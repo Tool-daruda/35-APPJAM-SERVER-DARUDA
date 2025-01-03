@@ -12,6 +12,7 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorResponse(
         int status,
+        String code,
         String message,
         List<ValidationError> errors
 ) {
@@ -19,6 +20,7 @@ public record ErrorResponse(
     public static ErrorResponse of(ErrorCode errorCode){
         return new ErrorResponse(
                 errorCode.getHttpStatus().value(),
+                errorCode.getCode(),
                 errorCode.getMessage(),
                 null
         );
@@ -28,6 +30,7 @@ public record ErrorResponse(
     public static ErrorResponse of(ErrorCode errorCode, BindingResult bindingResult){
         return new ErrorResponse(
                 errorCode.getHttpStatus().value(),
+                errorCode.getCode(),
                 errorCode.getMessage(),
                 ValidationError.of(bindingResult)
         );
@@ -37,6 +40,7 @@ public record ErrorResponse(
     public static ErrorResponse of(ErrorCode errorCode, Set<ConstraintViolation<?>> violations){
         return new ErrorResponse(
                 errorCode.getHttpStatus().value(),
+                errorCode.getCode(),
                 errorCode.getMessage(),
                 ValidationError.of(violations)
         );
@@ -46,6 +50,7 @@ public record ErrorResponse(
     public static ErrorResponse of(ErrorCode errorCode, Object detail){
         return new ErrorResponse(
                 errorCode.getHttpStatus().value(),
+                errorCode.getCode(),
                 errorCode.getMessage() + (detail != null ? ": " + detail : ""),
                 null
         );
