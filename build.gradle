@@ -35,7 +35,8 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
-
+	//aws 추가
+	implementation 'io.awspring.cloud:spring-cloud-starter-aws-s3:3.0.2'
 }
 
 tasks.named('test') {
