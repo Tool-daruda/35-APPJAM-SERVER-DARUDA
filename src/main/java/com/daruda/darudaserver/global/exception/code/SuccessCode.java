@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.global.error.code;
+package com.daruda.darudaserver.global.exception.code;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

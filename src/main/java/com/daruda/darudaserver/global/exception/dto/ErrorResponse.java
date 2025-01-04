@@ -1,6 +1,6 @@
-package com.daruda.darudaserver.global.error.dto;
+package com.daruda.darudaserver.global.exception.dto;
 
-import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.exception.code.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.validation.BindingResult;
 import jakarta.validation.ConstraintViolation;

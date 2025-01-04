@@ -17,7 +17,7 @@ spring :
 cloud:
   aws:
     s3:
-      bucket: readmate-s3-bucket
+      bucket: ${S3_BUCKET_NAME}
     credentials:
       access-key: ${S3ACCESSKEY}
       secret-key: ${S3SECRETKEY}
