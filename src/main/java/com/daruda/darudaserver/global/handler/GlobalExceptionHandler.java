@@ -1,19 +1,20 @@
 package com.daruda.darudaserver.global.handler;
 
-import com.daruda.darudaserver.global.error.BusinessException;
-import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.dto.ErrorResponse;
+import com.daruda.darudaserver.global.exception.BusinessException;
+import com.daruda.darudaserver.global.exception.code.ErrorCode;
+import com.daruda.darudaserver.global.exception.dto.ErrorResponse;
 import jakarta.validation.ConstraintDeclarationException;
 import jakarta.validation.ConstraintViolation;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingMatrixVariableException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.io.IOException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -66,5 +67,10 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ErrorResponse> buildErrorResponse(ErrorCode errorCode, Object detail){
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(ErrorResponse.of(errorCode, detail));
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<String> handleIOException(IOException ex) {
+        return ResponseEntity.status(500).body("파일 처리 중 오류 발생: " + ex.getMessage());
     }
 }
