@@ -14,9 +14,9 @@ public abstract class BaseTimeEntity {
 
     @CreatedDate
     @NotNull
-    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public LocalDateTime getCreatedAt(){
-        return createdAt;
+        return updatedAt;
     }
 }
