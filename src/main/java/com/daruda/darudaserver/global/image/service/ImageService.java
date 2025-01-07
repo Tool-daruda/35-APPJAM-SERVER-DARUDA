@@ -8,11 +8,13 @@ import com.daruda.darudaserver.global.image.entity.Image;
 import com.daruda.darudaserver.global.image.repository.ImageRepository;
 import com.daruda.darudaserver.global.infra.S3.S3Service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageService {
@@ -28,13 +30,17 @@ public class ImageService {
                     try {
                         String storedName = s3Service.uploadImage(dirName, image);
                         String originalName = image.getOriginalFilename();
+                        log.info("Uploaded image Successful: originalName={}, storedName={}", originalName, storedName);
                         Image newImage = Image.builder()
                                 .folder(dirName)
                                 .originalName(originalName)
                                 .storedName(storedName)
                                 .build();
-                        return imageRepository.save(newImage);
+                        Image savedImage = imageRepository.save(newImage);
+                        log.info("Image saved to database: imageId={}", savedImage.getImageId());
+                        return savedImage;
                     } catch (Exception e) {
+                        log.error("Image upload failed: error={}", e.getMessage(), e);
                         throw new BusinessException(ErrorCode.FILE_UPLOAD_FAIL);
                     }
                 })
@@ -52,11 +58,14 @@ public class ImageService {
 
             try {
                 // S3에서 삭제
+                log.info("Delete image from S3: imageId={}, s3Key={}", imageId, s3Key);
                 s3Service.deleteImage(s3Key);
                 // DB에서 삭제
                 image.delete();
+                log.info("Image deleted successfully: imageId={}", imageId);
                 imageRepository.save(image);
             } catch (InvalidValueException e) {
+                log.error("Failed to delete image: imageId={}, error={}", imageId, e.getMessage(), e);
                 throw new InvalidValueException(ErrorCode.FILE_DELETE_FAIL);
             }
         }
