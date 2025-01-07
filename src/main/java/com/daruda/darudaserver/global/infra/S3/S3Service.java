@@ -2,8 +2,8 @@ package com.daruda.darudaserver.global.infra.S3;
 
 
 
-import com.daruda.darudaserver.global.exception.InvalidValueException;
-import com.daruda.darudaserver.global.exception.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
+import com.daruda.darudaserver.global.error.code.ErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
