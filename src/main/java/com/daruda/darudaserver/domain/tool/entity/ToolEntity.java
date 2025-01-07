@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.domain.entity;
+package com.daruda.darudaserver.domain.tool.entity;
 
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
