@@ -1,11 +1,12 @@
 package com.daruda.darudaserver.global.handler;
 
-import com.daruda.darudaserver.global.exception.BusinessException;
-import com.daruda.darudaserver.global.exception.code.ErrorCode;
-import com.daruda.darudaserver.global.exception.dto.ErrorResponse;
+import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.dto.ErrorResponse;
 import jakarta.validation.ConstraintDeclarationException;
 import jakarta.validation.ConstraintViolation;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;

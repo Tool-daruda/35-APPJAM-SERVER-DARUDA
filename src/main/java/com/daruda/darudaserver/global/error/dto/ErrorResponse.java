@@ -1,13 +1,12 @@
-package com.daruda.darudaserver.global.exception.dto;
+package com.daruda.darudaserver.global.error.dto;
 
-import com.daruda.darudaserver.global.exception.code.ErrorCode;
+import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.validation.BindingResult;
 import jakarta.validation.ConstraintViolation;
 
 import java.util.List;
 import java.util.Set;
-
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorResponse(

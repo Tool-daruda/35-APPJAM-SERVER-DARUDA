@@ -1,6 +1,6 @@
-package com.daruda.darudaserver.global.exception;
+package com.daruda.darudaserver.global.error.exception;
 
-import com.daruda.darudaserver.global.exception.code.ErrorCode;
+import com.daruda.darudaserver.global.error.code.ErrorCode;
 import lombok.Getter;
 
 @Getter

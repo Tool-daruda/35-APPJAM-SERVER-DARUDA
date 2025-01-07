@@ -49,4 +49,5 @@ public class Image {
     public void delete(){
         this.delYn = true;
     }
+
 }
