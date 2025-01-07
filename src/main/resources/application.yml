@@ -26,3 +26,8 @@ cloud:
       auto: false
     stack:
       auto: false
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate.type: TRACE
