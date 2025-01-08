@@ -6,13 +6,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Entity
-@SuperBuilder
+@Builder
 @RequiredArgsConstructor
 public class Board extends BaseTimeEntity {
 
@@ -43,5 +43,4 @@ public class Board extends BaseTimeEntity {
                 .content(content)
                 .build();
     }
-
 }

@@ -1,7 +1,8 @@
 package com.daruda.darudaserver.global.handler;
 
-import com.daruda.darudaserver.global.exception.InvalidValueException;
-import com.daruda.darudaserver.global.exception.code.ErrorCode;
+
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
