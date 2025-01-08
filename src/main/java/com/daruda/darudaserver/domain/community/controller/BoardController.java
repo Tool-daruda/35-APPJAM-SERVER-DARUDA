@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.domain.community.controller;
 
-import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateRequest;
+import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.exception.code.SuccessCode;
@@ -23,10 +23,10 @@ public class BoardController {
 
     @PostMapping()
     public ResponseEntity<ApiResponse<?>> createBoard(
-            @RequestPart @Valid final BoardCreateAndUpdateRequest boardCreateAndUpdateRequest,
+            @RequestPart @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
             @RequestPart(value = "images", required = false) @Validated @Size(max=5) List<MultipartFile> images){
 
-        boardService.createBoard(boardCreateAndUpdateRequest,images);
+        boardService.createBoard(boardCreateAndUpdateReq,images);
         return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_CREATE));
     }
 }
