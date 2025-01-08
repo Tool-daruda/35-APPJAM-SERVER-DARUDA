@@ -1,9 +1,6 @@
 package com.daruda.darudaserver.global.common.response;
 
-import com.daruda.darudaserver.global.error.BusinessException;
-import com.daruda.darudaserver.global.error.dto.ErrorResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.annotation.Nullable;
 import org.springframework.http.HttpStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
