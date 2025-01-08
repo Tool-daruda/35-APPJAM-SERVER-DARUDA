@@ -31,6 +31,7 @@ public class ImageService {
                     try {
                         String storedName = s3Service.uploadImage(dirName, image);
                         String originalName = image.getOriginalFilename();
+                        log.info("Uploaded image Successful: originalName={}, storedName={}", originalName, storedName);
                         Image newImage = Image.builder()
                                 .folder(dirName)
                                 .originalName(originalName)
@@ -39,6 +40,7 @@ public class ImageService {
                          Image savedImage = imageRepository.save(newImage);
                         return savedImage.getImageId();
                     } catch (Exception e) {
+                        log.error("Image upload failed: error={}", e.getMessage(), e);
                         throw new BusinessException(ErrorCode.FILE_UPLOAD_FAIL);
                     }
                 })
@@ -55,11 +57,14 @@ public class ImageService {
 
             try {
                 // S3에서 삭제
+                log.info("Delete image from S3: imageId={}, s3Key={}", imageId, s3Key);
                 s3Service.deleteImage(s3Key);
                 // DB에서 삭제
                 image.delete();
+                log.info("Image deleted successfully: imageId={}", imageId);
                 imageRepository.save(image);
             } catch (InvalidValueException e) {
+                log.error("Failed to delete image: imageId={}, error={}", imageId, e.getMessage(), e);
                 throw new InvalidValueException(ErrorCode.FILE_DELETE_FAIL);
             }
         }
