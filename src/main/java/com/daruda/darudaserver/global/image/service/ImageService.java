@@ -25,7 +25,7 @@ public class ImageService {
 
     // 1. 이미지 업로드
     @Transactional
-    public List<Long> uploadImages(final List<MultipartFile> images)  {
+    public List<String> uploadImages(final List<MultipartFile> images, final String dirName)  {
 
         return images.stream()
                 .map(image -> {
