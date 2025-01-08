@@ -5,12 +5,10 @@ import com.daruda.darudaserver.domain.community.dto.response.BoardRes;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
-import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
