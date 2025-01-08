@@ -16,6 +16,8 @@ import java.util.List;
 public class BoardService {
 
     private final BoardRepository boardRepository;
+
+    private final BoardImageService boardImageService;
     private final ImageService imageService;
     public BoardRes createBoard(
                             final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
@@ -23,8 +25,14 @@ public class BoardService {
         //userId 검증
         Long userId= 1L;
         //toolId 검증
-        List<String> imageUrls= imageService.uploadImages(images,"board");
+
+        //Board 저장
         Board board = saveBoard(userId,  boardCreateAndUpdateReq);
+        // imageURL 반환
+        List<Long> imageIds =imageService.uploadImages(images,"board");
+        // BoardImage 저장
+        boardImageService.saveBoardImages(board.getBoardId(), imageIds);
+        List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
         return BoardRes.of(board,imageUrls);
     }
 
@@ -34,5 +42,4 @@ public class BoardService {
                 );
        return boardRepository.save(board);
     }
-
 }
