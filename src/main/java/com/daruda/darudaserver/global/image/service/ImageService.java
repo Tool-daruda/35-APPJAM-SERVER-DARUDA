@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.global.image.service;
 
+import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -8,11 +9,15 @@ import com.daruda.darudaserver.global.image.entity.Image;
 import com.daruda.darudaserver.global.image.repository.ImageRepository;
 import com.daruda.darudaserver.global.infra.S3.S3Service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageService {
@@ -21,7 +26,7 @@ public class ImageService {
 
     // 1. 이미지 업로드
     @Transactional
-    public List<Image> uploadImages(final List<MultipartFile> images, final String dirName)  {
+    public List<String> uploadImages(final List<MultipartFile> images, final String dirName)  {
 
         return images.stream()
                 .map(image -> {
@@ -33,7 +38,8 @@ public class ImageService {
                                 .originalName(originalName)
                                 .storedName(storedName)
                                 .build();
-                        return imageRepository.save(newImage);
+                         imageRepository.save(newImage);
+                        return storedName;
                     } catch (Exception e) {
                         throw new BusinessException(ErrorCode.FILE_UPLOAD_FAIL);
                     }

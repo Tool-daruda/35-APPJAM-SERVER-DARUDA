@@ -17,15 +17,15 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final ImageService imageService;
-    public void createBoard(
+    public BoardRes createBoard(
                             final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
                             List<MultipartFile> images) {
         //userId 검증
         Long userId= 1L;
         //toolId 검증
-        imageService.uploadImages(images,"board");
+        List<String> imageUrls= imageService.uploadImages(images,"board");
         Board board = saveBoard(userId,  boardCreateAndUpdateReq);
-//        return BoardRes.of(Board,imaegUrls)
+        return BoardRes.of(board,imageUrls);
     }
 
     private Board saveBoard( final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq){

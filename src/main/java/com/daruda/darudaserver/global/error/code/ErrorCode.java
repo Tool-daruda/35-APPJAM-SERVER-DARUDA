@@ -17,6 +17,7 @@ public enum ErrorCode {
     BUSINESS_LOGIC_ERROR(HttpStatus.BAD_REQUEST, "E400008","비즈니스 로직 처리 중 오류가 발생했습니다"),
     INVALID_IMAGE_TYPE(HttpStatus.BAD_REQUEST, "E400009", "지원하지 않는 이미지 확장자 입니다."),
     INVALID_IMAGE_SIZE(HttpStatus.BAD_REQUEST, "E400010", "지원하지 않는 이미지 크기 입니다."),
+    WRONG_IMAGE_URL(HttpStatus.BAD_REQUEST, "E400011", "잘못된 이미지 URL 입니다."),
     /* 404 NOT FOUND */
 
     DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "E404001","데이터가 존재하지 않습니다"),

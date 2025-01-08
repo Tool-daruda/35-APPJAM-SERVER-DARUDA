@@ -1,9 +1,11 @@
 package com.daruda.darudaserver.domain.community.controller;
 
 import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateReq;
+import com.daruda.darudaserver.domain.community.dto.response.BoardRes;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
-import com.daruda.darudaserver.global.exception.code.SuccessCode;
+import com.daruda.darudaserver.global.error.code.SuccessCode;
+import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +25,10 @@ public class BoardController {
 
     @PostMapping()
     public ResponseEntity<ApiResponse<?>> createBoard(
-            @RequestPart @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
-            @RequestPart(value = "images", required = false) @Validated @Size(max=5) List<MultipartFile> images){
+            @ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
+            @RequestPart(value = "images", required = false)  @Size(max=5) List<MultipartFile> images){
 
-        boardService.createBoard(boardCreateAndUpdateReq,images);
-        return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_CREATE));
+        BoardRes boardRes = boardService.createBoard(boardCreateAndUpdateReq,images);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
     }
 }
