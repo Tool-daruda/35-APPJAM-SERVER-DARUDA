@@ -64,6 +64,14 @@ public class S3Service {
         }
     }
 
+    public String getImageUrl(String folder, String storedName){
+        return String.format("https://%s.s3.%s.amazonaws.com/%s/%s",
+                bucketName,
+                awsConfig.getRegion().id(),
+                folder,
+                storedName);
+    }
+
     private String generateImageFileName(MultipartFile image){
         String extension = getExtension(Objects.requireNonNull(image.getContentType()));
         if(extension==null){
@@ -95,15 +103,4 @@ public class S3Service {
         }
     }
 
-    public List<String> getAllImageKeys(String prefix){
-        final S3Client s3Client = awsConfig.getS3Client();
-        ListObjectsV2Request listObjectsRequest = ListObjectsV2Request.builder()
-                .bucket(bucketName)
-                .prefix(prefix)
-                .build();
-        ListObjectsV2Response listObjectsV2Response = s3Client.listObjectsV2(listObjectsRequest);
-        return listObjectsV2Response.contents().stream()
-                .map(S3Object::key)
-                .toList();
-    }
 }

@@ -1,6 +1,5 @@
 package com.daruda.darudaserver.global.image.service;
 
-import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -24,9 +22,9 @@ public class ImageService {
     private final S3Service s3Service;
     private final ImageRepository imageRepository;
 
-    // 1. 이미지 업로드
+    // 1. 이미지 업로드 - 이미지 아이디 리스트 반환
     @Transactional
-    public List<String> uploadImages(final List<MultipartFile> images, final String dirName)  {
+    public List<Long> uploadImages(final List<MultipartFile> images, final String dirName)  {
 
         return images.stream()
                 .map(image -> {
@@ -38,15 +36,14 @@ public class ImageService {
                                 .originalName(originalName)
                                 .storedName(storedName)
                                 .build();
-                         imageRepository.save(newImage);
-                        return storedName;
+                         Image savedImage = imageRepository.save(newImage);
+                        return savedImage.getImageId();
                     } catch (Exception e) {
                         throw new BusinessException(ErrorCode.FILE_UPLOAD_FAIL);
                     }
                 })
                 .toList();
     }
-
 
     // 2. 이미지 삭제
     @Transactional
@@ -73,5 +70,11 @@ public class ImageService {
         return imageRepository.findById(imageId)
                 .filter(image -> !image.isDelYn())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.FILE_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public String getImageUrlById(final Long imageId) {
+        Image image = getImageById(imageId);
+        return s3Service.getImageUrl(image.getFolder(), image.getStoredName());
     }
 }
