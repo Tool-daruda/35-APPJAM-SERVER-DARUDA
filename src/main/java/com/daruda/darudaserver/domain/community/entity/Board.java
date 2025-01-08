@@ -8,9 +8,11 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Entity
+@SuperBuilder
 @RequiredArgsConstructor
 public class Board extends BaseTimeEntity {
 
@@ -25,9 +27,21 @@ public class Board extends BaseTimeEntity {
     private final String content;
 
     @NotNull
-    private final boolean delYn;
+    private final boolean delYn = false;
+
+    @NotNull
+    private final Long toolId;
 
     @NotNull
     private final Long userId;
+
+    public static Board create(final Long toolId, final Long userId, final String title, final String content){
+        return Board.builder()
+                .toolId(toolId)
+                .userId(userId)
+                .title(title)
+                .content(content)
+                .build();
+    }
 
 }
