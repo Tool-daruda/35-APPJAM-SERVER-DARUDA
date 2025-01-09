@@ -45,6 +45,7 @@ public class ImageService {
                 .toList();
     }
 
+
     // 2. 이미지 삭제
     @Transactional
     public void deleteImages(final List<Long> imageIds) {
