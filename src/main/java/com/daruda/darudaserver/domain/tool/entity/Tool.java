@@ -9,59 +9,52 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Table(name="tool")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class tool extends BaseTimeEntity {
+public class Tool extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long toolId;
 
-    @NotNull
-    @Column(name = "tool_main_name")
+    @Column(name = "tool_main_name", nullable = false)
     private String toolMainName;
 
-    @NotNull
-    @Column(name = "tool_sub_name")
+    @Column(name = "tool_sub_name", nullable = false)
     private String toolSubName;
 
-    @NotNull
-    @Column(name = "category")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", nullable = false)
     private Category category;
 
-    @NotNull
-    @Column(name = "tool_link")
+    @Column(name = "tool_link", nullable = false)
     private String toolLink;
 
-    @NotNull
-    @Column(name = "description")
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @NotNull
-    @Column(name = "license")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "license" , nullable = false)
     private License license;
 
-    @NotNull
-    @Column(name = "support_korea")
+    @Column(name = "support_korea", nullable = false)
     private Boolean supportKorea;
 
-    @NotNull
-    @Column(name="detail_description")
+    @Column(name="detail_description",nullable = false)
     private String detailDescription;
 
-    @Nullable
     @Column(name="plan_link")
     private String planLink;
 
-    @NotNull
-    @Column(name="color")
+    @Column(name="color",nullable = false)
     private String color;
 
-    @NotNull
-    @Column(name="toolLogo")
+    @Column(name="toolLogo",nullable = false)
     private String toolLogo;
 
 }
