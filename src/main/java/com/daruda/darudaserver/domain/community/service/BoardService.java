@@ -29,7 +29,7 @@ public class BoardService {
         //toolId 검증
 
         //Board 저장
-        Board board = saveBoard(userId,  boardCreateAndUpdateReq);
+        Board board = createBoard(userId,  boardCreateAndUpdateReq);
         // imageURL 반환
         List<Long> imageIds =imageService.uploadImages(images,"board");
         // BoardImage 저장
@@ -38,11 +38,38 @@ public class BoardService {
         return BoardRes.of(board,imageUrls);
     }
 
-    private Board saveBoard( final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq){
+    public BoardRes updateBoard(
+            final Long boardId,
+            final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
+            List<MultipartFile> images) {
+        //userId 검증
+        Long userId= 1L;
+        //toolId 검증
+
+        //Board 객체 검증
+        getBoardById(boardId);
+        //Board 저장
+        Board board = updateBoard(boardId , userId,boardCreateAndUpdateReq);
+        // imageURL 반환
+        List<Long> imageIds =imageService.uploadImages(images,"board");
+        // BoardImage 저장
+        boardImageService.saveBoardImages(board.getBoardId(), imageIds);
+        List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
+        return BoardRes.of(board,imageUrls);
+    }
+
+    private Board createBoard( final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq){
         Board board = Board.create(boardCreateAndUpdateReq.toolId(), userId,
                 boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content()
                 );
        return boardRepository.save(board);
+    }
+
+    private Board updateBoard( final Long boardId, final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq){
+        Board board = Board.update(boardId , boardCreateAndUpdateReq.toolId(), userId,
+                boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content()
+        );
+        return boardRepository.save(board);
     }
 
     public void deleteBoard(final Long boardId) {
@@ -61,6 +88,4 @@ public class BoardService {
         return boardRepository.findById(boardId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
     }
-
-
 }

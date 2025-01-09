@@ -30,6 +30,15 @@ public class BoardController {
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
     }
 
+    @PatchMapping("{board-id}")
+    public ResponseEntity<ApiResponse<?>> updateBoard(
+            @PathVariable(name="board-id") final Long boardId,
+            @ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
+            @RequestPart(value = "images", required = false)  @Size(max=5) List<MultipartFile> images){
+        BoardRes boardRes = boardService.updateBoard(boardId , boardCreateAndUpdateReq,images);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
+    }
+
     @GetMapping("{board-id}")
     public ResponseEntity<ApiResponse<?>> getBoard(@PathVariable(name="board-id") final Long boardId){
         BoardRes boardRes = boardService.getBoard(boardId);

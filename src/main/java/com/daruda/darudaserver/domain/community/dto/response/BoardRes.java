@@ -14,17 +14,17 @@ public record BoardRes(
         Long toolId,
         String title,
         String content,
-        List<String> imagesUrl,
+        List<String> images,
         @JsonFormat(shape=JsonFormat.Shape.STRING,pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
         LocalDateTime updateDate
 ) {
-    public static BoardRes of(Board board,List<String> imagesUrl){
+    public static BoardRes of(final Board board,final List<String> images){
         return BoardRes.builder()
                 .boardId(board.getBoardId())
                 .toolId(board.getToolId())
                 .title(board.getTitle())
                 .content(board.getContent())
-                .imagesUrl(imagesUrl)
+                .images(images)
                 .updateDate(board.getUpdatedAt())
                 .build();
     }
