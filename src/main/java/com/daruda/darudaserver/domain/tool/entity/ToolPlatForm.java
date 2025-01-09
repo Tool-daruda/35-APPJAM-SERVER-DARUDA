@@ -13,13 +13,13 @@ public class ToolPlatForm {
     @Column(name = "platform_id")
     private Long platformId;
 
-    @Column(name="web")
+    @Column(name="web",nullable = false)
     private Boolean web;
 
-    @Column(name="windows")
+    @Column(name="windows",nullable = false)
     private Boolean windows;
 
-    @Column(name="mac")
+    @Column(name="mac",nullable = false)
     private Boolean mac;
 
     @ManyToOne(fetch = FetchType.LAZY)

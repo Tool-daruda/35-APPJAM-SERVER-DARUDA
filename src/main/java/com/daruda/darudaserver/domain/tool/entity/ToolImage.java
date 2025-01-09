@@ -6,19 +6,20 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
-@Table(name="tool_keyword")
-public class ToolKeyword {
-
+@Table(name="tool_image")
+public class ToolImage {
     @Id
-    @Column(name = "keyword_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long keywordId;
+    @Column(name="tool_image_id")
+    private Long imageId;
 
-    @Column(name="keyword_name",nullable = false)
-    private String keywordName;
+    @Column(name="image_url",nullable = false)
+    private String imageUrl;
+
+    @Column(name="image_order", nullable = false)
+    private int imageOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="tool_id",nullable = false)
-    private Tool toolId ;
-
+    private Tool toolId;
 }

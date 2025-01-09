@@ -13,7 +13,7 @@ public class ToolVideo {
     @Column(name="tool_video_id")
     private Long videoId;
 
-    @Column(name="tool_video_url")
+    @Column(name="tool_video_url",nullable = false)
     private String videoUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
