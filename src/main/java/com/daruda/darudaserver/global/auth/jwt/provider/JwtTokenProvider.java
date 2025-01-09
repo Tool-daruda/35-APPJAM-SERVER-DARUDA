@@ -25,7 +25,7 @@ public class JwtTokenProvider {
     @Value("${jwt.refresh-token-expire-time}")
     private long refreshTokenExpireTime;
 
-    private static final String MEMBER_ID = "memberId";
+    private static final String USER_ID  = "userId";
 
     @PostConstruct
     protected void init(){
@@ -40,11 +40,11 @@ public class JwtTokenProvider {
         return generateToken(authentication, refreshTokenExpireTime);
     }
 
-    public Long getMemberIdFromJwt(String token){
+    public Long getUserIdFromJwt(String token){
         Claims claims = getBody(token);
-        Long memberId = Long.valueOf(claims.get(MEMBER_ID).toString());
+        Long userId = Long.valueOf(claims.get(USER_ID).toString());
 
-        return memberId;
+        return userId;
     }
 
     private Claims getBody(final String token){
@@ -67,7 +67,7 @@ public class JwtTokenProvider {
         final Claims claims = Jwts.claims().setIssuedAt(now).setExpiration(new Date(now.getTime()+expiredTime));
 
         //userId claim에 저장
-        claims.put(MEMBER_ID, authentication.getPrincipal());
+        claims.put(USER_ID, authentication.getPrincipal());
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)

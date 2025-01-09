@@ -2,8 +2,6 @@ package com.daruda.darudaserver.global.auth.jwt.service;
 
 import com.daruda.darudaserver.global.auth.jwt.entity.Token;
 import com.daruda.darudaserver.global.auth.jwt.repository.TokenRepository;
-import com.daruda.darudaserver.global.error.BusinessException;
-import com.daruda.darudaserver.global.error.code.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
