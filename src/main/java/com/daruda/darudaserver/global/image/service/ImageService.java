@@ -25,7 +25,7 @@ public class ImageService {
 
     // 1. 이미지 업로드
     @Transactional
-    public List<String> uploadImages(final List<MultipartFile> images, final String dirName)  {
+    public List<Long> uploadImages(final List<MultipartFile> images)  {
 
         return images.stream()
                 .map(image -> {
@@ -76,7 +76,6 @@ public class ImageService {
 
     @Transactional(readOnly = true)
     public String getImageUrlById(final Long imageId) {
-        Image image = getImageById(imageId);
-        return s3Service.getImageUrl(image.getFolder(), image.getStoredName());
+        return getImageById(imageId).getImageUrl();
     }
 }

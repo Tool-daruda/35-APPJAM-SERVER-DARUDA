@@ -29,7 +29,7 @@ public class BoardService {
         //Board 저장
         Board board = createBoard(userId,  boardCreateAndUpdateReq);
         // imageURL 반환
-        List<Long> imageIds =imageService.uploadImages(images,"board");
+        List<Long> imageIds =imageService.uploadImages(images);
         // BoardImage 저장
         boardImageService.saveBoardImages(board.getBoardId(), imageIds);
         List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
@@ -49,7 +49,7 @@ public class BoardService {
         //Board 저장
         Board board = updateBoard(boardId , userId,boardCreateAndUpdateReq);
         // imageURL 반환
-        List<Long> imageIds =imageService.uploadImages(images,"board");
+        List<Long> imageIds =imageService.uploadImages(images);
         // BoardImage 저장
         boardImageService.saveBoardImages(board.getBoardId(), imageIds);
         List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
