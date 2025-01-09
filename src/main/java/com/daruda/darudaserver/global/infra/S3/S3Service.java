@@ -30,15 +30,14 @@ public class S3Service {
         this.awsConfig = awsConfig;
     }
 
-    public String uploadImage(String directoryPath, MultipartFile image) throws IOException{
+    public String uploadImage( MultipartFile image) throws IOException{
         final String imageName = generateImageFileName(image);
-        final String key = directoryPath + "/"+ imageName;
         final S3Client s3Client = awsConfig.getS3Client();
         validateExtension(image);
         validateFileSize(image);
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucketName)
-                .key(key)
+                .key(imageName) //이미지 이름만 키로 사용
                 .contentType(image.getContentType())
                 .contentDisposition("inline")
                 .build();
@@ -95,15 +94,7 @@ public class S3Service {
         }
     }
 
-    public List<String> getAllImageKeys(String prefix){
-        final S3Client s3Client = awsConfig.getS3Client();
-        ListObjectsV2Request listObjectsRequest = ListObjectsV2Request.builder()
-                .bucket(bucketName)
-                .prefix(prefix)
-                .build();
-        ListObjectsV2Response listObjectsV2Response = s3Client.listObjectsV2(listObjectsRequest);
-        return listObjectsV2Response.contents().stream()
-                .map(S3Object::key)
-                .toList();
+    private String getImageUrl(String imageName) {
+        return String.format("https://%s.s3.amazonaws.com/%s", bucketName, imageName); // S3의 퍼블릭 URL 생성
     }
 }
