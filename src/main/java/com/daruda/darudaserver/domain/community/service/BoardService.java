@@ -4,6 +4,8 @@ import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdate
 import com.daruda.darudaserver.domain.community.dto.response.BoardRes;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,9 +18,9 @@ import java.util.List;
 public class BoardService {
 
     private final BoardRepository boardRepository;
-
     private final BoardImageService boardImageService;
     private final ImageService imageService;
+
     public BoardRes createBoard(
                             final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
                             List<MultipartFile> images) {
@@ -41,5 +43,16 @@ public class BoardService {
                 boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content()
                 );
        return boardRepository.save(board);
+    }
+
+    public void deleteBoard(final Long boardId) {
+        Board board = getBoard(boardId);
+        board.delete();
+        boardRepository.save(board);
+    }
+
+    private Board getBoard(final Long boardId){
+        return boardRepository.findById(boardId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
     }
 }

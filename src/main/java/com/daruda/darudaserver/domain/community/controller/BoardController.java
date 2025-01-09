@@ -29,4 +29,12 @@ public class BoardController {
         BoardRes boardRes = boardService.createBoard(boardCreateAndUpdateReq,images);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
     }
+
+    @DeleteMapping("{board-id}")
+    public ResponseEntity<ApiResponse<?>> deleteBoard(
+            @PathVariable(name="board-id") final Long boardId){
+
+        boardService.deleteBoard(boardId);
+        return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
+    }
 }

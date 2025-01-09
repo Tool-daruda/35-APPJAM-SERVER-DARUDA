@@ -6,34 +6,43 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Getter
 @Entity
 @Builder
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor(access=AccessLevel.PROTECTED)
 public class Board extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private final Long boardId;
+    private Long boardId;
 
     @NotNull
-    private final String title;
+    private String title;
 
     @NotNull
-    private final String content;
+    private String content;
 
     @NotNull
-    private final boolean delYn = false;
+    @Builder.Default
+    private boolean delYn = false;
 
     @NotNull
-    private final Long toolId;
+    private Long toolId;
 
     @NotNull
-    private final Long userId;
+    private Long userId;
+
+    @Builder
+    public Board(final String title,final String content, final Long toolId, final Long userId, final boolean delYn) {
+        this.title = title;
+        this.content = content;
+        this.toolId = toolId;
+        this.userId = userId;
+        this.delYn = delYn;
+    }
 
     public static Board create(final Long toolId, final Long userId, final String title, final String content){
         return Board.builder()
@@ -42,5 +51,8 @@ public class Board extends BaseTimeEntity {
                 .title(title)
                 .content(content)
                 .build();
+    }
+    public void delete(){
+        this.delYn=true;
     }
 }
