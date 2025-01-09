@@ -3,9 +3,11 @@ package com.daruda.darudaserver.domain.tool.entity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
+@Getter
 @Table(name="tool_video")
 public class ToolVideo {
     @Id
@@ -18,6 +20,6 @@ public class ToolVideo {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="tool_id",nullable = false)
-    private Tool toolId;
+    private Tool tool;
 
 }

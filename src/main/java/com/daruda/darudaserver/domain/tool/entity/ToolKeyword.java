@@ -19,4 +19,8 @@ public class ToolKeyword {
     @Column(name="keyword_name",nullable = false)
     private String keywordName;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="tool_id",nullable = false)
+    private Tool tool;
+
 }

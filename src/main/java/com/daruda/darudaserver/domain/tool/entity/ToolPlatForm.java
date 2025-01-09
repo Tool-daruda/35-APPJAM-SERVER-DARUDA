@@ -26,6 +26,6 @@ public class ToolPlatForm {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="tool_id",nullable = false)
-    private Tool toolId;
+    private Tool tool;
 
 }

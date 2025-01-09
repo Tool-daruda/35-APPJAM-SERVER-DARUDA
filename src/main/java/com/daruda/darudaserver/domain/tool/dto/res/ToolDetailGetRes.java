@@ -26,13 +26,7 @@ public record ToolDetailGetRes(
         @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy.MM.dd",timezone = "Asia/Seoul")
         LocalDateTime updatedAt
 ) {
-    public static ToolDetailGetRes of(Tool tool, List<ToolPlatForm> platform){
-        List<PlatformRes> platformRes = platform.stream()
-                .map(PlatformRes::of)
-                .toList();
-        List<String> keywordRes = tool.getKeywords().stream()
-                .map(ToolKeyword::getKeywordName)
-                .toList();
+    public static ToolDetailGetRes of( Tool tool, List<PlatformRes> platform, List<String> keywords , List<String> images ,List<String> videos){
 
         return ToolDetailGetRes.builder()
                 .toolId(tool.getToolId())
@@ -40,12 +34,15 @@ public record ToolDetailGetRes(
                 .toolSubName(tool.getToolSubName())
                 .description(tool.getDescription())
                 .license(tool.getLicense())
-                .keywords(keywordRes)
+                .keywords(keywords)
                 .category(tool.getCategory())
                 .toolLink(tool.getToolLink())
                 .supportKorea(tool.getSupportKorea())
-                .platform(platformRes)
+                .platform(platform)
                 .detailDescription(tool.getDetailDescription())
+                .updatedAt(tool.getUpdatedAt())
+                .images(images)
+                .videos(videos)
                 .build();
     }
 }

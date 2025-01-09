@@ -55,7 +55,4 @@ public class Tool extends BaseTimeEntity {
     @Column(name="toolLogo",nullable = false)
     private String toolLogo;
 
-    @OneToMany(mappedBy = "toolId", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ToolKeyword> keywords;
-
 }
