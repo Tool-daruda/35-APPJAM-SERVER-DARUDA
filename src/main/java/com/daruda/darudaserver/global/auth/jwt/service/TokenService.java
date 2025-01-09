@@ -2,6 +2,9 @@ package com.daruda.darudaserver.global.auth.jwt.service;
 
 import com.daruda.darudaserver.global.auth.jwt.entity.Token;
 import com.daruda.darudaserver.global.auth.jwt.repository.TokenRepository;
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,14 +22,14 @@ public class TokenService {
 
     public Long findIdByRefreshToken(final String refreshToken){
         Token token = tokenRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException());
+                .orElseThrow(() -> new InvalidValueException(ErrorCode.REFREH_TOKEN_EMPTY_ERROR));
         return token.getId();
     }
 
     @Transactional
     public void deleteRefreshToken(final Long userId){
         Token token = tokenRepository.findById(userId)
-                .orElseThrow(()-> new RuntimeException());
+                .orElseThrow(()-> new NotFoundException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         tokenRepository.delete(token);
     }
