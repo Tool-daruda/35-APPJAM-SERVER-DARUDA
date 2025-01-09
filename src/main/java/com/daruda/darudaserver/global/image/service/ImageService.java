@@ -23,18 +23,15 @@ public class ImageService {
 
     // 1. 이미지 업로드
     @Transactional
-    public List<Image> uploadImages(final List<MultipartFile> images, final String dirName)  {
+    public List<Image> uploadImages(final List<MultipartFile> images)  {
 
         return images.stream()
                 .map(image -> {
                     try {
-                        String storedName = s3Service.uploadImage(dirName, image);
-                        String originalName = image.getOriginalFilename();
-                        log.info("Uploaded image Successful: originalName={}, storedName={}", originalName, storedName);
+                        String imageUrl = s3Service.uploadImage(image);
+                        log.info("Uploaded image successfully: imageUrl={}", imageUrl);
                         Image newImage = Image.builder()
-                                .folder(dirName)
-                                .originalName(originalName)
-                                .storedName(storedName)
+                                .imageUrl(imageUrl)
                                 .build();
                         Image savedImage = imageRepository.save(newImage);
                         log.info("Image saved to database: imageId={}", savedImage.getImageId());
@@ -54,14 +51,13 @@ public class ImageService {
 
         for (Long imageId : imageIds) {
             Image image = getImageById(imageId); // 이미지 조회
-            String s3Key =  image.getFolder()+ "/" +image.getStoredName(); // S3 Key 생성
 
             try {
                 // S3에서 삭제
-                log.info("Delete image from S3: imageId={}, s3Key={}", imageId, s3Key);
-                s3Service.deleteImage(s3Key);
+                log.info("Delete image from S3: imageId={}, imageUrl={}", imageId, image.getImageUrl());
+                s3Service.deleteImage(image.getImageUrl());
                 // DB에서 삭제
-                image.delete();
+                imageRepository.delete(image);
                 log.info("Image deleted successfully: imageId={}", imageId);
                 imageRepository.save(image);
             } catch (InvalidValueException e) {
@@ -74,7 +70,6 @@ public class ImageService {
     // 이미지 조회 메서드
     private Image getImageById(long imageId) {
         return imageRepository.findById(imageId)
-                .filter(image -> !image.isDelYn())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.FILE_NOT_FOUND));
     }
 }
