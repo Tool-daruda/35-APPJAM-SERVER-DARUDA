@@ -23,7 +23,7 @@ public class ImageService {
 
     // 1. 이미지 업로드
     @Transactional
-    public List<Image> uploadImages(final List<MultipartFile> images)  {
+    public List<Long> uploadImages(final List<MultipartFile> images)  {
 
         return images.stream()
                 .map(image -> {
@@ -35,7 +35,7 @@ public class ImageService {
                                 .build();
                         Image savedImage = imageRepository.save(newImage);
                         log.info("Image saved to database: imageId={}", savedImage.getImageId());
-                        return savedImage;
+                        return savedImage.getImageId();
                     } catch (Exception e) {
                         log.error("Image upload failed: error={}", e.getMessage(), e);
                         throw new BusinessException(ErrorCode.FILE_UPLOAD_FAIL);
@@ -59,7 +59,6 @@ public class ImageService {
                 // DB에서 삭제
                 imageRepository.delete(image);
                 log.info("Image deleted successfully: imageId={}", imageId);
-                imageRepository.save(image);
             } catch (InvalidValueException e) {
                 log.error("Failed to delete image: imageId={}, error={}", imageId, e.getMessage(), e);
                 throw new InvalidValueException(ErrorCode.FILE_DELETE_FAIL);
