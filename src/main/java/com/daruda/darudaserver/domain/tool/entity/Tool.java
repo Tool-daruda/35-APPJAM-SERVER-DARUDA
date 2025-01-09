@@ -4,10 +4,7 @@ import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -15,6 +12,7 @@ import java.util.List;
 @Table(name="tool")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 @Builder
 public class Tool extends BaseTimeEntity {
 
@@ -56,5 +54,8 @@ public class Tool extends BaseTimeEntity {
 
     @Column(name="toolLogo",nullable = false)
     private String toolLogo;
+
+    @OneToMany(mappedBy = "toolId", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ToolKeyword> keywords;
 
 }

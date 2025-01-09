@@ -3,9 +3,11 @@ package com.daruda.darudaserver.domain.tool.entity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
+@Getter
 @Table(name="tool_platform")
 public class ToolPlatForm {
     @Id

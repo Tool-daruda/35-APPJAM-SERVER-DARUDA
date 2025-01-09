@@ -3,9 +3,11 @@ package com.daruda.darudaserver.domain.tool.entity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
+@Getter
 @Table(name="tool_keyword")
 public class ToolKeyword {
 
@@ -16,9 +18,5 @@ public class ToolKeyword {
 
     @Column(name="keyword_name",nullable = false)
     private String keywordName;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="tool_id",nullable = false)
-    private Tool toolId ;
 
 }
