@@ -30,15 +30,14 @@ public class S3Service {
         this.awsConfig = awsConfig;
     }
 
-    public String uploadImage(String directoryPath, MultipartFile image) throws IOException{
+    public String uploadImage( MultipartFile image) throws IOException{
         final String imageName = generateImageFileName(image);
-        final String key = directoryPath + "/"+ imageName;
         final S3Client s3Client = awsConfig.getS3Client();
         validateExtension(image);
         validateFileSize(image);
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucketName)
-                .key(key)
+                .key(imageName) //이미지 이름만 키로 사용
                 .contentType(image.getContentType())
                 .contentDisposition("inline")
                 .build();
@@ -62,14 +61,6 @@ public class S3Service {
         }catch(S3Exception e){
             throw new InvalidValueException(ErrorCode.FILE_DELETE_FAIL);
         }
-    }
-
-    public String getImageUrl(String folder, String storedName){
-        return String.format("https://%s.s3.%s.amazonaws.com/%s/%s",
-                bucketName,
-                awsConfig.getRegion().id(),
-                folder,
-                storedName);
     }
 
     private String generateImageFileName(MultipartFile image){
@@ -103,4 +94,7 @@ public class S3Service {
         }
     }
 
+    private String getImageUrl(String imageName) {
+        return String.format("https://%s.s3.amazonaws.com/%s", bucketName, imageName); // S3의 퍼블릭 URL 생성
+    }
 }
