@@ -30,10 +30,15 @@ public class BoardController {
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
     }
 
+    @GetMapping("{board-id}")
+    public ResponseEntity<ApiResponse<?>> getBoard(@PathVariable(name="board-id") final Long boardId){
+        BoardRes boardRes = boardService.getBoard(boardId);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_FETCH));
+    }
+
     @DeleteMapping("{board-id}")
     public ResponseEntity<ApiResponse<?>> deleteBoard(
             @PathVariable(name="board-id") final Long boardId){
-
         boardService.deleteBoard(boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
     }

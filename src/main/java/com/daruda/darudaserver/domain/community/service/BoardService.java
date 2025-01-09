@@ -46,13 +46,21 @@ public class BoardService {
     }
 
     public void deleteBoard(final Long boardId) {
-        Board board = getBoard(boardId);
+        Board board = getBoardById(boardId);
         board.delete();
         boardRepository.save(board);
     }
 
-    private Board getBoard(final Long boardId){
+    public BoardRes getBoard(Long boardId) {
+        Board board = getBoardById(boardId);
+        List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
+        return BoardRes.of(board,imageUrls);
+    }
+
+    private Board getBoardById(final Long boardId){
         return boardRepository.findById(boardId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
     }
+
+
 }
