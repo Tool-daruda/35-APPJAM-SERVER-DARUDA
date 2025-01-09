@@ -16,7 +16,7 @@ public class imageController {
     private final ImageService imageService;
 
     @PostMapping
-    public ResponseEntity<List<Long>> uploadImages(@RequestParam("files")List<MultipartFile> files){
+    public ResponseEntity<List<Long>> uploadImages(@RequestPart("files")List<MultipartFile> files){
         List<Long> imageUrls = imageService.uploadImages(files);
         return ResponseEntity.ok(imageUrls);
     }
