@@ -3,7 +3,6 @@ package com.daruda.darudaserver.global.common.response;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.springframework.http.HttpStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ApiResponse<T>(
