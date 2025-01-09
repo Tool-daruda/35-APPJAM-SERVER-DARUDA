@@ -52,6 +52,16 @@ public class Board extends BaseTimeEntity {
                 .content(content)
                 .build();
     }
+
+    public static Board update(final Long boardId , final Long toolId, final Long userId, final String title, final String content){
+        return Board.builder()
+                .boardId(boardId)
+                .toolId(toolId)
+                .userId(userId)
+                .title(title)
+                .content(content)
+                .build();
+    }
     public void delete(){
         this.delYn=true;
     }
