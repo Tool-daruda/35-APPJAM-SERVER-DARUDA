@@ -25,8 +25,8 @@ public class Plan {
     @Column(name = "plan_annual",nullable = false)
     private int priceAnnual;
 
-    @Column(name = "feature",nullable = false)
-    private String feature;
+    @Column(name = "description",nullable = false)
+    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="tool_id",nullable = false)
