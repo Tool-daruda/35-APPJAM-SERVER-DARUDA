@@ -13,6 +13,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Getter
@@ -21,10 +22,10 @@ import java.time.LocalDateTime;
 public abstract class BaseTimeEntity {
 
     @Column(name = "created_at",updatable = false)
-    @CreatedDate
-    private LocalDateTime createdAt;
+    @CreationTimestamp
+    private Timestamp createdAt;
 
     @Column(name="updated_at")
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
+    @UpdateTimestamp
+    private Timestamp updatedAt;
 }
