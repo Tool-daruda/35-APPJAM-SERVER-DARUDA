@@ -93,6 +93,7 @@ public class ToolService {
     private List<PlanRes> getPlanByTool(final Tool tool) {
         log.debug("툴에 연결된 플랜 정보를 조회합니다. toolId={}", tool.getToolId());
         List<Plan> planList = planRepository.findAllByTool(tool);
+        validateList(planList);
         return planList.stream()
                 .map(PlanRes::of)
                 .toList();
