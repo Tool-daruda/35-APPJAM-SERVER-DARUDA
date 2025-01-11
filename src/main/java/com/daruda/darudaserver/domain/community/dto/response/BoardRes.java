@@ -4,6 +4,8 @@ import com.daruda.darudaserver.domain.community.entity.Board;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
 import lombok.Builder;
+
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,7 +18,7 @@ public record BoardRes(
         String content,
         List<String> images,
         @JsonFormat(shape=JsonFormat.Shape.STRING,pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
-        LocalDateTime updateDate
+        Timestamp updatedAt
 ) {
     public static BoardRes of(final Board board,final List<String> images){
         return BoardRes.builder()
@@ -25,7 +27,7 @@ public record BoardRes(
                 .title(board.getTitle())
                 .content(board.getContent())
                 .images(images)
-                .updateDate(board.getUpdatedAt())
+                .updatedAt(board.getUpdatedAt())
                 .build();
     }
 }
