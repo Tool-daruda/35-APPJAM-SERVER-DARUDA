@@ -23,7 +23,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtTokenProvider jwtTokenProvider;
 
-    private static final String[] whiteList = {"/api/users/**","/api/v1/tools/**"};
+    private static final String[] WHITE_LIST = {"/api/v1/users/**","/api/v1/tools/**"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -47,6 +47,6 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers(whiteList);
+        return web -> web.ignoring().requestMatchers(WHITE_LIST);
     }
 }
