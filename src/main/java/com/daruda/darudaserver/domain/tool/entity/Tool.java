@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Entity
@@ -14,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-public class Tool extends BaseTimeEntity {
+public class Tool {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,5 +58,27 @@ public class Tool extends BaseTimeEntity {
 
     @Column(columnDefinition="integer default 0",nullable = false)
     private int viewCount;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Timestamp createdAt;
+
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
+
+    // createdAt 값을 설정하는 메서드
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = new Timestamp(System.currentTimeMillis());
+    }
+
+    // updatedAt 값을 수동으로 설정하는 메서드
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    // viewCount를 업데이트하는 메서드 (updatedAt에 영향 없음)
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
 
 }

@@ -13,9 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Transactional(readOnly = true)
 @Service
 @Slf4j
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ToolService {
 
@@ -28,7 +28,7 @@ public class ToolService {
     private final ToolCoreRepository toolCoreRepository;
     private final RelatedToolRepository relatedToolRepository;
 
-
+    @Transactional
     public ToolDetailGetRes getToolDetail(final Long toolId) {
         log.info("툴 세부 정보를 조회합니다. toolId={}", toolId);
 
