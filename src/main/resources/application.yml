@@ -33,3 +33,7 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate.type: TRACE
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME}
+  refresh-token-expire-time: ${JWT_REFRESH_TOKEN_EXPIRE_TIME}

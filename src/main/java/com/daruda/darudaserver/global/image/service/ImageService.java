@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.global.image.service;
 
+import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @Slf4j
@@ -70,5 +72,10 @@ public class ImageService {
     private Image getImageById(long imageId) {
         return imageRepository.findById(imageId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.FILE_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public String getImageUrlById(final Long imageId) {
+        return getImageById(imageId).getImageUrl();
     }
 }
