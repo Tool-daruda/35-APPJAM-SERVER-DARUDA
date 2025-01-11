@@ -22,15 +22,12 @@ public enum ErrorCode {
     REFREH_TOKEN_EMPTY_ERROR(HttpStatus.BAD_REQUEST,"E400013", "리프레쉬 토큰이 비어있습니다"),
     INVALID_IMAGE_TYPE(HttpStatus.BAD_REQUEST, "E400009", "지원하지 않는 이미지 확장자 입니다."),
     INVALID_IMAGE_SIZE(HttpStatus.BAD_REQUEST, "E400010", "지원하지 않는 이미지 크기 입니다."),
+    WRONG_IMAGE_URL(HttpStatus.BAD_REQUEST, "E400011", "잘못된 이미지 URL 입니다."),
 
     /* 401 */
     AUTHENTICATION_CODE_EXPIRED(HttpStatus.UNAUTHORIZED,"E401001", "인가코드가 만료되었습니다"),
     REFRESH_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED,"E401002","리프레쉬 토큰이 만료되었습니다"),
 
-
-    INVALID_IMAGE_TYPE(HttpStatus.BAD_REQUEST, "E400009", "지원하지 않는 이미지 확장자 입니다."),
-    INVALID_IMAGE_SIZE(HttpStatus.BAD_REQUEST, "E400010", "지원하지 않는 이미지 크기 입니다."),
-    WRONG_IMAGE_URL(HttpStatus.BAD_REQUEST, "E400011", "잘못된 이미지 URL 입니다."),
     /* 404 NOT FOUND */
 
     DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "E404001","데이터가 존재하지 않습니다"),
