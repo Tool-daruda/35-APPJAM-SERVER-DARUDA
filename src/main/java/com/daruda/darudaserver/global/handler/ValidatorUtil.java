@@ -11,6 +11,8 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ValidatorUtil {
 
+    private static int MIN_NUm =0 ;
+
     public static <T> void validateListSizeMin(final List<T> list, int minSize, ErrorCode errorCode){
         if(list.isEmpty() || list.size() < minSize){
             throw new InvalidValueException(errorCode);
@@ -29,14 +31,14 @@ public class ValidatorUtil {
         }
     }
 
-    public static void validatePage(int page) {
-            if (page <= 0) {
+    public static void validatePage(final int page) {
+            if (page <= MIN_NUm) {
                 throw new InvalidValueException(ErrorCode.INVALID_PAGE_MIN_SIZE);
             }
     }
 
-    public static void validateSize(int size, int maxSize) {
-            if (size <= 0 || size > maxSize) {
+    public static void validateSize(final int size, final int maxSize) {
+            if (size <= MIN_NUm || size > maxSize) {
                 throw new InvalidValueException(ErrorCode.INVALID_PAGE_MAX_SIZE);
             }
         }

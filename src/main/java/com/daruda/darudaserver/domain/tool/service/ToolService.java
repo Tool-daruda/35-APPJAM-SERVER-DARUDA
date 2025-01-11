@@ -78,7 +78,7 @@ public class ToolService {
     }
 
 
-    public ToolListRes getToolList(String sort, Category category, Pageable pageable) {
+    public ToolListRes getToolList(final String sort, final Category category,final Pageable pageable) {
         log.debug("카테고리별 툴 목록을 조회 category : {}, sort : {}, pageable : {}", category, sort, pageable);
         // 수정할 예정 - 찜 개수 추가 해야함
         Sort sorting = Sort.by(Sort.Order.desc("viewCount"));
