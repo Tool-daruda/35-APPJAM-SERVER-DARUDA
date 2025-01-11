@@ -33,6 +33,7 @@ public class ToolService {
         List<PlatformRes> platformRes = convertToPlatformRes(tool);
         List<String> keywordRes = convertToKeywordRes(tool);
         List<String> videos = getVideoById(tool);
+        updateView(toolId);
         return ToolDetailGetRes.of(tool,platformRes,keywordRes, images,videos);
     }
 
@@ -79,8 +80,6 @@ public class ToolService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
     }
 
-
-
     private List<String> getImageById(final Tool tool){
         List<ToolImage> toolImages = toolImageRepository.findAllByTool(tool);
         return toolImages.stream()
@@ -107,5 +106,9 @@ public class ToolService {
         return toolKeywords.stream()
                 .map(ToolKeyword::getKeywordName)
                 .toList();
+    }
+
+    public int updateView(Long toolId){
+        return toolRepository.updateView(toolId);
     }
 }

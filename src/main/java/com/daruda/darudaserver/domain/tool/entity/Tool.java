@@ -52,7 +52,10 @@ public class Tool extends BaseTimeEntity {
     @Column(name="color",nullable = false)
     private String color;
 
-    @Column(name="toolLogo",nullable = false)
+    @Column(name="tool_logo",nullable = false)
     private String toolLogo;
+
+    @Column(columnDefinition="integer default 0",nullable = false)
+    private int viewCount;
 
 }

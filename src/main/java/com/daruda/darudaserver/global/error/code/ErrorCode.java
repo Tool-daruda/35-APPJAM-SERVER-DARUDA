@@ -28,17 +28,15 @@ public enum ErrorCode {
     AUTHENTICATION_CODE_EXPIRED(HttpStatus.UNAUTHORIZED,"E401001", "인가코드가 만료되었습니다"),
     REFRESH_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED,"E401002","리프레쉬 토큰이 만료되었습니다"),
 
+
     /* 404 NOT FOUND */
+
     DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "E404001","데이터가 존재하지 않습니다"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "E404002", "유저가 존재하지 않습니다"),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND,"E404003", "리프레쉬 토큰이 존재하지 않습니다"),
 
-
     /* 500 INTERNAL SERVER ERROR */
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E500001","서버 내부에서 오류가 발생했습니다"),
-    FILE_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "E500002", "이미지 업로드에 실패했습니다"),
-    FILE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "E500003", "이미지를 찾을 수 없습니다"),
-    FILE_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "E500004", "이미지 삭제에 실패했습니다");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E500001","서버 내부에서 오류가 발생했습니다");
 
     private final HttpStatus httpStatus;
     private final String code;

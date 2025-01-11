@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
 import lombok.Builder;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public record ToolDetailGetRes(
         List<String> videos,
         List<String> images,
         @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy.MM.dd",timezone = "Asia/Seoul")
-        LocalDateTime updatedAt
+        Timestamp updatedAt
 ) {
     public static ToolDetailGetRes of( Tool tool, List<PlatformRes> platform, List<String> keywords , List<String> images ,List<String> videos){
 
