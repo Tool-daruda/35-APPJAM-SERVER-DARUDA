@@ -19,7 +19,7 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN_ERROR(HttpStatus.BAD_REQUEST,"E400010", "잘못된 리프레쉬 토큰입니다"),
     REFRESH_TOKEN_SIGNATURE_ERROR(HttpStatus.BAD_REQUEST,"E400011", "리프레쉬 토큰의 서명이 잘못되었습니다"),
     UNSUPPORTED_REFRESH_TOKEN_ERROR(HttpStatus.BAD_REQUEST,"E400012", "지원하지 않는 리프레쉬 토큰입니다"),
-    REFREH_TOKEN_EMPTY_ERROR(HttpStatus.BAD_REQUEST,"E400013", "리프레쉬 토큰이 비어있습니다"),
+    REFRESH_TOKEN_EMPTY_ERROR(HttpStatus.BAD_REQUEST,"E400013", "리프레쉬 토큰이 비어있습니다"),
     INVALID_IMAGE_TYPE(HttpStatus.BAD_REQUEST, "E400009", "지원하지 않는 이미지 확장자 입니다."),
     INVALID_IMAGE_SIZE(HttpStatus.BAD_REQUEST, "E400010", "지원하지 않는 이미지 크기 입니다."),
     WRONG_IMAGE_URL(HttpStatus.BAD_REQUEST, "E400011", "잘못된 이미지 URL 입니다."),

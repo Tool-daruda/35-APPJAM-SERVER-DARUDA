@@ -22,7 +22,7 @@ public class TokenService {
 
     public Long findIdByRefreshToken(final String refreshToken){
         Token token = tokenRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new InvalidValueException(ErrorCode.REFREH_TOKEN_EMPTY_ERROR));
+                .orElseThrow(() -> new InvalidValueException(ErrorCode.REFRESH_TOKEN_EMPTY_ERROR));
         return token.getId();
     }
 
