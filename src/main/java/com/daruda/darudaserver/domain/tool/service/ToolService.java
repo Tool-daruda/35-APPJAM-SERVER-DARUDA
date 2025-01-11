@@ -13,9 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Transactional
 @Service
 @Slf4j
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ToolService {
 
@@ -45,30 +45,24 @@ public class ToolService {
 
     public PlanRes getPlan(final Long toolId) {
         log.info("플랜 정보를 조회합니다. toolId={}", toolId);
-
         Tool tool = getToolById(toolId);
         Plan plan = getPlanByTool(tool);
-
         log.info("플랜 정보를 성공적으로 조회했습니다. toolId={}", toolId);
         return PlanRes.of(plan);
     }
 
     public ToolCoreRes getToolCore(final Long toolId) {
-        log.info("툴 핵심 정보를 조회합니다. toolId={}", toolId);
-
+        log.debug("툴 핵심 정보를 조회합니다. toolId={}", toolId);
         Tool tool = getToolById(toolId);
         ToolCore toolCore = getToolCoreByTool(tool);
-
         log.info("툴 핵심 정보를 성공적으로 조회했습니다. toolId={}", toolId);
         return ToolCoreRes.of(toolCore);
     }
 
     public RelatedToolListRes getRelatedTool(final Long toolId) {
         log.info("관련 툴 정보를 조회합니다. toolId={}", toolId);
-
         Tool tool = getToolById(toolId);
         List<RelatedTool> relatedTools = relatedTool(tool);
-
         List<RelatedToolRes> relatedToolResList = relatedTools.stream()
                 .map(relatedTool -> {
                     Tool related = relatedTool.getAlternativeTool();
@@ -82,7 +76,7 @@ public class ToolService {
     }
 
     private List<RelatedTool> relatedTool(final Tool tool) {
-        log.debug("툴의 관련 툴 데이터를 조회합니다. toolId={}", tool.getToolId());
+        log.info("툴의 관련 툴 데이터를 조회합니다. toolId={}", tool.getToolId());
         return relatedToolRepository.findAllByTool(tool);
     }
 
