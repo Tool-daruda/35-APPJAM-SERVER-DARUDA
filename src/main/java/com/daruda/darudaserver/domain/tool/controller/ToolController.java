@@ -1,9 +1,6 @@
 package com.daruda.darudaserver.domain.tool.controller;
 
-import com.daruda.darudaserver.domain.tool.dto.res.PlanRes;
-import com.daruda.darudaserver.domain.tool.dto.res.RelatedToolListRes;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolCoreRes;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolDetailGetRes;
+import com.daruda.darudaserver.domain.tool.dto.res.*;
 import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
@@ -36,7 +33,7 @@ public class ToolController {
      */
     @GetMapping("/{tool-id}/core-features")
     public ResponseEntity<ApiResponse<?>> getToolCoreFeature(@PathVariable(name="tool-id") final Long toolId){
-        ToolCoreRes toolCore = toolService.getToolCore(toolId);
+        ToolCoreListRes toolCore = toolService.getToolCore(toolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolCore, SuccessCode.SUCCESS_FETCH));
     }
 
@@ -45,7 +42,7 @@ public class ToolController {
      */
     @GetMapping("/{tool-id}/plans")
     public ResponseEntity<ApiResponse<?>> getToolPlans(@PathVariable(name="tool-id") final Long toolId){
-        PlanRes plan = toolService.getPlan(toolId);
+        PlanListRes plan = toolService.getPlan(toolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(plan, SuccessCode.SUCCESS_FETCH));
     }
 

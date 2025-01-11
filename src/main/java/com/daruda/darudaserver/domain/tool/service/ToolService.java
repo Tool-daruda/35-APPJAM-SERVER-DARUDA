@@ -43,26 +43,27 @@ public class ToolService {
         return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos);
     }
 
-    public PlanRes getPlan(final Long toolId) {
+    public PlanListRes getPlan(final Long toolId) {
         log.info("플랜 정보를 조회합니다. toolId={}", toolId);
         Tool tool = getToolById(toolId);
-        Plan plan = getPlanByTool(tool);
+        List<PlanRes> plan = getPlanByTool(tool);
         log.info("플랜 정보를 성공적으로 조회했습니다. toolId={}", toolId);
-        return PlanRes.of(plan);
+        return PlanListRes.of(plan);
     }
 
-    public ToolCoreRes getToolCore(final Long toolId) {
+    public ToolCoreListRes getToolCore(final Long toolId) {
         log.debug("툴 핵심 정보를 조회합니다. toolId={}", toolId);
         Tool tool = getToolById(toolId);
-        ToolCore toolCore = getToolCoreByTool(tool);
+        List<ToolCoreRes> toolCore = getToolCoreByTool(tool);
         log.info("툴 핵심 정보를 성공적으로 조회했습니다. toolId={}", toolId);
-        return ToolCoreRes.of(toolCore);
+        return ToolCoreListRes.of(toolCore);
     }
 
     public RelatedToolListRes getRelatedTool(final Long toolId) {
         log.info("관련 툴 정보를 조회합니다. toolId={}", toolId);
         Tool tool = getToolById(toolId);
         List<RelatedTool> relatedTools = relatedTool(tool);
+        validateList(relatedTools);
         List<RelatedToolRes> relatedToolResList = relatedTools.stream()
                 .map(relatedTool -> {
                     Tool related = relatedTool.getAlternativeTool();
@@ -89,26 +90,27 @@ public class ToolService {
                 });
     }
 
-    private Plan getPlanByTool(final Tool tool) {
+    private List<PlanRes> getPlanByTool(final Tool tool) {
         log.debug("툴에 연결된 플랜 정보를 조회합니다. toolId={}", tool.getToolId());
-        return planRepository.findByTool(tool)
-                .orElseThrow(() -> {
-                    log.error("플랜 정보를 찾을 수 없습니다. toolId={}", tool.getToolId());
-                    return new NotFoundException(ErrorCode.DATA_NOT_FOUND);
-                });
+        List<Plan> planList = planRepository.findAllByTool(tool);
+        return planList.stream()
+                .map(PlanRes::of)
+                .toList();
+
     }
 
-    private ToolCore getToolCoreByTool(final Tool tool) {
+    private List<ToolCoreRes> getToolCoreByTool(final Tool tool) {
         log.debug("툴에 연결된 핵심 정보를 조회합니다. toolId={}", tool.getToolId());
-        return toolCoreRepository.findByTool(tool)
-                .orElseThrow(() -> {
-                    log.error("핵심 정보를 찾을 수 없습니다. toolId={}", tool.getToolId());
-                    return new NotFoundException(ErrorCode.DATA_NOT_FOUND);
-                });
+        List<ToolCore> toolCoreList = toolCoreRepository.findAllByTool(tool);
+        validateList(toolCoreList);
+        return toolCoreList.stream()
+                .map(ToolCoreRes::of)
+                .toList();
     }
 
     private List<String> getImageById(final Tool tool) {
         List<ToolImage> toolImages = toolImageRepository.findAllByTool(tool);
+        validateList(toolImages);
         log.debug("툴에 연결된 플랫폼 정보를 조회했습니다");
         return toolImages.stream()
                 .map(ToolImage::getImageUrl)
@@ -117,6 +119,7 @@ public class ToolService {
 
     private List<String> getVideoById(final Tool tool) {
         List<ToolVideo> toolVideos = toolVideoRepository.findAllByTool(tool);
+        validateList(toolVideos);
         log.debug("툴에 연결된 비디오 목록을 조회했습니다");
         return toolVideos.stream()
                 .map(ToolVideo::getVideoUrl)
@@ -125,6 +128,7 @@ public class ToolService {
 
     private List<PlatformRes> convertToPlatformRes(Tool tool) {
         List<ToolPlatForm> toolPlatForms = toolPlatFormRepository.findAllByTool(tool);
+        validateList(toolPlatForms);
         log.debug("툴에 연결된 플랫폼 정보를 조회했습니다");
         return toolPlatForms.stream()
                 .map(PlatformRes::of)
@@ -132,8 +136,9 @@ public class ToolService {
     }
 
     private List<String> convertToKeywordRes(Tool tool) {
-        log.debug("툴에 연결된 키워드 정보를 조회했습니다");
         List<ToolKeyword> toolKeywords = toolKeywordRepository.findAllByTool(tool);
+        validateList(toolKeywords);
+        log.debug("툴에 연결된 키워드 정보를 조회했습니다");
         return toolKeywords.stream()
                 .map(ToolKeyword::getKeywordName)
                 .toList();
@@ -142,5 +147,12 @@ public class ToolService {
     public int updateView(Long toolId) {
         log.debug("툴 조회수를 증가시킵니다. toolId={}", toolId);
         return toolRepository.updateView(toolId);
+    }
+
+    private void validateList(List<?> lists) {
+        // 빈 리스트일 경우 예외 처리
+        if (lists == null || lists.isEmpty()) {
+            throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
+        }
     }
 }

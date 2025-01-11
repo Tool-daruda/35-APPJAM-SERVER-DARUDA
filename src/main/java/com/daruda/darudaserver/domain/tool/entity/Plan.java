@@ -20,10 +20,10 @@ public class Plan {
     @Column(name = "plan_name",nullable = false)
     private String planName;
 
-    @Column(name = "plan_monthly",nullable = false)
+    @Column(name = "price_monthly",nullable = false)
     private int priceMonthly;
 
-    @Column(name = "plan_annual",nullable = false)
+    @Column(name = "price_annual",nullable = false)
     private int priceAnnual;
 
     @Column(name = "description",nullable = false)
