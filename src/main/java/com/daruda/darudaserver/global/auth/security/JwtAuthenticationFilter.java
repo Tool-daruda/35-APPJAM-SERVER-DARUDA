@@ -28,6 +28,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private static final List<String> EXCLUDE_URL = Arrays.asList("/api/v1/users/**", "/api/v1/tools/**");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -47,8 +48,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
 
-    private static final List<String> EXCLUDE_URL = Arrays.asList("/api/users/**", "/api/v1/tools/**");
-
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 
@@ -57,8 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.debug("Checking shouldNotFilter for path: {}, excluded: {}", path, isExcluded);
         return isExcluded;
     }
-
-
 
     private String getAccessToken(HttpServletRequest request){
         String accessToken = request.getHeader("Authorization");
