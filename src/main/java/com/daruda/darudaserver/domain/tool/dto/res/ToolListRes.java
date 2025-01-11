@@ -7,11 +7,13 @@ import java.util.List;
 
 @Builder(access = AccessLevel.PRIVATE)
 public record ToolListRes (
-        List<ToolDtoGetRes> tools
+        List<ToolDtoGetRes> tools,
+        boolean hasNext
 ){
-    public static ToolListRes of(List<ToolDtoGetRes> tools){
+    public static ToolListRes of(List<ToolDtoGetRes> tools, boolean hasNext){
         return ToolListRes.builder()
                 .tools(tools)
+                .hasNext(hasNext)
                 .build();
     }
 }

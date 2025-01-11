@@ -28,4 +28,17 @@ public class ValidatorUtil {
             throw new InvalidValueException(code);
         }
     }
-}
+
+    public static void validatePage(int page) {
+            if (page <= 0) {
+                throw new InvalidValueException(ErrorCode.INVALID_PAGE_MIN_SIZE);
+            }
+    }
+
+    public static void validateSize(int size, int maxSize) {
+            if (size <= 0 || size > maxSize) {
+                throw new InvalidValueException(ErrorCode.INVALID_PAGE_MAX_SIZE);
+            }
+        }
+    }
+

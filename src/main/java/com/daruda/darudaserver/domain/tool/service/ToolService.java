@@ -8,6 +8,7 @@ import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,6 +77,23 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
+
+    public ToolListRes getToolList(String sort, Category category, Pageable pageable) {
+        log.debug("카테고리별 툴 목록을 조회 category : {}, sort : {}, pageable : {}", category, sort, pageable);
+        // 수정할 예정 - 찜 개수 추가 해야함
+        Sort sorting = Sort.by(Sort.Order.desc("viewCount"));
+        if("등록순".equalsIgnoreCase(sort)){
+            sorting = Sort.by(Sort.Order.asc("createdAt"));
+        }
+        //Pageable 객체 ( 페이지 Num, 크기, 정렬 )
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sorting);
+        Page<Tool> toolPage = toolRepository.findAllWithFilter(category, sortedPageable);
+        List<ToolDtoGetRes> tools =toolPage.getContent().stream()
+                .map(tool -> ToolDtoGetRes.of(tool, convertToKeywordRes(tool)))
+                .toList();
+        return ToolListRes.of(tools, toolPage.hasNext());
+
+    }
     private List<RelatedTool> relatedTool(final Tool tool) {
         log.info("툴의 관련 툴 데이터를 조회합니다. toolId={}", tool.getToolId());
         return relatedToolRepository.findAllByTool(tool);
@@ -156,4 +174,5 @@ public class ToolService {
             throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
         }
     }
+
 }
