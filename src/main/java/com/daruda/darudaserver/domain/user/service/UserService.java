@@ -77,13 +77,7 @@ public class UserService {
         return SignUpSuccessResponse.of(nickname,positions,email,jwtTokenResponse);
     }
 
-    public Long deleteUser(final String accessToken){
-        Long userId;
-        try{
-             userId= jwtTokenProvider.getUserIdFromJwt(accessToken);
-        } catch(JwtException e){
-            throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
-        }
+    public Long deleteUser(final Long userId){
         tokenService.deleteRefreshToken(userId);
 
         return userId;

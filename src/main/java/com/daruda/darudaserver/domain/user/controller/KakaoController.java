@@ -8,6 +8,7 @@ import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
 import com.daruda.darudaserver.domain.user.dto.response.kakao.KakaoTokenResponse;
 import com.daruda.darudaserver.domain.user.service.KakaoService;
 import com.daruda.darudaserver.domain.user.service.UserService;
+import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import jakarta.servlet.http.HttpServletResponse;
@@ -56,9 +57,9 @@ public class KakaoController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logOut(@RequestHeader(HttpHeaders.AUTHORIZATION) String accessToken){
-        Long userId = userService.deleteUser(accessToken);
-        return  ResponseEntity.ok(ApiResponse.ofSuccessWithData(userId,SuccessCode.SUCCESS_CREATE));
+    public ResponseEntity<?> logOut(@UserId Long userId){
+        Long returnedUserId = userService.deleteUser(userId);
+        return  ResponseEntity.ok(ApiResponse.ofSuccessWithData(returnedUserId,SuccessCode.SUCCESS_CREATE));
     }
 
     @PostMapping("/nickname")
@@ -68,7 +69,7 @@ public class KakaoController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> regenerateToken(@RequestHeader(HttpHeaders.AUTHORIZATION)String refreshToken){
+    public ResponseEntity<?> regenerateToken(@UserId String refreshToken){
         JwtTokenResponse jwtTokenResponse = userService.reissueToken(refreshToken);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse,SuccessCode.SUCCESS_CREATE));
     }
