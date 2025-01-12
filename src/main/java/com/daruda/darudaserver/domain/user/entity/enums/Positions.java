@@ -1,5 +1,7 @@
 package com.daruda.darudaserver.domain.user.entity.enums;
 
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.BusinessException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +20,6 @@ public enum Positions {
                 return position;
             }
         }
-        throw new IllegalArgumentException("Unknown position: " + name);
+        throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
     }
 }
