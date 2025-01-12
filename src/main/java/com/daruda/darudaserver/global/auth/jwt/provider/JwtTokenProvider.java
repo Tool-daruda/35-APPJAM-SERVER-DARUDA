@@ -1,5 +1,9 @@
 package com.daruda.darudaserver.global.auth.jwt.provider;
 
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.BadRequestException;
+import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.UnauhtorizedException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -90,6 +94,21 @@ public class JwtTokenProvider {
             return JwtValidationType.EMPTY_JWT;
         } catch (SignatureException ex){
             return JwtValidationType.INVALID_JWT_TOKEN;
+        }
+    }
+
+    public void validateRefreshToken(final String refreshToken){
+        JwtValidationType jwtValidationType = validateToken(refreshToken);
+
+        if(!jwtValidationType.equals(JwtValidationType.VALID_JWT)){
+            throw switch(jwtValidationType){
+                case EXPIRED_JWT_TOKEN -> new UnauhtorizedException(ErrorCode.REFRESH_TOKEN_EXPIRED_ERROR);
+                case INVALID_JWT_TOKEN -> new BadRequestException(ErrorCode.INVALID_REFRESH_TOKEN_ERROR);
+                case INVALID_JWT_SIGNATURE -> new BadRequestException(ErrorCode.REFRESH_TOKEN_SIGNATURE_ERROR);
+                case UNSUPPORTED_JWT_TOKEN -> new BadRequestException(ErrorCode.UNSUPPORTED_REFRESH_TOKEN_ERROR);
+                case EMPTY_JWT -> new BadRequestException(ErrorCode.REFREH_TOKEN_EMPTY_ERROR);
+                default -> new BusinessException(ErrorCode.UNSUPPORTED_REFRESH_TOKEN_ERROR);
+            };
         }
     }
 

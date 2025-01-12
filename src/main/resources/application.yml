@@ -33,7 +33,12 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate.type: TRACE
+
+kakao:
+  client_id: ${CLIENT_ID}
+  redirect_uri: ${REDIRECT_URI}
+
 jwt:
-  secret: ${JWT_SECRET}
-  access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME}
-  refresh-token-expire-time: ${JWT_REFRESH_TOKEN_EXPIRE_TIME}
+  secret: ${SECRET}
+  access-token-expire-time: ${ACCESS_TOKEN_EXPIRE_TIME}
+  refresh-token-expire-time: ${REFRESH_TOKEN_EXPIRE_TIME}

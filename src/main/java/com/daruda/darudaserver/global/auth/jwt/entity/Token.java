@@ -1,28 +1,28 @@
 package com.daruda.darudaserver.global.auth.jwt.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Builder;
-import lombok.Getter;
-
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Getter
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Token {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "refresh_token")
     private String refreshToken;
 
-    public static Token of(final Long id, final String refreshToken){
-        return Token.builder()
-                .id(id)
-                .refreshToken(refreshToken)
-                .build();
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Builder
+    public Token(final Long userId, final String refreshToken) {
+        this.userId = userId;
+        this.refreshToken = refreshToken;
     }
+
 }
