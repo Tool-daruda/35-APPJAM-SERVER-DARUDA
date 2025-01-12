@@ -46,30 +46,30 @@ public class KakaoController {
     public ResponseEntity<?> postAuthenticationCode(@RequestHeader("code") final String code){
         UserInfo userInfo = kakaoService.getInfo(code);
         LoginResponse loginResponse = userService.oAuthLogin(userInfo);
-        return ResponseEntity.ok(ApiResponse.ofSuccess(loginResponse));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(loginResponse,SuccessCode.SUCCESS_CREATE));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest){
         SignUpSuccessResponse signUpSuccessResponse = userService.createUser(signUpRequest.email(), signUpRequest.nickname(),signUpRequest.positions());
-        return ResponseEntity.ok(ApiResponse.ofSuccess(signUpSuccessResponse));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(signUpSuccessResponse,SuccessCode.SUCCESS_CREATE));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logOut(@RequestHeader(HttpHeaders.AUTHORIZATION) String accessToken){
         Long userId = userService.deleteUser(accessToken);
-        return  ResponseEntity.ok(ApiResponse.ofSuccess(userId));
+        return  ResponseEntity.ok(ApiResponse.ofSuccessWithData(userId,SuccessCode.SUCCESS_CREATE));
     }
 
     @PostMapping("/nickname")
     public ResponseEntity<?> checkDuplicate(@RequestBody String nickname){
         boolean result = userService.isDuplicated(nickname);
-        return ResponseEntity.ok(ApiResponse.ofSuccess(result));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result,SuccessCode.SUCCESS_CREATE));
     }
 
     @PostMapping("/reissue")
     public ResponseEntity<?> regenerateToken(@RequestHeader(HttpHeaders.AUTHORIZATION)String refreshToken){
         JwtTokenResponse jwtTokenResponse = userService.reissueToken(refreshToken);
-        return ResponseEntity.ok(ApiResponse.ofSuccess(jwtTokenResponse));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse,SuccessCode.SUCCESS_CREATE));
     }
 }
