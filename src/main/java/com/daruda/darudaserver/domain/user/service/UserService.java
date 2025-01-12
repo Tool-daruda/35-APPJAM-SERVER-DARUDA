@@ -29,13 +29,13 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenService tokenService;
 
-    @Transactional
-    public LoginResponse oAuthLogin(UserInfo userInfo) {
+    public LoginResponse oAuthLogin(final UserInfo userInfo) {
         String email = userInfo.email();
         Optional<UserEntity> userEntity = userRepository.findByEmail(email);
         //등록된 회원이 아닌 경우
@@ -59,12 +59,11 @@ public class UserService {
     }
 
     @Transactional
-    public SignUpSuccessResponse createUser(String email, String nickname, String positions){
+    public SignUpSuccessResponse createUser(final String email, final String nickname, final String positions){
         UserEntity userEntity = UserEntity.builder()
                 .email(email)
                 .nickname(nickname)
                 .positions(Positions.fromString(positions))
-                .createdAt(LocalDateTime.now())
                 .socialType(SocialType.KAKAO)
                 .build();
         Long userId = userRepository.save(userEntity).getUserId();
@@ -78,8 +77,7 @@ public class UserService {
         return SignUpSuccessResponse.of(nickname,positions,email,jwtTokenResponse);
     }
 
-    @Transactional
-    public Long deleteUser(String accessToken){
+    public Long deleteUser(final String accessToken){
         Long userId;
         try{
              userId= jwtTokenProvider.getUserIdFromJwt(accessToken);
@@ -91,12 +89,10 @@ public class UserService {
         return userId;
     }
 
-    @Transactional
-    public boolean isDuplicated(String nickname){
+    public boolean isDuplicated(final String nickname){
         return userRepository.existsByNickname(nickname);
     }
 
-    @Transactional
     public JwtTokenResponse reissueToken(String refreshToken){
         validateRefreshToken(refreshToken);
 
@@ -114,7 +110,7 @@ public class UserService {
 
     }
 
-    private void validateRefreshToken(String refreshToken){
+    private void validateRefreshToken(final String refreshToken){
         JwtValidationType jwtValidationType =jwtTokenProvider.validateToken(refreshToken);
 
         if(!jwtValidationType.equals(JwtValidationType.VALID_JWT)){
@@ -129,7 +125,7 @@ public class UserService {
         }
     }
 
-    private void verifyUserIdWithStoredToken(Long userId, String refreshToken){
+    private void verifyUserIdWithStoredToken(final Long userId, final String refreshToken){
         Long storedUserId = tokenService.findIdByRefreshToken(refreshToken);
 
         if(!storedUserId.equals(userId)){

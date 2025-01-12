@@ -25,15 +25,12 @@ public class KakaoService {
     @Value("${kakao.redirect_uri}")
     private String redirectUri;
 
-    private static final String KAUTH_TOKEN_URL_HOST = "https://kauth.kakao.com";
-    private static final String KAUTH_USER_URL_HOST = "https://kapi.kakao.com";
-
     public String getAccessTokenFromKakao(String code){
         try{
             KakaoTokenResponse kakaoTokenResponse = kakaoAPiFeignClient.getAccessToken(
                     "authorization_code",
-                    "65b8edb9273b17a701f937868170f95e",
-                    "http://localhost:8080/api/v1/users/kakao/login-url",
+                    clientId,
+                    redirectUri,
                     code,
                     "application/x-www-form-urlencoded;charset=utf-8"
             );

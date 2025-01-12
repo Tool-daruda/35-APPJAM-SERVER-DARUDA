@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Table(name = "user")
-public class UserEntity {
+public class UserEntity extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -30,17 +30,13 @@ public class UserEntity {
     private Positions positions;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(nullable = false)
     private SocialType socialType = SocialType.KAKAO;
 
     @Builder
-    private UserEntity(String email, String nickname, Positions positions, LocalDateTime createdAt, SocialType socialType){
+    private UserEntity(String email, String nickname, Positions positions, SocialType socialType){
         this.email = email;
         this.nickname = nickname;
         this.positions = positions;
-        this.createdAt = createdAt;
         this.socialType = socialType;
     }
 }
