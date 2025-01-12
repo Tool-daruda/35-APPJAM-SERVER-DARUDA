@@ -1,9 +1,14 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import lombok.Getter;
+
+import java.util.Arrays;
 
 @Getter
 public enum Category {
+    ALL("전체"),
     LIFESTYLE("라이프스타일"),
     DOCUMENT_EDITING("문서 편집"),
     AI("인공지능"),
@@ -22,7 +27,14 @@ public enum Category {
         this.koreanName = koreanName;
     }
 
-    public String getKoreanName() {
-        return koreanName;
+    public static Category fromKoreanName(String name) {
+        if ("전체".equalsIgnoreCase(name) || name == null || name.isBlank()) {
+            return Category.ALL;
+        }
+        return Arrays.stream(values())
+                .filter(category -> category.getKoreanName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new InvalidValueException(ErrorCode.INVALID_TOOL_CATEGORY));
     }
+
 }
