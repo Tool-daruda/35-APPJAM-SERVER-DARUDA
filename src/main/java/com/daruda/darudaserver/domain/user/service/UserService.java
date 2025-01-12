@@ -94,9 +94,11 @@ public class UserService {
     }
 
     public JwtTokenResponse reissueToken(String refreshToken){
-        validateRefreshToken(refreshToken);
+        jwtTokenProvider.validateRefreshToken(refreshToken);
 
         Long userId = jwtTokenProvider.getUserIdFromJwt(refreshToken);
+        verifyUserIdWithStoredToken(userId,refreshToken);
+
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
         String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);

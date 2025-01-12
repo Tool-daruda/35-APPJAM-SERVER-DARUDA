@@ -97,7 +97,7 @@ public class JwtTokenProvider {
         }
     }
 
-    private void validateRefreshToken(final String refreshToken){
+    public void validateRefreshToken(final String refreshToken){
         JwtValidationType jwtValidationType = validateToken(refreshToken);
 
         if(!jwtValidationType.equals(JwtValidationType.VALID_JWT)){
