@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="60 seconds"> <!-- 60 초 간격으로 파일 확인하여 반영-->
+<configuration scan="true" scanPeriod="300 seconds"> <!-- 5분 초 간격으로 파일 확인하여 반영-->
 
     <!-- 로그 파일 경로 및 이름 설정 -->
     <property name="LOG_PATH" value="../daruda_log"/>

@@ -10,7 +10,7 @@ import org.w3c.dom.Text;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 @Getter
-@Table(name="plan")
+@Table(name="tool_plan")
 public class Plan {
 
     @Id
