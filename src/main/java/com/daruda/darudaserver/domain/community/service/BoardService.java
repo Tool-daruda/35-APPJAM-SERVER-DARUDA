@@ -39,12 +39,19 @@ public class BoardService {
         Tool tool = getToolById (boardCreateAndUpdateReq.toolId());
         //Board 저장
         Board board = createBoard(tool.getToolId(), user.getUserId(),  boardCreateAndUpdateReq);
+
+        //만약에 이미지가 Null 이거나 Empty 일 경우 null 반환
+        if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
+            return BoardRes.of(board);
+        }
+
         // imageURL 반환
         List<Long> imageIds =imageService.uploadImages(images);
         // BoardImage 저장
         boardImageService.saveBoardImages(board.getBoardId(), imageIds);
         List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
         return BoardRes.of(board,imageUrls);
+
     }
 
     public BoardRes updateBoard(

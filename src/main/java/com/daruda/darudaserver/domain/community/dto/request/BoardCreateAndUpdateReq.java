@@ -17,16 +17,13 @@ public record BoardCreateAndUpdateReq(
         @NotNull(message="내용  입력은 필수 입니다.")
         String content,
         @NotNull(message="툴 선택은 필수 입니다.")
-        Long toolId,
-        @Nullable
-        List<MultipartFile> images
+        Long toolId
 ) {
-        public static BoardCreateAndUpdateReq of(String title, String content, Long toolId, List<MultipartFile> images) {
+        public static BoardCreateAndUpdateReq of(String title, String content, Long toolId) {
                 return BoardCreateAndUpdateReq.builder()
                         .title(title)
                         .content(content)
                         .toolId(toolId)
-                        .images(images)
                         .build();
         }
 }
