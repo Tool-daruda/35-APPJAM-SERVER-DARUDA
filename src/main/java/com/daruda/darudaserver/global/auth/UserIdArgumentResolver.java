@@ -12,8 +12,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class UserIdArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter){
-        boolean hasUserIdAnnoation = parameter.hasParameterAnnotation(UserId.class);
-        boolean isLongType = Long.class.isAssignableFrom(parameter.getParameterType());
+        boolean hasUserIdAnnoation = parameter.hasParameterAnnotation(UserId.class); //UserId 어노테이션을 파라미터가 가지고 있는지 확인
+        boolean isLongType = Long.class.isAssignableFrom(parameter.getParameterType()); //파라미터 타입이 Long 인지 확인
         return hasUserIdAnnoation && isLongType;
     }
 

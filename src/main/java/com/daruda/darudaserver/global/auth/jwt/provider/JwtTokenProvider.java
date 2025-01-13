@@ -8,6 +8,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 
+@Slf4j
 @Service
 public class JwtTokenProvider {
 
@@ -44,20 +46,27 @@ public class JwtTokenProvider {
         return generateToken(authentication, refreshTokenExpireTime);
     }
 
-    public Long getUserIdFromJwt(String token){
+    public Long getUserIdFromJwt(String token) {
+        log.debug("JWT 파싱 시작: {}", token);
         Claims claims = getBody(token);
         Long userId = Long.valueOf(claims.get(USER_ID).toString());
-
+        log.debug("JWT 파싱 성공 - UserID: {}", userId);
         return userId;
     }
 
-    private Claims getBody(final String token){
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    private Claims getBody(final String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            log.error("JWT 파싱 실패: {}", e.getMessage(), e);
+            throw e;
+        }
     }
+
 
     private SecretKey getSigningKey(){
         String encodedKey = Base64.getEncoder().encodeToString(jwtSecret.getBytes());
