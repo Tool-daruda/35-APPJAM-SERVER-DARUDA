@@ -4,6 +4,8 @@ package com.daruda.darudaserver.domain.tool.service;
 import com.daruda.darudaserver.domain.tool.dto.res.*;
 import com.daruda.darudaserver.domain.tool.entity.*;
 import com.daruda.darudaserver.domain.tool.repository.*;
+import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,8 @@ public class ToolService {
     private final PlanRepository planRepository;
     private final ToolCoreRepository toolCoreRepository;
     private final RelatedToolRepository relatedToolRepository;
+    private final ToolScrapRepository toolScrapRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public ToolDetailGetRes getToolDetail(final Long toolId) {
@@ -77,7 +81,6 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
-
     public ToolListRes getToolList(final String sort, final Category category,final Pageable pageable) {
         log.debug("카테고리별 툴 목록을 조회 category : {}, sort : {}, pageable : {}", category, sort, pageable);
         // 수정할 예정 - 찜 개수 추가 해야함
@@ -94,6 +97,25 @@ public class ToolService {
         return ToolListRes.of(tools, toolPage.hasNext());
 
     }
+
+    @Transactional
+    public ToolScrapRes postToolScrap(final Long userId, final Long toolId){
+        UserEntity user = getUserById(userId);
+        Tool tool = getToolById(toolId); // Tool 검증
+        boolean toolExists = toolScrapRepository.existsByUserIdAndToolId( userId, toolId);
+        if(toolExists){
+            toolScrapRepository.deleteByUserIdAndToolId(userId, toolId);
+            return ToolScrapRes.of(toolId, false);
+        }else{
+            ToolScrap toolScrap = ToolScrap.builder()
+                    .user(user)
+                    .tool(tool)
+                    .build();
+            toolScrapRepository.save(toolScrap);
+            return ToolScrapRes.of(toolId, true);
+        }
+    }
+
     private List<RelatedTool> relatedTool(final Tool tool) {
         log.info("툴의 관련 툴 데이터를 조회합니다. toolId={}", tool.getToolId());
         return relatedToolRepository.findAllByTool(tool);
@@ -175,4 +197,12 @@ public class ToolService {
         }
     }
 
+    public UserEntity getUserById(final Long userId) {
+        log.debug("유저를 조회합니다. userId={}", userId);
+        return userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.error("유저를 찾을 수 없습니다. userId={}", userId);
+                    return new NotFoundException(ErrorCode.DATA_NOT_FOUND);
+                });
+    }
 }

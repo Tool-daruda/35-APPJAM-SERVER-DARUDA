@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="60 seconds"> <!-- 60 초 간격으로 파일 확인하여 반영-->
+<configuration scan="true" scanPeriod="300 seconds"> <!-- 5분 초 간격으로 파일 확인하여 반영-->
 
     <!-- 로그 파일 경로 및 이름 설정 -->
-    <property name="LOG_PATH" value="C:\Users\LG\OneDrive\바탕 화면\AppJam_Daruda"/>
+<!--    <property name="LOG_PATH" value="C:\Users\LG\OneDrive\바탕 화면\AppJam_Daruda"/>-->
+        <property name="LOG_PATH" value="/Users/macbook/Desktop/daruda-log"/>
     <property name="LOG_FILE_NAME" value="logging"/> <!-- 단계별 로그 파일 이름 -->
     <property name="ERR_LOG_FILE_NAME" value="err_logging"/>
     <property name="LOG_PATTERN" value="%-5level %d{yy-MM-dd HH:mm:ss} [%thread] [%logger{0}:%line] - %msg%n"/>
