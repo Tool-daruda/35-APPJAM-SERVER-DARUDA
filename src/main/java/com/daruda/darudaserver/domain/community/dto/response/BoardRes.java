@@ -30,4 +30,14 @@ public record BoardRes(
                 .updatedAt(board.getUpdatedAt())
                 .build();
     }
+
+    public static BoardRes of(final Board board){
+        return BoardRes.builder()
+                .boardId(board.getBoardId())
+                .toolId(board.getToolId())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .updatedAt(board.getUpdatedAt())
+                .build();
+    }
 }
