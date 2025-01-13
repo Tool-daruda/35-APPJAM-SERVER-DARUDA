@@ -4,14 +4,17 @@ import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user")
 public class UserEntity extends BaseTimeEntity{
     @Id
