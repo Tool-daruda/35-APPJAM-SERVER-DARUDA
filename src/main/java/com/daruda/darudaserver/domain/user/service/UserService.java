@@ -91,16 +91,16 @@ public class UserService {
 
     public JwtTokenResponse reissueToken(Long userId){
         String requestToken = tokenService.getRefreshTokenByUserId(userId);
-
         verifyUserIdWithStoredToken(userId,requestToken);
+
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
+        //새 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
 
         JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(requestToken)
                 .build();
         return jwtTokenResponse;
 
