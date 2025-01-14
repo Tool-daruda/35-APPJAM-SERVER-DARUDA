@@ -29,7 +29,7 @@ public class BoardController {
     /**
      * 게시글 작성
      */
-    @PostMapping
+    @PostMapping("/boards")
     public ResponseEntity<ApiResponse<?>> createBoard(
             @UserId Long userId,
             @ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
