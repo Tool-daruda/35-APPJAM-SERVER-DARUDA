@@ -19,6 +19,7 @@ import com.daruda.darudaserver.global.error.exception.UnauhtorizedException;
 import io.jsonwebtoken.JwtException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
@@ -87,15 +89,16 @@ public class UserService {
         return userRepository.existsByNickname(nickname);
     }
 
-    public JwtTokenResponse reissueToken(String refreshToken){
-        jwtTokenProvider.validateRefreshToken(refreshToken);
+    public JwtTokenResponse reissueToken(Long userId){
+       /* jwtTokenProvider.validateRefreshToken(refreshToken);
 
         Long userId = jwtTokenProvider.getUserIdFromJwt(refreshToken);
-        verifyUserIdWithStoredToken(userId,refreshToken);
-
+        //verifyUserIdWithStoredToken(userId,refreshToken);
+*/
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
         String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
 
         JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
                 .accessToken(accessToken)

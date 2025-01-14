@@ -69,8 +69,8 @@ public class KakaoController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> regenerateToken(@UserId String refreshToken){
-        JwtTokenResponse jwtTokenResponse = userService.reissueToken(refreshToken);
+    public ResponseEntity<?> regenerateToken(@UserId Long userId){
+        JwtTokenResponse jwtTokenResponse = userService.reissueToken(userId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse,SuccessCode.SUCCESS_CREATE));
     }
 }
