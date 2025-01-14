@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/mypage")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class MyPageController {
     private final UserService userService;
@@ -41,5 +41,5 @@ public class MyPageController {
 
 
     }
- */
+*/
 }
