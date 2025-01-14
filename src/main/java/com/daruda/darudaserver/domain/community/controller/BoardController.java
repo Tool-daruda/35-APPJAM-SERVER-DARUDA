@@ -82,4 +82,9 @@ public class BoardController {
         BoardScrapRes boardScrapRes = boardService.postScrap(userId,boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardScrapRes , SuccessCode.SUCCESS_SCRAP));
     }
+
+    @GetMapping("/board/list")
+    public ResponseEntity<ApiResponse<?>> getBoards(){
+
+    }
 }
