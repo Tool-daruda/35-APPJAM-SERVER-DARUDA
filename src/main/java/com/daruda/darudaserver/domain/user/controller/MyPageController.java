@@ -36,9 +36,8 @@ public class MyPageController {
 
     @GetMapping("/tools")
     public ResponseEntity<?> getFavoriteTools(@UserId Long userId,
-                                              @RequestParam(defaultValue = "1", value = "page")int pageNo,
-                                              @RequestParam(defaultValue = "createdAt", value = "criteria")String criteria){
-        FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId, pageNo, criteria);
+                                              @RequestParam(defaultValue = "1", value = "page")int pageNo){
+        FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId, pageNo);
 
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteToolsResponse, SuccessCode.SUCCESS_CREATE));
     }

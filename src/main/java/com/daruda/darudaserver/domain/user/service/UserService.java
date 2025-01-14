@@ -2,6 +2,7 @@ package com.daruda.darudaserver.domain.user.service;
 
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDtoGetRes;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.tool.service.ToolService;
@@ -143,22 +144,27 @@ public class UserService {
         return UpdateMyResponse.of(nickname,positions);
     }
 
-    public FavoriteToolsResponse getFavoriteTools(Long userId, int pageNo, String criteria){
-        userRepository.findById(userId)
+    public FavoriteToolsResponse getFavoriteTools(Long userId, int pageNo){
+        UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        Pageable pageable = PageRequest.of(pageNo,10, Sort.by(Sort.Direction.DESC, criteria));
-        Page<Long> toolIdPage = toolScrapRepository.findAllByUserId(userId,pageable);
+        Pageable pageable = PageRequest.of(pageNo,10);
+        Page<ToolScrap> toolIdPage = toolScrapRepository.findAllByUserId(userId,pageable);
 
-        List<Long> toolIds = toolIdPage.getContent();
 
-        List<Tool> tools = toolRepository.findAllByToolId(toolIds);
+        List<ToolScrap> toolScraps = toolIdPage.getContent();
+        List<Long> toolIds = toolScraps.stream()
+                .map(toolScrap -> toolScrap.getTool().getToolId())
+                .toList();
+        List<Tool> tools = toolIds.stream()
+                .map(toolId-> getTool(toolId))
+                .toList();
 
         List<ToolDtoGetRes> toolDtoGetRes = tools.stream()
                 .map(tool->ToolDtoGetRes.of(tool, toolService.convertToKeywordRes(tool)))
                 .toList();
 
-        PagenationDto pagenationDto = PagenationDto.of(pageNo,10);
+        PagenationDto pagenationDto = PagenationDto.of(pageNo,10,toolIdPage.getTotalPages());
 
         FavoriteToolsResponse favoriteToolsResponse = FavoriteToolsResponse.of(toolDtoGetRes, pagenationDto);
 
@@ -174,9 +180,11 @@ public class UserService {
         }
     }
 
-    private void getTool(Long toolId){
+    private Tool getTool(Long toolId){
         Tool tool = toolRepository.findById(toolId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.DATA_NOT_FOUND));
+                .orElseThrow(()->new BusinessException(ErrorCode.DATA_NOT_FOUND));
+
+        return tool;
     }
 
 
