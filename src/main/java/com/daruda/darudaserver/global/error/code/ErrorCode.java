@@ -34,7 +34,7 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "E401003", "리소스 접근 권한이 없습니다."),
 
     /* 403 */
-    FORBIDDEN(HttpStatus.FORBIDDEN, "E403001", "리소스 접근 권한이 없습니다."),
+    BOARD_FORBIDDEN(HttpStatus.FORBIDDEN, "E403001", "게시판 접근 권한이 없습니다."),
 
     /* 404 NOT FOUND */
 

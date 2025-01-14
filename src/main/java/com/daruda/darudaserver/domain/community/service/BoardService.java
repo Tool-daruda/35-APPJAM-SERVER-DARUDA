@@ -17,6 +17,7 @@ import com.daruda.darudaserver.global.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import static com.daruda.darudaserver.domain.community.entity.Board.createFree;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class BoardService {
 
@@ -73,13 +75,10 @@ public class BoardService {
         //userId 검증
         UserEntity user = getUserById(userId);
         //Board 객체 검증
-        Board savedBoard = getBoardById(boardId);
-        if(!savedBoard.getUser().getId().equals(user.getId())){
-            throw new UnauthorizedException(ErrorCode.FORBIDDEN);
-
-        }
-        //Board 저장
-        Board board = updateBoard(boardId , user,boardCreateAndUpdateReq);
+        Board board = getBoardById(boardId);
+        validateUser(user.getId(), board.getUser().getId());
+        //Board 정보 Update
+        board.update(boardCreateAndUpdateReq.toolId(), user, boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content());
 
         // 1. 들어온 이미지가 없을 경우 -> 기존 이미지 삭제
         if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
@@ -103,8 +102,8 @@ public class BoardService {
 
     public void deleteBoard(final Long userId,final Long boardId) {
         UserEntity user = getUserById(userId);
-
         Board board = getBoardById(boardId);
+        validateUser(user.getId(), board.getBoardId());
         // Image 제거
         List<BoardImage> boardImages = boardImageRepository.findAllByBoardId(boardId);
         //2-1. 기존 이미지가 존재할 경우 -> 삭제
@@ -113,7 +112,6 @@ public class BoardService {
         }
         //Board 제거
         board.delete();
-        boardRepository.save(board);
     }
 
     public BoardRes getBoard(Long boardId) {
@@ -131,14 +129,6 @@ public class BoardService {
         Board board = createFree(user, boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content());
         return boardRepository.save(board);
     }
-
-    private Board updateBoard( final Long boardId, final UserEntity user, final BoardCreateAndUpdateReq boardCreateAndUpdateReq){
-        Board board = Board.update(boardId , boardCreateAndUpdateReq.toolId(), user ,
-                boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content()
-        );
-        return boardRepository.save(board);
-    }
-
 
     private Board getBoardById(final Long boardId){
         Board board = boardRepository.findById(boardId)
@@ -179,5 +169,11 @@ public class BoardService {
         boardImageRepository.deleteAll(boardImages);
         //Image Repository 의 이미지 삭제
         imageService.deleteImages(deleteImages);
+    }
+
+    public void validateUser(final Long userId, final Long boardUserId){
+        if(!boardUserId.equals(userId)){
+            throw new UnauthorizedException(ErrorCode.BOARD_FORBIDDEN);
+        }
     }
 }
