@@ -13,6 +13,7 @@ import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -63,7 +64,7 @@ public class KakaoController {
     }
 
     @PostMapping("/nickname")
-    public ResponseEntity<?> checkDuplicate(@RequestBody String nickname){
+    public ResponseEntity<?> checkDuplicate(@NotNull(message = "닉네임은 필수입력값입니다") @RequestBody String nickname){
         boolean result = userService.isDuplicated(nickname);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result,SuccessCode.SUCCESS_CREATE));
     }

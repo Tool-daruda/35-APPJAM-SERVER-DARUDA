@@ -90,11 +90,9 @@ public class UserService {
     }
 
     public JwtTokenResponse reissueToken(Long userId){
-       /* jwtTokenProvider.validateRefreshToken(refreshToken);
+        String requestToken = tokenService.getRefreshTokenByUserId(userId);
 
-        Long userId = jwtTokenProvider.getUserIdFromJwt(refreshToken);
-        //verifyUserIdWithStoredToken(userId,refreshToken);
-*/
+        verifyUserIdWithStoredToken(userId,requestToken);
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
         String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
