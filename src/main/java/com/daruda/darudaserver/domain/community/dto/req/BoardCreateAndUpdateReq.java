@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.domain.community.dto.request;
+package com.daruda.darudaserver.domain.community.dto.req;
 
 
 import jakarta.validation.constraints.NotNull;

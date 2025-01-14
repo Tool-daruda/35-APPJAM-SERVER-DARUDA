@@ -1,8 +1,9 @@
 package com.daruda.darudaserver.domain.community.controller;
 
-import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateReq;
-import com.daruda.darudaserver.domain.community.dto.response.BoardRes;
+import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
+import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.service.BoardService;
+import com.daruda.darudaserver.domain.tool.dto.res.ToolScrapRes;
 import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
@@ -47,6 +48,13 @@ public class BoardController {
         BoardRes boardRes = boardService.getBoard(boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_FETCH));
     }
+
+    @PostMapping("/{board-id}/scrap")
+    public ResponseEntity<ApiResponse<?>> postToolScrap(@UserId final Long userId, @PathVariable(name="board-id") final Long toolId){
+        ToolScrapRes toolScrapRes = toolService.postToolScrap(userId, toolId);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolScrapRes, SuccessCode.SUCCESS_CREATE));
+    }
+
 
     @DeleteMapping("/{board-id}")
     public ResponseEntity<ApiResponse<?>> deleteBoard(

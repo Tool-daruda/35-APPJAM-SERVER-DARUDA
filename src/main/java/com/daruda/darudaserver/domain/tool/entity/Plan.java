@@ -32,5 +32,4 @@ public class Plan {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="tool_id",nullable = false)
     private Tool tool;
-
 }

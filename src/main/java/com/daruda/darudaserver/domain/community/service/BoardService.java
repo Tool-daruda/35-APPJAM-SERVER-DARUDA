@@ -1,7 +1,7 @@
 package com.daruda.darudaserver.domain.community.service;
 
-import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateReq;
-import com.daruda.darudaserver.domain.community.dto.response.BoardRes;
+import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
+import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardImage;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
