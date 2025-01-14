@@ -5,9 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.List;
 
 @Repository
 public interface BoardImageRepository extends JpaRepository<BoardImage,Long> {
 
-    Collection<BoardImage> findAllByBoardId(Long boardId);
+    List<BoardImage> findAllByBoardId(Long boardId);
 }

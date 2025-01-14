@@ -72,14 +72,8 @@ public class Tool {
         this.createdAt = new Timestamp(System.currentTimeMillis());
     }
 
-    // updatedAt 값을 수동으로 설정하는 메서드
-    public void setUpdatedAt(Timestamp updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
     // viewCount를 업데이트하는 메서드 (updatedAt에 영향 없음)
     public void incrementViewCount() {
         this.viewCount++;
     }
-
 }

@@ -1,8 +1,12 @@
 package com.daruda.darudaserver.domain.community.controller;
 
-import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateReq;
-import com.daruda.darudaserver.domain.community.dto.response.BoardRes;
+import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
+import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
+import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
 import com.daruda.darudaserver.domain.community.service.BoardService;
+import com.daruda.darudaserver.domain.tool.dto.res.ToolScrapRes;
+import com.daruda.darudaserver.domain.tool.service.ToolService;
+import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import jakarta.validation.Valid;
@@ -16,39 +20,66 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/boards")
+@RequestMapping("/api/v1")
 public class BoardController {
 
     private final BoardService boardService;
+    private final ToolService toolService;
 
-    @PostMapping()
+    /**
+     * 게시글 작성
+     */
+    @PostMapping("/boards")
     public ResponseEntity<ApiResponse<?>> createBoard(
+            @UserId Long userId,
             @ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
             @RequestPart(value = "images", required = false)  @Size(max=5) List<MultipartFile> images){
 
-        BoardRes boardRes = boardService.createBoard(boardCreateAndUpdateReq,images);
+        BoardRes boardRes = boardService.createBoard(userId, boardCreateAndUpdateReq, images);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
     }
 
-    @PatchMapping("{board-id}")
+    /**
+     * 게시글 수정
+     */
+    @PatchMapping("/boards/{board-id}")
     public ResponseEntity<ApiResponse<?>> updateBoard(
+            @UserId Long userId,
             @PathVariable(name="board-id") final Long boardId,
             @ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
             @RequestPart(value = "images", required = false)  @Size(max=5) List<MultipartFile> images){
-        BoardRes boardRes = boardService.updateBoard(boardId , boardCreateAndUpdateReq,images);
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
+        BoardRes boardRes = boardService.updateBoard(userId , boardId , boardCreateAndUpdateReq,images);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_UPDATE));
     }
 
-    @GetMapping("{board-id}")
+    /**
+     * 게시글 조회
+     */
+    @GetMapping("/boards/board/{board-id}")
     public ResponseEntity<ApiResponse<?>> getBoard(@PathVariable(name="board-id") final Long boardId){
         BoardRes boardRes = boardService.getBoard(boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_FETCH));
     }
 
-    @DeleteMapping("{board-id}")
+    /**
+     * 게시글 삭제
+     */
+    @DeleteMapping("/boards/{board-id}")
     public ResponseEntity<ApiResponse<?>> deleteBoard(
+            @UserId Long userId,
             @PathVariable(name="board-id") final Long boardId){
-        boardService.deleteBoard(boardId);
+        boardService.deleteBoard(userId,boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
+    }
+
+    /**
+     * 게시글 스크랩
+     */
+    @PostMapping("/users/boards/{board-id}/scrap")
+    public ResponseEntity<ApiResponse<?>> scrapBoard(
+            @UserId Long userId,
+            @PathVariable(name="board-id") final Long boardId){
+        BoardScrapRes boardScrapRes = boardService.postScrap(userId,boardId);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardScrapRes , SuccessCode.SUCCESS_SCRAP));
     }
 }

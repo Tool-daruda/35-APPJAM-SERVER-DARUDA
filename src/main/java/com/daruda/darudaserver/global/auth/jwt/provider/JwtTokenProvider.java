@@ -3,7 +3,9 @@ package com.daruda.darudaserver.global.auth.jwt.provider;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
-import com.daruda.darudaserver.global.error.exception.UnauhtorizedException;
+
+
+import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -112,7 +114,7 @@ public class JwtTokenProvider {
 
         if(!jwtValidationType.equals(JwtValidationType.VALID_JWT)){
             throw switch(jwtValidationType){
-                case EXPIRED_JWT_TOKEN -> new UnauhtorizedException(ErrorCode.REFRESH_TOKEN_EXPIRED_ERROR);
+                case EXPIRED_JWT_TOKEN -> new UnauthorizedException(ErrorCode.REFRESH_TOKEN_EXPIRED_ERROR);
                 case INVALID_JWT_TOKEN -> new BadRequestException(ErrorCode.INVALID_REFRESH_TOKEN_ERROR);
                 case INVALID_JWT_SIGNATURE -> new BadRequestException(ErrorCode.REFRESH_TOKEN_SIGNATURE_ERROR);
                 case UNSUPPORTED_JWT_TOKEN -> new BadRequestException(ErrorCode.UNSUPPORTED_REFRESH_TOKEN_ERROR);

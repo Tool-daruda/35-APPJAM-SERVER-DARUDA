@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.domain.community.dto.response;
+package com.daruda.darudaserver.domain.community.dto.res;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 
 //Private 로 하는 이유
@@ -28,6 +27,17 @@ public record BoardRes(
                 .content(board.getContent())
                 .images(images)
                 .updatedAt(board.getUpdatedAt())
+                .build();
+    }
+
+    public static BoardRes of(final Board board){
+        return BoardRes.builder()
+                .boardId(board.getBoardId())
+                .toolId(board.getToolId())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .updatedAt(board.getUpdatedAt())
+                .images(null)
                 .build();
     }
 }
