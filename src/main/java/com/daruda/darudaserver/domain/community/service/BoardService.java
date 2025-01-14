@@ -46,12 +46,12 @@ public class BoardService {
 
         // 자유 게시판일 경우
         if(boardCreateAndUpdateReq.isFree()){
-            board = createFreeBoard(user.getUserId(), boardCreateAndUpdateReq);
+            board = createFreeBoard(user.getId(), boardCreateAndUpdateReq);
         }
         // 툴 기반 게시판 생성
         else {
             Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
-            board = createToolBoard(tool.getToolId(), user.getUserId(), boardCreateAndUpdateReq);
+            board = createToolBoard(tool.getToolId(), user.getId(), boardCreateAndUpdateReq);
         }
         // 이미지가 없으면 바로 응답 반환
         if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
@@ -74,7 +74,7 @@ public class BoardService {
         UserEntity user = getUserById(userId);
         //Board 객체 검증
         Board savedBoard = getBoardById(boardId);
-        if(!savedBoard.getUserId().equals(user.getUserId())){
+        if(!savedBoard.getUserId().equals(user.getId())){
             throw new UnauthorizedException(ErrorCode.FORBIDDEN);
 
         }

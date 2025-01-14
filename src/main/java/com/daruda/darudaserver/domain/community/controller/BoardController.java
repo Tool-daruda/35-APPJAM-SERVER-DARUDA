@@ -4,6 +4,7 @@ import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolScrapRes;
+import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
@@ -22,6 +23,7 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+    private final ToolService toolService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createBoard(
