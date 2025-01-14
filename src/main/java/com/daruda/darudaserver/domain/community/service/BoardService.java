@@ -3,6 +3,8 @@ package com.daruda.darudaserver.domain.community.service;
 import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.response.BoardRes;
 import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.community.entity.BoardImage;
+import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
@@ -27,6 +29,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final BoardImageService boardImageService;
+    private final BoardImageRepository boardImageRepository;
     private final ImageService imageService;
     private final ToolRepository toolRepository;
     private final UserRepository userRepository;
@@ -62,18 +65,30 @@ public class BoardService {
     }
 
     public BoardRes updateBoard(
+            final Long userId,
             final Long boardId,
             final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
             List<MultipartFile> images) {
         //userId 검증
-        Long userId= 1L;
-        //toolId 검증
-
+        UserEntity user = getUserById(userId);
         //Board 객체 검증
         getBoardById(boardId);
         //Board 저장
         Board board = updateBoard(boardId , userId,boardCreateAndUpdateReq);
-        // imageURL 반환
+
+        // 1. 들어온 이미지가 없을 경우 -> 기존 이미지 삭제
+        if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
+            deleteOriginImages(boardId);
+            return BoardRes.of(board);
+        }
+        //2. 들어온 이미지가 있을 경우 -> 기존 이미지의 존재 여부 확인
+        List<BoardImage> boardImages = boardImageRepository.findAllByBoardId(boardId);
+        //2-1. 기존 이미지가 존재할 경우 -> 삭제
+        if(!boardImages.isEmpty()){
+            deleteOriginImages(boardId);
+        }
+        //2-2. 기존 이미지가 존재하지 않을 경우 + 2-1 진행 후 이미지 업로드
+        // imageURL 업로드
         List<Long> imageIds =imageService.uploadImages(images);
         // BoardImage 저장
         boardImageService.saveBoardImages(board.getBoardId(), imageIds);
@@ -132,5 +147,16 @@ public class BoardService {
                     log.error("유저를 찾을 수 없습니다. userId={}", userId);
                     return new NotFoundException(ErrorCode.DATA_NOT_FOUND);
                 });
+    }
+
+    // 기존 이미지 삭제
+    public void deleteOriginImages(final Long boardId){
+        List<BoardImage> boardImages = boardImageRepository.findAllByBoardId(boardId);
+        List<Long> deleteImages = boardImages.stream()
+                .map(BoardImage::getImageId)
+                .toList();
+        boardImageRepository.deleteAll(boardImages);
+        //Image Repository 의 이미지 삭제
+        imageService.deleteImages(deleteImages);
     }
 }

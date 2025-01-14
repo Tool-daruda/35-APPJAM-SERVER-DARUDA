@@ -2,11 +2,9 @@ package com.daruda.darudaserver.domain.community.service;
 
 import com.daruda.darudaserver.domain.community.entity.BoardImage;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
-import com.daruda.darudaserver.global.image.entity.Image;
 import com.daruda.darudaserver.global.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

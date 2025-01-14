@@ -34,10 +34,11 @@ public class BoardController {
 
     @PatchMapping("/{board-id}")
     public ResponseEntity<ApiResponse<?>> updateBoard(
+            @UserId Long userId,
             @PathVariable(name="board-id") final Long boardId,
             @ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
             @RequestPart(value = "images", required = false)  @Size(max=5) List<MultipartFile> images){
-        BoardRes boardRes = boardService.updateBoard(boardId , boardCreateAndUpdateReq,images);
+        BoardRes boardRes = boardService.updateBoard(userId , boardId , boardCreateAndUpdateReq,images);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
     }
 
