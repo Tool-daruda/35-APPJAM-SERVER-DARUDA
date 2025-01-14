@@ -38,6 +38,10 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "E404002", "유저가 존재하지 않습니다"),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND,"E404003", "리프레쉬 토큰이 존재하지 않습니다"),
 
+    /* 409 CONFLICT */
+    DUPLICATED_NICKNAME(HttpStatus.CONFLICT,"E409001","닉네임 중복입니다"),
+    DUPLICATED_EMAIL(HttpStatus.CONFLICT,"E409002","이메일 중복입니다"),
+
     /* 500 INTERNAL SERVER ERROR */
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E500001","서버 내부에서 오류가 발생했습니다"),
     FILE_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "E500002", "이미지 업로드에 실패했습니다"),

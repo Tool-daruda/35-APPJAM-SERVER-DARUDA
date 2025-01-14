@@ -17,8 +17,8 @@ import lombok.NoArgsConstructor;
 public class UserEntity extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "id")
+    private Long id;
 
     @Column(nullable = false)
     private String email;
@@ -30,14 +30,19 @@ public class UserEntity extends BaseTimeEntity{
     @Column(nullable = false)
     private Positions positions;
 
-    @Column(nullable = false)
-    private SocialType socialType = SocialType.KAKAO;
 
     @Builder
-    private UserEntity(String email, String nickname, Positions positions, SocialType socialType){
+    private UserEntity(String email, String nickname, Positions positions){
         this.email = email;
         this.nickname = nickname;
         this.positions = positions;
-        this.socialType = socialType;
+    }
+
+    public void updatePositions(Positions positions){
+        this.positions = positions;
+    }
+
+    public void updateNickname(String nickname){
+        this.nickname=nickname;
     }
 }

@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.global.auth.jwt.entity;
 
+import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,12 +17,13 @@ public class Token {
     @Column(name = "refresh_token")
     private String refreshToken;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @OneToOne(targetEntity = UserEntity.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity userEntity;
 
     @Builder
-    public Token(final Long userId, final String refreshToken) {
-        this.userId = userId;
+    public Token(UserEntity userEntity, String refreshToken) {
+        this.userEntity = userEntity;
         this.refreshToken = refreshToken;
     }
 

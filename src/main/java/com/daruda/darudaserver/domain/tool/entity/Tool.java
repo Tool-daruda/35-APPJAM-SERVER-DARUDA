@@ -65,6 +65,7 @@ public class Tool {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
+
     // createdAt 값을 설정하는 메서드
     @PrePersist
     protected void onCreate() {
