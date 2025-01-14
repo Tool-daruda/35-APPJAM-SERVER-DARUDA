@@ -30,7 +30,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private static final List<String> EXCLUDE_URL = Arrays.asList("/api/v1/users/signin", "/api/v1/users/token","/api/v1/users/reissue","/api/v1/users/signup","/api/v1/users/nickname","/api/v1/tools/**");
+    private static final List<String> EXCLUDE_URL = Arrays.asList("/api/v1/users/signin", "/api/v1/users/token","/api/v1/users/signup","/api/v1/users/nickname","/api/v1/tools/**");
 
     @Override
     protected void doFilterInternal( HttpServletRequest request,  HttpServletResponse response,  FilterChain filterChain) throws ServletException, IOException {

@@ -29,7 +29,7 @@ public class TokenService {
     public Long findIdByRefreshToken(final String refreshToken){
         Token token = tokenRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new InvalidValueException(ErrorCode.REFRESH_TOKEN_EMPTY_ERROR));
-        return token.getId();
+        return token.getUserId();
     }
 
     @Transactional
@@ -38,6 +38,16 @@ public class TokenService {
                 .orElseThrow(()-> new NotFoundException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         tokenRepository.delete(token);
+    }
+
+    @Transactional
+    public String getRefreshTokenByUserId(Long userId)
+    {
+        Token token = tokenRepository.findByUserId(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        String refreshToken = token.getRefreshToken();
+        return refreshToken;
     }
 
 }
