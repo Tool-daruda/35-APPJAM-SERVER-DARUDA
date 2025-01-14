@@ -107,7 +107,7 @@ public class BoardService {
     public void deleteBoard(final Long userId,final Long boardId) {
         UserEntity user = getUserById(userId);
         Board board = getBoardById(boardId);
-        validateUser(user.getId(), board.getBoardId());
+        validateUser(user.getId(), board.getUser().getId());
         // Image 제거
         List<BoardImage> boardImages = boardImageRepository.findAllByBoardId(boardId);
         //2-1. 기존 이미지가 존재할 경우 -> 삭제
