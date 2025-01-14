@@ -12,6 +12,7 @@ import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +73,11 @@ public class BoardService {
         //userId 검증
         UserEntity user = getUserById(userId);
         //Board 객체 검증
-        getBoardById(boardId);
+        Board savedBoard = getBoardById(boardId);
+        if(!savedBoard.getUserId().equals(user.getUserId())){
+            throw new UnauthorizedException(ErrorCode.FORBIDDEN);
+
+        }
         //Board 저장
         Board board = updateBoard(boardId , userId,boardCreateAndUpdateReq);
 
@@ -96,8 +101,17 @@ public class BoardService {
         return BoardRes.of(board,imageUrls);
     }
 
-    public void deleteBoard(final Long boardId) {
+    public void deleteBoard(final Long userId,final Long boardId) {
+        UserEntity user = getUserById(userId);
+
         Board board = getBoardById(boardId);
+        // Image 제거
+        List<BoardImage> boardImages = boardImageRepository.findAllByBoardId(boardId);
+        //2-1. 기존 이미지가 존재할 경우 -> 삭제
+        if(!boardImages.isEmpty()){
+            deleteOriginImages(boardId);
+        }
+        //Board 제거
         board.delete();
         boardRepository.save(board);
     }
@@ -127,8 +141,15 @@ public class BoardService {
 
 
     private Board getBoardById(final Long boardId){
-        return boardRepository.findById(boardId)
+        Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
+
+        // 삭제된 보드인지 확인
+        if (board.isDelYn()) {
+            log.error("삭제된 보드입니다. boardId={}", boardId);
+            throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
+        }
+        return board;
     }
 
     private Tool getToolById(final Long toolId) {

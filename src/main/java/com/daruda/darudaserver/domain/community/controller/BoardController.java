@@ -39,10 +39,10 @@ public class BoardController {
             @ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
             @RequestPart(value = "images", required = false)  @Size(max=5) List<MultipartFile> images){
         BoardRes boardRes = boardService.updateBoard(userId , boardId , boardCreateAndUpdateReq,images);
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_UPDATE));
     }
 
-    @GetMapping("/{board-id}")
+    @GetMapping("/board/{board-id}")
     public ResponseEntity<ApiResponse<?>> getBoard(@PathVariable(name="board-id") final Long boardId){
         BoardRes boardRes = boardService.getBoard(boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_FETCH));
@@ -50,8 +50,9 @@ public class BoardController {
 
     @DeleteMapping("/{board-id}")
     public ResponseEntity<ApiResponse<?>> deleteBoard(
+            @UserId Long userId,
             @PathVariable(name="board-id") final Long boardId){
-        boardService.deleteBoard(boardId);
+        boardService.deleteBoard(userId,boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
     }
 }
