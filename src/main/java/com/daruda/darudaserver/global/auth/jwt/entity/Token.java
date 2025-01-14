@@ -17,13 +17,12 @@ public class Token {
     @Column(name = "refresh_token")
     private String refreshToken;
 
-    @OneToOne(targetEntity = UserEntity.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity userEntity;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Builder
-    public Token(UserEntity userEntity, String refreshToken) {
-        this.userEntity = userEntity;
+    public Token(Long userId, String refreshToken) {
+        this.userId = userId;
         this.refreshToken = refreshToken;
     }
 

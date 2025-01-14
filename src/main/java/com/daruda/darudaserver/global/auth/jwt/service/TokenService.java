@@ -19,9 +19,9 @@ public class TokenService {
 
 
     @Transactional
-    public void saveRefreshtoken(final UserEntity userEntity, final String refreshToken){
+    public void saveRefreshtoken(final Long userId, final String refreshToken){
         tokenRepository.save(Token.builder()
-                .userEntity(userEntity)
+                .userId(userId)
                 .refreshToken(refreshToken)
                 .build());
     }
@@ -30,14 +30,12 @@ public class TokenService {
     public Long findIdByRefreshToken(final String refreshToken){
         Token token = tokenRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new InvalidValueException(ErrorCode.REFRESH_TOKEN_EMPTY_ERROR));
-        UserEntity userEntity = token.getUserEntity();
-        Long userId = userEntity.getId();
-        return userId;
+        return token.getUserId();
     }
 
     @Transactional
     public void deleteRefreshToken(final Long userId){
-        Token token = tokenRepository.findByUserEntityId(userId)
+        Token token = tokenRepository.findByUserId(userId)
                 .orElseThrow(()-> new NotFoundException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         tokenRepository.delete(token);
@@ -46,7 +44,7 @@ public class TokenService {
     @Transactional
     public String getRefreshTokenByUserId(Long userId)
     {
-        Token token = tokenRepository.findByUserEntityId(userId)
+        Token token = tokenRepository.findByUserId(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
         return token.getRefreshToken();
     }
