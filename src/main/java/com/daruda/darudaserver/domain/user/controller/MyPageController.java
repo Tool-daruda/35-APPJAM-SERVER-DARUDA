@@ -26,7 +26,7 @@ public class MyPageController {
     @PatchMapping
     public ResponseEntity<?> patchMy(@UserId Long userId,
                                      @Valid @RequestBody UpdateMyRequest updateMyRequest){
-        if(updateMyRequest.positions() ==null && updateMyRequest.positions() ==null){
+        if(updateMyRequest.positions() ==null && updateMyRequest.nickname() ==null){
             throw new BusinessException(ErrorCode.MISSING_PARAMETER);
         }
         UpdateMyResponse updateMyResponse = userService.updateMy(userId,updateMyRequest.nickname(),updateMyRequest.positions());
@@ -40,5 +40,6 @@ public class MyPageController {
         userService.getFavoriteTools(userId, pageNo, criteria);
 
 
-    }*/
+    }
+ */
 }
