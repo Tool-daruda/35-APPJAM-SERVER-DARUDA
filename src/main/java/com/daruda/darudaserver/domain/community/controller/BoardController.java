@@ -26,6 +26,9 @@ public class BoardController {
     private final BoardService boardService;
     private final ToolService toolService;
 
+    /**
+     * 게시글 작성
+     */
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createBoard(
             @UserId Long userId,
@@ -36,6 +39,9 @@ public class BoardController {
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
     }
 
+    /**
+     * 게시글 수정
+     */
     @PatchMapping("/boards/{board-id}")
     public ResponseEntity<ApiResponse<?>> updateBoard(
             @UserId Long userId,
@@ -46,19 +52,18 @@ public class BoardController {
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_UPDATE));
     }
 
+    /**
+     * 게시글 조회
+     */
     @GetMapping("/boards/board/{board-id}")
     public ResponseEntity<ApiResponse<?>> getBoard(@PathVariable(name="board-id") final Long boardId){
         BoardRes boardRes = boardService.getBoard(boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_FETCH));
     }
 
-    @PostMapping("/boards/{board-id}/scrap")
-    public ResponseEntity<ApiResponse<?>> postToolScrap(@UserId final Long userId, @PathVariable(name="board-id") final Long toolId){
-        ToolScrapRes toolScrapRes = toolService.postToolScrap(userId, toolId);
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolScrapRes, SuccessCode.SUCCESS_CREATE));
-    }
-
-
+    /**
+     * 게시글 삭제
+     */
     @DeleteMapping("/boards/{board-id}")
     public ResponseEntity<ApiResponse<?>> deleteBoard(
             @UserId Long userId,
@@ -67,6 +72,9 @@ public class BoardController {
         return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
     }
 
+    /**
+     * 게시글 스크랩
+     */
     @PostMapping("/users/boards/{board-id}/scrap")
     public ResponseEntity<ApiResponse<?>> scrapBoard(
             @UserId Long userId,
