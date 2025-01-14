@@ -176,7 +176,7 @@ public class ToolService {
                 .toList();
     }
 
-    private List<String> convertToKeywordRes(Tool tool) {
+    public List<String> convertToKeywordRes(Tool tool) {
         List<ToolKeyword> toolKeywords = toolKeywordRepository.findAllByTool(tool);
         validateList(toolKeywords);
         log.debug("툴에 연결된 키워드 정보를 조회했습니다");
