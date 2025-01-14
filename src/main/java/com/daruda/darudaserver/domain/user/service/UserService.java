@@ -135,6 +135,9 @@ public class UserService {
     }
 
     public void getFavoriteTools(Long userId, int pageNo, String criteria){
+        userRepository.findById(userId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         Pageable pageable = PageRequest.of(pageNo,10, Sort.by(Sort.Direction.DESC, criteria));
     }
 
