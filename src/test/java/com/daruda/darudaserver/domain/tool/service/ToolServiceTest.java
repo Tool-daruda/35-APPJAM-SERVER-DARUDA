@@ -36,7 +36,6 @@ import static org.mockito.Mockito.when;
                     .email("test@example.com")
                     .nickname("tester")
                     .positions(null)
-                    .socialType(null)
                     .build();
 
             when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));

@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.global.auth.jwt.service;
 
+import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.global.auth.jwt.entity.Token;
 import com.daruda.darudaserver.global.auth.jwt.repository.TokenRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -18,9 +19,9 @@ public class TokenService {
 
 
     @Transactional
-    public void saveRefreshtoken(final Long userId, final String refreshToken){
+    public void saveRefreshtoken(final UserEntity userEntity, final String refreshToken){
         tokenRepository.save(Token.builder()
-                .userId(userId)
+                .userEntity(userEntity)
                 .refreshToken(refreshToken)
                 .build());
     }
@@ -29,12 +30,14 @@ public class TokenService {
     public Long findIdByRefreshToken(final String refreshToken){
         Token token = tokenRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new InvalidValueException(ErrorCode.REFRESH_TOKEN_EMPTY_ERROR));
-        return token.getUserId();
+        UserEntity userEntity = token.getUserEntity();
+        Long userId = userEntity.getId();
+        return userId;
     }
 
     @Transactional
     public void deleteRefreshToken(final Long userId){
-        Token token = tokenRepository.findByUserId(userId)
+        Token token = tokenRepository.findByUserEntityId(userId)
                 .orElseThrow(()-> new NotFoundException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         tokenRepository.delete(token);
@@ -43,11 +46,9 @@ public class TokenService {
     @Transactional
     public String getRefreshTokenByUserId(Long userId)
     {
-        Token token = tokenRepository.findByUserId(userId)
+        Token token = tokenRepository.findByUserEntityId(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
-
-        String refreshToken = token.getRefreshToken();
-        return refreshToken;
+        return token.getRefreshToken();
     }
 
 }

@@ -1,9 +1,6 @@
 package com.daruda.darudaserver.domain.user.service;
 
-import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
-import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
-import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
-import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
+import com.daruda.darudaserver.domain.user.dto.response.*;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
@@ -15,11 +12,16 @@ import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauhtorizedException;
 import io.jsonwebtoken.JwtException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -44,13 +46,14 @@ public class UserService {
         if (userEntity.isEmpty()) {
             return LoginResponse.of(false,email);
         } else { //등록된 회원인 경우
-            Long userId = userEntity.get().getUserId();
+            UserEntity user = userEntity.get();
+            Long userId = userEntity.get().getId();
             UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
             //토큰 생성 및 refreshToken db에 저장
             String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
             String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
-            tokenService.saveRefreshtoken(userId,refreshToken);
+            tokenService.saveRefreshtoken(user,refreshToken);
             JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
@@ -62,17 +65,19 @@ public class UserService {
 
     @Transactional
     public SignUpSuccessResponse createUser(final String email, final String nickname, final String positions){
+        if(userRepository.existsByEmail(email)){
+            throw new BusinessException(ErrorCode.DUPLICATED_EMAIL);
+        }
         UserEntity userEntity = UserEntity.builder()
                 .email(email)
                 .nickname(nickname)
                 .positions(Positions.fromString(positions))
-                .socialType(SocialType.KAKAO)
                 .build();
-        Long userId = userRepository.save(userEntity).getUserId();
+        Long userId = userRepository.save(userEntity).getId();
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
         String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
-        tokenService.saveRefreshtoken(userId,refreshToken);
+        tokenService.saveRefreshtoken(userEntity,refreshToken);
 
         JwtTokenResponse jwtTokenResponse = JwtTokenResponse.of(accessToken,refreshToken);
 
@@ -91,7 +96,9 @@ public class UserService {
 
     public JwtTokenResponse reissueToken(Long userId){
         String requestToken = tokenService.getRefreshTokenByUserId(userId);
-        verifyUserIdWithStoredToken(userId,requestToken);
+        UserEntity userEntity = userRepository.findById(userId)
+                        .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+        verifyUserIdWithStoredToken(userEntity,requestToken);
 
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
@@ -107,11 +114,35 @@ public class UserService {
 
     }
 
+    public UpdateMyResponse updateMy(Long userId, String nickname, String positions){
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        if(isDuplicated(nickname)){
+            throw new BusinessException(ErrorCode.DUPLICATED_NICKNAME);
+        }
+        if(nickname == null){
+            userEntity.updatePositions(Positions.fromString(positions));
+            return UpdateMyResponse.of(userEntity.getNickname(),positions);
+        }
+        if(positions == null){
+            userEntity.updateNickname(nickname);
+            return UpdateMyResponse.of(nickname, userEntity.getPositions().getName());
+        }
 
-    private void verifyUserIdWithStoredToken(final Long userId, final String refreshToken){
+        userEntity.updateNickname(nickname);
+        userEntity.updatePositions(Positions.fromString(positions));
+        return UpdateMyResponse.of(nickname,positions);
+    }
+
+    public void getFavoriteTools(Long userId, int pageNo, String criteria){
+        Pageable pageable = PageRequest.of(pageNo,10, Sort.by(Sort.Direction.DESC, criteria));
+    }
+
+
+    private void verifyUserIdWithStoredToken(final UserEntity userEntity, final String refreshToken){
         Long storedUserId = tokenService.findIdByRefreshToken(refreshToken);
 
-        if(!storedUserId.equals(userId)){
+        if(!storedUserId.equals(userEntity.getId())){
             throw new BadRequestException(ErrorCode.REFRESH_TOKEN_USER_ID_MISMATCH_ERROR);
         }
     }
