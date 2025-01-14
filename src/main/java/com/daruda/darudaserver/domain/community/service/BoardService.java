@@ -46,12 +46,12 @@ public class BoardService {
 
         // 자유 게시판일 경우
         if(boardCreateAndUpdateReq.isFree()){
-            board = createFreeBoard(user.getId(), boardCreateAndUpdateReq);
+            board = createFreeBoard(user, boardCreateAndUpdateReq);
         }
         // 툴 기반 게시판 생성
         else {
             Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
-            board = createToolBoard(tool.getToolId(), user.getId(), boardCreateAndUpdateReq);
+            board = createToolBoard(tool.getToolId(), user, boardCreateAndUpdateReq);
         }
         // 이미지가 없으면 바로 응답 반환
         if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
@@ -74,12 +74,12 @@ public class BoardService {
         UserEntity user = getUserById(userId);
         //Board 객체 검증
         Board savedBoard = getBoardById(boardId);
-        if(!savedBoard.getUserId().equals(user.getId())){
+        if(!savedBoard.getUser().getId().equals(user.getId())){
             throw new UnauthorizedException(ErrorCode.FORBIDDEN);
 
         }
         //Board 저장
-        Board board = updateBoard(boardId , userId,boardCreateAndUpdateReq);
+        Board board = updateBoard(boardId , user,boardCreateAndUpdateReq);
 
         // 1. 들어온 이미지가 없을 경우 -> 기존 이미지 삭제
         if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
@@ -122,18 +122,18 @@ public class BoardService {
         return BoardRes.of(board,imageUrls);
     }
 
-    private Board createToolBoard(final Long toolId, final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
-        Board board = Board.create(toolId, userId, boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content());
+    private Board createToolBoard(final Long toolId, final UserEntity user, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+        Board board = Board.create(toolId, user, boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content());
         return boardRepository.save(board);
     }
 
-    private Board createFreeBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
-        Board board = createFree(userId, boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content());
+    private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+        Board board = createFree(user, boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content());
         return boardRepository.save(board);
     }
 
-    private Board updateBoard( final Long boardId, final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq){
-        Board board = Board.update(boardId , boardCreateAndUpdateReq.toolId(), userId,
+    private Board updateBoard( final Long boardId, final UserEntity user, final BoardCreateAndUpdateReq boardCreateAndUpdateReq){
+        Board board = Board.update(boardId , boardCreateAndUpdateReq.toolId(), user ,
                 boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content()
         );
         return boardRepository.save(board);
