@@ -5,9 +5,7 @@ import com.daruda.darudaserver.domain.community.dto.response.BoardRes;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
-import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
-import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -25,15 +22,12 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<ApiResponse<?>> createBoard(
             @UserId Long userId,
             @ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
             @RequestPart(value = "images", required = false)  @Size(max=5) List<MultipartFile> images){
 
-        if (images == null || images.isEmpty()) {
-            images = List.of();
-        }
         BoardRes boardRes = boardService.createBoard(userId, boardCreateAndUpdateReq, images);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_CREATE));
     }

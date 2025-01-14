@@ -38,6 +38,7 @@ public record BoardRes(
                 .title(board.getTitle())
                 .content(board.getContent())
                 .updatedAt(board.getUpdatedAt())
+                .images(null)
                 .build();
     }
 }

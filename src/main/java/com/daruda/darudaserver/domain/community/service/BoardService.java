@@ -18,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static com.daruda.darudaserver.domain.community.entity.Board.createFree;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -28,30 +30,35 @@ public class BoardService {
     private final ImageService imageService;
     private final ToolRepository toolRepository;
     private final UserRepository userRepository;
+
     public BoardRes createBoard(
             final Long userId,
             final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
-            final List<MultipartFile> images) {
+            List<MultipartFile> images) {
 
         //UserId 검증
         UserEntity user = getUserById(userId);
-        //toolId 검증
-        Tool tool = getToolById (boardCreateAndUpdateReq.toolId());
-        //Board 저장
-        Board board = createBoard(tool.getToolId(), user.getUserId(),  boardCreateAndUpdateReq);
+        Board board;
 
-        //만약에 이미지가 Null 이거나 Empty 일 경우 null 반환
+        // 자유 게시판일 경우
+        if(boardCreateAndUpdateReq.isFree()){
+            board = createFreeBoard(user.getUserId(), boardCreateAndUpdateReq);
+        }
+        // 툴 기반 게시판 생성
+        else {
+            Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
+            board = createToolBoard(tool.getToolId(), user.getUserId(), boardCreateAndUpdateReq);
+        }
+        // 이미지가 없으면 바로 응답 반환
         if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
             return BoardRes.of(board);
         }
-
         // imageURL 반환
         List<Long> imageIds =imageService.uploadImages(images);
         // BoardImage 저장
         boardImageService.saveBoardImages(board.getBoardId(), imageIds);
         List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
         return BoardRes.of(board,imageUrls);
-
     }
 
     public BoardRes updateBoard(
@@ -74,20 +81,6 @@ public class BoardService {
         return BoardRes.of(board,imageUrls);
     }
 
-    private Board createBoard( final Long toolId, final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq){
-        Board board = Board.create(toolId, userId,
-                boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content()
-                );
-       return boardRepository.save(board);
-    }
-
-    private Board updateBoard( final Long boardId, final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq){
-        Board board = Board.update(boardId , boardCreateAndUpdateReq.toolId(), userId,
-                boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content()
-        );
-        return boardRepository.save(board);
-    }
-
     public void deleteBoard(final Long boardId) {
         Board board = getBoardById(boardId);
         board.delete();
@@ -99,6 +92,24 @@ public class BoardService {
         List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
         return BoardRes.of(board,imageUrls);
     }
+
+    private Board createToolBoard(final Long toolId, final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+        Board board = Board.create(toolId, userId, boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content());
+        return boardRepository.save(board);
+    }
+
+    private Board createFreeBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+        Board board = createFree(userId, boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content());
+        return boardRepository.save(board);
+    }
+
+    private Board updateBoard( final Long boardId, final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq){
+        Board board = Board.update(boardId , boardCreateAndUpdateReq.toolId(), userId,
+                boardCreateAndUpdateReq.title(), boardCreateAndUpdateReq.content()
+        );
+        return boardRepository.save(board);
+    }
+
 
     private Board getBoardById(final Long boardId){
         return boardRepository.findById(boardId)
