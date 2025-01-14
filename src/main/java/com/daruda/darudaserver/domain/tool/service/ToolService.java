@@ -102,9 +102,9 @@ public class ToolService {
     public ToolScrapRes postToolScrap(final Long userId, final Long toolId){
         UserEntity user = getUserById(userId);
         Tool tool = getToolById(toolId); // Tool 검증
-        boolean toolExists = toolScrapRepository.existsByUserIdAndToolId( userId, toolId);
+        boolean toolExists = toolScrapRepository.existsByUserAndTool( user, tool);
         if(toolExists){
-            toolScrapRepository.deleteByUserIdAndToolId(userId, toolId);
+            toolScrapRepository.deleteByUserAndTool(user, tool);
             return ToolScrapRes.of(toolId, false);
         }else{
             ToolScrap toolScrap = ToolScrap.builder()

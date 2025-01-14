@@ -2,10 +2,13 @@ package com.daruda.darudaserver.domain.community.service;
 
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
+import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardImage;
+import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
+import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
@@ -36,6 +39,7 @@ public class BoardService {
     private final ImageService imageService;
     private final ToolRepository toolRepository;
     private final UserRepository userRepository;
+    private final BoardScrapRepository boardScrapRepository ;
 
     public BoardRes createBoard(
             final Long userId,
@@ -114,7 +118,26 @@ public class BoardService {
         board.delete();
     }
 
-    public BoardRes getBoard(Long boardId) {
+    public BoardScrapRes postScrap(final Long userId, final Long boardId) {
+        Board board = getBoardById(boardId);
+        UserEntity user = getUserById(userId);
+        boolean boardExists = boardScrapRepository.existsByUserAndBoard(user, board);
+
+        if(boardExists){
+            boardScrapRepository.deleteByUserAndBoard(user, board);
+            return BoardScrapRes.of(boardId, false);
+        }else{
+            BoardScrap boardScrap = BoardScrap.builder()
+                    .user(user)
+                    .board(board)
+                    .build();
+            boardScrapRepository.save(boardScrap);
+            return BoardScrapRes.of(boardId, true);
+        }
+
+    }
+
+    public BoardRes getBoard(final Long boardId) {
         Board board = getBoardById(boardId);
         List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
         return BoardRes.of(board,imageUrls);
@@ -176,4 +199,6 @@ public class BoardService {
             throw new UnauthorizedException(ErrorCode.BOARD_FORBIDDEN);
         }
     }
+
+
 }
