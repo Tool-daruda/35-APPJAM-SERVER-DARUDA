@@ -46,14 +46,13 @@ public class UserService {
         if (userEntity.isEmpty()) {
             return LoginResponse.of(false,email);
         } else { //등록된 회원인 경우
-            UserEntity user = userEntity.get();
             Long userId = userEntity.get().getId();
             UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
             //토큰 생성 및 refreshToken db에 저장
             String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
             String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
-            tokenService.saveRefreshtoken(user,refreshToken);
+            tokenService.saveRefreshtoken(userId,refreshToken);
             JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
@@ -77,7 +76,7 @@ public class UserService {
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
         String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
-        tokenService.saveRefreshtoken(userEntity,refreshToken);
+        tokenService.saveRefreshtoken(userId,refreshToken);
 
         JwtTokenResponse jwtTokenResponse = JwtTokenResponse.of(accessToken,refreshToken);
 
@@ -98,7 +97,7 @@ public class UserService {
         String requestToken = tokenService.getRefreshTokenByUserId(userId);
         UserEntity userEntity = userRepository.findById(userId)
                         .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
-        verifyUserIdWithStoredToken(userEntity,requestToken);
+        verifyUserIdWithStoredToken(userId,requestToken);
 
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
@@ -142,10 +141,10 @@ public class UserService {
     }
 
 
-    private void verifyUserIdWithStoredToken(final UserEntity userEntity, final String refreshToken){
+    private void verifyUserIdWithStoredToken(final Long userId, final String refreshToken){
         Long storedUserId = tokenService.findIdByRefreshToken(refreshToken);
 
-        if(!storedUserId.equals(userEntity.getId())){
+        if(!storedUserId.equals(userId)){
             throw new BadRequestException(ErrorCode.REFRESH_TOKEN_USER_ID_MISMATCH_ERROR);
         }
     }
