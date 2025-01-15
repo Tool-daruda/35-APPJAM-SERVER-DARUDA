@@ -61,7 +61,7 @@ public class BoardService {
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getBoardId()), imageUrls);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls);
     }
 
     // 게시판 업데이트
@@ -81,7 +81,7 @@ public class BoardService {
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getBoardId()), imageUrls);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls);
     }
 
     // 게시판 삭제
@@ -127,18 +127,18 @@ public class BoardService {
         // 전체 조회
         if (toolId == null) {
             log.info("전체 게시판을 조회합니다");
-            boards = boardRepository.findByBoardIdLessThanOrderByBoardIdDesc(cursor, pageRequest);
+            boards = boardRepository.findByIdLessThanOrderByIdDesc(cursor, pageRequest);
         }
         // 자유 게시판 조회
         else if (toolId == -1) {
             log.info("자유 게시판을 조회합니다");
-            boards = boardRepository.findByIsFreeAndBoardIdLessThanOrderByBoardIdDesc(true,cursor, pageRequest);
+            boards = boardRepository.findByIsFreeAndIdLessThanOrderByIdDesc(true,cursor, pageRequest);
         }
         // 특정 Tool 게시판 조회
         else {
             Tool tool = getToolById(toolId);
             log.info(tool.getToolMainName() + " 게시판을 조회합니다");
-            boards = boardRepository.findByToolAndBoardIdLessThanOrderByBoardIdDesc(tool, cursor, pageRequest);
+            boards = boardRepository.findByToolAndIdLessThanOrderByIdDesc(tool, cursor, pageRequest);
         }
 
         ScrollPaginationCollection<Board> boardsCursor = ScrollPaginationCollection.of(boards, size);
@@ -148,12 +148,12 @@ public class BoardService {
                         board,
                         board.getTool() != null ? board.getTool().getToolMainName() : FREE,
                         board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO,
-                        getCommentCount(board.getBoardId()),
-                        boardImageService.getBoardImageUrls(board.getBoardId())
+                        getCommentCount(board.getId()),
+                        boardImageService.getBoardImageUrls(board.getId())
                 ))
                 .collect(Collectors.toList());
         log.debug("BoardRes List: {}", boardResList);
-        long nextCursor = boardsCursor.isLastScroll() ? -1L : boardsCursor.getNextCursor().getBoardId();
+        long nextCursor = boardsCursor.isLastScroll() ? -1L : boardsCursor.getNextCursor().getId();
 
         return new GetBoardResponse(boardResList, boardsCursor.getTotalElements(), nextCursor);
     }
@@ -169,13 +169,13 @@ public class BoardService {
 
     private List<String> processImages(final Board board, final List<MultipartFile> images) {
         if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
-            deleteOriginImages(board.getBoardId());
+            deleteOriginImages(board.getId());
             return List.of();
         }
-        deleteOriginImages(board.getBoardId());
+        deleteOriginImages(board.getId());
         List<Long> imageIds = imageService.uploadImages(images);
-        boardImageService.saveBoardImages(board.getBoardId(), imageIds);
-        return boardImageService.getBoardImageUrls(board.getBoardId());
+        boardImageService.saveBoardImages(board.getId(), imageIds);
+        return boardImageService.getBoardImageUrls(board.getId());
     }
 
     private int getCommentCount(final Long boardId) {

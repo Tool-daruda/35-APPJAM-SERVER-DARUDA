@@ -32,8 +32,7 @@ public class BoardRes {
     public static BoardRes createBoardRes(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images) {
         return BoardRes.builder()
                 .boardId(board.getId())
-                .toolId(board.getToolId())
-                .boardId(board.getBoardId())
+                .boardId(board.getId())
                 .toolName(toolName)
                 .toolLogo(toolLogo)
                 .author(board.getUser().getNickname())
@@ -41,18 +40,6 @@ public class BoardRes {
                 .content(board.getContent())
                 .images(images)
                 .updatedAt(board.getUpdatedAt())
-                .build();
-    }
-
-    public static BoardRes of(final Board board){
-        return BoardRes.builder()
-                .boardId(board.getId())
-                .toolId(board.getToolId())
-                .title(board.getTitle())
-                .content(board.getContent())
-                .updatedAt(board.getUpdatedAt())
-                .images(null)
-                .commentCount(commentCount)
                 .build();
     }
 }
