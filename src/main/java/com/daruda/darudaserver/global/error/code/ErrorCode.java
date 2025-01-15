@@ -41,6 +41,7 @@ public enum ErrorCode {
     DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "E404001","데이터가 존재하지 않습니다"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "E404002", "유저가 존재하지 않습니다"),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND,"E404003", "리프레쉬 토큰이 존재하지 않습니다"),
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND,"E404004","댓글이 존재하지 않습니다"),
 
     /* 409 CONFLICT */
     DUPLICATED_NICKNAME(HttpStatus.CONFLICT,"E409001","닉네임 중복입니다"),
