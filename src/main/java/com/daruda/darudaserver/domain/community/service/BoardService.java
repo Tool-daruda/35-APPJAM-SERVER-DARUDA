@@ -12,8 +12,11 @@ import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
+import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
+import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
+import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
@@ -21,7 +24,9 @@ import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +47,7 @@ public class BoardService {
     private final UserRepository userRepository;
     private final BoardScrapRepository boardScrapRepository;
     private final ToolRepository toolRepository;
+    private final UserService userService;
 
     private final String TOOL_LOGO = "ToolLogo.jpeg";
     private final String FREE = "자유";
@@ -209,4 +215,19 @@ public class BoardService {
         boardImageRepository.deleteAll(boardImages);
         imageService.deleteImages(imageIds);
     }
+
+    public BoardListResponse getMyBoards(Long userId, Pageable pageable){
+        userService.validateUser(userId);
+        Page<Board> boards = boardRepository.findAllByUserId(userId, pageable);
+
+        List<BoardRes> boardResList = boards.getContent().stream()
+                .map(board -> getBoard(board.getBoardId()))
+                .toList();
+
+        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
+
+        return new BoardListResponse(boardResList, userId, pageInfo);
+
+    }
+
 }
