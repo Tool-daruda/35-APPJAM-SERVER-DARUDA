@@ -10,6 +10,11 @@ import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -83,8 +88,8 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
-    public ToolListRes getToolList(final String sort, final Category category,final int size, final Long lastToolId) {
-        log.debug("카테고리별 툴 목록을 조회 category : {}, sort : {} ", category, sort, size, lastToolId );
+    public ToolListRes getToolList(final String sort, final Category category, final int size, final Long lastToolId) {
+        log.debug("카테고리별 툴 목록을 조회 category : {}, sort : {}, size : {}, lastToolId : {}", category, sort, size, lastToolId);
 
         Long cursor = (lastToolId == null) ? Long.MAX_VALUE : lastToolId;
 
@@ -97,7 +102,7 @@ public class ToolService {
 
         Pageable pageRequest = PageRequest.of(0, size, sorting);
 
-        // 카테고리별 툴 조회 (전체 카테고리일 경우 필터링 생략)
+
         List<Tool> tools = Category.ALL.equals(category)
                 ? toolRepository.findAllWithCursor(cursor, pageRequest)
                 : toolRepository.findByCategoryWithCursor(category, cursor, pageRequest);
@@ -108,14 +113,13 @@ public class ToolService {
                 .map(tool -> {
                     int scrapCount = calculateScrapCount(tool.getToolId());
                     int popularityScore = calculatePopularityScore(scrapCount, tool.getViewCount());
-                    return ToolResponse.of(tool, convertToKeywordRes(tool), scrapCount, popularityScore);
+                    return ToolResponse.of(tool, convertToKeywordRes(tool));
                 })
                 .toList();
 
         // Scroll Pagination 처리
         long nextCursor = toolCursor.isLastScroll() ? -1L : toolCursor.getNextCursor().getToolId();
 
-        // 페이지네이션 DTO 생성
         ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(toolCursor.getTotalElements(), nextCursor);
 
         // 최종 응답 반환

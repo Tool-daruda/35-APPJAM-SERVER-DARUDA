@@ -3,7 +3,7 @@ package com.daruda.darudaserver.domain.tool.dto.res;
 import lombok.AccessLevel;
 import lombok.Builder;
 
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 public record ToolScrapRes(
          Long toolId,
          Boolean scarp

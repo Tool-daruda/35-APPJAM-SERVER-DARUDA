@@ -8,7 +8,7 @@ import lombok.Builder;
 import java.sql.Timestamp;
 import java.util.List;
 
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 public record ToolDetailGetRes(
         Long toolId,
         String toolMainName,

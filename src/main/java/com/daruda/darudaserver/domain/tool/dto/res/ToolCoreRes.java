@@ -1,10 +1,9 @@
 package com.daruda.darudaserver.domain.tool.dto.res;
 
 import com.daruda.darudaserver.domain.tool.entity.ToolCore;
-import lombok.AccessLevel;
 import lombok.Builder;
 
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 public record ToolCoreRes(
         Long coreId,
         String coreTitle,

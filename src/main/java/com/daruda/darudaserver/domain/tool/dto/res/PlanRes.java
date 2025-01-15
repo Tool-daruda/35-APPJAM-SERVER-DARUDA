@@ -4,7 +4,7 @@ import com.daruda.darudaserver.domain.tool.entity.Plan;
 import lombok.AccessLevel;
 import lombok.Builder;
 
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 public record PlanRes(
         Long planId,
         String planName,
