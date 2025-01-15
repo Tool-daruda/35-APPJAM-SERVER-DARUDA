@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.user.controller;
 
+import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MyPageController {
     private final UserService userService;
+    private final BoardService boardService;
 
     @PatchMapping
     public ResponseEntity<?> patchMy(@UserId Long userId,
@@ -46,16 +48,6 @@ public class MyPageController {
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteToolsResponse, SuccessCode.SUCCESS_CREATE));
     }
 
-    @GetMapping("/boards/scrap")
-    public ResponseEntity<?> getFavoriteBoards(@UserId Long userId,
-                                               @RequestParam(defaultValue = "1", value = "page") int pageNo,
-                                               @RequestParam(defaultValue = "5", value = "size") int size,
-                                               @RequestParam(defaultValue = "createdAt", value = "criteria")String criteria){
-        Pageable pageable = PageRequest.of(pageNo, size);
-        FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = userService.getFavoriteBoards(userId,pageable);
-
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse,SuccessCode.SUCCESS_CREATE));
-    }
 
     @GetMapping("/boards")
     public ResponseEntity<?> getMyBoards(@UserId Long userId,
@@ -63,7 +55,7 @@ public class MyPageController {
                                          @RequestParam(defaultValue = "5", value = "size") int size,
                                          @RequestParam(defaultValue = "createdAt", value = "criteria") String criteria){
         Pageable pageable = PageRequest.of(pageNo, size, Sort.by(Sort.Direction.DESC, criteria));
-        BoardListResponse boardListResponse = userService.getMyBoards(userId, pageable);
+        BoardListResponse boardListResponse = boardService.getMyBoards(userId, pageable);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardListResponse,SuccessCode.SUCCESS_CREATE));
     }
 
@@ -78,13 +70,4 @@ public class MyPageController {
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse,SuccessCode.SUCCESS_CREATE));
     }
 
-    @GetMapping("/boards")
-    public ResponseEntity<?> getMyBoards(@UserId Long userId,
-                                         @RequestParam(defaultValue = "1", value = "page") int pageNo,
-                                         @RequestParam(defaultValue = "5", value = "size") int size,
-                                         @RequestParam(defaultValue = "createdAt", value = "criteria") String criteria){
-        Pageable pageable = PageRequest.of(pageNo, size, Sort.by(Sort.Direction.DESC, criteria));
-        BoardListResponse boardListResponse = userService.getMyBoards(userId, pageable);
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardListResponse,SuccessCode.SUCCESS_CREATE));
-    }
 }

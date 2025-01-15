@@ -7,26 +7,11 @@ import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
-import com.daruda.darudaserver.domain.tool.entity.Tool;
-import com.daruda.darudaserver.domain.tool.entity.ToolImage;
-import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
-import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
-import com.daruda.darudaserver.domain.tool.service.ToolService;
-import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
-import com.daruda.darudaserver.domain.community.entity.Board;
-import com.daruda.darudaserver.domain.community.entity.BoardImage;
-import com.daruda.darudaserver.domain.community.entity.BoardScrap;
-import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
-import com.daruda.darudaserver.domain.community.repository.BoardRepository;
-import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
-import com.daruda.darudaserver.domain.tool.entity.Tool;
-import com.daruda.darudaserver.domain.tool.entity.ToolImage;
-import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
-import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
-import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDtoGetRes;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolImage;
 import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
+import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.tool.service.ToolService;
@@ -36,7 +21,7 @@ import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
-import com.daruda.darudaserver.global.auth.jwt.provider.JwtValidationType;
+
 import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
 import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -49,11 +34,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -69,12 +53,7 @@ public class UserService {
     private final BoardRepository boardRepository;
     private final BoardImageRepository boardImageRepository;
     private final ToolScrapRepository toolScrapRepository;
-    private final ToolRepository toolRepository;
     private final ToolService toolService;
-    private final BoardScrapRepository boardScrapRepository;
-    private final ToolRepository toolRepository;
-    private final BoardRepository boardRepository;
-    private final BoardImageRepository boardImageRepository;
 
     public LoginResponse oAuthLogin(final UserInfo userInfo) {
         String email = userInfo.email();
@@ -83,7 +62,6 @@ public class UserService {
         if (userEntity.isEmpty()) {
             return LoginResponse.of(false,email);
         } else { //등록된 회원인 경우
-            UserEntity user = userEntity.get();
             Long userId = userEntity.get().getId();
             UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
@@ -134,8 +112,8 @@ public class UserService {
     public JwtTokenResponse reissueToken(Long userId){
         String requestToken = tokenService.getRefreshTokenByUserId(userId);
         UserEntity userEntity = userRepository.findById(userId)
-                        .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
-        verifyUserIdWithStoredToken(userEntity,requestToken);
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+        verifyUserIdWithStoredToken(userId,requestToken);
 
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
@@ -149,6 +127,32 @@ public class UserService {
         return jwtTokenResponse;
 
 
+    }
+    public FavoriteToolsResponse getFavoriteTools(Long userId, int pageNo){
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        Pageable pageable = PageRequest.of(pageNo,10);
+        Page<ToolScrap> toolIdPage = toolScrapRepository.findAllByUserId(userId,pageable);
+
+
+        List<ToolScrap> toolScraps = toolIdPage.getContent();
+        List<Long> toolIds = toolScraps.stream()
+                .map(toolScrap -> toolScrap.getTool().getToolId())
+                .toList();
+        List<Tool> tools = toolIds.stream()
+                .map(toolId-> getTool(toolId))
+                .toList();
+
+        List<ToolDtoGetRes> toolDtoGetRes = tools.stream()
+                .map(tool->ToolDtoGetRes.of(tool, toolService.convertToKeywordRes(tool)))
+                .toList();
+
+        PagenationDto pagenationDto = PagenationDto.of(pageNo,10,toolIdPage.getTotalPages());
+
+        FavoriteToolsResponse favoriteToolsResponse = FavoriteToolsResponse.of(toolDtoGetRes, pagenationDto);
+
+        return favoriteToolsResponse;
     }
 
     public UpdateMyResponse updateMy(Long userId, String nickname, String positions){
@@ -171,37 +175,6 @@ public class UserService {
         return UpdateMyResponse.of(nickname,positions);
     }
 
-    public FavoriteToolsResponse getFavoriteTools(Long userId, int pageNo){
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
-    public void getFavoriteTools(Long userId, int pageNo, String criteria){
-       validateUser(userId);
-
-        Pageable pageable = PageRequest.of(pageNo,10);
-        Page<ToolScrap> toolIdPage = toolScrapRepository.findAllByUserId(userId,pageable);
-    public void getFavoriteTools(Long userId, int pageNo, String criteria){
-       validateUser(userId);
-
-
-        List<ToolScrap> toolScraps = toolIdPage.getContent();
-        List<Long> toolIds = toolScraps.stream()
-                .map(toolScrap -> toolScrap.getTool().getToolId())
-                .toList();
-        List<Tool> tools = toolIds.stream()
-                .map(toolId-> getTool(toolId))
-                .toList();
-
-        List<ToolDtoGetRes> toolDtoGetRes = tools.stream()
-                .map(tool->ToolDtoGetRes.of(tool, toolService.convertToKeywordRes(tool)))
-                .toList();
-
-        PagenationDto pagenationDto = PagenationDto.of(pageNo,10,toolIdPage.getTotalPages());
-
-        FavoriteToolsResponse favoriteToolsResponse = FavoriteToolsResponse.of(toolDtoGetRes, pagenationDto);
-
-        return favoriteToolsResponse;
-    }
-
     public FavoriteBoardsRetrieveResponse getFavoriteBoards(Long userId, Pageable pageable){
         validateUser(userId);
 
@@ -213,8 +186,8 @@ public class UserService {
                         .title(board.getTitle())
                         .content(board.getContent())
                         .updatedAt(board.getUpdatedAt())
-                        .toolName(getTool(board.getToolId()).getToolMainName())
-                        .toolLogo(getTool(board.getToolId()).getToolLogo())
+                        .toolName(getTool(board.getTool().getToolId()).getToolMainName())
+                        .toolLogo(getTool(board.getTool().getToolId()).getToolLogo())
                         .build())
                 .toList();
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
@@ -224,61 +197,12 @@ public class UserService {
         return favoriteBoardsRetrieveResponse;
     }
 
-    public BoardListResponse getMyBoards(Long userId, Pageable pageable){
-       validateUser(userId);
-        Page<Board> boards = boardRepository.findAllByUserId(userId, pageable);
-
-        List<BoardRes> boardResList = boards.getContent().stream()
-                .map(board -> BoardRes.of(board))
-                .toList();
-
-        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
-
-        return new BoardListResponse(boardResList, userId, pageInfo);
-
-    }
-
-    public FavoriteBoardsRetrieveResponse getFavoriteBoards(Long userId, Pageable pageable){
-        validateUser(userId);
-
-        Page<BoardScrap> boardScraps = boardScrapRepository.findAllByUserId(userId, pageable);
-        List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
-                .map(BoardScrap::getBoard)
-                .map(board -> FavoriteBoardsResponse.builder()
-                        .boardId(board.getBoardId())
-                        .title(board.getTitle())
-                        .content(board.getContent())
-                        .updatedAt(board.getUpdatedAt())
-                        .toolName(getTool(board.getToolId()).getToolMainName())
-                        .toolLogo(getTool(board.getToolId()).getToolLogo())
-                        .build())
-                .toList();
-        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
-
-        FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
-
-        return favoriteBoardsRetrieveResponse;
-    }
-
-    public BoardListResponse getMyBoards(Long userId, Pageable pageable){
-       validateUser(userId);
-        Page<Board> boards = boardRepository.findAllByUserId(userId, pageable);
-
-        List<BoardRes> boardResList = boards.getContent().stream()
-                .map(board -> BoardRes.of(board))
-                .toList();
-
-        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
-
-        return new BoardListResponse(boardResList, userId, pageInfo);
-
-    }
 
 
-    private void verifyUserIdWithStoredToken(final UserEntity userEntity, final String refreshToken){
+    private void verifyUserIdWithStoredToken(final Long userId, final String refreshToken){
         Long storedUserId = tokenService.findIdByRefreshToken(refreshToken);
 
-        if(!storedUserId.equals(userEntity.getId())){
+        if(!storedUserId.equals(userId)){
             throw new BadRequestException(ErrorCode.REFRESH_TOKEN_USER_ID_MISMATCH_ERROR);
         }
     }
@@ -286,25 +210,15 @@ public class UserService {
     private Tool getTool(final Long toolId){
         Tool tool = toolRepository.findById(toolId)
                 .orElseThrow(()-> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
-    private Tool getTool(Long toolId){
-        Tool tool = toolRepository.findById(toolId)
-                .orElseThrow(()->new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
         return tool;
     }
 
-    private void validateUser(Long userId){
+    public void validateUser(Long userId){
         userRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
-        return tool;
-    }
-
-    private void validateUser(Long userId){
-        userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
-    }
 
 
 }
