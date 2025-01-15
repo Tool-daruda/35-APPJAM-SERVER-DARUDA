@@ -2,7 +2,9 @@ package com.daruda.darudaserver.domain.user.service;
 
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.community.entity.BoardImage;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
+import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
@@ -55,6 +57,7 @@ public class UserService {
     private final BoardScrapRepository boardScrapRepository;
     private final ToolRepository toolRepository;
     private final BoardRepository boardRepository;
+    private final BoardImageRepository boardImageRepository;
 
     public LoginResponse oAuthLogin(final UserInfo userInfo) {
         String email = userInfo.email();
@@ -154,6 +157,8 @@ public class UserService {
     public FavoriteToolsResponse getFavoriteTools(Long userId, int pageNo){
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+    public void getFavoriteTools(Long userId, int pageNo, String criteria){
+       validateUser(userId);
 
         Pageable pageable = PageRequest.of(pageNo,10);
         Page<ToolScrap> toolIdPage = toolScrapRepository.findAllByUserId(userId,pageable);
@@ -179,8 +184,7 @@ public class UserService {
     }
 
     public FavoriteBoardsRetrieveResponse getFavoriteBoards(Long userId, Pageable pageable){
-        userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        validateUser(userId);
 
         Page<BoardScrap> boardScraps = boardScrapRepository.findAllByUserId(userId, pageable);
         List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
@@ -190,7 +194,7 @@ public class UserService {
                         .title(board.getTitle())
                         .content(board.getContent())
                         .updatedAt(board.getUpdatedAt())
-                        .toolId(board.getToolId())
+                        .toolName(getTool(board.getToolId()).getToolMainName())
                         .toolLogo(getTool(board.getToolId()).getToolLogo())
                         .build())
                 .toList();
@@ -202,8 +206,7 @@ public class UserService {
     }
 
     public BoardListResponse getMyBoards(Long userId, Pageable pageable){
-        userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+       validateUser(userId);
         Page<Board> boards = boardRepository.findAllByUserId(userId, pageable);
 
         List<BoardRes> boardResList = boards.getContent().stream()
@@ -232,7 +235,10 @@ public class UserService {
         return tool;
     }
 
-
+    private void validateUser(Long userId){
+        userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+    }
 
 
 
