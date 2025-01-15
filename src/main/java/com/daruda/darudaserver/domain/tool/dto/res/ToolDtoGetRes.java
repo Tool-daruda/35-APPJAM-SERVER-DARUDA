@@ -2,9 +2,6 @@ package com.daruda.darudaserver.domain.tool.dto.res;
 
 import com.daruda.darudaserver.domain.tool.entity.License;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
-import lombok.AccessLevel;
-import lombok.Builder;
-
 import java.util.List;
 
 

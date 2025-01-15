@@ -47,20 +47,24 @@ public class Tool {
     @Column(name="plan_link")
     private String planLink;
 
-    @Column(name="color",nullable = false)
-    private String color;
+    @Column(name="bg_color",nullable = false)
+    private String bgColor;
+
+    @Column(name="font_color")
+    private boolean fontColor;
+
 
     @Column(name="tool_logo",nullable = false)
     private String toolLogo;
-
-    @Column(columnDefinition="integer default 0",nullable = false)
-    private int viewCount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
+
+    @Column(columnDefinition="integer default 0",nullable = false)
+    private int viewCount;
 
     // createdAt 값을 설정하는 메서드
     @PrePersist

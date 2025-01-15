@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder(access = AccessLevel.PRIVATE)
@@ -24,6 +23,8 @@ public record ToolDetailGetRes(
         String detailDescription,
         List<String> videos,
         List<String> images,
+        String bgColor,
+        Boolean fontColor,
         @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy.MM.dd",timezone = "Asia/Seoul")
         Timestamp updatedAt
 ) {
@@ -44,6 +45,8 @@ public record ToolDetailGetRes(
                 .updatedAt(tool.getUpdatedAt())
                 .images(images)
                 .videos(videos)
+                .bgColor(tool.getBgColor())
+                .fontColor(tool.isFontColor())
                 .build();
     }
 }

@@ -83,39 +83,43 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
-    public ToolListRes getToolList(final String sort, final Category category,final int size, final Long lastBoardId) {
-        log.debug("카테고리별 툴 목록을 조회 category : {}, sort : {} ", category, sort, size,lastBoardId );
+    public ToolListRes getToolList(final String sort, final Category category,final int size, final Long lastToolId) {
+        log.debug("카테고리별 툴 목록을 조회 category : {}, sort : {} ", category, sort, size, lastToolId );
+
+        Long cursor = (lastToolId == null) ? Long.MAX_VALUE : lastToolId;
 
         Sort sorting;
-        if("등록순".equalsIgnoreCase(sort)){
+        if ("등록순".equalsIgnoreCase(sort)) {
             sorting = Sort.by(Sort.Order.desc("createdAt"));
-        }else{
-            sorting = Sort.by(Sort.Order.desc("viewCount"));
+        } else {
+            sorting = Sort.by(Sort.Order.desc("viewCount")); // 기본값: 인기순
         }
 
-        Pageable pageable = PageRequest.of(0, size, sorting);
+        Pageable pageRequest = PageRequest.of(0, size, sorting);
 
-        Page<Tool> toolPage;
-        if(Category.ALL.equals(category)){
-            toolPage = toolRepository.findAll(pageable);
-        }else{
-            toolPage = toolRepository.findToolsByCategory(category, pageable);
+        // 카테고리별 툴 조회 (전체 카테고리일 경우 필터링 생략)
+        List<Tool> tools = Category.ALL.equals(category)
+                ? toolRepository.findAllWithCursor(cursor, pageRequest)
+                : toolRepository.findByCategoryWithCursor(category, cursor, pageRequest);
 
-        }
-        //Pageable 객체 ( 페이지 Num, 크기, 정렬 )
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sorting);
-        Page<Tool> toolPage = toolRepository.findAllWithFilter(category, sortedPageable);
-        List<ToolDtoGetRes> tools =toolPage.getContent().stream()
-                .map(tool -> ToolDtoGetRes.from(tool, convertToKeywordRes(tool)))
+        ScrollPaginationCollection<Tool> toolCursor = ScrollPaginationCollection.of(tools, size);
+
+        List<ToolResponse> toolResponses = toolCursor.getCurrentScrollItems().stream()
+                .map(tool -> {
+                    int scrapCount = calculateScrapCount(tool.getToolId());
+                    int popularityScore = calculatePopularityScore(scrapCount, tool.getViewCount());
+                    return ToolResponse.of(tool, convertToKeywordRes(tool), scrapCount, popularityScore);
+                })
                 .toList();
 
         // Scroll Pagination 처리
-        ScrollPaginationCollection<ToolResponse> toolCursor = new ScrollPaginationCollection<>(tools, size);
-        long nextCursor = toolCursor.isLastScroll() ? -1L : toolCursor.getNextCursor().toolId();
+        long nextCursor = toolCursor.isLastScroll() ? -1L : toolCursor.getNextCursor().getToolId();
 
+        // 페이지네이션 DTO 생성
         ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(toolCursor.getTotalElements(), nextCursor);
 
-        return ToolListRes.of(tools, scrollPaginationDto);
+        // 최종 응답 반환
+        return ToolListRes.of(toolResponses, scrollPaginationDto);
     }
 
     @Transactional
@@ -232,6 +236,5 @@ public class ToolService {
     public int calculateScrapCount(Long toolId) {
         return toolScrapRepository.countByToolId(toolId);
     }
-
 
 }

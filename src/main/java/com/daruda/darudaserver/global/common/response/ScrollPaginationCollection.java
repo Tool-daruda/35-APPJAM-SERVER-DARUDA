@@ -1,6 +1,5 @@
 package com.daruda.darudaserver.global.common.response;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
