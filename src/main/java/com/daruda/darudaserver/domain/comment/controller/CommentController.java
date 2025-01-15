@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/comments")
@@ -20,7 +22,7 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<?> postComment(@UserId Long userId,
                                          @PathVariable("board-id")Long boardId,
-                                         @Valid @RequestBody CreateCommentRequest createCommentRequest){
+                                         @Valid @RequestBody CreateCommentRequest createCommentRequest) throws IOException {
         CreateCommentResponse createCommentResponse = commentService.postComment(userId, boardId, createCommentRequest);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(createCommentResponse, SuccessCode.SUCCESS_CREATE));
     }

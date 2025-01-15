@@ -13,6 +13,7 @@ import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import com.daruda.darudaserver.global.image.service.ImageService;
 import com.daruda.darudaserver.global.infra.S3.S3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class CommentService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
     private final S3Service s3Service;
+    private final ImageService imageService;
 
     public CreateCommentResponse postComment(Long userId, Long boardId, CreateCommentRequest createCommentRequest) throws IOException {
         //게시글과 사용자 존재 여부 검사
