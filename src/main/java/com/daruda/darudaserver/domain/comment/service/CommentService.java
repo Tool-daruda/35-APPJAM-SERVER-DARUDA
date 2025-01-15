@@ -8,6 +8,7 @@ import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
+import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import jakarta.transaction.Transactional;
@@ -45,4 +46,17 @@ public class CommentService {
 
         return createCommentResponse;
     }
+
+    public void deleteComment(Long userId, Long commentId){
+        //사용자 존재 여부 검사
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        //댓글 존재 여부 검사 및 entity 반환
+        CommentEntity commentEntity = commentRepository.findById(commentId)
+                .orElseThrow(()-> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
+        //댓글 삭제
+        commentRepository.delete(commentEntity);
+    }
+
+
 }

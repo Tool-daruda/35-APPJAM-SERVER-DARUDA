@@ -7,6 +7,7 @@ import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,13 @@ public class CommentController {
                                          @Valid @RequestBody CreateCommentRequest createCommentRequest){
         CreateCommentResponse createCommentResponse = commentService.postComment(userId, boardId, createCommentRequest);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(createCommentResponse, SuccessCode.SUCCESS_CREATE));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteComment(@UserId Long userId,
+                                           @RequestParam("comment-id")Long commentId){
+        commentService.deleteComment(userId, commentId);
+        return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
     }
 
 }
