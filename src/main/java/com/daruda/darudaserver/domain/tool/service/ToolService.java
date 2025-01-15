@@ -101,19 +101,19 @@ public class ToolService {
     @Transactional
     public ToolScrapRes postToolScrap(final Long userId, final Long toolId){
         UserEntity user = getUserById(userId);
-        Tool tool = getToolById(toolId); // Tool 검증
-        boolean toolExists = toolScrapRepository.existsByUserAndTool( user, tool);
-        if(toolExists){
-            toolScrapRepository.deleteByUserAndTool(user, tool);
-            return ToolScrapRes.of(toolId, false);
-        }else{
-            ToolScrap toolScrap = ToolScrap.builder()
+        Tool tool = getToolById(toolId);
+        ToolScrap toolScrap = toolScrapRepository.findByUserAndTool(user, tool).orElse(null);
+
+        if(toolScrap==null){
+            toolScrap = ToolScrap.builder()
                     .user(user)
                     .tool(tool)
                     .build();
             toolScrapRepository.save(toolScrap);
-            return ToolScrapRes.of(toolId, true);
+        }else{
+            toolScrap.update();
         }
+        return ToolScrapRes.of(toolId, !toolScrap.isDelYn());
     }
 
     private List<RelatedTool> relatedTool(final Tool tool) {

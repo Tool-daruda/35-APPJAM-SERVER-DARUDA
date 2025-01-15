@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.community.dto.res;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,32 +13,43 @@ import java.util.List;
 @Builder(access = AccessLevel.PRIVATE)
 public record BoardRes(
         Long boardId,
-        Long toolId,
+        String toolName,
+        String toolLogo,
+        String author,
         String title,
         String content,
         List<String> images,
         @JsonFormat(shape=JsonFormat.Shape.STRING,pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
-        Timestamp updatedAt
+        Timestamp updatedAt,
+        int commentCount
 ) {
-    public static BoardRes of(final Board board,final List<String> images){
+    // Image 가 있는 경우
+    public static BoardRes of(final Board board,final String toolName, final String toolLogo,  final int commentCount,final List<String> images ){
         return BoardRes.builder()
                 .boardId(board.getBoardId())
-                .toolId(board.getToolId())
+                .toolName(toolName)
+                .toolLogo(toolLogo)
+                .author(board.getUser().getNickname())
                 .title(board.getTitle())
                 .content(board.getContent())
                 .images(images)
                 .updatedAt(board.getUpdatedAt())
+                .commentCount(commentCount)
                 .build();
     }
 
-    public static BoardRes of(final Board board){
+    //Image 가 없는 경우
+    public static BoardRes of(final Board board, final String toolName, final String toolLogo,final int commentCount){
         return BoardRes.builder()
                 .boardId(board.getBoardId())
-                .toolId(board.getToolId())
+                .toolName(toolName)
+                .toolLogo(toolLogo)
+                .author(board.getUser().getNickname())
                 .title(board.getTitle())
                 .content(board.getContent())
-                .updatedAt(board.getUpdatedAt())
                 .images(null)
+                .updatedAt(board.getUpdatedAt())
+                .commentCount(commentCount)
                 .build();
     }
 }
