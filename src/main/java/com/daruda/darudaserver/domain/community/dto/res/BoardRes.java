@@ -2,14 +2,12 @@ package com.daruda.darudaserver.domain.community.dto.res;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-//Private 로 하는 이유
 @Builder
 @Getter
 public class BoardRes {
