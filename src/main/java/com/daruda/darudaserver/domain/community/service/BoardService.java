@@ -58,7 +58,7 @@ public class BoardService {
         List<String> imageUrls = processImages(board, images);
 
         // Tool 정보 설정
-        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : "자유";
+        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
         return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getBoardId()), imageUrls);
