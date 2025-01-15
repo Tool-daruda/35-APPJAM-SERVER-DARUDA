@@ -88,11 +88,12 @@ public class BoardController {
      */
     @GetMapping("boards/board/list")
     public ResponseEntity <ApiResponse<?>> getBoardList(
+            @RequestParam(name="isFree") Boolean isFree,
             @RequestParam(name = "toolId",required = false) Long toolId,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "lastBoardId", required = false) Long lastBoardId )
     {
-        GetBoardResponse boardResponse =  boardService.getBoardList(toolId, size, lastBoardId);
+        GetBoardResponse boardResponse =  boardService.getBoardList(isFree, toolId, size, lastBoardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardResponse, SuccessCode.SUCCESS_FETCH));
     }
 }
