@@ -4,9 +4,10 @@ import java.util.List;
 
 public record FavoriteBoardsRetrieveResponse(
         Long userId,
-        List<FavoriteBoardsResponse> favoriteBoardsResponseList
+        List<FavoriteBoardsResponse> boardList,
+        PagenationDto pageInfo
 ) {
-    public static FavoriteBoardsRetrieveResponse of(Long userId, List<FavoriteBoardsResponse>favoriteBoardsResponseList){
-        return new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponseList);
+    public static FavoriteBoardsRetrieveResponse of(Long userId, List<FavoriteBoardsResponse> boardList, PagenationDto pageInfo){
+        return new FavoriteBoardsRetrieveResponse(userId, boardList, pageInfo);
     }
 }

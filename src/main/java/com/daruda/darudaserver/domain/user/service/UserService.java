@@ -164,8 +164,9 @@ public class UserService {
                         .toolLogo(getTool(board.getToolId()).getToolLogo())
                         .build())
                 .toList();
+        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
 
-        FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses);
+        FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
 
         return favoriteBoardsRetrieveResponse;
     }
@@ -179,7 +180,9 @@ public class UserService {
                 .map(board -> BoardRes.of(board))
                 .toList();
 
-        return new BoardListResponse(boardResList, userId);
+        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
+
+        return new BoardListResponse(boardResList, userId, pageInfo);
 
     }
 
