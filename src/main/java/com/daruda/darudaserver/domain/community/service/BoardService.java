@@ -44,6 +44,7 @@ public class BoardService {
     private final ToolRepository toolRepository;
 
     private final String TOOL_LOGO = "ToolLogo.jpeg";
+    private final String FREE = "자유";
 
     // 게시판 생성
     public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
@@ -77,7 +78,7 @@ public class BoardService {
 
         List<String> imageUrls = processImages(board, images);
 
-        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : "자유";
+        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
         return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getBoardId()), imageUrls);
@@ -110,7 +111,7 @@ public class BoardService {
     public BoardRes getBoard(final Long boardId) {
         Board board = getBoardById(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
-        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : "자유";
+        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
         return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls);
@@ -125,15 +126,18 @@ public class BoardService {
 
         // 전체 조회
         if (toolId == null) {
+            log.info("전체 게시판을 조회합니다");
             boards = boardRepository.findByBoardIdLessThanOrderByBoardIdDesc(cursor, pageRequest);
         }
         // 자유 게시판 조회
         else if (toolId == -1) {
+            log.info("자유 게시판을 조회합니다");
             boards = boardRepository.findByIsFreeAndBoardIdLessThanOrderByBoardIdDesc(true,cursor, pageRequest);
         }
         // 특정 Tool 게시판 조회
         else {
             Tool tool = getToolById(toolId);
+            log.info(tool.getToolMainName() + " 게시판을 조회합니다");
             boards = boardRepository.findByToolAndBoardIdLessThanOrderByBoardIdDesc(tool, cursor, pageRequest);
         }
 
@@ -142,13 +146,13 @@ public class BoardService {
         List<BoardRes> boardResList = boardsCursor.getCurrentScrollItems().stream()
                 .map(board -> BoardRes.of(
                         board,
-                        board.getTool() != null ? board.getTool().getToolMainName() : "자유",
+                        board.getTool() != null ? board.getTool().getToolMainName() : FREE,
                         board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO,
                         getCommentCount(board.getBoardId()),
                         boardImageService.getBoardImageUrls(board.getBoardId())
                 ))
                 .collect(Collectors.toList());
-        log.info("BoardRes List: {}", boardResList);
+        log.debug("BoardRes List: {}", boardResList);
         long nextCursor = boardsCursor.isLastScroll() ? -1L : boardsCursor.getNextCursor().getBoardId();
 
         return new GetBoardResponse(boardResList, boardsCursor.getTotalElements(), nextCursor);
@@ -157,6 +161,7 @@ public class BoardService {
     private Board validateBoardAndUser(final Long userId, final Long boardId) {
         Board board = getBoardById(boardId);
         if (!board.getUser().getId().equals(userId)) {
+            log.debug("게시판 작성자와, 유저가 다릅니다.");
             throw new UnauthorizedException(ErrorCode.BOARD_FORBIDDEN);
         }
         return board;
