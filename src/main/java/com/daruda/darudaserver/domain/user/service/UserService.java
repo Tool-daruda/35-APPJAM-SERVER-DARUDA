@@ -19,20 +19,14 @@ import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
-import com.daruda.darudaserver.global.error.exception.UnauhtorizedException;
-import io.jsonwebtoken.JwtException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,7 +57,7 @@ public class UserService {
             //토큰 생성 및 refreshToken db에 저장
             String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
             String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
-            tokenService.saveRefreshtoken(user,refreshToken);
+            tokenService.saveRefreshtoken(userId,refreshToken);
             JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
@@ -87,7 +81,7 @@ public class UserService {
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
         String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
-        tokenService.saveRefreshtoken(userEntity,refreshToken);
+        tokenService.saveRefreshtoken(userId,refreshToken);
 
         JwtTokenResponse jwtTokenResponse = JwtTokenResponse.of(accessToken,refreshToken);
 
