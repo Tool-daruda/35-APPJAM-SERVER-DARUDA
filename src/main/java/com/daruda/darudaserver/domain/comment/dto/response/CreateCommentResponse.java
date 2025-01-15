@@ -14,7 +14,7 @@ public record CreateCommentResponse(
         String image,
         String nickname
 ) {
-    @Builder
+
     public static CreateCommentResponse of(Long commentId, String content,Timestamp updatedAt, String image, String nickname){
         return CreateCommentResponse.builder()
                 .commentId(commentId)
