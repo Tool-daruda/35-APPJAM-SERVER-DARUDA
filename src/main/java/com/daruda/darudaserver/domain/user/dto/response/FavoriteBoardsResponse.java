@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.user.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 
 import java.sql.Timestamp;
@@ -10,6 +11,7 @@ public record FavoriteBoardsResponse(
         Long boardId,
         String title,
         String content,
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy.MM.dd",timezone = "Asia/Seoul")
         Timestamp updatedAt,
         Long toolId,
         String toolLogo,
