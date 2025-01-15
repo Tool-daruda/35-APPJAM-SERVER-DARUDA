@@ -47,7 +47,7 @@ public class MyPageController {
     @GetMapping("/boards/scrap")
     public ResponseEntity<?> getFavoriteBoards(@UserId Long userId,
                                                @RequestParam(defaultValue = "1", value = "page") int pageNo,
-                                               @RequestParam(defaultValue = "10", value = "size") int size,
+                                               @RequestParam(defaultValue = "5", value = "size") int size,
                                                @RequestParam(defaultValue = "createdAt", value = "criteria")String criteria){
         Pageable pageable = PageRequest.of(pageNo, size);
         FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = userService.getFavoriteBoards(userId,pageable);
@@ -58,9 +58,9 @@ public class MyPageController {
     @GetMapping("/boards")
     public ResponseEntity<?> getMyBoards(@UserId Long userId,
                                          @RequestParam(defaultValue = "1", value = "page") int pageNo,
-                                         @RequestParam(defaultValue = "10", value = "size") int size,
+                                         @RequestParam(defaultValue = "5", value = "size") int size,
                                          @RequestParam(defaultValue = "createdAt", value = "criteria") String criteria){
-        Pageable pageable = PageRequest.of(pageNo, size, Sort.by(Sort.Direction.ASC, criteria));
+        Pageable pageable = PageRequest.of(pageNo, size, Sort.by(Sort.Direction.DESC, criteria));
         BoardListResponse boardListResponse = userService.getMyBoards(userId, pageable);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardListResponse,SuccessCode.SUCCESS_CREATE));
     }
