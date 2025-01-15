@@ -10,11 +10,13 @@ import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CommentService {
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
