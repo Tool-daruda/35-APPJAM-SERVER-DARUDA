@@ -128,29 +128,28 @@ public class UserService {
 
 
     }
-    public FavoriteToolsResponse getFavoriteTools(Long userId, int pageNo){
+    public FavoriteToolsResponse getFavoriteTools(Long userId, Pageable pageable){
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        Pageable pageable = PageRequest.of(pageNo,10);
-        Page<ToolScrap> toolIdPage = toolScrapRepository.findAllByUserId(userId,pageable);
+        Page<ToolScrap> toolScrapPage = toolScrapRepository.findAllByUserId(userId,pageable);
+        log.info("툴 스크랩을 레포지토리에서 가지고 옵니다");
 
-
-        List<ToolScrap> toolScraps = toolIdPage.getContent();
-        List<Long> toolIds = toolScraps.stream()
-                .map(toolScrap -> toolScrap.getTool().getToolId())
+        List<ToolScrap> toolScraps = toolScrapPage.getContent();
+        log.info("리스트 형식으로 변환");
+        List<Tool> tools = toolScraps.stream()
+                .map(ToolScrap::getTool)
                 .toList();
-        List<Tool> tools = toolIds.stream()
-                .map(toolId-> getTool(toolId))
+        log.info("tool로 변환");
+
+        List<ToolDtoGetRes> toolDtoGetResList = tools.stream()
+                .map(tool->ToolDtoGetRes.from(tool, toolService.convertToKeywordRes(tool)))
                 .toList();
+        log.info("DTO로 변환");
 
-        List<ToolDtoGetRes> toolDtoGetRes = tools.stream()
-                .map(tool->ToolDtoGetRes.of(tool, toolService.convertToKeywordRes(tool)))
-                .toList();
+        PagenationDto pagenationDto = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), toolScrapPage.getTotalPages());
 
-        PagenationDto pagenationDto = PagenationDto.of(pageNo,10,toolIdPage.getTotalPages());
-
-        FavoriteToolsResponse favoriteToolsResponse = FavoriteToolsResponse.of(toolDtoGetRes, pagenationDto);
+        FavoriteToolsResponse favoriteToolsResponse = FavoriteToolsResponse.of(toolDtoGetResList, pagenationDto);
 
         return favoriteToolsResponse;
     }
