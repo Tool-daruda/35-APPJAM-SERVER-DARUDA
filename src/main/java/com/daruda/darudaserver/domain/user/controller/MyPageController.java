@@ -16,6 +16,7 @@ import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -42,10 +43,13 @@ public class MyPageController {
 
     @GetMapping("/tools")
     public ResponseEntity<?> getFavoriteTools(@UserId Long userId,
-                                              @RequestParam(defaultValue = "1", value = "page")int pageNo){
-        FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId, pageNo);
+                                              @RequestParam(defaultValue = "1", value = "page") int pageNo,
+                                              @RequestParam(defaultValue = "5", value = "size") int size,
+                                              @RequestParam(defaultValue = "createdAt", value = "criteria") String criteria){
+        Pageable pageable = PageRequest.of(pageNo, size, Sort.by(Sort.Direction.DESC, criteria));
+        FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId, pageable);
 
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteToolsResponse, SuccessCode.SUCCESS_CREATE));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteToolsResponse, SuccessCode.SUCCESS_FETCH));
     }
 
 
@@ -56,7 +60,7 @@ public class MyPageController {
                                          @RequestParam(defaultValue = "createdAt", value = "criteria") String criteria){
         Pageable pageable = PageRequest.of(pageNo, size, Sort.by(Sort.Direction.DESC, criteria));
         BoardListResponse boardListResponse = boardService.getMyBoards(userId, pageable);
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardListResponse,SuccessCode.SUCCESS_CREATE));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardListResponse,SuccessCode.SUCCESS_FETCH));
     }
 
     @GetMapping("/boards/scrap")
@@ -67,7 +71,7 @@ public class MyPageController {
         Pageable pageable = PageRequest.of(pageNo, size);
         FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = userService.getFavoriteBoards(userId,pageable);
 
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse,SuccessCode.SUCCESS_CREATE));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse,SuccessCode.SUCCESS_FETCH));
     }
 
 }

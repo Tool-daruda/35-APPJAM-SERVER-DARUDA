@@ -43,11 +43,9 @@ public class CommentController {
 
     @GetMapping
     public ResponseEntity<?> getComment(@RequestParam("board-id")Long boardId,
-                                        @RequestParam(defaultValue = "1", value = "page")int pageNo,
-                                        @RequestParam(defaultValue = "5", value = "size")int size,
-                                        @RequestParam(defaultValue = "createdAt", value = "criteria")String criteria){
-        Pageable pageable = PageRequest.of(pageNo, size, Sort.by(Sort.Direction.DESC, criteria));
-        GetCommentRetrieveResponse getCommentRetrieveResponse = commentService.getComments(boardId, pageable);
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(getCommentRetrieveResponse,SuccessCode.SUCCESS_CREATE));
+                                        @RequestParam(value = "size", defaultValue = "10") int size,
+                                        @RequestParam(value = "lastBoardId", required = false) Long commentId){
+        GetCommentRetrieveResponse getCommentRetrieveResponse = commentService.getComments(boardId, size, commentId);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(getCommentRetrieveResponse,SuccessCode.SUCCESS_FETCH));
     }
 }

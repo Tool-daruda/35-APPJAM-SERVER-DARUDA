@@ -7,7 +7,7 @@ import lombok.Builder;
 
 import java.util.List;
 
-@Builder(access = AccessLevel.PRIVATE)
+
 public record ToolDtoGetRes(
         Long toolId,
         String toolName,
@@ -16,14 +16,15 @@ public record ToolDtoGetRes(
         License license,
         List<String> keywords
 ) {
-    public static ToolDtoGetRes of(Tool tool, List<String> keywords) {
-        return ToolDtoGetRes.builder()
-                .toolId(tool.getToolId())
-                .toolName(tool.getToolMainName())
-                .toolLogo(tool.getToolLogo())
-                .description(tool.getDescription())
-                .license(tool.getLicense())
-                .keywords(keywords)
-                .build();
+    // 정적 팩토리 메서드
+    public static ToolDtoGetRes from(Tool tool, List<String> keywords) {
+        return new ToolDtoGetRes(
+                tool.getToolId(),
+                tool.getToolMainName(),
+                tool.getToolLogo(),
+                tool.getDescription(),
+                tool.getLicense(),
+                keywords
+        );
     }
 }

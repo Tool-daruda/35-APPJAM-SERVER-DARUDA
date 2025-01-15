@@ -1,12 +1,14 @@
 package com.daruda.darudaserver.domain.comment.dto.response;
 
+import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
+
 import java.util.List;
 
 public record GetCommentRetrieveResponse(
         List<GetCommentResponse> commentList,
-        PagenationDto pagenationDto
+        ScrollPaginationDto scrollPaginationDto
 ) {
-   public static GetCommentRetrieveResponse of(List<GetCommentResponse> commentList, PagenationDto pagenationDto){
-       return new GetCommentRetrieveResponse(commentList, pagenationDto);
+   public static GetCommentRetrieveResponse of(List<GetCommentResponse> commentList, ScrollPaginationDto scrollPaginationDto){
+       return new GetCommentRetrieveResponse(commentList, scrollPaginationDto);
    }
 }

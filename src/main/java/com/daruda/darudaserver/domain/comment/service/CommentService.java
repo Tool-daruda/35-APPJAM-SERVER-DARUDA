@@ -7,11 +7,15 @@ import com.daruda.darudaserver.domain.comment.dto.response.GetCommentRetrieveRes
 import com.daruda.darudaserver.domain.comment.dto.response.PagenationDto;
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
+import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
+import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.domain.user.service.UserService;
+import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
+import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
@@ -21,12 +25,14 @@ import com.daruda.darudaserver.global.infra.S3.S3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -82,21 +88,34 @@ public class CommentService {
         commentRepository.delete(commentEntity);
     }
 
-    public GetCommentRetrieveResponse getComments(Long boardId, Pageable pageable) {
-        Page<CommentEntity> commentEntityPage = commentRepository.findAllByBoardId(boardId, pageable);
-        List<GetCommentResponse> getCommentResponseList = commentEntityPage.getContent().stream()
+    public GetCommentRetrieveResponse getComments(Long boardId, int size, Long lastCommentId) {
+        List<CommentEntity> commentList;
+        Long cursor = (lastCommentId == null) ? Long.MAX_VALUE : lastCommentId;
+        PageRequest pageRequest = PageRequest.of(0, size + 1);
+
+        List<CommentEntity> commentEntityList = commentRepository.findAllByBoardId(boardId, cursor, pageRequest);
+
+        ScrollPaginationCollection<CommentEntity> commentCursor= ScrollPaginationCollection.of(commentEntityList,size);
+
+        List<GetCommentResponse> commentResponse = commentCursor.getCurrentScrollItems().stream()
                 .map(commentEntity -> GetCommentResponse.builder()
-                        .updatedAt(commentEntity.getUpdatedAt())
-                        .nickname(commentEntity.getUserEntity().getNickname())
-                        .commentId(commentEntity.getId())
-                        .image(commentEntity.getPhotoUrl())
                         .content(commentEntity.getContent())
+                        .image(commentEntity.getPhotoUrl())
+                        .commentId(commentEntity.getId())
+                        .nickname(commentEntity.getUserEntity().getNickname())
+                        .updatedAt(commentEntity.getUpdatedAt())
                         .build())
                 .toList();
-        PagenationDto pagenationDto = PagenationDto.of(commentEntityPage.getNumber(), commentEntityPage.getSize(), commentEntityPage.getTotalPages());
 
-        GetCommentRetrieveResponse getCommentRetrieveResponse = GetCommentRetrieveResponse.of(getCommentResponseList, pagenationDto);
-        return getCommentRetrieveResponse;
+        // ScrollPaginationCollection을 이용한 페이지네이션 처리
+        // 다음 페이지를 위한 커서 계산
+        long nextCursor = commentCursor.isLastScroll() ? -1L : commentCursor.getNextCursor().getId();
+
+        // ScrollPaginationDto 생성
+        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(commentCursor.getTotalElements(), nextCursor);
+
+        // 최종 결과 반환
+        return new GetCommentRetrieveResponse(commentResponse, scrollPaginationDto);
     }
 
 

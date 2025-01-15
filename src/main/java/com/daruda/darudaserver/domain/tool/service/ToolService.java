@@ -92,7 +92,7 @@ public class ToolService {
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sorting);
         Page<Tool> toolPage = toolRepository.findAllWithFilter(category, sortedPageable);
         List<ToolDtoGetRes> tools =toolPage.getContent().stream()
-                .map(tool -> ToolDtoGetRes.of(tool, convertToKeywordRes(tool)))
+                .map(tool -> ToolDtoGetRes.from(tool, convertToKeywordRes(tool)))
                 .toList();
         return ToolListRes.of(tools, toolPage.hasNext());
 

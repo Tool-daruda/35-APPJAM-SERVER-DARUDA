@@ -54,24 +54,24 @@ public class KakaoController {
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest){
         SignUpSuccessResponse signUpSuccessResponse = userService.createUser(signUpRequest.email(), signUpRequest.nickname(),signUpRequest.positions());
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(signUpSuccessResponse,SuccessCode.SUCCESS_CREATE));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(signUpSuccessResponse,SuccessCode.SUCCESS_LOGIN));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logOut(@UserId Long userId){
         Long returnedUserId = userService.deleteUser(userId);
-        return  ResponseEntity.ok(ApiResponse.ofSuccessWithData(returnedUserId,SuccessCode.SUCCESS_CREATE));
+        return  ResponseEntity.ok(ApiResponse.ofSuccessWithData(returnedUserId,SuccessCode.SUCCESS_LOGUT));
     }
 
     @PostMapping("/nickname")
     public ResponseEntity<?> checkDuplicate(@NotNull(message = "닉네임은 필수입력값입니다") @RequestBody String nickname){
         boolean result = userService.isDuplicated(nickname);
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result,SuccessCode.SUCCESS_CREATE));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result,SuccessCode.SUCCESS_FETCH));
     }
 
     @PostMapping("/reissue")
     public ResponseEntity<?> regenerateToken(@UserId Long userId){
         JwtTokenResponse jwtTokenResponse = userService.reissueToken(userId);
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse,SuccessCode.SUCCESS_CREATE));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse,SuccessCode.SUCCESS_REISSUE));
     }
 }
