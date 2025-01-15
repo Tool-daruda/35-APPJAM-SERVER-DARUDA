@@ -124,27 +124,28 @@ public class BoardService {
     }
 
     // 게시판 리스트 조회
-    public GetBoardResponse getBoardList(final Long toolId, final int size, final Long lastBoardId) {
+    public GetBoardResponse getBoardList(final Boolean isFree,final Long toolId, final int size, final Long lastBoardId) {
 
         List<Board> boards;
         Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId;
         PageRequest pageRequest = PageRequest.of(0, size + 1);
 
         // 전체 조회
-        if (toolId == null) {
-            log.info("전체 게시판을 조회합니다");
-            boards = boardRepository.findByIdLessThanOrderByIdDesc(cursor, pageRequest);
-        }
-        // 자유 게시판 조회
-        else if (toolId == -1) {
+        if(Boolean.TRUE.equals(isFree)){
             log.info("자유 게시판을 조회합니다");
-            boards = boardRepository.findByIsFreeAndIdLessThanOrderByIdDesc(true,cursor, pageRequest);
+            boards = boardRepository.findBoards(null, true, cursor, pageRequest);
         }
         // 특정 Tool 게시판 조회
-        else {
+        else if (toolId != null) {
             Tool tool = getToolById(toolId);
             log.info(tool.getToolMainName() + " 게시판을 조회합니다");
-            boards = boardRepository.findByToolAndIdLessThanOrderByIdDesc(tool, cursor, pageRequest);
+            boards = boardRepository.findBoards(tool, false, cursor,pageRequest);
+        }
+        //전체 게시판 조회
+        else{
+            log.info("전체 게시판을 조회합니다");
+            boards = boardRepository.findBoards(null, null, cursor, pageRequest);
+
         }
 
         ScrollPaginationCollection<Board> boardsCursor = ScrollPaginationCollection.of(boards, size);
