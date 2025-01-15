@@ -18,5 +18,6 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap,Long> {
     boolean existsByUserAndBoard(UserEntity user, Board board);
 
     Page<BoardScrap> findAllByUserId(Long userId, Pageable pageable);
+
     Optional<BoardScrap> findByUserAndBoard(UserEntity user, Board board);
 }

@@ -12,6 +12,18 @@ import com.daruda.darudaserver.domain.tool.entity.ToolImage;
 import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.tool.service.ToolService;
+import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
+import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.community.entity.BoardImage;
+import com.daruda.darudaserver.domain.community.entity.BoardScrap;
+import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
+import com.daruda.darudaserver.domain.community.repository.BoardRepository;
+import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
+import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolImage;
+import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
+import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDtoGetRes;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
@@ -40,6 +52,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -51,6 +64,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenService tokenService;
+    private final BoardScrapRepository boardScrapRepository;
+    private final ToolRepository toolRepository;
+    private final BoardRepository boardRepository;
+    private final BoardImageRepository boardImageRepository;
     private final ToolScrapRepository toolScrapRepository;
     private final ToolRepository toolRepository;
     private final ToolService toolService;
@@ -162,6 +179,8 @@ public class UserService {
 
         Pageable pageable = PageRequest.of(pageNo,10);
         Page<ToolScrap> toolIdPage = toolScrapRepository.findAllByUserId(userId,pageable);
+    public void getFavoriteTools(Long userId, int pageNo, String criteria){
+       validateUser(userId);
 
 
         List<ToolScrap> toolScraps = toolIdPage.getContent();
@@ -219,6 +238,42 @@ public class UserService {
 
     }
 
+    public FavoriteBoardsRetrieveResponse getFavoriteBoards(Long userId, Pageable pageable){
+        validateUser(userId);
+
+        Page<BoardScrap> boardScraps = boardScrapRepository.findAllByUserId(userId, pageable);
+        List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
+                .map(BoardScrap::getBoard)
+                .map(board -> FavoriteBoardsResponse.builder()
+                        .boardId(board.getBoardId())
+                        .title(board.getTitle())
+                        .content(board.getContent())
+                        .updatedAt(board.getUpdatedAt())
+                        .toolName(getTool(board.getToolId()).getToolMainName())
+                        .toolLogo(getTool(board.getToolId()).getToolLogo())
+                        .build())
+                .toList();
+        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
+
+        FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
+
+        return favoriteBoardsRetrieveResponse;
+    }
+
+    public BoardListResponse getMyBoards(Long userId, Pageable pageable){
+       validateUser(userId);
+        Page<Board> boards = boardRepository.findAllByUserId(userId, pageable);
+
+        List<BoardRes> boardResList = boards.getContent().stream()
+                .map(board -> BoardRes.of(board))
+                .toList();
+
+        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
+
+        return new BoardListResponse(boardResList, userId, pageInfo);
+
+    }
+
 
     private void verifyUserIdWithStoredToken(final UserEntity userEntity, final String refreshToken){
         Long storedUserId = tokenService.findIdByRefreshToken(refreshToken);
@@ -228,6 +283,9 @@ public class UserService {
         }
     }
 
+    private Tool getTool(final Long toolId){
+        Tool tool = toolRepository.findById(toolId)
+                .orElseThrow(()-> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
     private Tool getTool(Long toolId){
         Tool tool = toolRepository.findById(toolId)
                 .orElseThrow(()->new BusinessException(ErrorCode.DATA_NOT_FOUND));
@@ -240,6 +298,13 @@ public class UserService {
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
+        return tool;
+    }
+
+    private void validateUser(Long userId){
+        userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+    }
 
 
 }

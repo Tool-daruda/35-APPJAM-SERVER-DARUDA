@@ -3,6 +3,8 @@ package com.daruda.darudaserver.domain.user.controller;
 import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
+import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
+import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
 import com.daruda.darudaserver.domain.user.service.UserService;
@@ -42,6 +44,27 @@ public class MyPageController {
         FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId, pageNo);
 
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteToolsResponse, SuccessCode.SUCCESS_CREATE));
+    }
+
+    @GetMapping("/boards/scrap")
+    public ResponseEntity<?> getFavoriteBoards(@UserId Long userId,
+                                               @RequestParam(defaultValue = "1", value = "page") int pageNo,
+                                               @RequestParam(defaultValue = "5", value = "size") int size,
+                                               @RequestParam(defaultValue = "createdAt", value = "criteria")String criteria){
+        Pageable pageable = PageRequest.of(pageNo, size);
+        FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = userService.getFavoriteBoards(userId,pageable);
+
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse,SuccessCode.SUCCESS_CREATE));
+    }
+
+    @GetMapping("/boards")
+    public ResponseEntity<?> getMyBoards(@UserId Long userId,
+                                         @RequestParam(defaultValue = "1", value = "page") int pageNo,
+                                         @RequestParam(defaultValue = "5", value = "size") int size,
+                                         @RequestParam(defaultValue = "createdAt", value = "criteria") String criteria){
+        Pageable pageable = PageRequest.of(pageNo, size, Sort.by(Sort.Direction.DESC, criteria));
+        BoardListResponse boardListResponse = userService.getMyBoards(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardListResponse,SuccessCode.SUCCESS_CREATE));
     }
 
     @GetMapping("/boards/scrap")
