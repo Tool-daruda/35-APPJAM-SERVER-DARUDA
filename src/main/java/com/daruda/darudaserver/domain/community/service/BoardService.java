@@ -18,6 +18,7 @@ import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
+import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
@@ -162,8 +163,10 @@ public class BoardService {
         log.debug("BoardRes List: {}", boardResList);
         long nextCursor = boardsCursor.isLastScroll() ? -1L : boardsCursor.getNextCursor().getId();
 
-        return new GetBoardResponse(boardResList, boardsCursor.getTotalElements(), nextCursor);
+        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(boardsCursor.getTotalElements(), nextCursor);
+        return new GetBoardResponse(boardResList,scrollPaginationDto);
     }
+
 
     private Board validateBoardAndUser(final Long userId, final Long boardId) {
         Board board = getBoardById(boardId);
