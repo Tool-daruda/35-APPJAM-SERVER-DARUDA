@@ -13,17 +13,17 @@ public record FavoriteBoardsResponse(
         String content,
         @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy.MM.dd",timezone = "Asia/Seoul")
         Timestamp updatedAt,
-        Long toolId,
+        String toolName,
         String toolLogo,
         Long scarpId
 ) {
-    public static FavoriteBoardsResponse of(Long boardId, String title, String content, Timestamp updatedAt, Long toolId, String toolLogo, Long scarpId){
+    public static FavoriteBoardsResponse of(Long boardId, String title, String content, Timestamp updatedAt, String toolName, String toolLogo, Long scarpId){
         return FavoriteBoardsResponse.builder()
                 .boardId(boardId)
                 .title(title)
                 .content(content)
                 .updatedAt(updatedAt)
-                .toolId(toolId)
+                .toolName(toolName)
                 .toolLogo(toolLogo)
                 .scarpId(scarpId)
                 .build();
