@@ -14,6 +14,7 @@ import lombok.*;
 public class CommentEntity extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "comment_id")
     private Long id;
 
     @Column(name = "content", nullable = false)
