@@ -3,8 +3,8 @@ package com.daruda.darudaserver.domain.community.controller;
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
+import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.service.BoardService;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolScrapRes;
 import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
@@ -81,5 +81,18 @@ public class BoardController {
             @PathVariable(name="board-id") final Long boardId){
         BoardScrapRes boardScrapRes = boardService.postScrap(userId,boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardScrapRes , SuccessCode.SUCCESS_SCRAP));
+    }
+
+    /**
+     * 게시글 리스트 조회
+     */
+    @GetMapping("boards/board/list")
+    public ResponseEntity <ApiResponse<?>> getBoardList(
+            @RequestParam(name = "toolId",required = false) Long toolId,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "lastBoardId", required = false) Long lastBoardId )
+    {
+        GetBoardResponse boardResponse =  boardService.getBoardList(toolId, size, lastBoardId);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardResponse, SuccessCode.SUCCESS_FETCH));
     }
 }

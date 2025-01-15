@@ -1,18 +1,18 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
+@Getter
 @Entity
 @Table(name="tool_scrap")
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ToolScrap {
+public class ToolScrap extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long toolScrapId;
@@ -25,4 +25,11 @@ public class ToolScrap {
     @JoinColumn(name="tool_id",nullable = false)
     private Tool tool;
 
+    @NotNull
+    @Builder.Default
+    private boolean delYn = false;
+
+    public void update() {
+        this.delYn = !this.delYn;
+    }
 }

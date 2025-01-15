@@ -1,13 +1,10 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
-import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
-import jakarta.annotation.Nullable;
+
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 @Entity
 @Table(name="tool")
@@ -64,7 +61,6 @@ public class Tool {
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
-
 
     // createdAt 값을 설정하는 메서드
     @PrePersist

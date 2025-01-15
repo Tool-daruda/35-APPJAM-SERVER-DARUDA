@@ -12,7 +12,7 @@ public record BoardCreateAndUpdateReq(
         @NotNull(message="내용  입력은 필수 입니다.")
         String content,
         Long toolId,
-        @NotNull(message = "자유게시판 선택은 필수 입니다")
+        @NotNull(message = "자유 게시판 선택은 필수 입니다")
         boolean isFree// 자유 게시판 여부 추가
 ) {
         public static BoardCreateAndUpdateReq of(String title, String content, Long toolId, boolean isFree) {
