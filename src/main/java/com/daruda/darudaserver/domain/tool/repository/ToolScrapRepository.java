@@ -20,17 +20,10 @@ import java.util.List;
 public interface ToolScrapRepository extends JpaRepository<ToolScrap,Long> {
 
 
-    @Query("SELECT CASE WHEN COUNT(ts) > 0 THEN true ELSE false END " +
-            "FROM ToolScrap ts WHERE ts.user.id = :userId AND ts.tool.id = :toolId")
-    boolean existsByUserIdAndToolId(@Param("userId") Long userId, @Param("toolId") Long toolId);
-
     boolean existsByUserAndTool(final UserEntity user, final Tool tool);
 
     void deleteByUserAndTool(final UserEntity user, final Tool tool);
-    @Transactional
-    @Modifying
-    @Query("DELETE FROM ToolScrap ts WHERE ts.user.id = :userId AND ts.tool.id = :toolId")
-    void deleteByUserIdAndToolId(@Param("userId") Long userId, @Param("toolId") Long toolId);
+
 
     @Query("SELECT ts FROM ToolScrap ts WHERE ts.user.id = :userId")
     Page<ToolScrap> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
