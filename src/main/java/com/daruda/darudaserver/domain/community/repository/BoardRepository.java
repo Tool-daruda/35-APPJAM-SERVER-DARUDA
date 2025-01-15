@@ -1,6 +1,8 @@
 package com.daruda.darudaserver.domain.community.repository;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

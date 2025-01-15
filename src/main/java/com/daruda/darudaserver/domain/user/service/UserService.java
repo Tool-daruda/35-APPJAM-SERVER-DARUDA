@@ -1,5 +1,15 @@
 package com.daruda.darudaserver.domain.user.service;
 
+import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
+import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.community.entity.BoardScrap;
+import com.daruda.darudaserver.domain.community.repository.BoardRepository;
+import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
+import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolImage;
+import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
+import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDtoGetRes;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
@@ -42,6 +52,9 @@ public class UserService {
     private final ToolScrapRepository toolScrapRepository;
     private final ToolRepository toolRepository;
     private final ToolService toolService;
+    private final BoardScrapRepository boardScrapRepository;
+    private final ToolRepository toolRepository;
+    private final BoardRepository boardRepository;
 
     public LoginResponse oAuthLogin(final UserInfo userInfo) {
         String email = userInfo.email();
@@ -165,6 +178,41 @@ public class UserService {
         return favoriteToolsResponse;
     }
 
+    public FavoriteBoardsRetrieveResponse getFavoriteBoards(Long userId, Pageable pageable){
+        userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        Page<BoardScrap> boardScraps = boardScrapRepository.findAllByUserId(userId, pageable);
+        List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
+                .map(BoardScrap::getBoard)
+                .map(board -> FavoriteBoardsResponse.builder()
+                        .boardId(board.getBoardId())
+                        .title(board.getTitle())
+                        .content(board.getContent())
+                        .updatedAt(board.getUpdatedAt())
+                        .toolId(board.getToolId())
+                        .toolLogo(getTool(board.getToolId()).getToolLogo())
+                        .build())
+                .toList();
+
+        FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses);
+
+        return favoriteBoardsRetrieveResponse;
+    }
+
+    public BoardListResponse getMyBoards(Long userId, Pageable pageable){
+        userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        Page<Board> boards = boardRepository.findAllByUserId(userId, pageable);
+
+        List<BoardRes> boardResList = boards.getContent().stream()
+                .map(board -> BoardRes.of(board))
+                .toList();
+
+        return new BoardListResponse(boardResList, userId);
+
+    }
+
 
     private void verifyUserIdWithStoredToken(final UserEntity userEntity, final String refreshToken){
         Long storedUserId = tokenService.findIdByRefreshToken(refreshToken);
@@ -180,6 +228,7 @@ public class UserService {
 
         return tool;
     }
+
 
 
 
