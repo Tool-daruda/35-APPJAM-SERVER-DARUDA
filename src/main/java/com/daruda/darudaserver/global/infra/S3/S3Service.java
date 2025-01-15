@@ -94,7 +94,7 @@ public class S3Service {
         }
     }
 
-    private String getImageUrl(String imageName) {
+    public String getImageUrl(String imageName) {
         return String.format("https://%s.s3.amazonaws.com/%s", bucketName, imageName); // S3의 퍼블릭 URL 생성
     }
 }

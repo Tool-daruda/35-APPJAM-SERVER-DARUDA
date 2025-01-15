@@ -10,10 +10,15 @@ import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.BadRequestException;
+import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import com.daruda.darudaserver.global.infra.S3.S3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -22,19 +27,24 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
+    private final S3Service s3Service;
 
-    public CreateCommentResponse postComment(Long userId, Long boardId, CreateCommentRequest createCommentRequest){
+    public CreateCommentResponse postComment(Long userId, Long boardId, CreateCommentRequest createCommentRequest) throws IOException {
         //게시글과 사용자 존재 여부 검사
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.DATA_NOT_FOUND));
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
+        //S3에 이미지 저장
+        String imageName = s3Service.uploadImage(createCommentRequest.image());
+        String imageUrl = s3Service.getImageUrl(imageName);
+
         //댓글 entity 생성
         CommentEntity commentEntity = CommentEntity.builder()
                 .userEntity(userEntity)
                 .board(board)
-                .photoUrl(createCommentRequest.image())
+                .photoUrl(imageUrl)
                 .content(createCommentRequest.content())
                 .build();
 
