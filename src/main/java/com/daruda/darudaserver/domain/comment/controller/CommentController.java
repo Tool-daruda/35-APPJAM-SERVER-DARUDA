@@ -19,7 +19,7 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<?> postComment(@UserId Long userId,
-                                         @RequestParam("board-id")Long boardId,
+                                         @PathVariable("board-id")Long boardId,
                                          @Valid @RequestBody CreateCommentRequest createCommentRequest){
         CreateCommentResponse createCommentResponse = commentService.postComment(userId, boardId, createCommentRequest);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(createCommentResponse, SuccessCode.SUCCESS_CREATE));
@@ -27,7 +27,7 @@ public class CommentController {
 
     @DeleteMapping
     public ResponseEntity<?> deleteComment(@UserId Long userId,
-                                           @RequestParam("comment-id")Long commentId){
+                                           @PathVariable("comment-id")Long commentId){
         commentService.deleteComment(userId, commentId);
         return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
     }
