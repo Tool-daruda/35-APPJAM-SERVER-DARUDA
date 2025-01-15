@@ -41,4 +41,5 @@ public class BoardRes {
                 .commentCount(commentCount)
                 .build();
     }
+
 }

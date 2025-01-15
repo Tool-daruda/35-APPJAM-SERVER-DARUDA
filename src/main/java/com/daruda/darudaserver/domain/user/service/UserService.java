@@ -1,8 +1,17 @@
 package com.daruda.darudaserver.domain.user.service;
 
+import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
+import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.community.entity.BoardImage;
+import com.daruda.darudaserver.domain.community.entity.BoardScrap;
+import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
+import com.daruda.darudaserver.domain.community.repository.BoardRepository;
+import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDtoGetRes;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolImage;
 import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
+import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.tool.service.ToolService;
@@ -12,7 +21,7 @@ import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
-import com.daruda.darudaserver.global.auth.jwt.provider.JwtValidationType;
+
 import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
 import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -25,10 +34,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -39,8 +48,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenService tokenService;
-    private final ToolScrapRepository toolScrapRepository;
+    private final BoardScrapRepository boardScrapRepository;
     private final ToolRepository toolRepository;
+    private final BoardRepository boardRepository;
+    private final BoardImageRepository boardImageRepository;
+    private final ToolScrapRepository toolScrapRepository;
     private final ToolService toolService;
 
     public LoginResponse oAuthLogin(final UserInfo userInfo) {
@@ -50,7 +62,6 @@ public class UserService {
         if (userEntity.isEmpty()) {
             return LoginResponse.of(false,email);
         } else { //등록된 회원인 경우
-            UserEntity user = userEntity.get();
             Long userId = userEntity.get().getId();
             UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
@@ -101,8 +112,8 @@ public class UserService {
     public JwtTokenResponse reissueToken(Long userId){
         String requestToken = tokenService.getRefreshTokenByUserId(userId);
         UserEntity userEntity = userRepository.findById(userId)
-                        .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
-        verifyUserIdWithStoredToken(userEntity,requestToken);
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+        verifyUserIdWithStoredToken(userId,requestToken);
 
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
@@ -117,27 +128,6 @@ public class UserService {
 
 
     }
-
-    public UpdateMyResponse updateMy(Long userId, String nickname, String positions){
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        if(isDuplicated(nickname)){
-            throw new BusinessException(ErrorCode.DUPLICATED_NICKNAME);
-        }
-        if(nickname == null){
-            userEntity.updatePositions(Positions.fromString(positions));
-            return UpdateMyResponse.of(userEntity.getNickname(),positions);
-        }
-        if(positions == null){
-            userEntity.updateNickname(nickname);
-            return UpdateMyResponse.of(nickname, userEntity.getPositions().getName());
-        }
-
-        userEntity.updateNickname(nickname);
-        userEntity.updatePositions(Positions.fromString(positions));
-        return UpdateMyResponse.of(nickname,positions);
-    }
-
     public FavoriteToolsResponse getFavoriteTools(Long userId, int pageNo){
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -165,22 +155,69 @@ public class UserService {
         return favoriteToolsResponse;
     }
 
+    public UpdateMyResponse updateMy(Long userId, String nickname, String positions){
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        if(isDuplicated(nickname)){
+            throw new BusinessException(ErrorCode.DUPLICATED_NICKNAME);
+        }
+        if(nickname == null){
+            userEntity.updatePositions(Positions.fromString(positions));
+            return UpdateMyResponse.of(userEntity.getNickname(),positions);
+        }
+        if(positions == null){
+            userEntity.updateNickname(nickname);
+            return UpdateMyResponse.of(nickname, userEntity.getPositions().getName());
+        }
 
-    private void verifyUserIdWithStoredToken(final UserEntity userEntity, final String refreshToken){
+        userEntity.updateNickname(nickname);
+        userEntity.updatePositions(Positions.fromString(positions));
+        return UpdateMyResponse.of(nickname,positions);
+    }
+
+    public FavoriteBoardsRetrieveResponse getFavoriteBoards(Long userId, Pageable pageable){
+        validateUser(userId);
+
+        Page<BoardScrap> boardScraps = boardScrapRepository.findAllByUserId(userId, pageable);
+        List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
+                .map(BoardScrap::getBoard)
+                .map(board -> FavoriteBoardsResponse.builder()
+                        .boardId(board.getBoardId())
+                        .title(board.getTitle())
+                        .content(board.getContent())
+                        .updatedAt(board.getUpdatedAt())
+                        .toolName(getTool(board.getTool().getToolId()).getToolMainName())
+                        .toolLogo(getTool(board.getTool().getToolId()).getToolLogo())
+                        .build())
+                .toList();
+        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
+
+        FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
+
+        return favoriteBoardsRetrieveResponse;
+    }
+
+
+
+    private void verifyUserIdWithStoredToken(final Long userId, final String refreshToken){
         Long storedUserId = tokenService.findIdByRefreshToken(refreshToken);
 
-        if(!storedUserId.equals(userEntity.getId())){
+        if(!storedUserId.equals(userId)){
             throw new BadRequestException(ErrorCode.REFRESH_TOKEN_USER_ID_MISMATCH_ERROR);
         }
     }
 
-    private Tool getTool(Long toolId){
+    private Tool getTool(final Long toolId){
         Tool tool = toolRepository.findById(toolId)
-                .orElseThrow(()->new BusinessException(ErrorCode.DATA_NOT_FOUND));
+                .orElseThrow(()-> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
 
         return tool;
     }
 
+    public void validateUser(Long userId){
+        userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+    }
 
 
 
