@@ -10,7 +10,6 @@ import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
-import com.daruda.darudaserver.domain.tool.entity.Category;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
@@ -69,7 +68,6 @@ public class BoardService {
         Board board = validateBoardAndUser(userId, boardId);
         Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
         board.update(
-
                 tool,
                 board.getUser(),
                 boardCreateAndUpdateReq.title(),

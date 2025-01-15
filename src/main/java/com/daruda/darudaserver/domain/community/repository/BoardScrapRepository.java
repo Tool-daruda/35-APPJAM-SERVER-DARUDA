@@ -10,7 +10,5 @@ import java.util.Optional;
 
 @Repository
 public interface BoardScrapRepository extends JpaRepository<BoardScrap,Long> {
-
-
     Optional<BoardScrap> findByUserAndBoard(UserEntity user, Board board);
 }

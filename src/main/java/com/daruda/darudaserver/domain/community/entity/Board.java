@@ -6,6 +6,7 @@ import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -30,12 +31,12 @@ public class Board extends BaseTimeEntity {
     @Builder.Default
     private boolean delYn = false;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="tool_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tool_id", unique = false)
     private Tool tool;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id",nullable = false)
+    @JoinColumn(name="user_id",nullable = false,unique = false)
     private UserEntity user;
 
     @Builder.Default
