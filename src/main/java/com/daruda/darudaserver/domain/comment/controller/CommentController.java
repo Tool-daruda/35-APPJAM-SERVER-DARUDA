@@ -48,6 +48,6 @@ public class CommentController {
                                         @RequestParam(defaultValue = "createdAt", value = "criteria")String criteria){
         Pageable pageable = PageRequest.of(pageNo, size, Sort.by(Sort.Direction.DESC, criteria));
         GetCommentRetrieveResponse getCommentRetrieveResponse = commentService.getComments(boardId, pageable);
-        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(getCommentRetrieveResponse,SuccessCode.SUCCESS_CREATE));
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(getCommentRetrieveResponse,SuccessCode.SUCCESS_FETCH));
     }
 }
