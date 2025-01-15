@@ -2,6 +2,7 @@ package com.daruda.darudaserver.domain.community.dto.res;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -30,7 +31,8 @@ public class BoardRes {
 
     public static BoardRes createBoardRes(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images) {
         return BoardRes.builder()
-                .boardId(board.getBoardId())
+                .boardId(board.getId())
+                .boardId(board.getId())
                 .toolName(toolName)
                 .toolLogo(toolLogo)
                 .author(board.getUser().getNickname())
@@ -38,8 +40,8 @@ public class BoardRes {
                 .content(board.getContent())
                 .images(images)
                 .updatedAt(board.getUpdatedAt())
-                .commentCount(commentCount)
                 .build();
     }
+
 
 }

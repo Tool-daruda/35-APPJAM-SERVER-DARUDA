@@ -23,11 +23,11 @@ import java.util.Optional;
 @Repository
 public interface BoardRepository extends JpaRepository<Board,Long> {
 
-    List<Board> findByToolAndBoardIdLessThanOrderByBoardIdDesc(Tool tool, Long cursor, Pageable pageable);
+    List<Board> findByToolAndIdLessThanOrderByIdDesc(Tool tool, Long cursor, Pageable pageable);
 
-    List<Board> findByIsFreeAndBoardIdLessThanOrderByBoardIdDesc(
+    List<Board> findByIsFreeAndIdLessThanOrderByIdDesc(
             boolean isFree, Long boardId, Pageable pageable);
 
-    List<Board> findByBoardIdLessThanOrderByBoardIdDesc(Long cursor, PageRequest pageRequest);
+    List<Board> findByIdLessThanOrderByIdDesc(Long cursor, PageRequest pageRequest);
     Page<Board> findAllByUserId(Long userId, Pageable pageable);
 }

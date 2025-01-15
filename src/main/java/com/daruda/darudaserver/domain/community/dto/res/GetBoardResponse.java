@@ -34,7 +34,7 @@ public class GetBoardResponse {
                 ))
                 .collect(Collectors.toList());
 
-        long nextCursor = pagination.isLastScroll() ? LAST_CURSOR : pagination.getNextCursor().getBoardId();
+        long nextCursor = pagination.isLastScroll() ? LAST_CURSOR : pagination.getNextCursor().getId();
 
         return new GetBoardResponse(boardResList, pagination.getTotalElements(), nextCursor);
     }
