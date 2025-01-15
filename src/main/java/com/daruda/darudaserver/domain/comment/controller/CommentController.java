@@ -5,11 +5,13 @@ import com.daruda.darudaserver.domain.comment.service.CommentService;
 import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -21,9 +23,10 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<?> postComment(@UserId Long userId,
-                                         @PathVariable("board-id")Long boardId,
-                                         @Valid @RequestBody CreateCommentRequest createCommentRequest) throws IOException {
-        CreateCommentResponse createCommentResponse = commentService.postComment(userId, boardId, createCommentRequest);
+                                         @RequestParam("board-id")Long boardId,
+                                         @Valid @ModelAttribute CreateCommentRequest createCommentRequest,
+                                         @Nullable @RequestPart(value = "image", required = false)MultipartFile image) throws IOException {
+        CreateCommentResponse createCommentResponse = commentService.postComment(userId, boardId, createCommentRequest, image);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(createCommentResponse, SuccessCode.SUCCESS_CREATE));
     }
 
