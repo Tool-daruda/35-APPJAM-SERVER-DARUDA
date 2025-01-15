@@ -5,11 +5,11 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class ScrollPaginationCollection<T> {
 
-    private final List <T> itemsWithNextCursor; // 현재 스크롤의 데이터 + 다음 스크롤의 데이터 1개(다음 데이터 확인 위함)
-    private final int countPerScroll; // 스크롤 1회에 조회할 데이터의 개수
+    public final List <T> itemsWithNextCursor; // 현재 스크롤의 데이터 + 다음 스크롤의 데이터 1개(다음 데이터 확인 위함)
+    public final int countPerScroll; // 스크롤 1회에 조회할 데이터의 개수
 
     public static <T> ScrollPaginationCollection <T> of (List<T> itemsWithNextCursor,
                                                         int size){

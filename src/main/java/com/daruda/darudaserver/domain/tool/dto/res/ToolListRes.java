@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.tool.dto.res;
 
+import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import lombok.AccessLevel;
 import lombok.Builder;
 
@@ -7,13 +8,10 @@ import java.util.List;
 
 @Builder(access = AccessLevel.PRIVATE)
 public record ToolListRes (
-        List<ToolDtoGetRes> tools,
-        boolean hasNext
+        List<ToolResponse> tools,
+        ScrollPaginationDto scrollPaginationDto
 ){
-    public static ToolListRes of(List<ToolDtoGetRes> tools, boolean hasNext){
-        return ToolListRes.builder()
-                .tools(tools)
-                .hasNext(hasNext)
-                .build();
+    public static ToolListRes of(List<ToolResponse> tools, ScrollPaginationDto scrollPaginationDto){
+        return new ToolListRes(tools, scrollPaginationDto);
     }
 }

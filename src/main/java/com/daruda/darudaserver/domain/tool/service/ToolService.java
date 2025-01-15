@@ -6,6 +6,8 @@ import com.daruda.darudaserver.domain.tool.entity.*;
 import com.daruda.darudaserver.domain.tool.repository.*;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
+import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
+import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -81,12 +83,24 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
-    public ToolListRes getToolList(final String sort, final Category category,final Pageable pageable) {
-        log.debug("카테고리별 툴 목록을 조회 category : {}, sort : {}, pageable : {}", category, sort, pageable);
-        // 수정할 예정 - 찜 개수 추가 해야함
-        Sort sorting = Sort.by(Sort.Order.desc("viewCount"));
+    public ToolListRes getToolList(final String sort, final Category category,final int size, final Long lastBoardId) {
+        log.debug("카테고리별 툴 목록을 조회 category : {}, sort : {} ", category, sort, size,lastBoardId );
+
+        Sort sorting;
         if("등록순".equalsIgnoreCase(sort)){
-            sorting = Sort.by(Sort.Order.asc("createdAt"));
+            sorting = Sort.by(Sort.Order.desc("createdAt"));
+        }else{
+            sorting = Sort.by(Sort.Order.desc("viewCount"));
+        }
+
+        Pageable pageable = PageRequest.of(0, size, sorting);
+
+        Page<Tool> toolPage;
+        if(Category.ALL.equals(category)){
+            toolPage = toolRepository.findAll(pageable);
+        }else{
+            toolPage = toolRepository.findToolsByCategory(category, pageable);
+
         }
         //Pageable 객체 ( 페이지 Num, 크기, 정렬 )
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sorting);
@@ -94,8 +108,14 @@ public class ToolService {
         List<ToolDtoGetRes> tools =toolPage.getContent().stream()
                 .map(tool -> ToolDtoGetRes.from(tool, convertToKeywordRes(tool)))
                 .toList();
-        return ToolListRes.of(tools, toolPage.hasNext());
 
+        // Scroll Pagination 처리
+        ScrollPaginationCollection<ToolResponse> toolCursor = new ScrollPaginationCollection<>(tools, size);
+        long nextCursor = toolCursor.isLastScroll() ? -1L : toolCursor.getNextCursor().toolId();
+
+        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(toolCursor.getTotalElements(), nextCursor);
+
+        return ToolListRes.of(tools, scrollPaginationDto);
     }
 
     @Transactional
@@ -205,4 +225,13 @@ public class ToolService {
                     return new NotFoundException(ErrorCode.DATA_NOT_FOUND);
                 });
     }
+    public int calculatePopularityScore(int scrapCount, int viewCount) {
+        return scrapCount * 10 + viewCount;
+    }
+
+    public int calculateScrapCount(Long toolId) {
+        return toolScrapRepository.countByToolId(toolId);
+    }
+
+
 }
