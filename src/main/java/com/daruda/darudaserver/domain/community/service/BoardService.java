@@ -3,27 +3,32 @@ package com.daruda.darudaserver.domain.community.service;
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
+import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardImage;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
+import com.daruda.darudaserver.domain.tool.entity.Category;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
+import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -35,35 +40,37 @@ public class BoardService {
     private final BoardImageService boardImageService;
     private final BoardImageRepository boardImageRepository;
     private final ImageService imageService;
-    private final ToolRepository toolRepository;
     private final UserRepository userRepository;
     private final BoardScrapRepository boardScrapRepository;
+    private final ToolRepository toolRepository;
 
     private final String TOOL_LOGO = "ToolLogo.jpeg";
 
     // 게시판 생성
-    public BoardRes createBoard(final Long userId,final  BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
+    public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
         UserEntity user = getUserById(userId);
+        Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
         Board board = boardCreateAndUpdateReq.isFree() ?
                 createFreeBoard(user, boardCreateAndUpdateReq) :
-                createToolBoard(boardCreateAndUpdateReq, user);
+                createToolBoard(tool, boardCreateAndUpdateReq, user);
 
         // 이미지 처리
         List<String> imageUrls = processImages(board, images);
 
         // Tool 정보 설정
-        String toolName = boardCreateAndUpdateReq.isFree() ? "자유" : getToolName(board.getToolId());
-        String toolLogo = boardCreateAndUpdateReq.isFree() ? TOOL_LOGO : getToolLogo(board.getToolId());
+        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : "자유";
+        String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getBoardId()), imageUrls );
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getBoardId()), imageUrls);
     }
 
     // 게시판 업데이트
-    public BoardRes updateBoard(final Long userId,final  Long boardId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
+    public BoardRes updateBoard(final Long userId, final Long boardId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
         Board board = validateBoardAndUser(userId, boardId);
-
+        Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
         board.update(
-                boardCreateAndUpdateReq.toolId(),
+
+                tool,
                 board.getUser(),
                 boardCreateAndUpdateReq.title(),
                 boardCreateAndUpdateReq.content(),
@@ -72,50 +79,83 @@ public class BoardService {
 
         List<String> imageUrls = processImages(board, images);
 
-        String toolName = boardCreateAndUpdateReq.isFree() ? "자유" : getToolName(board.getToolId());
-        String toolLogo = boardCreateAndUpdateReq.isFree() ? TOOL_LOGO : getToolLogo(board.getToolId());
+        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : "자유";
+        String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-        return BoardRes.of(board, toolName, toolLogo,  getCommentCount(boardId),imageUrls);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getBoardId()), imageUrls);
     }
 
     // 게시판 삭제
-    public void deleteBoard(final Long userId,final  Long boardId) {
+    public void deleteBoard(final Long userId, final Long boardId) {
         Board board = validateBoardAndUser(userId, boardId);
         deleteOriginImages(boardId);
         board.delete();
     }
 
     // 스크랩 처리
-    public BoardScrapRes postScrap(final Long userId,final Long boardId) {
+    public BoardScrapRes postScrap(final Long userId, final Long boardId) {
         UserEntity user = getUserById(userId);
         Board board = getBoardById(boardId);
 
-        // 저장되어있는 BoardScrap 이 있으면 delete(). 없으면 생성
-        BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user, board)
-                .orElse( boardScrap = null);
+        BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user, board).orElse(null);
 
-        // 이미 존재하는 경우 - SoftDelete
         if (boardScrap == null) {
             boardScrap = BoardScrap.builder().user(user).board(board).build();
             boardScrapRepository.save(boardScrap);
-        }else{
+        } else {
             boardScrap.update();
         }
         return BoardScrapRes.of(boardId, !boardScrap.isDelYn());
-
     }
 
     // 게시판 조회
     public BoardRes getBoard(final Long boardId) {
         Board board = getBoardById(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
-        String toolName = board.isFree() ? "자유" : getToolName(board.getToolId());
-        String toolLogo = board.isFree() ? TOOL_LOGO : getToolLogo(board.getToolId());
+        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : "자유";
+        String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-        return BoardRes.of(board, toolName, toolLogo,  getCommentCount(boardId),imageUrls);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls);
     }
 
-    // 유효성 검증
+    // 게시판 리스트 조회
+    public GetBoardResponse getBoardList(final Long toolId, final int size, final Long lastBoardId) {
+
+        List<Board> boards;
+        Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId;
+        PageRequest pageRequest = PageRequest.of(0, size + 1);
+
+        // 전체 조회
+        if (toolId == null) {
+            boards = boardRepository.findByBoardIdLessThanOrderByBoardIdDesc(cursor, pageRequest);
+        }
+        // 자유 게시판 조회
+        else if (toolId == -1) {
+            boards = boardRepository.findByIsFreeAndBoardIdLessThanOrderByBoardIdDesc(true,cursor, pageRequest);
+        }
+        // 특정 Tool 게시판 조회
+        else {
+            Tool tool = getToolById(toolId);
+            boards = boardRepository.findByToolAndBoardIdLessThanOrderByBoardIdDesc(tool, cursor, pageRequest);
+        }
+
+        ScrollPaginationCollection<Board> boardsCursor = ScrollPaginationCollection.of(boards, size);
+
+        List<BoardRes> boardResList = boardsCursor.getCurrentScrollItems().stream()
+                .map(board -> BoardRes.of(
+                        board,
+                        board.getTool() != null ? board.getTool().getToolMainName() : "자유",
+                        board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO,
+                        getCommentCount(board.getBoardId()),
+                        boardImageService.getBoardImageUrls(board.getBoardId())
+                ))
+                .collect(Collectors.toList());
+        log.info("BoardRes List: {}", boardResList);
+        long nextCursor = boardsCursor.isLastScroll() ? -1L : boardsCursor.getNextCursor().getBoardId();
+
+        return new GetBoardResponse(boardResList, boardsCursor.getTotalElements(), nextCursor);
+    }
+
     private Board validateBoardAndUser(final Long userId, final Long boardId) {
         Board board = getBoardById(boardId);
         if (!board.getUser().getId().equals(userId)) {
@@ -124,7 +164,6 @@ public class BoardService {
         return board;
     }
 
-    // 이미지 처리
     private List<String> processImages(final Board board, final List<MultipartFile> images) {
         if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
             deleteOriginImages(board.getBoardId());
@@ -136,52 +175,31 @@ public class BoardService {
         return boardImageService.getBoardImageUrls(board.getBoardId());
     }
 
-    // 댓글 개수 반환 (Mock)
     private int getCommentCount(final Long boardId) {
-
-        return 1;
+        return 1; // Mock 데이터
     }
 
-    // Board 및 Tool 생성
-    private Board createToolBoard(final BoardCreateAndUpdateReq req, final UserEntity user) {
-        return boardRepository.save(Board.create(req.toolId(), user, req.title(), req.content()));
+    private Board createToolBoard(final Tool tool,final BoardCreateAndUpdateReq req, final UserEntity user) {
+        return boardRepository.save(Board.create( tool, user, req.title(), req.content()));
     }
 
     private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
         return boardRepository.save(Board.createFree(user, req.title(), req.content()));
     }
 
-    // Tool 정보 가져오기
-    private String getToolName(final Long toolId) {
-        return getToolById(toolId).getToolMainName();
-    }
-
-    private String getToolLogo(final Long toolId) {
-        return getToolById(toolId).getToolLogo();
-    }
-
-    // 도구 조회
-    private Tool getToolById(final Long toolId) {
-        return toolRepository.findById(toolId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
-    }
-
-    // 유저 및 게시판 조회
     private Board getBoardById(final Long boardId) {
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
-        if (board.isDelYn()) {
-            throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
-        }
-        return board;
+        return boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
     }
+
+    private Tool getToolById(final Long toolId) {
+        return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
+    }
+
 
     private UserEntity getUserById(final Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
+        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
     }
 
-    // 기존 이미지 삭제
     private void deleteOriginImages(final Long boardId) {
         List<BoardImage> boardImages = boardImageRepository.findAllByBoardId(boardId);
         List<Long> imageIds = boardImages.stream().map(BoardImage::getImageId).toList();

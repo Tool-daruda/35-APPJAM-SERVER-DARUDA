@@ -15,10 +15,12 @@ public class ScrollPaginationCollection<T> {
                                                         int size){
         return new ScrollPaginationCollection<>(itemsWithNextCursor,size);
     }
+
     // 마지막 스크롤린지 확인하기 위한 메서드, 조회한 결과(countPerScroll) 이하로 조회시 마지막 스크롤 이라고 판단
     public boolean isLastScroll(){
         return this.itemsWithNextCursor.size() <= countPerScroll;
     }
+
     // 마지막 스크롤 일 경우 itemsWithNextCursor를 Return
     public List<T> getCurrentScrollItems(){
         // 마지막 스크롤일 경우
@@ -32,5 +34,9 @@ public class ScrollPaginationCollection<T> {
     // 마지막 데이터를 cursor 로 사용하고 Return
     public T getNextCursor(){
         return itemsWithNextCursor.get(countPerScroll - 1);
+    }
+
+    public long getTotalElements(){
+        return this.itemsWithNextCursor.size();
     }
 }
