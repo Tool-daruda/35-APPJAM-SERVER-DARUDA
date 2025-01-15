@@ -221,7 +221,7 @@ public class BoardService {
         Page<Board> boards = boardRepository.findAllByUserId(userId, pageable);
 
         List<BoardRes> boardResList = boards.getContent().stream()
-                .map(board -> getBoard(board.getBoardId()))
+                .map(board -> getBoard(board.getId()))
                 .toList();
 
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());

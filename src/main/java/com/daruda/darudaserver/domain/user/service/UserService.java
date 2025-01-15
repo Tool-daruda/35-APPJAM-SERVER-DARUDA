@@ -182,7 +182,7 @@ public class UserService {
         List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
                 .map(BoardScrap::getBoard)
                 .map(board -> FavoriteBoardsResponse.builder()
-                        .boardId(board.getBoardId())
+                        .boardId(board.getId())
                         .title(board.getTitle())
                         .content(board.getContent())
                         .updatedAt(board.getUpdatedAt())
