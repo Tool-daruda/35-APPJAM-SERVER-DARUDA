@@ -66,8 +66,8 @@ public class BoardService {
         // imageURL 반환
         List<Long> imageIds =imageService.uploadImages(images);
         // BoardImage 저장
-        boardImageService.saveBoardImages(board.getBoardId(), imageIds);
-        List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
+        boardImageService.saveBoardImages(board.getId(), imageIds);
+        List<String> imageUrls= boardImageService.getBoardImageUrls(board.getId());
         return BoardRes.of(board,imageUrls);
     }
 
@@ -99,8 +99,8 @@ public class BoardService {
         // imageURL 업로드
         List<Long> imageIds =imageService.uploadImages(images);
         // BoardImage 저장
-        boardImageService.saveBoardImages(board.getBoardId(), imageIds);
-        List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
+        boardImageService.saveBoardImages(board.getId(), imageIds);
+        List<String> imageUrls= boardImageService.getBoardImageUrls(board.getId());
         return BoardRes.of(board,imageUrls);
     }
 
@@ -139,7 +139,7 @@ public class BoardService {
 
     public BoardRes getBoard(final Long boardId) {
         Board board = getBoardById(boardId);
-        List<String> imageUrls= boardImageService.getBoardImageUrls(board.getBoardId());
+        List<String> imageUrls= boardImageService.getBoardImageUrls(board.getId());
         return BoardRes.of(board,imageUrls);
     }
 

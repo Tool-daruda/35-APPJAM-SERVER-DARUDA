@@ -21,7 +21,7 @@ public record BoardRes(
 ) {
     public static BoardRes of(final Board board,final List<String> images){
         return BoardRes.builder()
-                .boardId(board.getBoardId())
+                .boardId(board.getId())
                 .toolId(board.getToolId())
                 .title(board.getTitle())
                 .content(board.getContent())
@@ -32,7 +32,7 @@ public record BoardRes(
 
     public static BoardRes of(final Board board){
         return BoardRes.builder()
-                .boardId(board.getBoardId())
+                .boardId(board.getId())
                 .toolId(board.getToolId())
                 .title(board.getTitle())
                 .content(board.getContent())
