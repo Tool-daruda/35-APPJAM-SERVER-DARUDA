@@ -158,7 +158,7 @@ public class BoardService {
                         getCommentCount(board.getId()),
                         boardImageService.getBoardImageUrls(board.getId())
                 ))
-                .collect(Collectors.toList());
+                .toList();
         log.debug("BoardRes List: {}", boardResList);
         long nextCursor = boardsCursor.isLastScroll() ? -1L : boardsCursor.getNextCursor().getId();
 
