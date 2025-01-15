@@ -20,15 +20,11 @@ import java.util.List;
 public interface ToolScrapRepository extends JpaRepository<ToolScrap,Long> {
 
 
-    boolean existsByUserAndTool(final UserEntity user, final Tool tool);
-
-    void deleteByUserAndTool(final UserEntity user, final Tool tool);
 
 
     @Query("SELECT ts FROM ToolScrap ts WHERE ts.user.id = :userId")
     Page<ToolScrap> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
 
-    Page<Long> findAllByUserId(Long userId, Pageable pageablea);
 
     Optional<ToolScrap>  findByUserAndTool(UserEntity user, Tool tool);
 }
