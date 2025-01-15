@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.user.controller;
 
 import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
+import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.auth.UserId;
@@ -32,14 +33,12 @@ public class MyPageController {
         UpdateMyResponse updateMyResponse = userService.updateMy(userId,updateMyRequest.nickname(),updateMyRequest.positions());
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(updateMyResponse, SuccessCode.SUCCESS_UPDATE));
     }
-/*
+
     @GetMapping("/tools")
     public ResponseEntity<?> getFavoriteTools(@UserId Long userId,
-                                              @RequestParam(defaultValue = "1", value = "page")int pageNo,
-                                              @RequestParam(defaultValue = "createdAt", value = "criteria")String criteria){
-        userService.getFavoriteTools(userId, pageNo, criteria);
+                                              @RequestParam(defaultValue = "1", value = "page")int pageNo){
+        FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId, pageNo);
 
-
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteToolsResponse, SuccessCode.SUCCESS_CREATE));
     }
-*/
 }

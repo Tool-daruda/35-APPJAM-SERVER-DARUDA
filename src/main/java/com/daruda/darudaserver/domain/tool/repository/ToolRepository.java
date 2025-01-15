@@ -23,5 +23,4 @@ public interface ToolRepository extends JpaRepository<Tool,Long> {
 
     @Query("SELECT t FROM Tool t WHERE ( :category = 'ALL' OR t.category = :category)")
     Page<Tool> findAllWithFilter(@Param("category") Category category, Pageable pageable);
-
 }

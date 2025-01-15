@@ -1,12 +1,18 @@
 package com.daruda.darudaserver.domain.user.service;
 
+import com.daruda.darudaserver.domain.tool.dto.res.ToolDtoGetRes;
+import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
+import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
+import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.domain.user.dto.response.*;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
-
+import com.daruda.darudaserver.global.auth.jwt.provider.JwtValidationType;
 import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
 import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -16,11 +22,13 @@ import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -31,6 +39,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenService tokenService;
+    private final ToolScrapRepository toolScrapRepository;
+    private final ToolRepository toolRepository;
+    private final ToolService toolService;
 
     public LoginResponse oAuthLogin(final UserInfo userInfo) {
         String email = userInfo.email();
@@ -39,6 +50,7 @@ public class UserService {
         if (userEntity.isEmpty()) {
             return LoginResponse.of(false,email);
         } else { //등록된 회원인 경우
+            UserEntity user = userEntity.get();
             Long userId = userEntity.get().getId();
             UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
@@ -90,7 +102,7 @@ public class UserService {
         String requestToken = tokenService.getRefreshTokenByUserId(userId);
         UserEntity userEntity = userRepository.findById(userId)
                         .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
-        verifyUserIdWithStoredToken(userId,requestToken);
+        verifyUserIdWithStoredToken(userEntity,requestToken);
 
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
@@ -126,20 +138,47 @@ public class UserService {
         return UpdateMyResponse.of(nickname,positions);
     }
 
-    public void getFavoriteTools(Long userId, int pageNo, String criteria){
-        userRepository.findById(userId)
+    public FavoriteToolsResponse getFavoriteTools(Long userId, int pageNo){
+        UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        Pageable pageable = PageRequest.of(pageNo,10, Sort.by(Sort.Direction.DESC, criteria));
+        Pageable pageable = PageRequest.of(pageNo,10);
+        Page<ToolScrap> toolIdPage = toolScrapRepository.findAllByUserId(userId,pageable);
+
+
+        List<ToolScrap> toolScraps = toolIdPage.getContent();
+        List<Long> toolIds = toolScraps.stream()
+                .map(toolScrap -> toolScrap.getTool().getToolId())
+                .toList();
+        List<Tool> tools = toolIds.stream()
+                .map(toolId-> getTool(toolId))
+                .toList();
+
+        List<ToolDtoGetRes> toolDtoGetRes = tools.stream()
+                .map(tool->ToolDtoGetRes.of(tool, toolService.convertToKeywordRes(tool)))
+                .toList();
+
+        PagenationDto pagenationDto = PagenationDto.of(pageNo,10,toolIdPage.getTotalPages());
+
+        FavoriteToolsResponse favoriteToolsResponse = FavoriteToolsResponse.of(toolDtoGetRes, pagenationDto);
+
+        return favoriteToolsResponse;
     }
 
 
-    private void verifyUserIdWithStoredToken(final Long userId, final String refreshToken){
+    private void verifyUserIdWithStoredToken(final UserEntity userEntity, final String refreshToken){
         Long storedUserId = tokenService.findIdByRefreshToken(refreshToken);
 
-        if(!storedUserId.equals(userId)){
+        if(!storedUserId.equals(userEntity.getId())){
             throw new BadRequestException(ErrorCode.REFRESH_TOKEN_USER_ID_MISMATCH_ERROR);
         }
+    }
+
+    private Tool getTool(Long toolId){
+        Tool tool = toolRepository.findById(toolId)
+                .orElseThrow(()->new BusinessException(ErrorCode.DATA_NOT_FOUND));
+
+        return tool;
     }
 
 
