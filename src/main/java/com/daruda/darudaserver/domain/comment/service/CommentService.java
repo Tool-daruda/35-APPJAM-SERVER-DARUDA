@@ -46,7 +46,7 @@ public class CommentService {
     public CreateCommentResponse postComment(Long userId, Long boardId, CreateCommentRequest createCommentRequest, MultipartFile image) throws IOException {
         //게시글과 사용자 존재 여부 검사
         Board board = boardRepository.findById(boardId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.DATA_NOT_FOUND));
+                .orElseThrow(()->new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
 

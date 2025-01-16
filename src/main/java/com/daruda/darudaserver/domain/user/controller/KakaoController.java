@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.user.controller;
 
+import com.daruda.darudaserver.domain.user.dto.request.NicknameRequest;
 import com.daruda.darudaserver.domain.user.dto.request.SignUpRequest;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
@@ -64,8 +65,8 @@ public class KakaoController {
     }
 
     @PostMapping("/nickname")
-    public ResponseEntity<?> checkDuplicate(@NotNull(message = "닉네임은 필수입력값입니다") @RequestBody String nickname){
-        boolean result = userService.isDuplicated(nickname);
+    public ResponseEntity<?> checkDuplicate(@NotNull(message = "닉네임은 필수입력값입니다") @RequestBody NicknameRequest nickName){
+        boolean result = userService.isDuplicated(nickName.getNickName());
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result,SuccessCode.SUCCESS_FETCH));
     }
 

@@ -212,10 +212,6 @@ public class ToolService {
                 .toList();
     }
 
-    public int updateView(Long toolId) {
-        log.debug("툴 조회수를 증가시킵니다. toolId={}", toolId);
-        return toolRepository.updateView(toolId);
-    }
 
     private void validateList(List<?> lists) {
         // 빈 리스트일 경우 예외 처리

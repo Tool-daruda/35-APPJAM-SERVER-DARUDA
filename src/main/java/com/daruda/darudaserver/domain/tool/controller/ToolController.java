@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,7 +66,7 @@ public class ToolController {
      */
     @GetMapping("/tools")
     public ResponseEntity<ApiResponse<?>> getToolList(@RequestParam(defaultValue = "popular", value="criteria") String criteria,
-                                                      @RequestParam(defaultValue = "ALL") String category,
+                                                      @RequestParam(defaultValue = "ALL",value="category") String category,
                                                       @RequestParam(value = "size", defaultValue = "18") int size,
                                                       @RequestParam(value = "lastToolId", required = false) Long lastToolId
                                                              ){
@@ -87,8 +88,9 @@ public class ToolController {
      */
     @GetMapping("/tools/category")
     public ResponseEntity<ApiResponse<List<CategoryRes>>> getAllCategories() {
-        return ResponseEntity<ApiResponse> Arrays.stream(Category.values())
+        List<CategoryRes> categoryRes = Arrays.stream(Category.values())
                 .map(CategoryRes::from)
                 .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(categoryRes, SuccessCode.SUCCESS_FETCH));
     }
 }

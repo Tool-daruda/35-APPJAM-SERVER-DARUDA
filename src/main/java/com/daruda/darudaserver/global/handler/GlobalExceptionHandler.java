@@ -1,10 +1,12 @@
 package com.daruda.darudaserver.global.handler;
 
+import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.dto.ErrorResponse;
 import jakarta.validation.ConstraintDeclarationException;
 import jakarta.validation.ConstraintViolation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +15,11 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.io.IOException;
-
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -60,9 +63,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(Exception e) {
-        return buildErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+    public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
+        return buildErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage());
+
     }
+
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(ErrorCode ex) {
+        return buildErrorResponse(ErrorCode.INVALID_FIELD_ERROR, ex.getMessage());
+    }
+
 
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(ErrorCode errorCode, Object detail){

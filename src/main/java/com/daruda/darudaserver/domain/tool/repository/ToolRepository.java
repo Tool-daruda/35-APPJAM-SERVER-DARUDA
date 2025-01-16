@@ -15,11 +15,6 @@ import java.util.List;
 @Repository
 public interface ToolRepository extends JpaRepository<Tool, Long> {
 
-    @Transactional
-    @Modifying
-    @Query("UPDATE Tool t SET t.viewCount = t.viewCount + 1 WHERE t.toolId = :id")
-    int updateView(@Param("id") Long id);
-
     // 1. popular 기준 (전체 조회)
     @Query("SELECT t FROM Tool t WHERE t.toolId < :cursor ORDER BY t.popular DESC, t.toolId DESC")
     List<Tool> findAllWithCursorOrderByPopular(@Param("cursor") Long cursor, Pageable pageable);

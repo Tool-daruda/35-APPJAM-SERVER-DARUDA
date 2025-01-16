@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -200,16 +199,16 @@ public class BoardService {
     }
 
     private Board getBoardById(final Long boardId) {
-        return boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
+        return boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
     }
 
     private Tool getToolById(final Long toolId) {
-        return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
+        return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
     }
 
 
     private UserEntity getUserById(final Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.DATA_NOT_FOUND));
+        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
     private void deleteOriginImages(final Long boardId) {
