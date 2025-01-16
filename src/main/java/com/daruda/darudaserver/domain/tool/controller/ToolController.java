@@ -62,7 +62,7 @@ public class ToolController {
     @GetMapping("/tools")
     public ResponseEntity<ApiResponse<?>> getToolList(@RequestParam(defaultValue = "popular", value="criteria") String criteria,
                                                       @RequestParam(defaultValue = "ALL") String category,
-                                                      @RequestParam(value = "size", defaultValue = "10") int size,
+                                                      @RequestParam(value = "size", defaultValue = "18") int size,
                                                       @RequestParam(value = "lastToolId", required = false) Long lastToolId
                                                              ){
         Category categoryEnum = Category.fromEnglishName(category);
