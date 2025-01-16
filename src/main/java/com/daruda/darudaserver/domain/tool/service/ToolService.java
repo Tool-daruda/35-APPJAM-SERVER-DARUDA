@@ -10,11 +10,6 @@ import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -118,7 +113,13 @@ public class ToolService {
                 .toList();
 
         // Scroll Pagination 처리
-        long nextCursor = toolCursor.isLastScroll() ? -1L : toolCursor.getNextCursor().getToolId();
+        long nextCursor;
+        if (toolResponses.isEmpty()) {
+            nextCursor = -1; // 데이터 없음
+        } else {
+            nextCursor = toolResponses.get(toolResponses.size() - 1).toolId();
+        }
+
 
         ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(toolCursor.getTotalElements(), nextCursor);
 

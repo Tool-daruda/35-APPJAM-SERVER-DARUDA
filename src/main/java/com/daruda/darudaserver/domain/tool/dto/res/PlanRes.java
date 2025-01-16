@@ -1,7 +1,6 @@
 package com.daruda.darudaserver.domain.tool.dto.res;
 
 import com.daruda.darudaserver.domain.tool.entity.Plan;
-import lombok.AccessLevel;
 import lombok.Builder;
 
 @Builder
@@ -10,7 +9,8 @@ public record PlanRes(
         String planName,
         int monthlyPrice,
         int annualPrice,
-        String description
+        String description,
+        Boolean isDollar
 ) {
     public static PlanRes of (final Plan plan){
         return PlanRes.builder()
@@ -19,6 +19,7 @@ public record PlanRes(
                 .monthlyPrice(plan.getPriceMonthly())
                 .annualPrice(plan.getPriceAnnual())
                 .description(plan.getDescription())
+                .isDollar(plan.getIsDollar())
                 .build();
     }
 }

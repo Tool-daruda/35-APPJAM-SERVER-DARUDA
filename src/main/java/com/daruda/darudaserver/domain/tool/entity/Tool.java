@@ -28,7 +28,7 @@ public class Tool {
     @Column(name = "category", nullable = false)
     private Category category;
 
-    @Column(name = "tool_link", nullable = false)
+    @Column(name = "tool_link", nullable = false,length = 5000)
     private String toolLink;
 
     @Column(name = "description", nullable = false)
@@ -44,7 +44,7 @@ public class Tool {
     @Column(name="detail_description",nullable = false)
     private String detailDescription;
 
-    @Column(name="plan_link")
+    @Column(name="plan_link", length = 5000)
     private String planLink;
 
     @Column(name="bg_color",nullable = false)
@@ -52,7 +52,6 @@ public class Tool {
 
     @Column(name="font_color")
     private boolean fontColor;
-
 
     @Column(name="tool_logo",nullable = false)
     private String toolLogo;
