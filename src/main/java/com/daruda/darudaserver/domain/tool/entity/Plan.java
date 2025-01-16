@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.w3c.dom.Text;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
@@ -23,11 +22,14 @@ public class Plan {
     @Column(name = "price_monthly",nullable = false)
     private int priceMonthly;
 
-    @Column(name = "price_annual",nullable = false)
+    @Column(name = "price_annual")
     private int priceAnnual;
 
-    @Column(name = "description",nullable = false)
+    @Column(name = "description",nullable = false,length = 50000)
     private String description;
+
+    @Column(name = "is_dollar",nullable = false)
+    private Boolean isDollar;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="tool_id",nullable = false)

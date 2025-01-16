@@ -6,7 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import java.util.List;
 
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 public record RelatedToolRes (
         Long toolId,
         String toolName,

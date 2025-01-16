@@ -17,7 +17,7 @@ public class RelatedTool {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long relatedToolId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     @JoinColumn(name="tool_id",nullable = false)
     private Tool tool;
 

@@ -4,7 +4,7 @@ import com.daruda.darudaserver.domain.tool.entity.ToolPlatForm;
 import lombok.AccessLevel;
 import lombok.Builder;
 
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 public record PlatformRes (
         Boolean web,
         Boolean windows,

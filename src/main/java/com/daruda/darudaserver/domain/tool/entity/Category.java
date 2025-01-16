@@ -28,13 +28,25 @@ public enum Category {
     }
 
     public static Category fromKoreanName(String name) {
-        if ("전체".equalsIgnoreCase(name) || name == null || name.isBlank()) {
+        // Null 또는 빈 문자열의 경우 기본값으로 Category.ALL 반환
+        if (name == null || name.isBlank()) {
             return Category.ALL;
         }
+        // 한국어 이름을 기반으로 Category 검색
         return Arrays.stream(values())
-                .filter(category -> category.getKoreanName().equalsIgnoreCase(name))
+                .filter(category -> category.koreanName.equalsIgnoreCase(name.trim()))
                 .findFirst()
                 .orElseThrow(() -> new InvalidValueException(ErrorCode.INVALID_TOOL_CATEGORY));
     }
 
+
+    public static Category fromEnglishName(String name) {
+        if (name == null || name.isBlank()) {
+            return Category.ALL;
+        }
+        return Arrays.stream(values())
+                .filter(category -> category.name().equalsIgnoreCase(name.trim()))
+                .findFirst()
+                .orElseThrow(() -> new InvalidValueException(ErrorCode.INVALID_TOOL_CATEGORY));
+    }
 }

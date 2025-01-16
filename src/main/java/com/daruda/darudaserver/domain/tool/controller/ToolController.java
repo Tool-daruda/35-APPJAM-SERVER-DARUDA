@@ -7,11 +7,8 @@ import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 
-import com.daruda.darudaserver.global.handler.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,18 +60,14 @@ public class ToolController {
      * 툴 리스트 조회
      */
     @GetMapping("/tools")
-    public ResponseEntity<ApiResponse<?>> getToolList(@RequestParam(defaultValue = "인기순") String sort,
-                                                      @RequestParam(defaultValue = "전체") String category,
-                                                      @RequestParam(defaultValue = "1")   int page,
-                                                      @RequestParam(defaultValue = "18")  int size
+    public ResponseEntity<ApiResponse<?>> getToolList(@RequestParam(defaultValue = "popular", value="criteria") String criteria,
+                                                      @RequestParam(defaultValue = "ALL") String category,
+                                                      @RequestParam(value = "size", defaultValue = "10") int size,
+                                                      @RequestParam(value = "lastToolId", required = false) Long lastToolId
                                                              ){
-        ValidatorUtil.validatePage(page);
-        ValidatorUtil.validateSize(size, 18);
-
-        Pageable pageable = PageRequest.of(page - 1, size);
-        Category categoryEnum = Category.fromKoreanName(category);
+        Category categoryEnum = Category.fromEnglishName(category);
         ToolListRes toolListRes = toolService.
-                getToolList(sort , categoryEnum, pageable);
+                getToolList(criteria , categoryEnum, size, lastToolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolListRes,SuccessCode.SUCCESS_FETCH));
     }
     /**

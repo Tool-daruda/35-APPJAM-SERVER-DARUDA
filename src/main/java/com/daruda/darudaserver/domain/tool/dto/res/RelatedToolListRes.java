@@ -5,7 +5,7 @@ import lombok.Builder;
 
 import java.util.List;
 
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 public record RelatedToolListRes(
         List<RelatedToolRes> relatedToolResList
         ) {

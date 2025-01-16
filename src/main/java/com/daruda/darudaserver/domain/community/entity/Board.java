@@ -13,6 +13,7 @@ import lombok.*;
 @Getter
 @Entity
 @Builder
+@Table(name="board")
 @AllArgsConstructor
 @NoArgsConstructor(access=AccessLevel.PROTECTED)
 public class Board extends BaseTimeEntity {

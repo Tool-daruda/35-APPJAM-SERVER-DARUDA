@@ -28,7 +28,7 @@ public class Tool {
     @Column(name = "category", nullable = false)
     private Category category;
 
-    @Column(name = "tool_link", nullable = false)
+    @Column(name = "tool_link", nullable = false,length = 5000)
     private String toolLink;
 
     @Column(name = "description", nullable = false)
@@ -44,17 +44,17 @@ public class Tool {
     @Column(name="detail_description",nullable = false)
     private String detailDescription;
 
-    @Column(name="plan_link")
+    @Column(name="plan_link", length = 5000)
     private String planLink;
 
-    @Column(name="color",nullable = false)
-    private String color;
+    @Column(name="bg_color",nullable = false)
+    private String bgColor;
+
+    @Column(name="font_color")
+    private boolean fontColor;
 
     @Column(name="tool_logo",nullable = false)
     private String toolLogo;
-
-    @Column(columnDefinition="integer default 0",nullable = false)
-    private int viewCount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
@@ -62,14 +62,17 @@ public class Tool {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
-    // createdAt 값을 설정하는 메서드
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = new Timestamp(System.currentTimeMillis());
-    }
+    @Column(columnDefinition="integer default 0",nullable = false)
+    private int viewCount;
 
-    // viewCount를 업데이트하는 메서드 (updatedAt에 영향 없음)
+    @Column(name = "popular", columnDefinition="integer default 0")
+    private int popular;
+
     public void incrementViewCount() {
         this.viewCount++;
     }
+    public void updatePopular(int scrapCount) {
+        this.popular = scrapCount * 10 + this.viewCount;
+    }
+
 }
