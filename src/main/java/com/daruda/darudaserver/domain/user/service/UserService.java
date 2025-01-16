@@ -201,6 +201,7 @@ public class UserService {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
         userRepository.delete(userEntity);
+        tokenService.deleteRefreshToken(userId);
     }
 
     private void verifyUserIdWithStoredToken(final Long userId, final String refreshToken){
