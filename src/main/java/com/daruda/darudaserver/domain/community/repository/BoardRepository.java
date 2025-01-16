@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board,Long> {
@@ -20,6 +21,7 @@ public interface BoardRepository extends JpaRepository<Board,Long> {
             "WHERE (:tool IS NULL OR b.tool = :tool) " +
             "AND (:isFree IS NULL OR b.isFree = :isFree) " +
             "AND b.id < :cursor " +
+            "AND b.delYn = false " +
             "ORDER BY b.createdAt DESC")
     List<Board> findBoards(
             @Param("tool") Tool tool,
@@ -28,5 +30,7 @@ public interface BoardRepository extends JpaRepository<Board,Long> {
             Pageable pageable);
 
 
-    Page<Board> findAllByUserId(Long userId, Pageable pageable);
+    Page<Board> findAllByUserIdAndDelYnFalse(Long userId, Pageable pageable);
+
+    Optional<Board> findByIdAndDelYn(Long boardId, boolean delYn);
 }
