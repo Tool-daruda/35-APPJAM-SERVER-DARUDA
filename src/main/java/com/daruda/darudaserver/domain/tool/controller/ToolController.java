@@ -60,14 +60,14 @@ public class ToolController {
      * 툴 리스트 조회
      */
     @GetMapping("/tools")
-    public ResponseEntity<ApiResponse<?>> getToolList(@RequestParam(defaultValue = "인기순") String sort,
-                                                      @RequestParam(defaultValue = "전체") String category,
+    public ResponseEntity<ApiResponse<?>> getToolList(@RequestParam(defaultValue = "popular", value="criteria") String criteria,
+                                                      @RequestParam(defaultValue = "ALL") String category,
                                                       @RequestParam(value = "size", defaultValue = "10") int size,
-                                                      @RequestParam(value = "lastBoardId", required = false) Long lastBoardId
+                                                      @RequestParam(value = "lastToolId", required = false) Long lastToolId
                                                              ){
-        Category categoryEnum = Category.fromKoreanName(category);
+        Category categoryEnum = Category.fromEnglishName(category);
         ToolListRes toolListRes = toolService.
-                getToolList(sort , categoryEnum, size, lastBoardId);
+                getToolList(criteria , categoryEnum, size, lastToolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolListRes,SuccessCode.SUCCESS_FETCH));
     }
     /**

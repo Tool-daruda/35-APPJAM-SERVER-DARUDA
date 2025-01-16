@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.tool.service;
 
 
+import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.tool.dto.res.*;
 import com.daruda.darudaserver.domain.tool.entity.*;
 import com.daruda.darudaserver.domain.tool.repository.*;
@@ -9,6 +10,7 @@ import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Transactional(readOnly = true)
+@Transactional
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -44,9 +46,10 @@ public class ToolService {
         List<PlatformRes> platformRes = convertToPlatformRes(tool);
         List<String> keywordRes = convertToKeywordRes(tool);
         List<String> videos = getVideoById(tool);
-        updateView(toolId);
-
+        tool.incrementViewCount();
+        log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
         log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
+        toolRepository.save(tool);
         return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos);
     }
 
@@ -83,49 +86,40 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
-    public ToolListRes getToolList(final String sort, final Category category, final int size, final Long lastToolId) {
-        log.debug("카테고리별 툴 목록을 조회 category : {}, sort : {}, size : {}, lastToolId : {}", category, sort, size, lastToolId);
+    public ToolListRes getToolList(final String criteria, final Category category, final int size, final Long lastToolId) {
+        log.debug("카테고리별 툴 목록을 조회 category: {}, sort: {}, size: {}, lastToolId: {}", category, criteria, size, lastToolId);
 
         Long cursor = (lastToolId == null) ? Long.MAX_VALUE : lastToolId;
+        validateCriteria(criteria);
+        Pageable pageRequest = PageRequest.of(0, size + 1);  // size + 1 조회하여 다음 페이지 존재 여부 확인
 
-        Sort sorting;
-        if ("등록순".equalsIgnoreCase(sort)) {
-            sorting = Sort.by(Sort.Order.desc("createdAt"));
+        List<Tool> tools;
+        long totalElements = Category.ALL.equals(category)
+                ? toolRepository.count()
+                : toolRepository.countWithCursor(category, cursor);
+
+        if ("popular".equals(criteria)) {
+            tools = Category.ALL.equals(category)
+                    ? toolRepository.findAllWithCursorOrderByPopular(cursor, pageRequest)
+                    : toolRepository.findByCategoryWithCursorOrderByPopular(category, cursor, pageRequest);
         } else {
-            sorting = Sort.by(Sort.Order.desc("viewCount")); // 기본값: 인기순
+            tools = Category.ALL.equals(category)
+                    ? toolRepository.findAllWithCursorOrderByCreatedAt(cursor, pageRequest)
+                    : toolRepository.findByCategoryWithCursorOrderByCreatedAt(category, cursor, pageRequest);
         }
 
-        Pageable pageRequest = PageRequest.of(0, size, sorting);
-
-
-        List<Tool> tools = Category.ALL.equals(category)
-                ? toolRepository.findAllWithCursor(cursor, pageRequest)
-                : toolRepository.findByCategoryWithCursor(category, cursor, pageRequest);
-
-        ScrollPaginationCollection<Tool> toolCursor = ScrollPaginationCollection.of(tools, size);
-
-        List<ToolResponse> toolResponses = toolCursor.getCurrentScrollItems().stream()
-                .map(tool -> {
-                    int scrapCount = calculateScrapCount(tool.getToolId());
-                    int popularityScore = calculatePopularityScore(scrapCount, tool.getViewCount());
-                    return ToolResponse.of(tool, convertToKeywordRes(tool));
-                })
+        // nextCursor : size + 1로 조회했을 때 다음 데이터가 있는지 확인
+        boolean hasNextPage = tools.size() > size;
+        List<Tool> paginatedTools = hasNextPage ? tools.subList(0, size) : tools;
+        long nextCursor = hasNextPage ? tools.get(size).getToolId() : -1; // 다음 페이지가 있으면 cursor 설정
+        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
+        List<ToolResponse> toolResponses = paginatedTools.stream()
+                .map(tool -> ToolResponse.of(tool, convertToKeywordRes(tool)))
                 .toList();
 
-        // Scroll Pagination 처리
-        long nextCursor;
-        if (toolResponses.isEmpty()) {
-            nextCursor = -1; // 데이터 없음
-        } else {
-            nextCursor = toolResponses.get(toolResponses.size() - 1).toolId();
-        }
-
-
-        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(toolCursor.getTotalElements(), nextCursor);
-
-        // 최종 응답 반환
         return ToolListRes.of(toolResponses, scrollPaginationDto);
     }
+
 
     @Transactional
     public ToolScrapRes postToolScrap(final Long userId, final Long toolId){
@@ -139,9 +133,12 @@ public class ToolService {
                     .tool(tool)
                     .build();
             toolScrapRepository.save(toolScrap);
+            log.debug("툴 스크랩이 생 되었습니다");
         }else{
-            toolScrap.update();
+            log.debug("툴 스크랩이 업데이트 되었습니다");
         }
+        int scrapCount = toolScrapRepository.countByTool_ToolIdAndDelYnFalse(toolId);
+        tool.updatePopular(scrapCount);
         return ToolScrapRes.of(toolId, !toolScrap.isDelYn());
     }
 
@@ -234,12 +231,12 @@ public class ToolService {
                     return new NotFoundException(ErrorCode.DATA_NOT_FOUND);
                 });
     }
-    public int calculatePopularityScore(int scrapCount, int viewCount) {
-        return scrapCount * 10 + viewCount;
-    }
 
-    public int calculateScrapCount(Long toolId) {
-        return toolScrapRepository.countByToolId(toolId);
+    // 정렬 기준 검증
+    public void validateCriteria(String criteria){
+        List<String> allowedFields = List.of("popular", "createdAt");
+        if (!allowedFields.contains(criteria)) {
+            throw new IllegalArgumentException("Invalid sort criteria: " + criteria);
+        }
     }
-
 }

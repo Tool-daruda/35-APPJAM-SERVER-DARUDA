@@ -65,14 +65,14 @@ public class Tool {
     @Column(columnDefinition="integer default 0",nullable = false)
     private int viewCount;
 
-    // createdAt 값을 설정하는 메서드
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = new Timestamp(System.currentTimeMillis());
-    }
+    @Column(name = "popular", columnDefinition="integer default 0")
+    private int popular;
 
-    // viewCount를 업데이트하는 메서드 (updatedAt에 영향 없음)
     public void incrementViewCount() {
         this.viewCount++;
     }
+    public void updatePopular(int scrapCount) {
+        this.popular = scrapCount * 10 + this.viewCount;
+    }
+
 }

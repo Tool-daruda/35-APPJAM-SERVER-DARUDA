@@ -13,17 +13,32 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ToolRepository extends JpaRepository<Tool,Long> {
+public interface ToolRepository extends JpaRepository<Tool, Long> {
 
     @Transactional
     @Modifying
-    @Query("update Tool t set t.viewCount = t.viewCount + 1 where t.toolId = :id")
-    int updateView(Long id);
+    @Query("UPDATE Tool t SET t.viewCount = t.viewCount + 1 WHERE t.toolId = :id")
+    int updateView(@Param("id") Long id);
 
-    @Query("SELECT t FROM Tool t WHERE t.id < :cursor ORDER BY t.id DESC")
-    List<Tool> findAllWithCursor(@Param("cursor") Long cursor, Pageable pageable);
+    // 1. popular 기준 (전체 조회)
+    @Query("SELECT t FROM Tool t WHERE t.toolId < :cursor ORDER BY t.popular DESC, t.toolId DESC")
+    List<Tool> findAllWithCursorOrderByPopular(@Param("cursor") Long cursor, Pageable pageable);
 
-    // 카테고리별 툴 조회 (커서 기반)
-    @Query("SELECT t FROM Tool t WHERE t.category = :category AND t.id < :cursor ORDER BY t.id DESC")
-    List<Tool> findByCategoryWithCursor(@Param("category") Category category, @Param("cursor") Long cursor, Pageable pageable);
+    // 1-2. 카테고리별 popular 조회
+    @Query("SELECT t FROM Tool t WHERE t.category = :category AND t.toolId < :cursor ORDER BY t.popular DESC, t.toolId DESC")
+    List<Tool> findByCategoryWithCursorOrderByPopular(@Param("category") Category category, @Param("cursor") Long cursor, Pageable pageable);
+
+    // 2. createdAt 기준 (전체 조회)
+    @Query("SELECT t FROM Tool t WHERE t.toolId < :cursor ORDER BY t.createdAt DESC, t.toolId DESC")
+    List<Tool> findAllWithCursorOrderByCreatedAt(@Param("cursor") Long cursor, Pageable pageable);
+
+    // 2-2. 카테고리별 createdAt 조회
+    @Query("SELECT t FROM Tool t WHERE t.category = :category AND t.toolId < :cursor ORDER BY t.createdAt DESC, t.toolId DESC")
+    List<Tool> findByCategoryWithCursorOrderByCreatedAt(@Param("category") Category category, @Param("cursor") Long cursor, Pageable pageable);
+
+
+    @Query("SELECT COUNT(t) FROM Tool t WHERE t.category = :category AND t.toolId < :cursor")
+    long countWithCursor(@Param("category") Category category, @Param("cursor") Long cursor);
+
+    long count();
 }

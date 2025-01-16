@@ -22,12 +22,15 @@ import java.util.List;
 public interface ToolScrapRepository extends JpaRepository<ToolScrap,Long> {
 
     @Query("SELECT ts FROM ToolScrap ts WHERE ts.user.id = :userId")
-    Page<ToolScrap> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
+    Page<ToolScrap> findAllByUserId(@Param("userId") final Long userId, Pageable pageable);
 
 
-    Optional<ToolScrap>  findByUserAndTool(UserEntity user, Tool tool);
+    Optional<ToolScrap>  findByUserAndTool(final UserEntity user,final Tool tool);
 
     @Query("SELECT COUNT(ts) FROM ToolScrap ts WHERE ts.tool.toolId = :toolId AND ts.delYn = false")
-    int countByToolId(@Param("toolId") Long toolId);
+    int countByToolId(@Param("toolId")final  Long toolId);
+
+    // toolId와 isDelYn이 false인 경우의 스크랩 수 계산
+    int countByTool_ToolIdAndDelYnFalse(final Long toolId);
 
 }
