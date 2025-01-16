@@ -15,7 +15,8 @@ public enum SuccessCode {
     SUCCESS_FETCH(HttpStatus.OK, "요청 데이터가 성공적으로 조회되었습니다"),
     SUCCESS_SCRAP(HttpStatus.OK,  "스크랩이 변경이 완료되었습니다"),
     SUCCESS_LOGIN(HttpStatus.OK, "로그인 성공했습니다"),
-    SUCCESS_LOGUT(HttpStatus.OK,"로그아웃에 성공했습니다");
+    SUCCESS_LOGUT(HttpStatus.OK,"로그아웃에 성공했습니다"),
+    SUCCESS_WITHDRAW(HttpStatus.OK, "회원탈퇴에 성공했습니다");
 
     private final HttpStatus httpStatus;
     private final String message;

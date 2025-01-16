@@ -196,7 +196,12 @@ public class UserService {
         return favoriteBoardsRetrieveResponse;
     }
 
-
+    public void withdrawMe(Long userId){
+        //사용자 찾기
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        userRepository.delete(userEntity);
+    }
 
     private void verifyUserIdWithStoredToken(final Long userId, final String refreshToken){
         Long storedUserId = tokenService.findIdByRefreshToken(refreshToken);
