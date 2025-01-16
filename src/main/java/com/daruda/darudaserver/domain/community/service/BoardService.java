@@ -1,5 +1,7 @@
 package com.daruda.darudaserver.domain.community.service;
 
+import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
@@ -49,6 +51,7 @@ public class BoardService {
     private final BoardScrapRepository boardScrapRepository;
     private final ToolRepository toolRepository;
     private final UserService userService;
+    private final CommentRepository commentRepository;
 
     private final String TOOL_LOGO = "ToolLogo.jpeg";
     private final String FREE = "자유";
@@ -188,10 +191,6 @@ public class BoardService {
         return boardImageService.getBoardImageUrls(board.getId());
     }
 
-    private int getCommentCount(final Long boardId) {
-        return 1; // Mock 데이터
-    }
-
     private Board createToolBoard(final Tool tool,final BoardCreateAndUpdateReq req, final UserEntity user) {
         return boardRepository.save(Board.create( tool, user, req.title(), req.content()));
     }
@@ -232,6 +231,12 @@ public class BoardService {
 
         return new BoardListResponse(boardResList, userId, pageInfo);
 
+    }
+
+    public int getCommentCount(final Long boardId){
+        List<CommentEntity> commentEntityList = commentRepository.findAllByBoardId(boardId);
+        log.debug("댓글 Entity리스트를 받아옵니다 : " + commentEntityList.size());
+        return commentEntityList.size();
     }
 
 }

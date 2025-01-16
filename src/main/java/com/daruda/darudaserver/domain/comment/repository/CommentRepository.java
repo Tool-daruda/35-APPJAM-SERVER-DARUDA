@@ -21,4 +21,6 @@ public interface CommentRepository extends JpaRepository<CommentEntity,Long> {
             @Param("cursor") Long cursor,
             Pageable pageable);
 
+    List<CommentEntity> findAllByBoardId(Long boardId);
+
 }

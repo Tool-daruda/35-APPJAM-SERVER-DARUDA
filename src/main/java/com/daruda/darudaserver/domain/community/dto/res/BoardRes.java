@@ -37,6 +37,7 @@ public class BoardRes {
                 .title(board.getTitle())
                 .content(board.getContent())
                 .images(images)
+                .commentCount(commentCount)
                 .updatedAt(board.getUpdatedAt())
                 .build();
     }
