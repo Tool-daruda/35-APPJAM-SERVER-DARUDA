@@ -57,9 +57,6 @@ public class CommentService {
             String imageName = s3Service.uploadImage(image);
             photoUrl = s3Service.getImageUrl(imageName);
         }
-
-
-
         //댓글 entity 생성
         CommentEntity commentEntity = CommentEntity.builder()
                 .userEntity(userEntity)
