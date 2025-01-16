@@ -1,6 +1,5 @@
 package com.daruda.darudaserver.domain.tool.dto.res;
 
-import com.daruda.darudaserver.domain.tool.entity.License;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import java.util.List;
 
@@ -10,7 +9,7 @@ public record ToolDtoGetRes(
         String toolName,
         String toolLogo,
         String description,
-        License license,
+        String license,
         List<String> keywords
 ) {
     // 정적 팩토리 메서드
@@ -20,7 +19,7 @@ public record ToolDtoGetRes(
                 tool.getToolMainName(),
                 tool.getToolLogo(),
                 tool.getDescription(),
-                tool.getLicense(),
+                tool.getLicense().getKoreanName(),
                 keywords
         );
     }

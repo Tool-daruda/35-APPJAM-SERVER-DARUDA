@@ -1,7 +1,6 @@
 package com.daruda.darudaserver.domain.user.entity;
 
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
-import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

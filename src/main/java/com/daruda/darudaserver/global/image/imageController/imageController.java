@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.global.image.imageController;
 
-import com.daruda.darudaserver.global.error.code.SuccessCode;
+
 import com.daruda.darudaserver.global.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

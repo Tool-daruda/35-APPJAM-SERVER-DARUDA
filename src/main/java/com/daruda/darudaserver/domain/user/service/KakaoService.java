@@ -7,10 +7,9 @@ import com.daruda.darudaserver.global.auth.client.KakaoAPiFeignClient;
 import com.daruda.darudaserver.global.auth.client.KakaoFeignClient;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatusCode;
+
 import org.springframework.stereotype.Service;
 
 @Service

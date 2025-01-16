@@ -7,8 +7,8 @@ import lombok.Builder;
 public record PlanRes(
         Long planId,
         String planName,
-        int monthlyPrice,
-        int annualPrice,
+        Long monthlyPrice,
+        Long annualPrice,
         String description,
         Boolean isDollar
 ) {

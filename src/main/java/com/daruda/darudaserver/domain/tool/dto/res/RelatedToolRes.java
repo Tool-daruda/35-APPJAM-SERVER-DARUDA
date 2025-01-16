@@ -1,8 +1,6 @@
 package com.daruda.darudaserver.domain.tool.dto.res;
 
-import com.daruda.darudaserver.domain.tool.entity.License;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
-import lombok.AccessLevel;
 import lombok.Builder;
 import java.util.List;
 
@@ -11,7 +9,7 @@ public record RelatedToolRes (
         Long toolId,
         String toolName,
         String toolLogo,
-        License license,
+        String license,
         List<String> keywords
 ){
 
@@ -20,7 +18,7 @@ public record RelatedToolRes (
                 .toolId(tool.getToolId())
                 .toolName(tool.getToolMainName())
                 .toolLogo(tool.getToolLogo())
-                .license(tool.getLicense())
+                .license(tool.getLicense().getKoreanName())
                 .keywords(keywords)
                 .build();
     }

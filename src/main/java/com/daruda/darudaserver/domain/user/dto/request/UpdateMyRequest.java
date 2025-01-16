@@ -1,7 +1,6 @@
 package com.daruda.darudaserver.domain.user.dto.request;
 
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 

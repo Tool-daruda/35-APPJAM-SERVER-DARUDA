@@ -12,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -61,8 +65,8 @@ public class ToolController {
      */
     @GetMapping("/tools")
     public ResponseEntity<ApiResponse<?>> getToolList(@RequestParam(defaultValue = "popular", value="criteria") String criteria,
-                                                      @RequestParam(defaultValue = "ALL") String category,
-                                                      @RequestParam(value = "size", defaultValue = "10") int size,
+                                                      @RequestParam(defaultValue = "ALL",value="category") String category,
+                                                      @RequestParam(value = "size", defaultValue = "18") int size,
                                                       @RequestParam(value = "lastToolId", required = false) Long lastToolId
                                                              ){
         Category categoryEnum = Category.fromEnglishName(category);
@@ -77,5 +81,15 @@ public class ToolController {
     public ResponseEntity<ApiResponse<?>> postToolScrap(@UserId final Long userId, @PathVariable(name="tool-id") final Long toolId){
         ToolScrapRes toolScrapRes = toolService.postToolScrap(userId, toolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolScrapRes, SuccessCode.SUCCESS_CREATE));
+    }
+    /**
+     * 카테고리 조회 API
+     */
+    @GetMapping("/tools/category")
+    public ResponseEntity<ApiResponse<List<CategoryRes>>> getAllCategories() {
+        List<CategoryRes> categoryRes = Arrays.stream(Category.values())
+                .map(CategoryRes::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(categoryRes, SuccessCode.SUCCESS_FETCH));
     }
 }

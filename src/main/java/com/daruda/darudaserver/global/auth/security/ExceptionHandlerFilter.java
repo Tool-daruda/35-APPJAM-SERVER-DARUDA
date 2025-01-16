@@ -34,6 +34,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         ErrorCode errorCode = ue.getErrorCode();
         HttpStatus httpStatus = errorCode.getHttpStatus();
         setResponse(response, httpStatus, errorCode);
+        log.debug("handleUnauthorizedException" + ue.getMessage());
     }
 
     private void handleException(HttpServletResponse response, Exception e) throws IOException {

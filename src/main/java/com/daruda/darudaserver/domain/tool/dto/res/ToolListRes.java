@@ -1,7 +1,6 @@
 package com.daruda.darudaserver.domain.tool.dto.res;
 
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
-import lombok.AccessLevel;
 import lombok.Builder;
 
 import java.util.List;

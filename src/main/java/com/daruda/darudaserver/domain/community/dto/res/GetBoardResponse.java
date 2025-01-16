@@ -6,7 +6,6 @@ import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 public record GetBoardResponse(
