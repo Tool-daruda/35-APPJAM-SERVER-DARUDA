@@ -12,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -77,5 +81,14 @@ public class ToolController {
     public ResponseEntity<ApiResponse<?>> postToolScrap(@UserId final Long userId, @PathVariable(name="tool-id") final Long toolId){
         ToolScrapRes toolScrapRes = toolService.postToolScrap(userId, toolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolScrapRes, SuccessCode.SUCCESS_CREATE));
+    }
+    /**
+     * 카테고리 조회 API
+     */
+    @GetMapping("/tools/category")
+    public ResponseEntity<ApiResponse<List<CategoryRes>>> getAllCategories() {
+        return ResponseEntity<ApiResponse> Arrays.stream(Category.values())
+                .map(CategoryRes::from)
+                .collect(Collectors.toList());
     }
 }
