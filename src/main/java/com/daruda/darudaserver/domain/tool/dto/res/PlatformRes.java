@@ -1,7 +1,6 @@
 package com.daruda.darudaserver.domain.tool.dto.res;
 
 import com.daruda.darudaserver.domain.tool.entity.ToolPlatForm;
-import lombok.AccessLevel;
 import lombok.Builder;
 
 @Builder

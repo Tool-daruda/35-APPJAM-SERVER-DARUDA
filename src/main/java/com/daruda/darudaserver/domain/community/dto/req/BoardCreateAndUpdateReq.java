@@ -1,6 +1,5 @@
 package com.daruda.darudaserver.domain.community.dto.req;
 
-import com.daruda.darudaserver.global.handler.ValidatorUtil;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

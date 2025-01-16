@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.global.image.service;
 
-import com.daruda.darudaserver.global.error.exception.BadRequestException;
+
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.code.ErrorCode;

@@ -3,7 +3,6 @@ package com.daruda.darudaserver.global.image.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Getter

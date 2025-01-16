@@ -13,9 +13,6 @@ import java.util.Optional;
 @Repository
 public interface BoardScrapRepository extends JpaRepository<BoardScrap,Long> {
 
-    void deleteByUserAndBoard(UserEntity user, Board board);
-
-    boolean existsByUserAndBoard(UserEntity user, Board board);
 
     Page<BoardScrap> findAllByUserId(Long userId, Pageable pageable);
 

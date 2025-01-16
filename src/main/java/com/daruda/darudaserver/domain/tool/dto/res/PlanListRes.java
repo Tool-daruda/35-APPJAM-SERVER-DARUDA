@@ -1,6 +1,5 @@
 package com.daruda.darudaserver.domain.tool.dto.res;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 
 import java.util.List;
