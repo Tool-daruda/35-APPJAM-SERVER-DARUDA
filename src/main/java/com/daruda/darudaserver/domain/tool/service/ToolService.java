@@ -1,16 +1,13 @@
 package com.daruda.darudaserver.domain.tool.service;
 
 
-import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.tool.dto.res.*;
 import com.daruda.darudaserver.domain.tool.entity.*;
 import com.daruda.darudaserver.domain.tool.repository.*;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
-import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -136,10 +133,11 @@ public class ToolService {
             log.debug("툴 스크랩이 생 되었습니다");
         }else{
             log.debug("툴 스크랩이 업데이트 되었습니다");
+            toolScrap.update();
         }
         int scrapCount = toolScrapRepository.countByTool_ToolIdAndDelYnFalse(toolId);
         tool.updatePopular(scrapCount);
-        return ToolScrapRes.of(toolId, !toolScrap.isDelYn());
+        return ToolScrapRes.of(toolId, toolScrap.isDelYn());
     }
 
     private List<RelatedTool> relatedTool(final Tool tool) {
@@ -211,10 +209,6 @@ public class ToolService {
                 .toList();
     }
 
-    public int updateView(Long toolId) {
-        log.debug("툴 조회수를 증가시킵니다. toolId={}", toolId);
-        return toolRepository.updateView(toolId);
-    }
 
     private void validateList(List<?> lists) {
         // 빈 리스트일 경우 예외 처리

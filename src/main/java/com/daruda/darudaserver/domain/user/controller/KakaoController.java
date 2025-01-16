@@ -1,28 +1,23 @@
 package com.daruda.darudaserver.domain.user.controller;
 
+import com.daruda.darudaserver.domain.user.dto.request.NicknameRequest;
 import com.daruda.darudaserver.domain.user.dto.request.SignUpRequest;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
-import com.daruda.darudaserver.domain.user.dto.response.kakao.KakaoTokenResponse;
 import com.daruda.darudaserver.domain.user.service.KakaoService;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.util.Map;
 
 @RequestMapping("/api/v1/users")
 @RestController
@@ -60,12 +55,12 @@ public class KakaoController {
     @PostMapping("/logout")
     public ResponseEntity<?> logOut(@UserId Long userId){
         Long returnedUserId = userService.deleteUser(userId);
-        return  ResponseEntity.ok(ApiResponse.ofSuccessWithData(returnedUserId,SuccessCode.SUCCESS_LOGUT));
+        return  ResponseEntity.ok(ApiResponse.ofSuccessWithData(returnedUserId,SuccessCode.SUCCESS_LOGOUT));
     }
 
     @PostMapping("/nickname")
-    public ResponseEntity<?> checkDuplicate(@NotNull(message = "닉네임은 필수입력값입니다") @RequestBody String nickname){
-        boolean result = userService.isDuplicated(nickname);
+    public ResponseEntity<?> checkDuplicate(@NotNull(message = "닉네임은 필수입력값입니다") @RequestBody NicknameRequest nickName){
+        boolean result = userService.isDuplicated(nickName.getNickName());
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result,SuccessCode.SUCCESS_FETCH));
     }
 

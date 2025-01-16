@@ -5,7 +5,6 @@ import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
 import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.service.BoardService;
-import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
@@ -24,7 +23,6 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
-    private final ToolService toolService;
 
     /**
      * 게시글 작성
@@ -32,7 +30,7 @@ public class BoardController {
     @PostMapping("/boards")
     public ResponseEntity<ApiResponse<?>> createBoard(
             @UserId Long userId,
-            @ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
+            @ModelAttribute @Valid BoardCreateAndUpdateReq boardCreateAndUpdateReq,
             @RequestPart(value = "images", required = false)  @Size(max=5) List<MultipartFile> images){
 
         BoardRes boardRes = boardService.createBoard(userId, boardCreateAndUpdateReq, images);

@@ -6,7 +6,6 @@ import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
