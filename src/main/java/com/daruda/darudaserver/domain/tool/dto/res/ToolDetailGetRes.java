@@ -14,9 +14,9 @@ public record ToolDetailGetRes(
         String toolMainName,
         String toolSubName,
         String description,
-        License license,
+        String license,
         List<String> keywords,
-        Category category,
+        String category,
         String toolLink,
         Boolean supportKorea,
         List<PlatformRes> platform,
@@ -35,9 +35,9 @@ public record ToolDetailGetRes(
                 .toolMainName(tool.getToolMainName())
                 .toolSubName(tool.getToolSubName())
                 .description(tool.getDescription())
-                .license(tool.getLicense())
+                .license(tool.getLicense().getKoreanName())
                 .keywords(keywords)
-                .category(tool.getCategory())
+                .category(tool.getCategory().getKoreanName())
                 .toolLink(tool.getToolLink())
                 .supportKorea(tool.getSupportKorea())
                 .platform(platform)

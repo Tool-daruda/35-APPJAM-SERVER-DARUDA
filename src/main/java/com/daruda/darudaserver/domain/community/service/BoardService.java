@@ -53,7 +53,7 @@ public class BoardService {
     private final UserService userService;
     private final CommentRepository commentRepository;
 
-    private final String TOOL_LOGO = "ToolLogo.jpeg";
+    private final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/daruda+logo.svg";
     private final String FREE = "자유";
 
     // 게시판 생성
@@ -114,7 +114,7 @@ public class BoardService {
         } else {
             boardScrap.update();
         }
-        return BoardScrapRes.of(boardId, !boardScrap.isDelYn());
+        return BoardScrapRes.of(boardId, boardScrap.isDelYn());
     }
 
     // 게시판 조회

@@ -11,7 +11,7 @@ public record RelatedToolRes (
         Long toolId,
         String toolName,
         String toolLogo,
-        License license,
+        String license,
         List<String> keywords
 ){
 
@@ -20,7 +20,7 @@ public record RelatedToolRes (
                 .toolId(tool.getToolId())
                 .toolName(tool.getToolMainName())
                 .toolLogo(tool.getToolLogo())
-                .license(tool.getLicense())
+                .license(tool.getLicense().getKoreanName())
                 .keywords(keywords)
                 .build();
     }

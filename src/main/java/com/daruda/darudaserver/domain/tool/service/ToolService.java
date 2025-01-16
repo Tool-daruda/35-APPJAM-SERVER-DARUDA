@@ -136,10 +136,11 @@ public class ToolService {
             log.debug("툴 스크랩이 생 되었습니다");
         }else{
             log.debug("툴 스크랩이 업데이트 되었습니다");
+            toolScrap.update();
         }
         int scrapCount = toolScrapRepository.countByTool_ToolIdAndDelYnFalse(toolId);
         tool.updatePopular(scrapCount);
-        return ToolScrapRes.of(toolId, !toolScrap.isDelYn());
+        return ToolScrapRes.of(toolId, toolScrap.isDelYn());
     }
 
     private List<RelatedTool> relatedTool(final Tool tool) {
