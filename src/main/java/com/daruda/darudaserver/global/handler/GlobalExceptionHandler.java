@@ -68,13 +68,10 @@ public class GlobalExceptionHandler {
 
     }
 
-
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(ErrorCode ex) {
+    public ResponseEntity<ErrorResponse> handleValidationException(HandlerMethodValidationException ex) {
         return buildErrorResponse(ErrorCode.INVALID_FIELD_ERROR, ex.getMessage());
     }
-
-
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(ErrorCode errorCode, Object detail){
         return ResponseEntity.status(errorCode.getHttpStatus())

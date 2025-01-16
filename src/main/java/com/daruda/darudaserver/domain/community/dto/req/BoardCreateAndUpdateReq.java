@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.community.dto.req;
 
+import com.daruda.darudaserver.global.handler.ValidatorUtil;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,6 +16,7 @@ public record BoardCreateAndUpdateReq(
         @NotNull(message = "자유 게시판 선택은 필수 입니다")
         boolean isFree// 자유 게시판 여부 추가
 ) {
+
         public static BoardCreateAndUpdateReq of(String title, String content, Long toolId, boolean isFree) {
                 return new BoardCreateAndUpdateReq(title, content, toolId, isFree);
         }
