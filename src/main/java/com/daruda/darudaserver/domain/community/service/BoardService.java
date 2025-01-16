@@ -22,6 +22,7 @@ import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.service.ImageService;
@@ -199,8 +200,11 @@ public class BoardService {
     }
 
     private Board getBoardById(final Long boardId) {
-        return boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        return boardRepository.findByIdAndDelYn(boardId, false)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
     }
+
+
 
     private Tool getToolById(final Long toolId) {
         return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
@@ -220,7 +224,7 @@ public class BoardService {
 
     public BoardListResponse getMyBoards(Long userId, Pageable pageable){
         userService.validateUser(userId);
-        Page<Board> boards = boardRepository.findAllByUserId(userId, pageable);
+        Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userId, pageable);
 
         List<BoardRes> boardResList = boards.getContent().stream()
                 .map(board -> getBoard(board.getId()))
