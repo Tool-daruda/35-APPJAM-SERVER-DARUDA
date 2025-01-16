@@ -9,17 +9,17 @@ import java.util.Arrays;
 @Getter
 public enum Category {
     ALL("전체"),
-    LIFESTYLE("라이프스타일"),
-    DOCUMENT_EDITING("문서 편집"),
-    AI("인공지능"),
-    COLLABORATION("협업"),
-    CODING("코딩"),
-    DESIGN_MODELING("디자인/모델링"),
+    LIFESTYLE("생활"),
+    DOCUMENT_EDITING("문서 작성/편집"),
+    AI("AI"),
+    COLLABORATION("협업/커뮤니케이션"),
+    CODING("코딩/개발"),
+    DESIGN_MODELING("설계/모델링"),
     DATA("데이터"),
     PRESENTATION("프레젠테이션"),
-    GRAPHIC_DESIGN("그래픽 디자인"),
+    GRAPHIC_DESIGN("그래픽/디자인"),
     VIDEO_MUSIC("영상/음악"),
-    CAREER_DEVELOPMENT("커리어 개발");
+    CAREER_DEVELOPMENT("커리어/자기개발");
 
     private final String koreanName;
 
