@@ -32,15 +32,15 @@ jobs:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          echo "$EC2_SSH_KEY" > $RUNNER_TEMP/my-readMate-key.pem
+          echo "$EC2_SSH_KEY" > $RUNNER_TEMP/daruda-rsa.pem
           chmod 600 $RUNNER_TEMP/my-readMate-key.pem
-          scp -o StrictHostKeyChecking=no -i $RUNNER_TEMP/my-readMate-key.pem build/libs/*.jar ubuntu@$EC2_HOST:/home/ubuntu/app/step1/
+          scp -o StrictHostKeyChecking=no -i $RUNNER_TEMP/daruda-rsa.pem build/libs/*.jar ubuntu@$EC2_HOST:/home/ubuntu/app/step1/
 
       - name: Deploy to EC2
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          echo "$EC2_SSH_KEY" > $RUNNER_TEMP/my-readMate-key.pem
-          chmod 600 $RUNNER_TEMP/my-readMate-key.pem
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=5 -i $RUNNER_TEMP/my-readMate-key.pem ubuntu@$EC2_HOST "nohup java -jar /home/ubuntu/app/step1/ReadMate-0.0.1-SNAPSHOT.jar > /home/ubuntu/app/step1/logs/app.log 2>&1 &"
+          echo "$EC2_SSH_KEY" > $RUNNER_TEMP/daruda-rsa.pem
+          chmod 600 $RUNNER_TEMP/daruda-rsa.pem
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=5 -i $RUNNER_TEMP/daruda-rsa.pem ubuntu@$EC2_HOST "nohup java -jar daruda-0.0.1-SNAPSHOT.jar &"
