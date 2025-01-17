@@ -1,24 +1,15 @@
 package com.daruda.darudaserver.domain.user.service;
-
-import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
-import com.daruda.darudaserver.domain.community.entity.Board;
-import com.daruda.darudaserver.domain.community.entity.BoardImage;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
-import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
-import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDtoGetRes;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
-import com.daruda.darudaserver.domain.tool.entity.ToolImage;
 import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
-import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.domain.user.dto.response.*;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
-import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 
@@ -50,8 +41,6 @@ public class UserService {
     private final TokenService tokenService;
     private final BoardScrapRepository boardScrapRepository;
     private final ToolRepository toolRepository;
-    private final BoardRepository boardRepository;
-    private final BoardImageRepository boardImageRepository;
     private final ToolScrapRepository toolScrapRepository;
     private final ToolService toolService;
 
@@ -140,19 +129,28 @@ public class UserService {
         List<Tool> tools = toolScraps.stream()
                 .map(ToolScrap::getTool)
                 .toList();
-        log.info("tool로 변환");
 
         List<ToolDtoGetRes> toolDtoGetResList = tools.stream()
-                .map(tool->ToolDtoGetRes.from(tool, toolService.convertToKeywordRes(tool)))
+                .map(tool->
+                        {
+                            tool.getToolMainName();
+                            tool.getToolLogo();
+                            toolService.convertToKeywordRes(tool);
+                            boolean isScrapped = getToolScrap(userEntity, tool);
+                            return   ToolDtoGetRes.from(tool, toolService.convertToKeywordRes(tool),isScrapped);
+                        })
                 .toList();
         log.info("DTO로 변환");
 
         PagenationDto pagenationDto = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), toolScrapPage.getTotalPages());
 
-        FavoriteToolsResponse favoriteToolsResponse = FavoriteToolsResponse.of(toolDtoGetResList, pagenationDto);
+        return  FavoriteToolsResponse.of(toolDtoGetResList, pagenationDto);
 
-        return favoriteToolsResponse;
     }
+    private boolean getToolScrap(UserEntity user, Tool tool) {
+        return toolScrapRepository.existsByUserAndTool(user, tool);
+    }
+
 
     public UpdateMyResponse updateMy(Long userId, String nickname, String positions){
         UserEntity userEntity = userRepository.findById(userId)
@@ -192,9 +190,9 @@ public class UserService {
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
         log.debug("페이지 번호를 출력합니다" + pageable.getPageNumber());
 
-        FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
+        return  new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
 
-        return favoriteBoardsRetrieveResponse;
+
     }
 
     public void withdrawMe(Long userId){

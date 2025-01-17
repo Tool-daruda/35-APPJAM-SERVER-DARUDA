@@ -1,7 +1,5 @@
 package com.daruda.darudaserver.domain.community.dto.res;
 
-import com.daruda.darudaserver.domain.community.entity.Board;
-import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 

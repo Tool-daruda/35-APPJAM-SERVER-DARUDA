@@ -19,6 +19,7 @@ import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.domain.user.service.UserService;
+import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -37,6 +38,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -52,6 +55,7 @@ public class BoardService {
     private final ToolRepository toolRepository;
     private final UserService userService;
     private final CommentRepository commentRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     private final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/daruda+logo.svg";
     private final String FREE = "자유";
@@ -121,22 +125,33 @@ public class BoardService {
     }
 
     // 게시판 조회
-    public BoardRes getBoard(final Long boardId) {
+    public BoardRes getBoard(final String accessToken, final Long boardId) {
+        UserEntity user = getUser(accessToken);
         Board board = getBoardById(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
+        Boolean isScraped = getBoardScrap(user, board);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls,isScraped);
+    }
 
+    // 내가 쓴  게시판 조회
+    public BoardRes getMyBoard(final Long boardId) {
+        Board board = getBoardById(boardId);
+        List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
+        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
+        String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
         return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls);
     }
 
     // 게시판 리스트 조회
-    public GetBoardResponse getBoardList(final Boolean isFree,final Long toolId, final int size, final Long lastBoardId) {
+    public GetBoardResponse getBoardList(final String accessToken, final Boolean isFree,final Long toolId, final int size, final Long lastBoardId) {
 
         List<Board> boards;
         Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId;
         PageRequest pageRequest = PageRequest.of(0, size + 1);
 
+        UserEntity user = getUser(accessToken);
         // 전체 조회
         if(Boolean.TRUE.equals(isFree)){
             log.info("자유 게시판을 조회합니다");
@@ -154,19 +169,19 @@ public class BoardService {
             boards = boardRepository.findBoards(null, null, cursor, pageRequest);
 
         }
-
         ScrollPaginationCollection<Board> boardsCursor = ScrollPaginationCollection.of(boards, size);
 
+
         List<BoardRes> boardResList = boardsCursor.getCurrentScrollItems().stream()
-                .map(board -> BoardRes.of(
-                        board,
-                        board.getTool() != null ? board.getTool().getToolMainName() : FREE,
-                        board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO,
-                        getCommentCount(board.getId()),
-                        boardImageService.getBoardImageUrls(board.getId())
-                ))
-                .toList();
-        log.debug("BoardRes List: {}", boardResList);
+                .map(board -> {
+                    String toolName = (board.getTool() != null) ? board.getTool().getToolMainName() : FREE;
+                    String toolLogo = (board.getTool() != null) ? board.getTool().getToolLogo() : TOOL_LOGO;
+                    int commentCount = getCommentCount(board.getId());
+                    List<String> boardImages = boardImageService.getBoardImageUrls(board.getId());
+                    boolean isScrapped = (user != null) && getBoardScrap(user, board);
+
+                    return BoardRes.of(board, toolName, toolLogo, commentCount, boardImages, isScrapped);
+                }).toList();
         long nextCursor = boardsCursor.isLastScroll() ? -1L : boardsCursor.getNextCursor().getId();
 
         ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(boardsCursor.getTotalElements(), nextCursor);
@@ -207,8 +222,6 @@ public class BoardService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
     }
 
-
-
     private Tool getToolById(final Long toolId) {
         return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
     }
@@ -230,7 +243,7 @@ public class BoardService {
         Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userId, pageable);
 
         List<BoardRes> boardResList = boards.getContent().stream()
-                .map(board -> getBoard(board.getId()))
+                .map(board -> getMyBoard( board.getId()))
                 .toList();
 
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
@@ -243,6 +256,25 @@ public class BoardService {
         List<CommentEntity> commentEntityList = commentRepository.findAllByBoardId(boardId);
         log.debug("댓글 Entity리스트를 받아옵니다 : " + commentEntityList.size());
         return commentEntityList.size();
+    }
+
+    public Boolean getBoardScrap(final UserEntity user, final Board board){
+        return (user != null &&
+                boardScrapRepository.findByUserAndBoard(user, board)
+                        .map(toolScrap -> !toolScrap.isDelYn())
+                        .orElse(false));
+    }
+
+
+    public UserEntity getUser(String accessToken) {
+        UserEntity user = null;
+        if (accessToken != null) {
+            Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
+            user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+            log.debug("유저 정보를 조회했습니다: {}", user.getId());
+        }
+        return user;
     }
 
 }

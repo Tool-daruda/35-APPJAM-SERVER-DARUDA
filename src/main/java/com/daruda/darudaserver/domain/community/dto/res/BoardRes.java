@@ -18,6 +18,7 @@ public class BoardRes {
     private String title;
     private String content;
     private List<String> images;
+    private Boolean isScraped;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
     private Timestamp updatedAt;
@@ -25,6 +26,9 @@ public class BoardRes {
 
     public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images) {
         return createBoardRes(board, toolName, toolLogo, commentCount, images);
+    }
+    public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images,final Boolean isScraped) {
+        return getBoardRes(board, toolName, toolLogo, commentCount, images,isScraped);
     }
 
     public static BoardRes createBoardRes(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images) {
@@ -39,6 +43,22 @@ public class BoardRes {
                 .images(images)
                 .commentCount(commentCount)
                 .updatedAt(board.getUpdatedAt())
+                .build();
+    }
+
+    public static BoardRes getBoardRes(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images,final Boolean isScraped) {
+        return BoardRes.builder()
+                .boardId(board.getId())
+                .boardId(board.getId())
+                .toolName(toolName)
+                .toolLogo(toolLogo)
+                .author(board.getUser().getNickname())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .images(images)
+                .commentCount(commentCount)
+                .updatedAt(board.getUpdatedAt())
+                .isScraped(isScraped)
                 .build();
     }
 
