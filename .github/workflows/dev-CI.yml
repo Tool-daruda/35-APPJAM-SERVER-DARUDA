@@ -51,7 +51,7 @@ jobs:
           chmod +x gradlew
           ./gradlew :build -x test
         shell : bash
-          
+
       # SSH Key 설정 추가
       - name: Setup SSH Key
         run: |
