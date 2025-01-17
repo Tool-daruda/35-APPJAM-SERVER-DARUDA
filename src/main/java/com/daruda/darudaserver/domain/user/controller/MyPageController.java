@@ -21,7 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/users/profile")
 @RequiredArgsConstructor
 public class MyPageController {
     private final UserService userService;
@@ -69,10 +69,4 @@ public class MyPageController {
 
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse,SuccessCode.SUCCESS_FETCH));
     }
-    @DeleteMapping("/withdraw")
-    public ResponseEntity<?> withdrawUser(@UserId Long userId){
-        userService.withdrawMe(userId);
-        return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_WITHDRAW));
-    }
-
 }
