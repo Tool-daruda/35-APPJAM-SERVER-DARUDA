@@ -28,4 +28,5 @@ public interface ToolScrapRepository extends JpaRepository<ToolScrap,Long> {
     // toolId와 isDelYn이 false인 경우의 스크랩 수 계산
     int countByTool_ToolIdAndDelYnFalse(final Long toolId);
 
+    boolean existsByUserAndTool(UserEntity user, Tool tool);
 }

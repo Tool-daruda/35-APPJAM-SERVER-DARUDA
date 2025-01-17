@@ -140,10 +140,17 @@ public class UserService {
         List<Tool> tools = toolScraps.stream()
                 .map(ToolScrap::getTool)
                 .toList();
-        log.info("tool로 변환");
 
         List<ToolDtoGetRes> toolDtoGetResList = tools.stream()
-                .map(tool->ToolDtoGetRes.from(tool, toolService.convertToKeywordRes(tool)))
+                .map(tool->
+                        {
+                            String toolName = tool.getToolMainName();
+                            String toolLogo = tool.getToolLogo();
+                            List<String> toolKeywords = toolService.convertToKeywordRes(tool);
+                            boolean isScrapped = getToolScrap(userEntity, tool);
+
+                            return   ToolDtoGetRes.from(tool, toolService.convertToKeywordRes(tool),isScrapped);
+                        })
                 .toList();
         log.info("DTO로 변환");
 
@@ -153,6 +160,10 @@ public class UserService {
 
         return favoriteToolsResponse;
     }
+    private boolean getToolScrap(UserEntity user, Tool tool) {
+        return toolScrapRepository.existsByUserAndTool(user, tool);
+    }
+
 
     public UpdateMyResponse updateMy(Long userId, String nickname, String positions){
         UserEntity userEntity = userRepository.findById(userId)
