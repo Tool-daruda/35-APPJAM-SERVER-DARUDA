@@ -34,7 +34,6 @@ public class ToolService {
     private final ToolScrapRepository toolScrapRepository;
     private final UserRepository userRepository;
 
-    @Transactional
     public ToolDetailGetRes getToolDetail(final Long toolId) {
         log.info("툴 세부 정보를 조회합니다. toolId={}", toolId);
 
