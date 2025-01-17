@@ -32,7 +32,7 @@ jobs:
 
       # Add SSH deployment after Gradle build
       - name: executing remote ssh commands using ssh key
-        uses: appleboy/ssh-action@v0.1.10
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.USERNAME }}
