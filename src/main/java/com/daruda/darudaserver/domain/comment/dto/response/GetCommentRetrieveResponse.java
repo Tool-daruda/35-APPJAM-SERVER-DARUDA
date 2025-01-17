@@ -6,9 +6,9 @@ import java.util.List;
 
 public record GetCommentRetrieveResponse(
         List<GetCommentResponse> commentList,
-        ScrollPaginationDto scrollPaginationDto
+        ScrollPaginationDto pageInfo
 ) {
-   public static GetCommentRetrieveResponse of(List<GetCommentResponse> commentList, ScrollPaginationDto scrollPaginationDto){
-       return new GetCommentRetrieveResponse(commentList, scrollPaginationDto);
+   public static GetCommentRetrieveResponse of(List<GetCommentResponse> commentList, ScrollPaginationDto pageInfo){
+       return new GetCommentRetrieveResponse(commentList, pageInfo);
    }
 }
