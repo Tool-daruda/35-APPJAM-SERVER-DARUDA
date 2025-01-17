@@ -103,6 +103,9 @@ public class BoardService {
 
     // 스크랩 처리
     public BoardScrapRes postScrap(final Long userId, final Long boardId) {
+        boardRepository.findById(boardId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+
         UserEntity user = getUserById(userId);
         Board board = getBoardById(boardId);
 

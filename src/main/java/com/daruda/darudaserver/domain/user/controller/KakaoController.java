@@ -69,4 +69,11 @@ public class KakaoController {
         JwtTokenResponse jwtTokenResponse = userService.reissueToken(userId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse,SuccessCode.SUCCESS_REISSUE));
     }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<?> withdrawUser(@UserId Long userId){
+        userService.withdrawMe(userId);
+        return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_WITHDRAW));
+    }
+
 }
