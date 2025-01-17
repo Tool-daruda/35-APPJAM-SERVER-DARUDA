@@ -13,9 +13,10 @@ public record ToolResponse (
     String toolLogo,
     String description,
     String license,
-    List<String> keywords
+    List<String> keywords,
+    Boolean isScraped
 ) {
-        public static ToolResponse of(Tool tool, List<String> keywords) {
+        public static ToolResponse of(Tool tool, List<String> keywords,Boolean isScraped) {
             return ToolResponse.builder()
                     .toolId(tool.getToolId())
                     .toolName(tool.getToolMainName())
@@ -23,6 +24,7 @@ public record ToolResponse (
                     .description(tool.getDescription())
                     .license(tool.getLicense().getKoreanName())
                     .keywords(keywords)
+                    .isScraped(isScraped)
                     .build();
         }
 }

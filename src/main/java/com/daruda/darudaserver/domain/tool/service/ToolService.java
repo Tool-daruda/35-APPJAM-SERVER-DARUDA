@@ -6,6 +6,7 @@ import com.daruda.darudaserver.domain.tool.entity.*;
 import com.daruda.darudaserver.domain.tool.repository.*;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
+import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
@@ -15,7 +16,10 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Base64;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Transactional
 @Service
@@ -33,6 +37,7 @@ public class ToolService {
     private final RelatedToolRepository relatedToolRepository;
     private final ToolScrapRepository toolScrapRepository;
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public ToolDetailGetRes getToolDetail(final Long toolId) {
@@ -83,12 +88,28 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
-    public ToolListRes getToolList(final String criteria, final Category category, final int size, final Long lastToolId) {
+    public ToolListRes getToolList(String accessToken, final String criteria, final Category category, final int size, final Long lastToolId) {
         log.debug("카테고리별 툴 목록을 조회 category: {}, sort: {}, size: {}, lastToolId: {}", category, criteria, size, lastToolId);
+
+
+        UserEntity user;
+        log.debug("Access Token: {}", accessToken);
+
+        if (accessToken != null) {
+            Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
+            log.debug("추출된 userId: {}", userId);
+            user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+            log.debug("유저 정보를 조회했습니다: {}", user.getId());
+        } else {
+            user = null;
+        }
+
 
         Long cursor = (lastToolId == null) ? Long.MAX_VALUE : lastToolId;
         validateCriteria(criteria);
-        Pageable pageRequest = PageRequest.of(0, size + 1);  // size + 1 조회하여 다음 페이지 존재 여부 확인
+        Pageable pageRequest = PageRequest.of(0, size + 1);
+
 
         List<Tool> tools;
         long totalElements = Category.ALL.equals(category)
@@ -105,17 +126,25 @@ public class ToolService {
                     : toolRepository.findByCategoryWithCursorOrderByCreatedAt(category, cursor, pageRequest);
         }
 
-        // nextCursor : size + 1로 조회했을 때 다음 데이터가 있는지 확인
         boolean hasNextPage = tools.size() > size;
         List<Tool> paginatedTools = hasNextPage ? tools.subList(0, size) : tools;
-        long nextCursor = hasNextPage ? tools.get(size).getToolId() : -1; // 다음 페이지가 있으면 cursor 설정
-        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
+        long nextCursor = hasNextPage ? tools.get(size).getToolId() : -1;
+
         List<ToolResponse> toolResponses = paginatedTools.stream()
-                .map(tool -> ToolResponse.of(tool, convertToKeywordRes(tool)))
+                .map(tool -> {
+                    final Boolean isScraped = (user != null &&
+                            toolScrapRepository.findByUserAndTool(user, tool)
+                                    .map(toolScrap -> !toolScrap.isDelYn())
+                                    .orElse(false));
+                    System.out.println("isScraped = " + isScraped);
+                    return ToolResponse.of(tool, convertToKeywordRes(tool), isScraped);
+                })
                 .toList();
 
+        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
         return ToolListRes.of(toolResponses, scrollPaginationDto);
     }
+
 
 
     @Transactional
