@@ -11,7 +11,7 @@ spring :
     password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate.dialect: org.hibernate.dialect.MySQLDialect
 cloud:
