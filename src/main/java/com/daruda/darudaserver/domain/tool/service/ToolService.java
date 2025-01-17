@@ -39,7 +39,7 @@ public class ToolService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Transactional
+
     public ToolDetailGetRes getToolDetail(final String accessToken, final Long toolId) {
         log.info("툴 세부 정보를 조회합니다. toolId={}", toolId);
 
@@ -152,8 +152,6 @@ public class ToolService {
     }
 
 
-
-    @Transactional
     public ToolScrapRes postToolScrap(final Long userId, final Long toolId){
         UserEntity user = getUserById(userId);
         Tool tool = getToolById(toolId);
@@ -246,7 +244,6 @@ public class ToolService {
 
 
     private void validateList(List<?> lists) {
-        // 빈 리스트일 경우 예외 처리
         if (lists == null || lists.isEmpty()) {
             throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
         }
