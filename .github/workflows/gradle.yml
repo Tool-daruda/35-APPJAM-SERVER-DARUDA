@@ -29,6 +29,16 @@ jobs:
 
       - name: Build without tests
         run: ./gradlew build -x test
+          
+          
+      # SSH Key 설정 추가
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/daruda-rsa.pem
+          chmod 600 ~/.ssh/daruda-rsa.pem
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} 
+
 
       # Add SSH deployment after Gradle build
       - name: executing remote ssh commands using ssh key
