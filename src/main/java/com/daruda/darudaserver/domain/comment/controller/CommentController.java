@@ -40,7 +40,7 @@ public class CommentController {
     @GetMapping
     public ResponseEntity<?> getComment(@RequestParam("board-id")Long boardId,
                                         @RequestParam(value = "size", defaultValue = "10") int size,
-                                        @RequestParam(value = "lastBoardId", required = false) Long commentId){
+                                        @RequestParam(value = "lastCommentId", required = false) Long commentId){
         GetCommentRetrieveResponse getCommentRetrieveResponse = commentService.getComments(boardId, size, commentId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(getCommentRetrieveResponse,SuccessCode.SUCCESS_FETCH));
     }
