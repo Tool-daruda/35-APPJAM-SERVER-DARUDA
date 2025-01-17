@@ -39,3 +39,6 @@ out/
 .env
 
 *.log
+
+*.application-dev.yml
+application-dev.yml
