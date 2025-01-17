@@ -6,9 +6,9 @@ import java.util.List;
 
 public record FavoriteToolsResponse(
         List<ToolDtoGetRes> toolDtoGetResList,
-        PagenationDto pagenationDto
+        PagenationDto pageInfo
 ) {
-    public static FavoriteToolsResponse of(List<ToolDtoGetRes> toolDtoGetResList, PagenationDto pagenationDto){
-        return new FavoriteToolsResponse(toolDtoGetResList, pagenationDto);
+    public static FavoriteToolsResponse of(List<ToolDtoGetRes> toolList, PagenationDto pageInfo){
+        return new FavoriteToolsResponse(toolList, pageInfo);
     }
 }
