@@ -6,6 +6,7 @@ import com.daruda.darudaserver.domain.tool.entity.*;
 import com.daruda.darudaserver.domain.tool.repository.*;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
+import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
@@ -15,7 +16,10 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Base64;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Transactional
 @Service
@@ -33,9 +37,10 @@ public class ToolService {
     private final RelatedToolRepository relatedToolRepository;
     private final ToolScrapRepository toolScrapRepository;
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @Transactional
-    public ToolDetailGetRes getToolDetail(final Long toolId) {
+
+    public ToolDetailGetRes getToolDetail(final String accessToken, final Long toolId) {
         log.info("툴 세부 정보를 조회합니다. toolId={}", toolId);
 
         Tool tool = getToolById(toolId);
@@ -44,10 +49,21 @@ public class ToolService {
         List<String> keywordRes = convertToKeywordRes(tool);
         List<String> videos = getVideoById(tool);
         tool.incrementViewCount();
+
+        UserEntity user;
+        Boolean isScrapped = false;
+        //AccessToken 이 들어왔을 경우
+        if (accessToken != null) {
+            Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
+            user = userRepository.findById(userId)
+                    .orElse(null);
+            log.debug("유저 정보를 조회했습니다: {}", user.getId());
+            isScrapped = getScrapped(user, tool);
+        }
         log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
         log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
         toolRepository.save(tool);
-        return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos);
+        return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos,isScrapped);
     }
 
     public PlanListRes getPlan(final Long toolId) {
@@ -83,12 +99,23 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
-    public ToolListRes getToolList(final String criteria, final Category category, final int size, final Long lastToolId) {
+    public ToolListRes getToolList(final String accessToken, final String criteria, final Category category, final int size, final Long lastToolId) {
         log.debug("카테고리별 툴 목록을 조회 category: {}, sort: {}, size: {}, lastToolId: {}", category, criteria, size, lastToolId);
+
+        UserEntity user;
+        if (accessToken != null) {
+            Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
+            user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.SCRAP_NOT_FOUND));
+            log.debug("유저 정보를 조회했습니다: {}", user.getId());
+        } else {
+            user = null;
+        }
 
         Long cursor = (lastToolId == null) ? Long.MAX_VALUE : lastToolId;
         validateCriteria(criteria);
-        Pageable pageRequest = PageRequest.of(0, size + 1);  // size + 1 조회하여 다음 페이지 존재 여부 확인
+        Pageable pageRequest = PageRequest.of(0, size + 1);
+
 
         List<Tool> tools;
         long totalElements = Category.ALL.equals(category)
@@ -105,20 +132,26 @@ public class ToolService {
                     : toolRepository.findByCategoryWithCursorOrderByCreatedAt(category, cursor, pageRequest);
         }
 
-        // nextCursor : size + 1로 조회했을 때 다음 데이터가 있는지 확인
         boolean hasNextPage = tools.size() > size;
         List<Tool> paginatedTools = hasNextPage ? tools.subList(0, size) : tools;
-        long nextCursor = hasNextPage ? tools.get(size).getToolId() : -1; // 다음 페이지가 있으면 cursor 설정
-        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
+        long nextCursor = hasNextPage ? tools.get(size).getToolId() : -1;
+
         List<ToolResponse> toolResponses = paginatedTools.stream()
-                .map(tool -> ToolResponse.of(tool, convertToKeywordRes(tool)))
+                .map(tool -> {
+                    final Boolean isScraped = (user != null &&
+                            toolScrapRepository.findByUserAndTool(user, tool)
+                                    .map(toolScrap -> !toolScrap.isDelYn())
+                                    .orElse(false));
+                    System.out.println("isScraped = " + isScraped);
+                    return ToolResponse.of(tool, convertToKeywordRes(tool), isScraped);
+                })
                 .toList();
 
+        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
         return ToolListRes.of(toolResponses, scrollPaginationDto);
     }
 
 
-    @Transactional
     public ToolScrapRes postToolScrap(final Long userId, final Long toolId){
         UserEntity user = getUserById(userId);
         Tool tool = getToolById(toolId);
@@ -211,7 +244,6 @@ public class ToolService {
 
 
     private void validateList(List<?> lists) {
-        // 빈 리스트일 경우 예외 처리
         if (lists == null || lists.isEmpty()) {
             throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
         }
@@ -226,6 +258,11 @@ public class ToolService {
                 });
     }
 
+    public Boolean getScrapped(final UserEntity user, final Tool tool) {
+        ToolScrap toolScrap = toolScrapRepository.findByUserAndTool(user, tool)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.SCRAP_NOT_FOUND));
+        return toolScrap.isDelYn();
+    }
     // 정렬 기준 검증
     public void validateCriteria(String criteria){
         List<String> allowedFields = List.of("popular", "createdAt");

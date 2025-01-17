@@ -28,8 +28,8 @@ public class ToolController {
      * 툴 세부정보 조회
      */
     @GetMapping("/tools/{tool-id}")
-    public ResponseEntity<ApiResponse<?>> getToolDetail(@PathVariable(name="tool-id") final Long toolId){
-        ToolDetailGetRes toolDetail = toolService.getToolDetail(toolId);
+    public ResponseEntity<ApiResponse<?>> getToolDetail(  @RequestHeader(value = "Access-Token" , required = false)String accessToken,@PathVariable(name="tool-id") final Long toolId){
+        ToolDetailGetRes toolDetail = toolService.getToolDetail(accessToken, toolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolDetail, SuccessCode.SUCCESS_FETCH));
     }
 
@@ -64,14 +64,16 @@ public class ToolController {
      * 툴 리스트 조회
      */
     @GetMapping("/tools")
-    public ResponseEntity<ApiResponse<?>> getToolList(@RequestParam(defaultValue = "popular", value="criteria") String criteria,
-                                                      @RequestParam(defaultValue = "ALL",value="category") String category,
-                                                      @RequestParam(value = "size", defaultValue = "18") int size,
-                                                      @RequestParam(value = "lastToolId", required = false) Long lastToolId
+    public ResponseEntity<ApiResponse<?>> getToolList(
+            @RequestHeader(value = "Access-Token" , required = false)String accessToken,
+            @RequestParam(defaultValue = "popular", value="criteria") String criteria,
+            @RequestParam(defaultValue = "ALL",value="category") String category,
+            @RequestParam(value = "size", defaultValue = "18") int size,
+            @RequestParam(value = "lastToolId", required = false) Long lastToolId
                                                              ){
         Category categoryEnum = Category.fromEnglishName(category);
         ToolListRes toolListRes = toolService.
-                getToolList(criteria , categoryEnum, size, lastToolId);
+                getToolList(accessToken , criteria , categoryEnum, size, lastToolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolListRes,SuccessCode.SUCCESS_FETCH));
     }
     /**

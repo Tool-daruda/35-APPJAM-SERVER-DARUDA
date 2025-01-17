@@ -25,9 +25,10 @@ public record ToolDetailGetRes(
         String bgColor,
         Boolean fontColor,
         @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy.MM.dd",timezone = "Asia/Seoul")
-        Timestamp updatedAt
+        Timestamp updatedAt,
+        Boolean isScrapped
 ) {
-    public static ToolDetailGetRes of( Tool tool, List<PlatformRes> platform, List<String> keywords , List<String> images ,List<String> videos){
+    public static ToolDetailGetRes of( Tool tool, List<PlatformRes> platform, List<String> keywords , List<String> images ,List<String> videos,Boolean isScrapped){
 
         return ToolDetailGetRes.builder()
                 .toolId(tool.getToolId())
@@ -46,6 +47,7 @@ public record ToolDetailGetRes(
                 .videos(videos)
                 .bgColor(tool.getBgColor())
                 .fontColor(tool.isFontColor())
+                .isScrapped(isScrapped)
                 .build();
     }
 }

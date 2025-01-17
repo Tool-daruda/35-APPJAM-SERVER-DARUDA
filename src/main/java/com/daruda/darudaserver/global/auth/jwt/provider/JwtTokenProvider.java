@@ -73,7 +73,8 @@ public class JwtTokenProvider {
 
     private SecretKey getSigningKey(){
         String encodedKey = Base64.getEncoder().encodeToString(jwtSecret.getBytes());
-        return Keys.hmacShaKeyFor(encodedKey.getBytes());
+        SecretKey key = Keys.hmacShaKeyFor(encodedKey.getBytes());
+        return key;
     }
 
     private String generateToken(final Authentication authentication, final long expiredTime){
@@ -121,6 +122,14 @@ public class JwtTokenProvider {
                 case EMPTY_JWT -> new BadRequestException(ErrorCode.REFREH_TOKEN_EMPTY_ERROR);
                 default -> new BusinessException(ErrorCode.UNSUPPORTED_REFRESH_TOKEN_ERROR);
             };
+        }
+    }
+
+    public boolean validateTokens(String jwtToken) {
+        try {
+            return !getBody(jwtToken).getExpiration().before(new Date());
+        } catch (Exception e) {
+            return false;
         }
     }
 

@@ -54,8 +54,10 @@ public class BoardController {
      * 게시글 조회
      */
     @GetMapping("/boards/board/{board-id}")
-    public ResponseEntity<ApiResponse<?>> getBoard(@PathVariable(name="board-id") final Long boardId){
-        BoardRes boardRes = boardService.getBoard(boardId);
+    public ResponseEntity<ApiResponse<?>> getBoard(
+            @RequestHeader(value = "Access-Token" , required = false)String accessToken,
+            @PathVariable(name="board-id") final Long boardId){
+        BoardRes boardRes = boardService.getBoard(accessToken, boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_FETCH));
     }
 
@@ -86,12 +88,13 @@ public class BoardController {
      */
     @GetMapping("boards/board/list")
     public ResponseEntity <ApiResponse<?>> getBoardList(
+            @RequestHeader(value = "Access-Token" , required = false)String accessToken,
             @RequestParam(name="isFree") Boolean isFree,
             @RequestParam(name = "toolId",required = false) Long toolId,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "lastBoardId", required = false) Long lastBoardId )
     {
-        GetBoardResponse boardResponse =  boardService.getBoardList(isFree, toolId, size, lastBoardId);
+        GetBoardResponse boardResponse =  boardService.getBoardList(accessToken, isFree, toolId, size, lastBoardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardResponse, SuccessCode.SUCCESS_FETCH));
     }
 }
