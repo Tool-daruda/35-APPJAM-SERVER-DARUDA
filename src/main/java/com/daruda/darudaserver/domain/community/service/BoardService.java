@@ -114,7 +114,7 @@ public class BoardService {
         } else {
             boardScrap.update();
         }
-        return BoardScrapRes.of(boardId, boardScrap.isDelYn());
+        return BoardScrapRes.of(boardId, !boardScrap.isDelYn());
     }
 
     // 게시판 조회

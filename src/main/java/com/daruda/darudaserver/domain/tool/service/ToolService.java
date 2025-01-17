@@ -137,7 +137,7 @@ public class ToolService {
         }
         int scrapCount = toolScrapRepository.countByTool_ToolIdAndDelYnFalse(toolId);
         tool.updatePopular(scrapCount);
-        return ToolScrapRes.of(toolId, toolScrap.isDelYn());
+        return ToolScrapRes.of(toolId, !toolScrap.isDelYn());
     }
 
     private List<RelatedTool> relatedTool(final Tool tool) {
