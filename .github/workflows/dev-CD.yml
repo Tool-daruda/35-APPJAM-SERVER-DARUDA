@@ -81,6 +81,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "./docker-compose.yml"
           target: "~"
+
+      - name: 로그 디렉토리 생성
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            mkdir -p /home/ubuntu/daruda_log
+
+
   cd:
     needs: ci
     runs-on: ubuntu-22.04
