@@ -20,7 +20,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:3000","http://localhost:8080", "http://localhost:8081")
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true) // 쿠키 인증 요청 허용
+                .allowedOriginPatterns("*")
+                //.allowCredentials(true) // 쿠키 인증 요청 허용
+                .exposedHeaders("*")
                 .maxAge(3000);
     }
 
