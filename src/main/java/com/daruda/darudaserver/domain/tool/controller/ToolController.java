@@ -28,8 +28,8 @@ public class ToolController {
      * 툴 세부정보 조회
      */
     @GetMapping("/tools/{tool-id}")
-    public ResponseEntity<ApiResponse<?>> getToolDetail(@PathVariable(name="tool-id") final Long toolId){
-        ToolDetailGetRes toolDetail = toolService.getToolDetail(toolId);
+    public ResponseEntity<ApiResponse<?>> getToolDetail(  @RequestHeader(value = "Access-Token" , required = false)String accessToken,@PathVariable(name="tool-id") final Long toolId){
+        ToolDetailGetRes toolDetail = toolService.getToolDetail(accessToken, toolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolDetail, SuccessCode.SUCCESS_FETCH));
     }
 

@@ -40,7 +40,7 @@ public class ToolService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    public ToolDetailGetRes getToolDetail(final Long toolId) {
+    public ToolDetailGetRes getToolDetail(final String accessToken, final Long toolId) {
         log.info("툴 세부 정보를 조회합니다. toolId={}", toolId);
 
         Tool tool = getToolById(toolId);
@@ -49,10 +49,21 @@ public class ToolService {
         List<String> keywordRes = convertToKeywordRes(tool);
         List<String> videos = getVideoById(tool);
         tool.incrementViewCount();
+
+        UserEntity user;
+        Boolean isScrapped = false;
+        //AccessToken 이 들어왔을 경우
+        if (accessToken != null) {
+            Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
+            user = userRepository.findById(userId)
+                    .orElse(null);
+            log.debug("유저 정보를 조회했습니다: {}", user.getId());
+            isScrapped = getScrapped(user, tool);
+        }
         log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
         log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
         toolRepository.save(tool);
-        return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos);
+        return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos,isScrapped);
     }
 
     public PlanListRes getPlan(final Long toolId) {
@@ -88,23 +99,18 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
-    public ToolListRes getToolList(String accessToken, final String criteria, final Category category, final int size, final Long lastToolId) {
+    public ToolListRes getToolList(final String accessToken, final String criteria, final Category category, final int size, final Long lastToolId) {
         log.debug("카테고리별 툴 목록을 조회 category: {}, sort: {}, size: {}, lastToolId: {}", category, criteria, size, lastToolId);
 
-
         UserEntity user;
-        log.debug("Access Token: {}", accessToken);
-
         if (accessToken != null) {
             Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
-            log.debug("추출된 userId: {}", userId);
             user = userRepository.findById(userId)
-                    .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.SCRAP_NOT_FOUND));
             log.debug("유저 정보를 조회했습니다: {}", user.getId());
         } else {
             user = null;
         }
-
 
         Long cursor = (lastToolId == null) ? Long.MAX_VALUE : lastToolId;
         validateCriteria(criteria);
@@ -255,6 +261,11 @@ public class ToolService {
                 });
     }
 
+    public Boolean getScrapped(final UserEntity user, final Tool tool) {
+        ToolScrap toolScrap = toolScrapRepository.findByUserAndTool(user, tool)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.SCRAP_NOT_FOUND));
+        return toolScrap.isDelYn();
+    }
     // 정렬 기준 검증
     public void validateCriteria(String criteria){
         List<String> allowedFields = List.of("popular", "createdAt");
