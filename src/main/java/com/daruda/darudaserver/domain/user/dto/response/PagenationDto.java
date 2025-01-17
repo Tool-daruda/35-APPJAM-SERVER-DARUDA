@@ -6,6 +6,6 @@ public record PagenationDto(
         int totalPages
 ) {
     public static PagenationDto of(int pageNo, int size, int totalPages){
-        return new PagenationDto(pageNo, size, totalPages);
+        return new PagenationDto(pageNo+1, size, totalPages);
     }
 }

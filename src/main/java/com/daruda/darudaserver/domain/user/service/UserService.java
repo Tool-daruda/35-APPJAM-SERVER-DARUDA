@@ -190,6 +190,7 @@ public class UserService {
                         .build())
                 .toList();
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
+        log.debug("페이지 번호를 출력합니다" + pageable.getPageNumber());
 
         FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
 
