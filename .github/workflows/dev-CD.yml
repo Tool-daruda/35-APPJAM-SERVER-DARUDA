@@ -69,7 +69,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./Dockerfile-dev
+          file: ./Dockerfile
           push: true
           tags: darudaserver:daruda
 
