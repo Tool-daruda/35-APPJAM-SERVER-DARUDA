@@ -1,0 +1,23 @@
+version : '3.9'
+
+services:
+  blue:
+    container_name: blue
+    image: daruda241221/daruda
+    expose:
+      - 8080
+    ports:
+      - "8081:8080"
+    environment:
+      - TZ=Asia/Seoul
+
+
+  green:
+    container_name: green
+    image: daruda241221/daruda
+    expose:
+      - 8080
+    ports:
+      - "8082:8080"
+    environment:
+      - TZ=Asia/Seoul
