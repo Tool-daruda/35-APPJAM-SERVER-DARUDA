@@ -125,8 +125,8 @@ public class BoardService {
     }
 
     // 게시판 조회
-    public BoardRes getBoard(final String accessToken, final Long boardId) {
-        UserEntity user = getUser(accessToken);
+    public BoardRes getBoard(final Long userIdOrNull, final Long boardId) {
+        UserEntity user = getUser(userIdOrNull);
         Board board = getBoardById(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
@@ -145,13 +145,13 @@ public class BoardService {
     }
 
     // 게시판 리스트 조회
-    public GetBoardResponse getBoardList(final String accessToken, final Boolean isFree,final Long toolId, final int size, final Long lastBoardId) {
+    public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean isFree,final Long toolId, final int size, final Long lastBoardId) {
 
         List<Board> boards;
         Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId;
         PageRequest pageRequest = PageRequest.of(0, size + 1);
 
-        UserEntity user = getUser(accessToken);
+        UserEntity user = getUser(userIdOrNull);
         // 전체 조회
         if(Boolean.TRUE.equals(isFree)){
             log.info("자유 게시판을 조회합니다");
@@ -266,10 +266,10 @@ public class BoardService {
     }
 
 
-    public UserEntity getUser(String accessToken) {
+    public UserEntity getUser(Long userIdOrNull) {
         UserEntity user = null;
-        if (accessToken != null) {
-            Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
+        if (userIdOrNull != null) {
+            Long userId = userIdOrNull;
             user = userRepository.findById(userId)
                     .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
             log.debug("유저 정보를 조회했습니다: {}", user.getId());

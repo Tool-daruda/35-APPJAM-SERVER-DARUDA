@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,9 +56,9 @@ public class BoardController {
      */
     @GetMapping("/boards/board/{board-id}")
     public ResponseEntity<ApiResponse<?>> getBoard(
-            @RequestHeader(value = "Access-Token" , required = false)String accessToken,
+            @AuthenticationPrincipal Long userIdOrNull,
             @PathVariable(name="board-id") final Long boardId){
-        BoardRes boardRes = boardService.getBoard(accessToken, boardId);
+        BoardRes boardRes = boardService.getBoard(userIdOrNull, boardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes,SuccessCode.SUCCESS_FETCH));
     }
 
@@ -88,13 +89,13 @@ public class BoardController {
      */
     @GetMapping("boards/board/list")
     public ResponseEntity <ApiResponse<?>> getBoardList(
-            @RequestHeader(value = "Access-Token" , required = false)String accessToken,
+            @AuthenticationPrincipal Long userIdOrNull,
             @RequestParam(name="isFree") Boolean isFree,
             @RequestParam(name = "toolId",required = false) Long toolId,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "lastBoardId", required = false) Long lastBoardId )
     {
-        GetBoardResponse boardResponse =  boardService.getBoardList(accessToken, isFree, toolId, size, lastBoardId);
+        GetBoardResponse boardResponse =  boardService.getBoardList(userIdOrNull, isFree, toolId, size, lastBoardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardResponse, SuccessCode.SUCCESS_FETCH));
     }
 }

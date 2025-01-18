@@ -10,6 +10,7 @@ import com.daruda.darudaserver.global.error.code.SuccessCode;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -28,8 +29,8 @@ public class ToolController {
      * 툴 세부정보 조회
      */
     @GetMapping("/tools/{tool-id}")
-    public ResponseEntity<ApiResponse<?>> getToolDetail(  @RequestHeader(value = "Access-Token" , required = false)String accessToken,@PathVariable(name="tool-id") final Long toolId){
-        ToolDetailGetRes toolDetail = toolService.getToolDetail(accessToken, toolId);
+    public ResponseEntity<ApiResponse<?>> getToolDetail(@AuthenticationPrincipal Long userIdOrNull,@PathVariable(name="tool-id") final Long toolId){
+        ToolDetailGetRes toolDetail = toolService.getToolDetail(userIdOrNull, toolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolDetail, SuccessCode.SUCCESS_FETCH));
     }
 
@@ -65,7 +66,7 @@ public class ToolController {
      */
     @GetMapping("/tools")
     public ResponseEntity<ApiResponse<?>> getToolList(
-            @RequestHeader(value = "Access-Token" , required = false)String accessToken,
+            @AuthenticationPrincipal Long userIdOrNull,
             @RequestParam(defaultValue = "popular", value="criteria") String criteria,
             @RequestParam(defaultValue = "ALL",value="category") String category,
             @RequestParam(value = "size", defaultValue = "18") int size,
@@ -73,7 +74,7 @@ public class ToolController {
                                                              ){
         Category categoryEnum = Category.fromEnglishName(category);
         ToolListRes toolListRes = toolService.
-                getToolList(accessToken , criteria , categoryEnum, size, lastToolId);
+                getToolList(userIdOrNull, criteria , categoryEnum, size, lastToolId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolListRes,SuccessCode.SUCCESS_FETCH));
     }
     /**
