@@ -33,6 +33,7 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate.type: TRACE
+  config: classpath:logback-spring.xml
 
 kakao:
   client_id: ${CLIENT_ID}
