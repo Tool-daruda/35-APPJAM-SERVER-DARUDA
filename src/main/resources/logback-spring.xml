@@ -30,7 +30,7 @@
 
     <!-- Error 로그 전용 Rolling File Appender -->
     <appender name="Error" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/${ERR_LOG_FILE_NAME}.log</file>
+        <file>${LOG_PATH}/${ERR_LOG_FILE_NAME}.%d{yyyy-MM-dd}.%i.log</file>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
             <onMatch>ACCEPT</onMatch>
