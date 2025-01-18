@@ -10,8 +10,13 @@ services:
       - "8081:8080"
     environment:
       - TZ=Asia/Seoul
+      - SPRING_DATASOURCE_URL=jdbc:mysql://daruda-db.czk6okg68de0.ap-northeast-2.rds.amazonaws.com:3306/daruda
+      - SPRING_DATASOURCE_USERNAME=daruda
+      - SPRING_DATASOURCE_PASSWORD=daruda8688!
     volumes:
       - daruda-blue-volume:/logs/daruda-blue-volume
+
+
 
 
   green:
@@ -23,5 +28,8 @@ services:
       - "8082:8080"
     environment:
       - TZ=Asia/Seoul
+      - SPRING_DATASOURCE_URL=jdbc:mysql://daruda-db.czk6okg68de0.ap-northeast-2.rds.amazonaws.com:3306/daruda
+      - SPRING_DATASOURCE_USERNAME=daruda
+      - SPRING_DATASOURCE_PASSWORD=daruda8688!
     volumes:
       - daruda-green-volume:/logs/daruda-green-volume
