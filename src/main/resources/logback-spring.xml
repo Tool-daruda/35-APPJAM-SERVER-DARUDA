@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="300 seconds"> <!-- 5분 초 간격으로 파일 확인하여 반영-->
 
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
     <!-- 로그 파일 경로 및 이름 설정 -->
     <springProperty scope="context" name="LOG_PATH" source="logging.file.path"/>
     <property name="LOG_FILE_NAME" value="logging"/> <!-- 단계별 로그 파일 이름 -->
