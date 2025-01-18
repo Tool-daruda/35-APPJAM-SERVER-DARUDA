@@ -17,13 +17,13 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry){
         corsRegistry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000","http://localhost:8080", "http://localhost:8081")
+                .allowedOrigins("http://localhost:3000","http://localhost:8080", "http://localhost:8081", "http://localhost:8082","http://www.daruda.site")
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowedOriginPatterns("*")
-                //.allowCredentials(true) // 쿠키 인증 요청 허용
+                .allowCredentials(true) // 쿠키 인증 요청 허용
                 .exposedHeaders("*")
-                .maxAge(3000);
+                .maxAge(3600);
     }
 
     @Override
