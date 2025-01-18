@@ -40,8 +40,8 @@ public class ToolService {
     private final JwtTokenProvider jwtTokenProvider;
 
 
-    public ToolDetailGetRes getToolDetail(final String accessToken, final Long toolId) {
-        log.info("툴 세부 정보를 조회합니다. toolId={}", toolId);
+    public ToolDetailGetRes getToolDetail(final Long userIdOrNull, final Long toolId) {
+        log.info("툴 세부 정보를 조회합니다. toolId={}", userIdOrNull);
 
         Tool tool = getToolById(toolId);
         List<String> images = getImageById(tool);
@@ -53,8 +53,8 @@ public class ToolService {
         UserEntity user;
         Boolean isScrapped = false;
         //AccessToken 이 들어왔을 경우
-        if (accessToken != null) {
-            Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
+        if (userIdOrNull != null) {
+            Long userId = userIdOrNull;
             user = userRepository.findById(userId)
                     .orElse(null);
             log.debug("유저 정보를 조회했습니다: {}", user.getId());
@@ -99,12 +99,12 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
-    public ToolListRes getToolList(final String accessToken, final String criteria, final Category category, final int size, final Long lastToolId) {
+    public ToolListRes getToolList(final Long userIdOrNull, final String criteria, final Category category, final int size, final Long lastToolId) {
         log.debug("카테고리별 툴 목록을 조회 category: {}, sort: {}, size: {}, lastToolId: {}", category, criteria, size, lastToolId);
 
         UserEntity user;
-        if (accessToken != null) {
-            Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
+        if (userIdOrNull != null) {
+            Long userId = userIdOrNull;
             user = userRepository.findById(userId)
                     .orElseThrow(() -> new NotFoundException(ErrorCode.SCRAP_NOT_FOUND));
             log.debug("유저 정보를 조회했습니다: {}", user.getId());

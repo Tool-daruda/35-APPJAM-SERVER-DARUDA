@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/v1/users/token",
             "/api/v1/users/signup",
             "/api/v1/users/nickname",
-            "/api/v1/boards/board/**",
+            //"/api/v1/boards/board/**",
             "/api/v1/tools/**");
 
     @Override
