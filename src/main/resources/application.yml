@@ -29,7 +29,7 @@ cloud:
 
 logging:
   file:
-    path : logs
+    path : /home/ubuntu/daruda_log
   level:
     org.springframework.web: DEBUG
     org.hibernate.type: TRACE
