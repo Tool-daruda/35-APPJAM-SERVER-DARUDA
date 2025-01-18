@@ -42,3 +42,5 @@ out/
 
 *.application-dev.yml
 application-dev.yml
+
+LOG_PATH_IS_UNDEFINED
