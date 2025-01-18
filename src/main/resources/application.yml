@@ -27,13 +27,13 @@ cloud:
     stack:
       auto: false
 
-#logging:
-#  file:
-#    path: ./daruda_log
-#  level:
-#    org.springframework.web: DEBUG
-#    org.hibernate.type: TRACE
-#  config: classpath:logback-spring.xml
+logging:
+  file:
+    path: /home/ubuntu/daruda_log
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate.type: TRACE
+  config: classpath:logback-spring.xml
 
 kakao:
   client_id: ${CLIENT_ID}
