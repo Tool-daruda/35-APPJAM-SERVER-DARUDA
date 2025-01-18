@@ -41,7 +41,7 @@ public class ToolService {
 
 
     public ToolDetailGetRes getToolDetail(final Long userIdOrNull, final Long toolId) {
-        log.info("툴 세부 정보를 조회합니다. toolId={}", userIdOrNull);
+        log.info("툴 세부 정보를 조회합니다. toolId={}" + userIdOrNull);
 
         Tool tool = getToolById(toolId);
         List<String> images = getImageById(tool);
@@ -63,7 +63,7 @@ public class ToolService {
         log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
         log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
         toolRepository.save(tool);
-        return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos,isScrapped);
+        return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos, !isScrapped);
     }
 
     public PlanListRes getPlan(final Long toolId) {
@@ -143,7 +143,7 @@ public class ToolService {
                                     .map(toolScrap -> !toolScrap.isDelYn())
                                     .orElse(false));
                     System.out.println("isScraped = " + isScraped);
-                    return ToolResponse.of(tool, convertToKeywordRes(tool), isScraped);
+                    return ToolResponse.of(tool, convertToKeywordRes(tool), !isScraped);
                 })
                 .toList();
 
@@ -217,7 +217,7 @@ public class ToolService {
 
     private List<String> getVideoById(final Tool tool) {
         List<ToolVideo> toolVideos = toolVideoRepository.findAllByTool(tool);
-        validateList(toolVideos);
+        //validateList(toolVideos);
         log.debug("툴에 연결된 비디오 목록을 조회했습니다");
         return toolVideos.stream()
                 .map(ToolVideo::getVideoUrl)
