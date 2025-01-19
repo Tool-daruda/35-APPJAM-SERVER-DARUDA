@@ -1,4 +1,6 @@
 name: CI/CD
+env:
+  SECRET_CODE : ${{ secrets.SECRET_CODE}}
 
 on:
   push:
@@ -26,6 +28,11 @@ jobs:
           echo "${{ secrets.APPLICATION_DEV }}" > ./application-dev.yml
         shell: bash
 
+      - name : Environment 설정
+        run :
+          echo "SECRET_CODE=$SECRET_CODE" >> .env
+        env:
+          SECRET_CODE : ${{secret.SECRET_CODE}}
       - name: Build with Gradle
         run: |
           chmod +x gradlew
