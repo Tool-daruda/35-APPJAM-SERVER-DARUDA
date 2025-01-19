@@ -1,54 +1,55 @@
-name : CI/CD
+name: CI/CD
 
-on :
-  push :
+on:
+  push:
     branches: ["main"]
 
-jobs :
+jobs:
   CI-CD:
-    runs-on : ubuntu
-    steps :
-      - uses : actions/checkout@v3
+    runs-on: ubuntu
+    steps:
+      - uses: actions/checkout@v3
 
-        # JDK 세팅
-      - name : Set up JDK 17
-        uses : actions/setup-java@v3
-        with :
-          java-version : '17'
-          distribution : 'temurin'
+      # JDK 세팅
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name : make application.yml
-        run : |
+      - name: make application.yml
+        run: |
           mkdir -p ./src/main/resources
           cd ./src/main/resources
           touch application-dev.yml
           echo "${{ secrets.APPLICATION_DEV }}" > ./application-dev.yml
-        shell : bash
+        shell: bash
 
-      - name : Build with Gradle
-        run : ./gradlew build -x test
+      - name: Build with Gradle
+        run: ./gradlew build -x test
 
-      - name : Docker Buildx
-        uses : docker/setup-buildx-action@v2
+      - name: Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name : Docker Login
-        run : echo $ {{ secrets.DOCKER_LOGIN_ACCESSTOKEN }} | docker login -u ${{ secrets.DOCKER_LOGIN_USERNAME }} --password-stdin
+      - name: Docker Login
+        run: echo ${{ secrets.DOCKER_LOGIN_ACCESSTOKEN }} | docker login -u ${{ secrets.DOCKER_LOGIN_USERNAME }} --password-stdin
 
-      - name : Docker build & push
-        run : |
+      - name: Docker build & push
+        run: |
           docker buildx build \
             --platform linux/amd64 \
-            --push \ 
+            --push \
             -t ${{ secrets.DOCKER_LOGIN_USERNAME }}/daruda .
 
-      - name : Deploy
-        uses : appleboy/ssh-action@master
-        with :
-          host : ${{ secrets.EC2_HOST }}
-          username : ${{ secrets.DOCKER_USERNAME }}
-          key : $[{ secrets.EC2_SSH_KEY }}
-          script : |
-            sudo docker ps #현재 실행 중인 컨테이너 확인
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/daruda #최신 이미지 풀
-            sudo docker run -d -p 8080:8080${{secrets.DOCKER_USERNAME }}/daruda # 새 컨테이너 실행
-            sudo docker image prune -f #사용하지 않는 이미지 정리
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo docker ps -q --filter "ancestor=${{ secrets.DOCKER_USERNAME }}/daruda" | xargs -r sudo docker stop
+            sudo docker ps -aq --filter "ancestor=${{ secrets.DOCKER_USERNAME }}/daruda" | xargs -r sudo docker rm
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/daruda
+            sudo docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/daruda
+            sudo docker image prune -f
