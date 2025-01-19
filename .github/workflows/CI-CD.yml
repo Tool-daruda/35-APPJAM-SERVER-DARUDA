@@ -48,5 +48,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd~
-            ./deploy.sh
+            cd /home/ubuntu/35-APPJAM-SERVER-DARUDA
+            chmod +x deploy.sh && ./deploy.sh
+
