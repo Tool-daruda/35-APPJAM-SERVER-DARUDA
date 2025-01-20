@@ -32,7 +32,7 @@ jobs:
         run :
           echo "SECRET_CODE=$SECRET_CODE" >> .env
         env:
-          SECRET_CODE : ${{secret.SECRET_CODE}}
+          SECRET_CODE : ${{secrets.SECRET_CODE}}
       - name: Build with Gradle
         run: |
           chmod +x gradlew
