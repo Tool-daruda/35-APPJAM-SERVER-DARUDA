@@ -138,16 +138,18 @@ public class BoardService {
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
         Boolean isScraped = getBoardScrap(user, board);
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls,isScraped);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped);
     }
 
     // 내가 쓴  게시판 조회
-    public BoardRes getMyBoard(final Long boardId) {
+    public BoardRes getMyBoard(final UserEntity user,final  Long boardId) {
         Board board = getBoardById(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls);
+
+        Boolean isScraped = getBoardScrap(user, board);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls,isScraped);
     }
 
     // 게시판 리스트 조회
@@ -271,9 +273,9 @@ public class BoardService {
         validateBoard.validateUser(userIdOrNull);
         log.debug("사용자를 조회합니다, {}", userIdOrNull);
         Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userIdOrNull, pageable);
-
+        UserEntity user = getUser(userIdOrNull);
         List<BoardRes> boardResList = boards.getContent().stream()
-                .map(board -> getMyBoard( board.getId()))
+                .map(board -> getMyBoard( user, board.getId()))
                 .toList();
 
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
