@@ -138,12 +138,12 @@ public class ToolService {
 
         List<ToolResponse> toolResponses = paginatedTools.stream()
                 .map(tool -> {
-                    final Boolean isScraped = (user != null &&
+                     boolean isScraped = (
                             toolScrapRepository.findByUserAndTool(user, tool)
                                     .map(toolScrap -> !toolScrap.isDelYn())
                                     .orElse(false));
-                    System.out.println("isScraped = " + isScraped);
-                    return ToolResponse.of(tool, convertToKeywordRes(tool), !isScraped);
+                     log.debug("스크랩 여부"+tool.getToolId()+isScraped);
+                    return ToolResponse.of(tool, convertToKeywordRes(tool), isScraped);
                 })
                 .toList();
 
