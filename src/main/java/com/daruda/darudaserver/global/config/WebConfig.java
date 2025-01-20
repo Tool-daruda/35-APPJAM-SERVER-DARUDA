@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
         corsRegistry.addMapping("/**")
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
+                .allowedHeaders("Authorization", "*")
                 .allowCredentials(true);
     }
 
