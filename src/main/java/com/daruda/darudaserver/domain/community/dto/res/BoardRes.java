@@ -28,7 +28,7 @@ public class BoardRes {
         return createBoardRes(board, toolName, toolLogo, commentCount, images);
     }
     public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images,final Boolean isScraped) {
-        return getBoardRes(board, toolName, toolLogo, commentCount, images,isScraped);
+        return getBoardRes(board, toolName, toolLogo, commentCount, images, isScraped);
     }
 
     public static BoardRes createBoardRes(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images) {
@@ -43,6 +43,7 @@ public class BoardRes {
                 .images(images)
                 .commentCount(commentCount)
                 .updatedAt(board.getUpdatedAt())
+                .isScraped(false)
                 .build();
     }
 

@@ -197,11 +197,4 @@ public class UserService {
         return tool;
     }
 
-    public void validateUser(Long userId){
-        userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
-    }
-
-
-
 }

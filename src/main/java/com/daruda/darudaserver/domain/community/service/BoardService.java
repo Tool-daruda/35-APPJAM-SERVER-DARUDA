@@ -21,16 +21,12 @@ import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveRe
 import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
-import com.daruda.darudaserver.domain.user.service.UserService;
-import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.service.ImageService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -41,8 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
@@ -57,7 +51,6 @@ public class BoardService {
     private final UserRepository userRepository;
     private final BoardScrapRepository boardScrapRepository;
     private final ToolRepository toolRepository;
-    private final UserService userService;
     private final CommentRepository commentRepository;
     private final ValidateBoard validateBoard;
 
@@ -86,6 +79,7 @@ public class BoardService {
     public BoardRes updateBoard(final Long userId, final Long boardId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
         Board board = validateBoardAndUser(userId, boardId);
         Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
+        UserEntity user = getUser(userId);
         board.update(
                 tool,
                 board.getUser(),
@@ -99,7 +93,15 @@ public class BoardService {
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls);
+        boolean isScrapped=false;
+        BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user, board)
+                .orElse(null);
+
+        if(boardScrap!=null){
+            isScrapped = !boardScrap.isDelYn();
+        }
+
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, isScrapped);
     }
 
     // 게시판 삭제
@@ -213,7 +215,6 @@ public class BoardService {
                 .toList();
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
         log.debug("페이지 번호를 출력합니다" + pageable.getPageNumber());
-
         return  new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
 
     }
@@ -255,7 +256,6 @@ public class BoardService {
         return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
     }
 
-
     private UserEntity getUserById(final Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
     }
@@ -279,7 +279,6 @@ public class BoardService {
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
 
         return new BoardListResponse(boardResList, userIdOrNull, pageInfo);
-
     }
 
     public int getCommentCount(final Long boardId){
@@ -294,7 +293,6 @@ public class BoardService {
                         .map(toolScrap -> !toolScrap.isDelYn())
                         .orElse(false));
     }
-
 
     public UserEntity getUser(Long userIdOrNull) {
         UserEntity user = null;
