@@ -26,7 +26,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
+         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -41,8 +41,11 @@ public class SecurityConfig {
                                 .anyRequest()
                                 .authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new    ExceptionHandlerFilter(), JwtAuthenticationFilter.class)
-                .build();
+                .addFilterBefore(new    ExceptionHandlerFilter(), JwtAuthenticationFilter.class);
+
+         http.cors(cors->cors.configurationSource(CorsConfig.configurationSource()));
+
+         return http.build();
     }
 
     @Bean
