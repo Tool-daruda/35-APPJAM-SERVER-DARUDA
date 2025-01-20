@@ -218,7 +218,6 @@ public class UserService {
 
         userRepository.delete(userEntity);
 
-        userEntity.deleteMe(" ");
         tokenService.deleteRefreshToken(userId);
     }
 

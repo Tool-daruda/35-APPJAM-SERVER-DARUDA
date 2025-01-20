@@ -45,5 +45,4 @@ public class UserEntity extends BaseTimeEntity{
         this.nickname=nickname;
     }
 
-    public void deleteMe(String email){this.email = email;}
 }
