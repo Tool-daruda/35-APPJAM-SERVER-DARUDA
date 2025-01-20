@@ -45,3 +45,8 @@ application-dev.yml
 daruda_log
 
 LOG_PATH_IS_UNDEFINED
+
+
+*.application.yml
+application.yml
+daruda_log

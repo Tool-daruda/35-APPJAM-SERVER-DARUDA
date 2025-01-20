@@ -17,12 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry){
         corsRegistry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000",
-                        "http://localhost:8080",
-                        "http://localhost:8081",
-                        "http://localhost:8082",
-                        "http://www.daruda.site",
-                        "https://www.daruda.site")
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true) // 쿠키 인증 요청 허용
