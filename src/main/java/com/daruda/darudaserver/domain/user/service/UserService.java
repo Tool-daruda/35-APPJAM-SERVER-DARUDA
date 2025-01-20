@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.user.service;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
+import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDtoGetRes;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
@@ -43,6 +44,7 @@ public class UserService {
     private final ToolRepository toolRepository;
     private final ToolScrapRepository toolScrapRepository;
     private final ToolService toolService;
+    private final BoardRepository boardRepository;
 
     public LoginResponse oAuthLogin(final UserInfo userInfo) {
         String email = userInfo.email();
@@ -205,8 +207,17 @@ public class UserService {
         //사용자 찾기
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        log.debug("사용자를 성공적으로 조회하였습니다, {}", userId);
+        //FK로 묶여있는 toolScrap삭제
+        toolScrapRepository.deleteAllByUserId(userId);
+
+        //FK로 묶여있는 boardScrap 삭제
+        boardScrapRepository.deleteAllByUserId(userId);
+
+        //FK로 묶여있는 board 삭제
+        boardRepository.deleteAllByUserId(userId);
+
         userRepository.delete(userEntity);
+
         tokenService.deleteRefreshToken(userId);
     }
 

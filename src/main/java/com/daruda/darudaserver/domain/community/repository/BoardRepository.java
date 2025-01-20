@@ -2,11 +2,13 @@ package com.daruda.darudaserver.domain.community.repository;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -28,6 +30,11 @@ public interface BoardRepository extends JpaRepository<Board,Long> {
             @Param("isFree") Boolean isFree,
             @Param("cursor") Long cursor,
             Pageable pageable);
+
+
+    @Modifying
+    @Transactional
+    void deleteAllByUserId(@Param("userId") Long userId);
 
 
     Page<Board> findAllByUserIdAndDelYnFalse(Long userId, Pageable pageable);
