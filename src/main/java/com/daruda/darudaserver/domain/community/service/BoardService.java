@@ -238,9 +238,10 @@ public class BoardService {
         imageService.deleteImages(imageIds);
     }
 
-    public BoardListResponse getMyBoards(Long userId, Pageable pageable){
-        userService.validateUser(userId);
-        Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userId, pageable);
+    public BoardListResponse getMyBoards(Long userIdOrNull, Pageable pageable){
+        userService.validateUser(userIdOrNull);
+        log.debug("사용자를 조회합니다, {}", userIdOrNull);
+        Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userIdOrNull, pageable);
 
         List<BoardRes> boardResList = boards.getContent().stream()
                 .map(board -> getMyBoard( board.getId()))
@@ -248,7 +249,7 @@ public class BoardService {
 
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
 
-        return new BoardListResponse(boardResList, userId, pageInfo);
+        return new BoardListResponse(boardResList, userIdOrNull, pageInfo);
 
     }
 

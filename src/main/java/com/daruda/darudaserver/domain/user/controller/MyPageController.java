@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -50,12 +51,12 @@ public class MyPageController {
 
 
     @GetMapping("/boards")
-    public ResponseEntity<?> getMyBoards(@UserId Long userId,
+    public ResponseEntity<?> getMyBoards(@AuthenticationPrincipal Long userIdOrNull,
                                          @RequestParam(defaultValue = "1", value = "page") int pageNo,
                                          @RequestParam(defaultValue = "5", value = "size") int size,
                                          @RequestParam(defaultValue = "createdAt", value = "criteria") String criteria){
         Pageable pageable = PageRequest.of(pageNo-1, size, Sort.by(Sort.Direction.DESC, criteria));
-        BoardListResponse boardListResponse = boardService.getMyBoards(userId, pageable);
+        BoardListResponse boardListResponse = boardService.getMyBoards(userIdOrNull, pageable);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardListResponse,SuccessCode.SUCCESS_FETCH));
     }
 
