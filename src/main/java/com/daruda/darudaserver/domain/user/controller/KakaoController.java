@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.net.URI;
 
+import static com.daruda.darudaserver.global.error.code.SuccessCode.SUCCESS_REDIRECT;
+
 
 @RequestMapping("/api/v1/users")
 @RestController
@@ -43,15 +45,8 @@ public class KakaoController {
     public ResponseEntity<?> requestLogin(HttpServletResponse response) throws IOException {
         String location = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri=" + redirectUri;
 
-        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
-        response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-        response.setDateHeader("Expires", 0);
 
-        response.sendRedirect(location);
-        // 리다이렉트 명확히 지정
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create(location));
-        return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(location, SUCCESS_REDIRECT));
     }
 
     @PostMapping("/token")
