@@ -7,6 +7,7 @@ import com.daruda.darudaserver.global.auth.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -38,6 +39,7 @@ public class SecurityConfig {
                                 .authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
                         authorizationManagerRequestMatcherRegistry
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .anyRequest()
                                 .authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
