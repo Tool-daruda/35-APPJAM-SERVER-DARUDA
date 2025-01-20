@@ -2,6 +2,7 @@ package com.daruda.darudaserver.domain.community.service;
 
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
+import com.daruda.darudaserver.domain.community.ValidateBoard;
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
@@ -15,6 +16,8 @@ import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
+import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsResponse;
+import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
@@ -27,6 +30,7 @@ import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.service.ImageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -55,7 +59,7 @@ public class BoardService {
     private final ToolRepository toolRepository;
     private final UserService userService;
     private final CommentRepository commentRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final ValidateBoard validateBoard;
 
     private final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/daruda+logo.svg";
     private final String FREE = "자유";
@@ -189,6 +193,31 @@ public class BoardService {
     }
 
 
+    public FavoriteBoardsRetrieveResponse getFavoriteBoards(final Long userId, final Pageable pageable){
+        validateBoard.validateUser(userId);
+
+        Page<BoardScrap> boardScraps = boardScrapRepository.findAllByUserId(userId, pageable);
+        List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
+                .map(boardScrap -> {
+                    Board board = boardScrap.getBoard();
+                    return FavoriteBoardsResponse.builder()
+                            .boardId(board.getId())
+                            .title(board.getTitle())
+                            .content(board.getContent())
+                            .updatedAt(board.getUpdatedAt())
+                            .toolName(freeName(board))
+                            .toolLogo(freeLogo(board))
+                            .isScrapped(boardScrap.isDelYn())
+                            .build();
+                })
+                .toList();
+        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
+        log.debug("페이지 번호를 출력합니다" + pageable.getPageNumber());
+
+        return  new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
+
+    }
+
     private Board validateBoardAndUser(final Long userId, final Long boardId) {
         Board board = getBoardById(boardId);
         if (!board.getUser().getId().equals(userId)) {
@@ -239,7 +268,7 @@ public class BoardService {
     }
 
     public BoardListResponse getMyBoards(Long userIdOrNull, Pageable pageable){
-        userService.validateUser(userIdOrNull);
+        validateBoard.validateUser(userIdOrNull);
         log.debug("사용자를 조회합니다, {}", userIdOrNull);
         Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userIdOrNull, pageable);
 
@@ -278,4 +307,10 @@ public class BoardService {
         return user;
     }
 
+    public String freeName(Board board) {
+      return board.getTool() != null ? board.getTool().getToolMainName() : FREE;
+    }
+    public String freeLogo(Board board){
+        return board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
+    }
 }
