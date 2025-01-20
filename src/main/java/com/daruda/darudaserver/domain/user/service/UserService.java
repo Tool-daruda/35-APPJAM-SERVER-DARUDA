@@ -121,6 +121,13 @@ public class UserService {
 
 
     }
+    public MyProfileResponse getMyInfo(Long userId){
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        MyProfileResponse myProfileResponse = MyProfileResponse.of(userEntity.getNickname(), userEntity.getPositions().toString());
+        return myProfileResponse;
+    }
+
     public FavoriteToolsResponse getFavoriteTools(Long userId){
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));

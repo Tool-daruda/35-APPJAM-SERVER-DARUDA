@@ -2,10 +2,7 @@ package com.daruda.darudaserver.domain.user.controller;
 
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
-import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
-import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
-import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
-import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
+import com.daruda.darudaserver.domain.user.dto.response.*;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
@@ -65,5 +62,11 @@ public class MyPageController {
         FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = userService.getFavoriteBoards(userId,pageable);
 
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse,SuccessCode.SUCCESS_FETCH));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getMyProfile(@UserId Long userId){
+        MyProfileResponse myProfileResponse = userService.getMyInfo(userId);
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(myProfileResponse, SuccessCode.SUCCESS_FETCH));
     }
 }

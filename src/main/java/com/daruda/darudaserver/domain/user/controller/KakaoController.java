@@ -16,10 +16,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URI;
 
 
 @RequestMapping("/api/v1/users")
@@ -37,7 +40,7 @@ public class KakaoController {
 
 
     @GetMapping("/kakao/login-url")
-    public void requestLogin(HttpServletResponse response) throws IOException {
+    public ResponseEntity<?> requestLogin(HttpServletResponse response) throws IOException {
         String location = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri=" + redirectUri;
 
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
@@ -45,6 +48,10 @@ public class KakaoController {
         response.setDateHeader("Expires", 0);
 
         response.sendRedirect(location);
+        // 리다이렉트 명확히 지정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(location));
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
     @PostMapping("/token")

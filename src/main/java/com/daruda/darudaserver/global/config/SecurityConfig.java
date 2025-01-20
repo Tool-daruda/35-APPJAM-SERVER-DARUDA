@@ -23,7 +23,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtTokenProvider jwtTokenProvider;
 
-    private static final String[] WHITE_LIST = {"/api/v1/boards/board/**","/api/v1/users/signin", "/api/v1/users/token","/api/v1/users/signup","/api/v1/users/nickname","/api/v1/tools/**","/api/v1/comments"};
+    private static final String[] WHITE_LIST = {"/api/v1/boards/board/**","/api/v1/users/signin", "/api/v1/users/token","/api/v1/users/signup","/api/v1/users/nickname","/api/v1/tools/**","/api/v1/comments", "/api/v1/users/kakao/login-url"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
