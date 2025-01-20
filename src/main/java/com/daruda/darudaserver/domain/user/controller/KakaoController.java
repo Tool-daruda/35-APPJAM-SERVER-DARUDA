@@ -11,12 +11,15 @@ import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 
 @RequestMapping("/api/v1/users")
@@ -32,12 +35,12 @@ public class KakaoController {
     @Value("${kakao.redirect_uri}")
     private String redirectUri;
 
-    /*
+
     @GetMapping("/kakao/login-url")
     public void requestLogin(HttpServletResponse response) throws IOException {
         String location = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri=" + redirectUri;
         response.sendRedirect(location);
-    }*/
+    }
 
     @PostMapping("/token")
     public ResponseEntity<?> postAuthenticationCode(@RequestHeader("code") final String code){

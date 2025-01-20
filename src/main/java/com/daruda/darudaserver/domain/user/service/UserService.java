@@ -52,11 +52,13 @@ public class UserService {
             return LoginResponse.of(false,email);
         } else { //등록된 회원인 경우
             Long userId = userEntity.get().getId();
+            log.debug("유저 아이디를 성공적으로 조회했습니다. userId : ,{}", userId);
             UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
             //토큰 생성 및 refreshToken db에 저장
             String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
             String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
+            log.info("토큰을 정상적으로 생성하였습니다");
             tokenService.saveRefreshtoken(userId,refreshToken);
             JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
                     .accessToken(accessToken)
@@ -78,9 +80,10 @@ public class UserService {
                 .positions(Positions.fromString(positions))
                 .build();
         Long userId = userRepository.save(userEntity).getId();
-        UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
+        log.debug("유저 아이디를 성공적으로 조회했습니다. userId : ,{}", userId);        UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
         String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
+        log.info("토큰을 정상적으로 생성하였습니다");
         tokenService.saveRefreshtoken(userId,refreshToken);
 
         JwtTokenResponse jwtTokenResponse = JwtTokenResponse.of(accessToken,refreshToken);
@@ -90,7 +93,6 @@ public class UserService {
 
     public Long deleteUser(final Long userId){
         tokenService.deleteRefreshToken(userId);
-
         return userId;
     }
 
@@ -100,6 +102,7 @@ public class UserService {
 
     public JwtTokenResponse reissueToken(Long userId){
         String requestToken = tokenService.getRefreshTokenByUserId(userId);
+        log.debug("RefreshToken을 성공적으로 조회하였습니다, {}", requestToken);
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
         verifyUserIdWithStoredToken(userId,requestToken);
@@ -108,6 +111,7 @@ public class UserService {
 
         //새 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
+        log.debug("토큰을 정상적으로 생성하였습니다, {}", accessToken);
 
         JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
                 .accessToken(accessToken)
@@ -155,6 +159,7 @@ public class UserService {
     public UpdateMyResponse updateMy(Long userId, String nickname, String positions){
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        log.debug("사용자를 성공적으로 조회하였습니다., {}", userId);
         if(isDuplicated(nickname)){
             throw new BusinessException(ErrorCode.DUPLICATED_NICKNAME);
         }
@@ -169,6 +174,7 @@ public class UserService {
 
         userEntity.updateNickname(nickname);
         userEntity.updatePositions(Positions.fromString(positions));
+        log.debug("사용자 정보를 성공적으로 업데이트 했습니다., {} {}", nickname, positions);
         return UpdateMyResponse.of(nickname,positions);
     }
 
@@ -199,6 +205,7 @@ public class UserService {
         //사용자 찾기
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        log.debug("사용자를 성공적으로 조회하였습니다, {}", userId);
         userRepository.delete(userEntity);
         tokenService.deleteRefreshToken(userId);
     }

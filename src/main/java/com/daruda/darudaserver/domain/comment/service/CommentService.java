@@ -17,6 +17,7 @@ import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.infra.S3.S3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class CommentService {
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
@@ -38,8 +40,10 @@ public class CommentService {
         //게시글과 사용자 존재 여부 검사
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        log.debug("게시글을 성공적으로 조회하였습니다, {}", boardId);
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        log.debug("사용자를 성공적으로 조회하였습니다, {}", userId);
 
         String photoUrl = null;
 
@@ -58,6 +62,7 @@ public class CommentService {
 
         //댓글 entity 생성 및 댓글 ID 추출
         Long commentId = commentRepository.save(commentEntity).getId();
+        log.debug("댓글을 정상적으로 생성하였습니다., {}",commentId);
 
         //ResponseDto 변환
         CreateCommentResponse createCommentResponse = CreateCommentResponse.of(commentId, commentEntity.getContent(), commentEntity.getUpdatedAt(),commentEntity.getPhotoUrl(),userEntity.getNickname());
@@ -69,9 +74,11 @@ public class CommentService {
         //사용자 존재 여부 검사
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        log.debug("사용자를 성공적으로 조회하였습니다, {}", userId);
         //댓글 존재 여부 검사 및 entity 반환
         CommentEntity commentEntity = commentRepository.findById(commentId)
                 .orElseThrow(()-> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
+        log.debug("댓글을 성공적으로 조회하였습니다., {}", commentId);
         //댓글 삭제
         commentRepository.delete(commentEntity);
     }

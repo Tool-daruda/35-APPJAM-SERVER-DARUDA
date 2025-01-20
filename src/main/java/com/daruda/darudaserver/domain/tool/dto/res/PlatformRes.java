@@ -5,15 +5,15 @@ import lombok.Builder;
 
 @Builder
 public record PlatformRes (
-        Boolean web,
-        Boolean windows,
-        Boolean mac
+        Boolean Web,
+        Boolean Windows,
+        Boolean Mac
 ) {
     public static PlatformRes of(ToolPlatForm platForm){
         return PlatformRes.builder()
-                .web(platForm.getWeb())
-                .windows(platForm.getWindows())
-                .mac(platForm.getMac())
+                .Web(platForm.getWeb())
+                .Windows(platForm.getWindows())
+                .Mac(platForm.getMac())
                 .build();
     }
 }

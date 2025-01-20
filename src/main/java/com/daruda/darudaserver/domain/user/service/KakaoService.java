@@ -8,12 +8,14 @@ import com.daruda.darudaserver.global.auth.client.KakaoFeignClient;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KakaoService {
     private final KakaoFeignClient kakaoFeignClient;
     private final KakaoAPiFeignClient kakaoAPiFeignClient;
@@ -33,8 +35,10 @@ public class KakaoService {
                     code,
                     "application/x-www-form-urlencoded;charset=utf-8"
             );
+            log.debug("카카오로부터 AccessToken을 성공적으로 받았습니다, {}", kakaoTokenResponse.getAccessToken());
             return kakaoTokenResponse.getAccessToken();
         } catch (Exception e){
+            log.error("Error on: ", e);
             throw new BusinessException(ErrorCode.AUTHENTICATION_CODE_EXPIRED);
         }
     }
@@ -44,6 +48,7 @@ public class KakaoService {
             KakaoUserDto kakaoUserDto = kakaoFeignClient.getUserInformation(
                     "Bearer " + accessToken,
                     "application/x-www-form-urlencoded;charset=utf-8");
+            log.debug("카카오로부터 사용자 정보를 성공적으로 불러왔습니다. Id:, {}", kakaoUserDto.id());
             return new UserInfo(
                     kakaoUserDto.id(),
                     kakaoUserDto.kakaoAccount().email(),

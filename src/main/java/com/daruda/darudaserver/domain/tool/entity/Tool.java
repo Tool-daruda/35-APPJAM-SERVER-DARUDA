@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.Locale;
 
 @Entity
 @Table(name="tool")
@@ -73,6 +74,17 @@ public class Tool {
     }
     public void updatePopular(int scrapCount) {
         this.popular = scrapCount * 10 + this.viewCount;
+    }
+
+    public String upperMainName(String toolMainName){
+        //첫 글자가 대문자이면 그대로 return
+        if(Character.isUpperCase(toolMainName.charAt(0))){
+            return toolMainName;
+        }
+        //첫 글자가 대문자가 아닌 경우에만 대문자로 변경
+        String uppdatedName  = toolMainName.substring(0,1).toUpperCase() + toolMainName.substring(1);
+
+        return uppdatedName;
     }
 
 }

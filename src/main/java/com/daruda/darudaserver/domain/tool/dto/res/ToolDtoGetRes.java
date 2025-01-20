@@ -17,7 +17,7 @@ public record ToolDtoGetRes(
     public static ToolDtoGetRes from(Tool tool, List<String> keywords,Boolean isScraped) {
         return new ToolDtoGetRes(
                 tool.getToolId(),
-                tool.getToolMainName(),
+                tool.upperMainName(tool.getToolMainName()),
                 tool.getToolLogo(),
                 tool.getDescription(),
                 tool.getLicense().getKoreanName(),
