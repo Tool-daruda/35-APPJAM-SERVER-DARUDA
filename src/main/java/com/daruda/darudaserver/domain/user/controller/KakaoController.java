@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ import java.net.URI;
 
 import static com.daruda.darudaserver.global.error.code.SuccessCode.SUCCESS_REDIRECT;
 
-
+@Slf4j
 @RequestMapping("/api/v1/users")
 @RestController
 @RequiredArgsConstructor
@@ -50,7 +51,8 @@ public class KakaoController {
     }
 
     @PostMapping("/token")
-    public ResponseEntity<?> postAuthenticationCode(@RequestParam("code") final String code){
+    public ResponseEntity<?> postAuthenticationCode(@RequestHeader("code") final String code){
+        log.debug("CODE = "+code);
         UserInfo userInfo = kakaoService.getInfo(code);
         LoginResponse loginResponse = userService.oAuthLogin(userInfo);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(loginResponse,SuccessCode.SUCCESS_CREATE));
