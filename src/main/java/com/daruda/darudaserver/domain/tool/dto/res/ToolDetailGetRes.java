@@ -10,6 +10,7 @@ import java.util.List;
 @Builder
 public record ToolDetailGetRes(
         Long toolId,
+        String toolLogo,
         String toolMainName,
         String toolSubName,
         String description,
@@ -28,10 +29,11 @@ public record ToolDetailGetRes(
         Timestamp updatedAt,
         Boolean isScrapped
 ) {
-    public static ToolDetailGetRes of( Tool tool, List<PlatformRes> platform, List<String> keywords , List<String> images ,List<String> videos,Boolean isScrapped){
+    public static ToolDetailGetRes of( Tool tool, List<PlatformRes> platform, String toolLogo, List<String> keywords , List<String> images ,List<String> videos,Boolean isScrapped){
 
         return ToolDetailGetRes.builder()
                 .toolId(tool.getToolId())
+                .toolLogo(tool.getToolLogo())
                 .toolMainName(tool.getToolMainName())
                 .toolSubName(tool.getToolSubName())
                 .description(tool.getDescription())
