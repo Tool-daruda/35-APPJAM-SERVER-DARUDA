@@ -39,7 +39,7 @@ public class SecurityConfig {
                                 .authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
                         authorizationManagerRequestMatcherRegistry
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() //OPTION 추가
                                 .anyRequest()
                                 .authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
