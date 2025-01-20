@@ -10,14 +10,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 
 @Repository
 public interface ToolScrapRepository extends JpaRepository<ToolScrap,Long> {
 
-    @Query("SELECT ts FROM ToolScrap ts WHERE ts.user.id = :userId")
-    Page<ToolScrap> findAllByUserId(@Param("userId") final Long userId, Pageable pageable);
+
+    List<ToolScrap> findAllByUserId(@Param("userId") final Long userId);
 
 
     Optional<ToolScrap>  findByUserAndTool(final UserEntity user,final Tool tool);

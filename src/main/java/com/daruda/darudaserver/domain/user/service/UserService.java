@@ -121,34 +121,27 @@ public class UserService {
 
 
     }
-    public FavoriteToolsResponse getFavoriteTools(Long userId, Pageable pageable){
+    public FavoriteToolsResponse getFavoriteTools(Long userId){
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        Page<ToolScrap> toolScrapPage = toolScrapRepository.findAllByUserId(userId,pageable);
-        log.info("툴 스크랩을 레포지토리에서 가지고 옵니다");
-
-        List<ToolScrap> toolScraps = toolScrapPage.getContent();
-        log.info("리스트 형식으로 변환");
-        List<Tool> tools = toolScraps.stream()
+        List<ToolScrap> toolScrapList = toolScrapRepository.findAllByUserId(userId);
+        List<Tool> tools = toolScrapList.stream()
                 .map(ToolScrap::getTool)
                 .toList();
 
         List<ToolDtoGetRes> toolDtoGetResList = tools.stream()
                 .map(tool->
-                        {
-                            tool.getToolMainName();
-                            tool.getToolLogo();
-                            toolService.convertToKeywordRes(tool);
-                            boolean isScrapped = getToolScrap(userEntity, tool);
-                            return   ToolDtoGetRes.from(tool, toolService.convertToKeywordRes(tool),isScrapped);
-                        })
+                {
+                    tool.getToolMainName();
+                    tool.getToolLogo();
+                    toolService.convertToKeywordRes(tool);
+                    boolean isScrapped = getToolScrap(userEntity, tool);
+                    return   ToolDtoGetRes.from(tool, toolService.convertToKeywordRes(tool),isScrapped);
+                })
                 .toList();
-        log.info("DTO로 변환");
 
-        PagenationDto pagenationDto = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), toolScrapPage.getTotalPages());
-
-        return  FavoriteToolsResponse.of(toolDtoGetResList, pagenationDto);
+        return  FavoriteToolsResponse.of(toolDtoGetResList);
 
     }
     private boolean getToolScrap(UserEntity user, Tool tool) {

@@ -39,12 +39,8 @@ public class MyPageController {
     }
 
     @GetMapping("/tools")
-    public ResponseEntity<?> getFavoriteTools(@UserId Long userId,
-                                              @RequestParam(defaultValue = "1", value = "page") int pageNo,
-                                              @RequestParam(defaultValue = "5", value = "size") int size,
-                                              @RequestParam(defaultValue = "createdAt", value = "criteria") String criteria){
-        Pageable pageable = PageRequest.of(pageNo-1, size, Sort.by(Sort.Direction.DESC, criteria));
-        FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId, pageable);
+    public ResponseEntity<?> getFavoriteTools(@UserId Long userId){
+        FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId);
 
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteToolsResponse, SuccessCode.SUCCESS_FETCH));
     }
