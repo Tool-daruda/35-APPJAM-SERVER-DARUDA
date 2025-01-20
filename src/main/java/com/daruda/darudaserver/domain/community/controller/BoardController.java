@@ -91,7 +91,7 @@ public class BoardController {
     /**
      * 게시글 리스트 조회
      */
-    @GetMapping("boards/board/list")
+    @GetMapping("/boards/board/list")
     public ResponseEntity <ApiResponse<?>> getBoardList(
             @AuthenticationPrincipal Long userIdOrNull,
             @RequestParam(name="isFree") Boolean isFree,
