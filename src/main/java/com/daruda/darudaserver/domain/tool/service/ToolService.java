@@ -260,7 +260,8 @@ public class ToolService {
 
     public Boolean getScrapped(final UserEntity user, final Tool tool) {
         ToolScrap toolScrap = toolScrapRepository.findByUserAndTool(user, tool)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.SCRAP_NOT_FOUND));
+                .orElse(null);
+        if(toolScrap==null){return false;}
         return toolScrap.isDelYn();
     }
     // 정렬 기준 검증
