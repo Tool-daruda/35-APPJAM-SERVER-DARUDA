@@ -12,16 +12,15 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebMvc
 public class WebConfig implements WebMvcConfigurer {
     private final UserIdArgumentResolver userIdArgumentResolver;
 
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry){
-        corsRegistry.addMapping("/api/**")
-                .allowedOriginPatterns("http://localhost:5173/","https://www.daruda.site/","http://localhost:8080/")
+        corsRegistry.addMapping("/**")
+                .allowedOriginPatterns("http://localhost:5173","https://www.daruda.site","http://localhost:8080")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH")
-                .allowedHeaders("*")
+                .allowedHeaders("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With")
                 .allowCredentials(true);
     }
 
