@@ -34,7 +34,7 @@ public record ToolDetailGetRes(
         return ToolDetailGetRes.builder()
                 .toolId(tool.getToolId())
                 .toolLogo(tool.getToolLogo())
-                .toolMainName(tool.getToolMainName())
+                .toolMainName(tool.upperMainName(tool.getToolMainName()))
                 .toolSubName(tool.getToolSubName())
                 .description(tool.getDescription())
                 .license(tool.getLicense().getKoreanName())
