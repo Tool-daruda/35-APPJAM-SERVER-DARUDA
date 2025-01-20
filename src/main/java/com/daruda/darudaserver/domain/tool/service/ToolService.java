@@ -63,7 +63,7 @@ public class ToolService {
         log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
         log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
         toolRepository.save(tool);
-        return ToolDetailGetRes.of(tool, platformRes, tool.getToolLogo(), keywordRes, images, videos, !isScrapped);
+        return ToolDetailGetRes.of(tool, platformRes, tool.getToolLogo(), keywordRes, images, videos, isScrapped);
     }
 
     public PlanListRes getPlan(final Long toolId) {
@@ -262,7 +262,7 @@ public class ToolService {
         ToolScrap toolScrap = toolScrapRepository.findByUserAndTool(user, tool)
                 .orElse(null);
         if(toolScrap==null){return false;}
-        return toolScrap.isDelYn();
+        return !toolScrap.isDelYn();
     }
     // 정렬 기준 검증
     public void validateCriteria(String criteria){
