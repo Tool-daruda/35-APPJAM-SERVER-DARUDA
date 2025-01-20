@@ -171,28 +171,7 @@ public class UserService {
         return UpdateMyResponse.of(nickname,positions);
     }
 
-    public FavoriteBoardsRetrieveResponse getFavoriteBoards(Long userId, Pageable pageable){
-        validateUser(userId);
 
-        Page<BoardScrap> boardScraps = boardScrapRepository.findAllByUserId(userId, pageable);
-        List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
-                .map(BoardScrap::getBoard)
-                .map(board -> FavoriteBoardsResponse.builder()
-                        .boardId(board.getId())
-                        .title(board.getTitle())
-                        .content(board.getContent())
-                        .updatedAt(board.getUpdatedAt())
-                        .toolName(getTool(board.getTool().getToolId()).getToolMainName())
-                        .toolLogo(getTool(board.getTool().getToolId()).getToolLogo())
-                        .build())
-                .toList();
-        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
-        log.debug("페이지 번호를 출력합니다" + pageable.getPageNumber());
-
-        return  new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
-
-
-    }
 
     public void withdrawMe(Long userId){
         //사용자 찾기

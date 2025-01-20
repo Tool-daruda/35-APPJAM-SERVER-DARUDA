@@ -33,11 +33,11 @@ public class Board extends BaseTimeEntity {
     private boolean delYn = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tool_id", unique = false)
+    @JoinColumn(name = "tool_id")
     private Tool tool;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id",nullable = false,unique = false)
+    @JoinColumn(name="user_id",nullable = false)
     private UserEntity user;
 
     @Builder.Default

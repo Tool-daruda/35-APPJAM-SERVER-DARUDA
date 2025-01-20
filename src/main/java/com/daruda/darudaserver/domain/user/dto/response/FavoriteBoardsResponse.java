@@ -15,9 +15,9 @@ public record FavoriteBoardsResponse(
         Timestamp updatedAt,
         String toolName,
         String toolLogo,
-        Long scarpId
+        Boolean isScrapped
 ) {
-    public static FavoriteBoardsResponse of(Long boardId, String title, String content, Timestamp updatedAt, String toolName, String toolLogo, Long scarpId){
+    public static FavoriteBoardsResponse of(Long boardId, String title, String content, Timestamp updatedAt, String toolName, String toolLogo, Boolean isScrapped){
         return FavoriteBoardsResponse.builder()
                 .boardId(boardId)
                 .title(title)
@@ -25,7 +25,7 @@ public record FavoriteBoardsResponse(
                 .updatedAt(updatedAt)
                 .toolName(toolName)
                 .toolLogo(toolLogo)
-                .scarpId(scarpId)
+                .isScrapped(isScrapped)
                 .build();
     }
 }
