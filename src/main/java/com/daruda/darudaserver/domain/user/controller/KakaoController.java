@@ -74,8 +74,8 @@ public class KakaoController {
     }
 
     @PostMapping("/nickname")
-    public ResponseEntity<?> checkDuplicate(@NotNull(message = "닉네임은 필수입력값입니다") @RequestBody NicknameRequest nickName){
-        boolean result = userService.isDuplicated(nickName.getNickName());
+    public ResponseEntity<?> checkDuplicate(@NotNull(message = "닉네임은 필수입력값입니다") @RequestParam("nickname")String nickName){
+        boolean result = userService.isDuplicated(nickName);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result,SuccessCode.SUCCESS_FETCH));
     }
 
