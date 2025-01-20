@@ -5,12 +5,16 @@ import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
 import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.service.BoardService;
+import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
 import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -87,7 +91,7 @@ public class BoardController {
     /**
      * 게시글 리스트 조회
      */
-    @GetMapping("boards/board/list")
+    @GetMapping("/boards/board/list")
     public ResponseEntity <ApiResponse<?>> getBoardList(
             @AuthenticationPrincipal Long userIdOrNull,
             @RequestParam(name="isFree") Boolean isFree,
@@ -97,5 +101,17 @@ public class BoardController {
     {
         GetBoardResponse boardResponse =  boardService.getBoardList(userIdOrNull, isFree, toolId, size, lastBoardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardResponse, SuccessCode.SUCCESS_FETCH));
+    }
+
+    // 관심있는 글 조회
+    @GetMapping("/users/profile/boards/scrap")
+    public ResponseEntity<?> getFavoriteBoards(@AuthenticationPrincipal Long userIdOrNull,
+                                               @RequestParam(defaultValue = "1", value = "page") int pageNo,
+                                               @RequestParam(defaultValue = "5", value = "size") int size,
+                                               @RequestParam(defaultValue = "createdAt", value = "criteria")String criteria){
+        Pageable pageable = PageRequest.of(pageNo-1, size, Sort.by(Sort.Direction.DESC, criteria));
+        FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = boardService.getFavoriteBoards(userIdOrNull,pageable);
+
+        return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse,SuccessCode.SUCCESS_FETCH));
     }
 }

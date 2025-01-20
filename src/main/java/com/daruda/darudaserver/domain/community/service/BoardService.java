@@ -2,6 +2,7 @@ package com.daruda.darudaserver.domain.community.service;
 
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
+import com.daruda.darudaserver.domain.community.ValidateBoard;
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
@@ -15,15 +16,14 @@ import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
+import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsResponse;
+import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
-import com.daruda.darudaserver.domain.user.service.UserService;
-import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.service.ImageService;
@@ -38,8 +38,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -53,9 +51,8 @@ public class BoardService {
     private final UserRepository userRepository;
     private final BoardScrapRepository boardScrapRepository;
     private final ToolRepository toolRepository;
-    private final UserService userService;
     private final CommentRepository commentRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final ValidateBoard validateBoard;
 
     private final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/daruda+logo.svg";
     private final String FREE = "자유";
@@ -82,6 +79,7 @@ public class BoardService {
     public BoardRes updateBoard(final Long userId, final Long boardId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
         Board board = validateBoardAndUser(userId, boardId);
         Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
+        UserEntity user = getUser(userId);
         board.update(
                 tool,
                 board.getUser(),
@@ -95,7 +93,15 @@ public class BoardService {
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls);
+        boolean isScrapped=false;
+        BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user, board)
+                .orElse(null);
+
+        if(boardScrap!=null){
+            isScrapped = !boardScrap.isDelYn();
+        }
+
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, isScrapped);
     }
 
     // 게시판 삭제
@@ -132,16 +138,18 @@ public class BoardService {
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
         Boolean isScraped = getBoardScrap(user, board);
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls,isScraped);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped);
     }
 
     // 내가 쓴  게시판 조회
-    public BoardRes getMyBoard(final Long boardId) {
+    public BoardRes getMyBoard(final UserEntity user,final  Long boardId) {
         Board board = getBoardById(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls);
+
+        Boolean isScraped = getBoardScrap(user, board);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls,isScraped);
     }
 
     // 게시판 리스트 조회
@@ -189,6 +197,30 @@ public class BoardService {
     }
 
 
+    public FavoriteBoardsRetrieveResponse getFavoriteBoards(final Long userId, final Pageable pageable){
+        validateBoard.validateUser(userId);
+
+        Page<BoardScrap> boardScraps = boardScrapRepository.findAllByUserId(userId, pageable);
+        List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
+                .map(boardScrap -> {
+                    Board board = boardScrap.getBoard();
+                    return FavoriteBoardsResponse.builder()
+                            .boardId(board.getId())
+                            .title(board.getTitle())
+                            .content(board.getContent())
+                            .updatedAt(board.getUpdatedAt())
+                            .toolName(freeName(board))
+                            .toolLogo(freeLogo(board))
+                            .isScrapped(boardScrap.isDelYn())
+                            .build();
+                })
+                .toList();
+        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
+        log.debug("페이지 번호를 출력합니다" + pageable.getPageNumber());
+        return  new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
+
+    }
+
     private Board validateBoardAndUser(final Long userId, final Long boardId) {
         Board board = getBoardById(boardId);
         if (!board.getUser().getId().equals(userId)) {
@@ -226,7 +258,6 @@ public class BoardService {
         return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
     }
 
-
     private UserEntity getUserById(final Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
     }
@@ -239,18 +270,17 @@ public class BoardService {
     }
 
     public BoardListResponse getMyBoards(Long userIdOrNull, Pageable pageable){
-        userService.validateUser(userIdOrNull);
+        validateBoard.validateUser(userIdOrNull);
         log.debug("사용자를 조회합니다, {}", userIdOrNull);
         Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userIdOrNull, pageable);
-
+        UserEntity user = getUser(userIdOrNull);
         List<BoardRes> boardResList = boards.getContent().stream()
-                .map(board -> getMyBoard( board.getId()))
+                .map(board -> getMyBoard( user, board.getId()))
                 .toList();
 
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
 
         return new BoardListResponse(boardResList, userIdOrNull, pageInfo);
-
     }
 
     public int getCommentCount(final Long boardId){
@@ -266,7 +296,6 @@ public class BoardService {
                         .orElse(false));
     }
 
-
     public UserEntity getUser(Long userIdOrNull) {
         UserEntity user = null;
         if (userIdOrNull != null) {
@@ -278,4 +307,10 @@ public class BoardService {
         return user;
     }
 
+    public String freeName(Board board) {
+      return board.getTool() != null ? board.getTool().getToolMainName() : FREE;
+    }
+    public String freeLogo(Board board){
+        return board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
+    }
 }
