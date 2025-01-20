@@ -72,9 +72,18 @@ jobs:
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }} # ubuntu
-          username: ${{ secrets.DOCKER_USERNAME }} # daruda241221
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            LOG_DIR="/home/ubuntu/daruda_log"
+            if [ ! -d "$LOG_DIR" ]; then
+            mkdir -p "$LOG_DIR"
+          echo "📂 로그 폴더 생성 완료: $LOG_DIR"
+            fi
+            
+            # 기존 배포 스크립트 실행
             cd /home/ubuntu/35-APPJAM-SERVER-DARUDA
-            chmod +x deploy.sh && ./deploy.sh
+            chmod +x deploy.sh
+            ./deploy.sh
+
