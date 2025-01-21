@@ -67,12 +67,15 @@ public class BoardService {
 
         // 이미지 처리
         List<String> imageUrls = processImages(board, images);
+        List<String> boardImageUrls = imageUrls.stream()
+                .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
+                .toList();
 
         // Tool 정보 설정
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), boardImageUrls);
     }
 
     // 게시판 업데이트
@@ -135,21 +138,27 @@ public class BoardService {
         UserEntity user = getUser(userIdOrNull);
         Board board = getBoardById(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
+        List<String> boardImageList = imageUrls.stream()
+                .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
+                .toList();
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
         Boolean isScraped = getBoardScrap(user, board);
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), boardImageList, isScraped);
     }
 
     // 내가 쓴  게시판 조회
     public BoardRes getMyBoard(final UserEntity user,final  Long boardId) {
         Board board = getBoardById(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
+        List<String> boardImageUrls = imageUrls.stream()
+                .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
+                .toList();
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
         Boolean isScraped = getBoardScrap(user, board);
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls,isScraped);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), boardImageUrls, isScraped);
     }
 
     // 게시판 리스트 조회
@@ -186,9 +195,12 @@ public class BoardService {
                     String toolLogo = (board.getTool() != null) ? board.getTool().getToolLogo() : TOOL_LOGO;
                     int commentCount = getCommentCount(board.getId());
                     List<String> boardImages = boardImageService.getBoardImageUrls(board.getId());
+                    List<String> boardImageUrls = boardImages.stream()
+                            .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
+                            .toList();
                     boolean isScrapped = (user != null) && getBoardScrap(user, board);
 
-                    return BoardRes.of(board, toolName, toolLogo, commentCount, boardImages, isScrapped);
+                    return BoardRes.of(board, toolName, toolLogo, commentCount, boardImageUrls, isScrapped);
                 }).toList();
         long nextCursor = boardsCursor.isLastScroll() ? -1L : boardsCursor.getNextCursor().getId();
 
