@@ -34,19 +34,17 @@ out/
 /nbdist/
 /.nb-gradle/
 
+src/main/resources/application.yml
+*.application.yml
+
 ### VS Code ###
 .vscode/
 .env
 
 *.log
 
-*.application-dev.yml
-application-dev.yml
 daruda_log
 
 LOG_PATH_IS_UNDEFINED
 
-
-*.application.yml
-application.yml
 daruda_log
