@@ -2,8 +2,8 @@ server:
   port : 8080
 
 spring :
-  config:
-    import: optional:file:.env[.properties]
+#  config:
+#    import: optional:file:.env[.properties]
 #    activate:
 #      on-profile: dev
   datasource:
