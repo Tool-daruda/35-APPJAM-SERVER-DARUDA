@@ -45,13 +45,13 @@
         </filter>
     </appender>
 
-    <root level="info">
+    <root level="debug">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
         <appender-ref ref="Error"/>
     </root>
 
-    <logger name="org.apache.ibatis" level="info" additivity="false">
+    <logger name="org.apache.ibatis" level="debug" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
         <appender-ref ref="Error"/>
