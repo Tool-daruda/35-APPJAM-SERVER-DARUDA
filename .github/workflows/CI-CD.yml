@@ -24,7 +24,7 @@ jobs:
         run: |
           mkdir -p ./src/main/resources
           cd ./src/main/resources
-          touch ./applicationyml
+          touch ./application.yml
           echo "${{ secrets.APPLICATION_DEV }}" > ./application.yml
         shell: bash
 
