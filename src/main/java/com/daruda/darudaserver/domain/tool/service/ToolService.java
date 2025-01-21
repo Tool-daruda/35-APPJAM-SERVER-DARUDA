@@ -6,20 +6,20 @@ import com.daruda.darudaserver.domain.tool.entity.*;
 import com.daruda.darudaserver.domain.tool.repository.*;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
-import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Base64;
+import java.sql.Timestamp;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
+import java.util.Optional;
 
 @Transactional
 @Service
@@ -37,8 +37,9 @@ public class ToolService {
     private final RelatedToolRepository relatedToolRepository;
     private final ToolScrapRepository toolScrapRepository;
     private final UserRepository userRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JPAQueryFactory jpaQueryFactory;
 
+    QTool qTool = QTool.tool;
 
     public ToolDetailGetRes getToolDetail(final Long userIdOrNull, final Long toolId) {
         log.info("툴 세부 정보를 조회합니다. toolId={}" + userIdOrNull);
@@ -99,50 +100,50 @@ public class ToolService {
         return RelatedToolListRes.of(relatedToolResList);
     }
 
-    public ToolListRes getToolList(final Long userIdOrNull, final String criteria, final Category category, final int size, final Long lastToolId) {
+    public ToolListRes getToolList(final Long userIdOrNull, final String criteria, final String category, final int size, final Long lastToolId, final Boolean isFree) {
         log.debug("카테고리별 툴 목록을 조회 category: {}, sort: {}, size: {}, lastToolId: {}", category, criteria, size, lastToolId);
 
         UserEntity user;
         if (userIdOrNull != null) {
             Long userId = userIdOrNull;
             user = userRepository.findById(userId)
-                    .orElseThrow(() -> new NotFoundException(ErrorCode.SCRAP_NOT_FOUND));
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
             log.debug("유저 정보를 조회했습니다: {}", user.getId());
         } else {
             user = null;
         }
+        // lastToolId 가 null 일 경우 에러 발생
+        Long lastSortValue = getLastSortValue(lastToolId, criteria);
+
+        List<Tool> tools = jpaQueryFactory
+                .selectFrom(qTool)
+                .where(
+                        categoryEq(category),
+                        isFreeEq(isFree),
+                        cursorCondition(lastToolId, lastSortValue, criteria) // Cursor 페이징 조건
+                )
+                .orderBy(getSortOrder(criteria))
+                .limit(size + 1)
+                .fetch();
 
         Long cursor = (lastToolId == null) ? Long.MAX_VALUE : lastToolId;
+
         validateCriteria(criteria);
-        Pageable pageRequest = PageRequest.of(0, size + 1);
 
 
-        List<Tool> tools;
-        long totalElements = Category.ALL.equals(category)
-                ? toolRepository.count()
-                : toolRepository.countWithCursor(category, cursor);
+        long totalElements = getTotalElements(category,isFree);
+        long nextCursor = getNextCursor(tools, size);
 
-        if ("popular".equals(criteria)) {
-            tools = Category.ALL.equals(category)
-                    ? toolRepository.findAllWithCursorOrderByPopular(cursor, pageRequest)
-                    : toolRepository.findByCategoryWithCursorOrderByPopular(category, cursor, pageRequest);
-        } else {
-            tools = Category.ALL.equals(category)
-                    ? toolRepository.findAllWithCursorOrderByCreatedAt(cursor, pageRequest)
-                    : toolRepository.findByCategoryWithCursorOrderByCreatedAt(category, cursor, pageRequest);
-        }
 
         boolean hasNextPage = tools.size() > size;
         List<Tool> paginatedTools = hasNextPage ? tools.subList(0, size) : tools;
-        long nextCursor = hasNextPage ? tools.get(size).getToolId() : -1;
-
         List<ToolResponse> toolResponses = paginatedTools.stream()
                 .map(tool -> {
-                     boolean isScraped = (
+                    boolean isScraped = (
                             toolScrapRepository.findByUserAndTool(user, tool)
                                     .map(toolScrap -> !toolScrap.isDelYn())
                                     .orElse(false));
-                     log.debug("스크랩 여부"+tool.getToolId()+isScraped);
+                    log.debug("스크랩 여부" + tool.getToolId() + isScraped);
                     return ToolResponse.of(tool, convertToKeywordRes(tool), isScraped);
                 })
                 .toList();
@@ -152,19 +153,19 @@ public class ToolService {
     }
 
 
-    public ToolScrapRes postToolScrap(final Long userId, final Long toolId){
+    public ToolScrapRes postToolScrap(final Long userId, final Long toolId) {
         UserEntity user = getUserById(userId);
         Tool tool = getToolById(toolId);
         ToolScrap toolScrap = toolScrapRepository.findByUserAndTool(user, tool).orElse(null);
 
-        if(toolScrap==null){
+        if (toolScrap == null) {
             toolScrap = ToolScrap.builder()
                     .user(user)
                     .tool(tool)
                     .build();
             toolScrapRepository.save(toolScrap);
             log.debug("툴 스크랩이 생 되었습니다");
-        }else{
+        } else {
             log.debug("툴 스크랩이 업데이트 되었습니다");
             toolScrap.update();
         }
@@ -261,14 +262,95 @@ public class ToolService {
     public Boolean getScrapped(final UserEntity user, final Tool tool) {
         ToolScrap toolScrap = toolScrapRepository.findByUserAndTool(user, tool)
                 .orElse(null);
-        if(toolScrap==null){return false;}
+        if (toolScrap == null) {
+            return false;
+        }
         return !toolScrap.isDelYn();
     }
+
     // 정렬 기준 검증
-    public void validateCriteria(String criteria){
+    public void validateCriteria(String criteria) {
         List<String> allowedFields = List.of("popular", "createdAt");
         if (!allowedFields.contains(criteria)) {
             throw new IllegalArgumentException("Invalid sort criteria: " + criteria);
         }
+    }
+
+    // 카테고리 필터링
+    private BooleanExpression categoryEq(String category) {
+        return (category == null || category.equals("ALL")) ? null : qTool.category.eq(Category.valueOf(category));
+    }
+
+    // 무료 여부 필터링
+    private BooleanExpression isFreeEq(Boolean isFree) {
+        if (isFree == null) return null; // 필터링 없음
+        if (!isFree) return null; // isFree == false이면 모든 데이터를 조회해야 함
+        return qTool.license.eq(License.FREE); // isFree == true이면 무료 데이터만 조회
+    }
+
+    private BooleanExpression cursorCondition(Long lastToolId, Long lastSortValue, String criteria) {
+        if (lastSortValue == null || lastToolId == null) return null;  // 첫 페이지일 경우 null 반환
+
+        if ("popular".equals(criteria)) {
+            return qTool.popular.lt(lastSortValue.intValue())
+                    .or(qTool.popular.eq(lastSortValue.intValue()).and(qTool.toolId.lt(lastToolId)));
+        } else {
+            return qTool.createdAt.lt(new Timestamp(lastSortValue))
+                    .or(qTool.createdAt.eq(new Timestamp(lastSortValue)).and(qTool.toolId.lt(lastToolId)));
+        }
+    }
+
+
+    // 정렬 조건 적용 (등록순, 인기순)
+    private OrderSpecifier<?>[] getSortOrder(String criteria) {
+        if ("popular".equals(criteria)) {
+            return new OrderSpecifier<?>[]{
+                    qTool.popular.desc().nullsLast(),
+                    qTool.toolId.desc()
+            };
+        } else {
+            return new OrderSpecifier<?>[]{
+                    qTool.createdAt.desc().nullsLast(),
+                    qTool.toolId.desc()
+            };
+        }
+    }
+
+    private Long getLastSortValue(final Long lastToolId, String criteria) {
+        if (lastToolId == null) {
+            return "popular".equals(criteria) ? Long.MAX_VALUE : System.currentTimeMillis();
+        }
+        Tool tool = getToolById(lastToolId);
+        return "popular".equals(criteria) ? tool.getPopular() : tool.getCreatedAt().getTime();
+    }
+
+    private Long getNextCursor(List<Tool> tools, int size) {
+        if (tools.size() > size) {
+            return tools.get(size).getToolId();
+        } else if (!tools.isEmpty()) {
+            Long lastToolId = tools.get(tools.size() - 1).getToolId();
+            if (lastToolId.equals(tools.get(tools.size() - 1).getToolId())) {
+                return -1L;
+            }
+
+            return lastToolId;
+        }
+        return -1L;
+    }
+
+    private long getTotalElements(String category, Boolean isFree) {
+        BooleanExpression categoryCondition = categoryEq(category);
+        BooleanExpression freeCondition = isFreeEq(isFree);
+
+        return Optional.ofNullable(jpaQueryFactory
+                        .select(qTool.count())
+                        .from(qTool)
+                        .where(
+                                categoryCondition,
+                                freeCondition
+                        )
+                        .fetchOne())
+                .orElse(0L);
+
     }
 }

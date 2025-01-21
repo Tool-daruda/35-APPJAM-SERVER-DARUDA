@@ -26,15 +26,5 @@ public enum Category {
     Category(String koreanName) {
         this.koreanName = koreanName;
     }
-
-
-    public static Category fromEnglishName(String name) {
-        if (name == null || name.isBlank()) {
-            return Category.ALL;
-        }
-        return Arrays.stream(values())
-                .filter(category -> category.name().equalsIgnoreCase(name.trim()))
-                .findFirst()
-                .orElseThrow(() -> new InvalidValueException(ErrorCode.INVALID_TOOL_CATEGORY));
-    }
 }
+
