@@ -83,6 +83,6 @@ jobs:
             fi
 
             # 기존 배포 스크립트 실행
-            cd /home/ubuntu/35-APPJAM-SERVER-DARUDA
+            cd /home/ubuntu
             chmod +x deploy.sh
             ./deploy.sh
