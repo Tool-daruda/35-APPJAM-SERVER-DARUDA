@@ -24,15 +24,10 @@ jobs:
         run: |
           mkdir -p ./src/main/resources
           cd ./src/main/resources
-          touch ./application-dev.yml
-          echo "${{ secrets.APPLICATION_DEV }}" > ./application-dev.yml
+          touch ./application.yml
+          echo "${{ secrets.APPLICATION_DEV }}" > ./application.yml
         shell: bash
 
-      - name : Environment 설정
-        run :
-          echo "SECRET_CODE=$SECRET_CODE" >> .env
-        env:
-          SECRET_CODE : ${{secrets.SECRET_CODE}}
       - name: Build with Gradle
         run: |
           chmod +x gradlew
@@ -56,14 +51,6 @@ jobs:
           push: true
           tags: daruda241221/daruda
 
-      - name: docker-compose.yml 파일 EC2 서버로 전송
-        uses: appleboy/scp-action@master
-        with:
-          username: ubuntu
-          host: ${{ secrets.EC2_HOST }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "./docker-compose.yml"
-          target: "~"
 
   CD:
     needs: CI
