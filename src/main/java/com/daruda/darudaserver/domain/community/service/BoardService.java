@@ -212,7 +212,7 @@ public class BoardService {
     public FavoriteBoardsRetrieveResponse getFavoriteBoards(final Long userId, final Pageable pageable){
         validateBoard.validateUser(userId);
 
-        Page<BoardScrap> boardScraps = boardScrapRepository.findAllByUserId(userId, pageable);
+        Page<BoardScrap> boardScraps = boardScrapRepository.findAllActiveByUserId(userId, pageable);
         List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
                 .filter(boardScrap -> !boardScrap.isDelYn())
                 .map(boardScrap -> {
@@ -229,7 +229,6 @@ public class BoardService {
                 })
                 .toList();
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
-        log.debug("페이지 번호를 출력합니다" + pageable.getPageNumber());
         return  new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
 
     }
@@ -325,5 +324,16 @@ public class BoardService {
     }
     public String freeLogo(Board board){
         return board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
+    }
+
+    public int getTotalPage(int size){
+        int remain = size%5;
+        int quo = size / 5;
+        if(remain == 0){
+            return quo;
+        }else{
+            return quo + 1;
+        }
+
     }
 }
