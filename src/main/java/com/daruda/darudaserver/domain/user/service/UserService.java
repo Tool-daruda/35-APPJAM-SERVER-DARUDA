@@ -138,6 +138,7 @@ public class UserService {
 
         List<ToolScrap> toolScrapList = toolScrapRepository.findAllByUserId(userId);
         List<Tool> tools = toolScrapList.stream()
+                .filter(toolScrap -> !toolScrap.isDelYn())
                 .map(ToolScrap::getTool)
                 .toList();
 
