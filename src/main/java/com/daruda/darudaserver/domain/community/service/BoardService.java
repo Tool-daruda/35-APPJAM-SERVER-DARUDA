@@ -214,6 +214,7 @@ public class BoardService {
 
         Page<BoardScrap> boardScraps = boardScrapRepository.findAllByUserId(userId, pageable);
         List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
+                .filter(boardScrap -> !boardScrap.isDelYn())
                 .map(boardScrap -> {
                     Board board = boardScrap.getBoard();
                     return FavoriteBoardsResponse.builder()
@@ -223,7 +224,7 @@ public class BoardService {
                             .updatedAt(board.getUpdatedAt())
                             .toolName(freeName(board))
                             .toolLogo(freeLogo(board))
-                            .isScrapped(boardScrap.isDelYn())
+                            .isScrapped(!boardScrap.isDelYn())
                             .build();
                 })
                 .toList();
