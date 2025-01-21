@@ -51,7 +51,7 @@ public class KakaoController {
     }
 
     @PostMapping("/token")
-    public ResponseEntity<?> postAuthenticationCode(@RequestParam(name = "code") String code){
+    public ResponseEntity<?> postAuthenticationCode(@RequestHeader(value = "Authorization") String code){
         log.debug("CODE = "+code);
         UserInfo userInfo = kakaoService.getInfo(code);
         LoginResponse loginResponse = userService.oAuthLogin(userInfo);
