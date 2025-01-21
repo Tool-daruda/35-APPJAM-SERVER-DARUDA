@@ -126,8 +126,6 @@ public class ToolService {
                 .limit(size + 1)
                 .fetch();
 
-        Long cursor = (lastToolId == null) ? Long.MAX_VALUE : lastToolId;
-
         validateCriteria(criteria);
 
 
@@ -284,8 +282,8 @@ public class ToolService {
     // 무료 여부 필터링
     private BooleanExpression isFreeEq(Boolean isFree) {
         if (isFree == null) return null; // 필터링 없음
-        if (!isFree) return null; // isFree == false이면 모든 데이터를 조회해야 함
-        return qTool.license.eq(License.FREE); // isFree == true이면 무료 데이터만 조회
+        if (!isFree) return null; // false이면 모든 데이터
+        return qTool.license.eq(License.FREE); // true이면 무료 데이터만
     }
 
     private BooleanExpression cursorCondition(Long lastToolId, Long lastSortValue, String criteria) {
@@ -301,7 +299,6 @@ public class ToolService {
     }
 
 
-    // 정렬 조건 적용 (등록순, 인기순)
     private OrderSpecifier<?>[] getSortOrder(String criteria) {
         if ("popular".equals(criteria)) {
             return new OrderSpecifier<?>[]{
