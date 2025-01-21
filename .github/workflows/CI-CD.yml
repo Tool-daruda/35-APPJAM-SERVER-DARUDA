@@ -51,7 +51,6 @@ jobs:
           push: true
           tags: daruda241221/daruda
 
-
   CD:
     needs: CI
     runs-on: ubuntu-22.04
@@ -66,10 +65,9 @@ jobs:
             LOG_DIR="/home/ubuntu/daruda_log"
             if [ ! -d "$LOG_DIR" ]; then
               mkdir -p "$LOG_DIR"
-              echo "📂 로그 폴더 생성 완료: $LOG_DIR"
+              echo "로그 폴더 생성 완료: $LOG_DIR"
             fi
 
             # 기존 배포 스크립트 실행
-            cd /home/ubuntu
-            chmod +x deploy.sh
+            cd ~
             ./deploy.sh
