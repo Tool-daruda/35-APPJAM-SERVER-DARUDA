@@ -6,11 +6,11 @@ import java.util.List;
 
 @Builder
 public record PlanListRes(
-        List<PlanRes> toolCoreResList
+        List<PlanRes> toolPlans
 ){
     public static PlanListRes of (List<PlanRes> planRes){
         return PlanListRes.builder()
-                .toolCoreResList(planRes)
+                .toolPlans(planRes)
                 .build();
     }
 }
