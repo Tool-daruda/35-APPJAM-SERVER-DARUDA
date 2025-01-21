@@ -1,26 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration> <!-- 5분 초 간격으로 파일 확인하여 반영-->
-    <!--  scan="true" scanPeriod="300 seconds" -->
+<configuration>
 
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
 
-    <!-- 로그 파일 경로 및 이름 설정 -->
     <springProperty scope="context" name="LOG_PATH" source="logging.file.path"/>
-    <property name="LOG_FILE_NAME" value="logging2"/> <!-- 단계별 로그 파일 이름 -->
-    <property name="ERR_LOG_FILE_NAME" value="err_logging2"/>
-    <property name="LOG_PATTERN" value="%-5level %d{yy-MM-dd HH:mm:ss} [%thread] [%logger{0}:%line] - %msg%n"/>
+    <property name="LOG_FILE_NAME" value="logging"/>
+    <property name="ERR_LOG_FILE_NAME" value="err_logging"/>
+    <property name="LOG_PATTERN" value="%-5level %d{yy-MM-dd HH:mm:ss, Asia/Seoul} [%thread] [%logger{0}:%line] - %msg%n"/>
 
-    <!-- Console 로그 설정 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss, Asia/Seoul} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Rolling File Appender 일반로그 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}.%i</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd, Asia/Seoul}.%i</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>3</maxHistory>
             <totalSizeCap>500MB</totalSizeCap>
@@ -31,10 +27,9 @@
         </encoder>
     </appender>
 
-    <!-- Error 로그 전용 Rolling File Appender -->
     <appender name="Error" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/${ERR_LOG_FILE_NAME}.%d{yyyy-MM-dd}.%i</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/${ERR_LOG_FILE_NAME}.%d{yyyy-MM-dd, Asia/Seoul}.%i</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
@@ -50,15 +45,13 @@
         </filter>
     </appender>
 
-    <!-- 기본 (루트) 로그 레벨 -->
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
         <appender-ref ref="Error"/>
     </root>
 
-    <!-- 특정 패키지 로깅 레벨 -->
-    <logger name="org.apache.ibatis" level="debug" additivity="false">
+    <logger name="org.apache.ibatis" level="info" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
         <appender-ref ref="Error"/>
