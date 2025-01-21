@@ -325,15 +325,4 @@ public class BoardService {
     public String freeLogo(Board board){
         return board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
     }
-
-    public int getTotalPage(int size){
-        int remain = size%5;
-        int quo = size / 5;
-        if(remain == 0){
-            return quo;
-        }else{
-            return quo + 1;
-        }
-
-    }
 }
