@@ -14,7 +14,9 @@ public record ToolResponse (
     String description,
     String license,
     List<String> keywords,
-    Boolean isScraped
+    Boolean isScraped,
+    String bgColor,
+    boolean fontColor
 ) {
         public static ToolResponse of(Tool tool, List<String> keywords,Boolean isScraped) {
             return ToolResponse.builder()
@@ -25,6 +27,8 @@ public record ToolResponse (
                     .license(tool.getLicense().getKoreanName())
                     .keywords(keywords)
                     .isScraped(isScraped)
+                    .bgColor(tool.getBgColor())
+                    .fontColor(tool.isFontColor())
                     .build();
         }
 }
