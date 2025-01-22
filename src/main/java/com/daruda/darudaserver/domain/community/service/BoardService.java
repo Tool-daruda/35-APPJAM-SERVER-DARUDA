@@ -80,7 +80,7 @@ public class BoardService {
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), boardImageUrls);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), boardImageUrls,tool.getToolId());
     }
 
     // 게시판 업데이트

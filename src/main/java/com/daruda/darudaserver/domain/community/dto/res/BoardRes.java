@@ -25,8 +25,8 @@ public class BoardRes {
     private Timestamp updatedAt;
     private int commentCount;
 
-    public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images) {
-        return createBoardRes(board, toolName, toolLogo, commentCount, images);
+    public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images,final Long toolId) {
+        return createBoardRes(board, toolName, toolLogo, commentCount, images, toolId);
     }
     public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images,final Boolean isScraped) {
         return getBoardRes(board, toolName, toolLogo, commentCount, images, isScraped);
@@ -35,9 +35,8 @@ public class BoardRes {
         return getBoardResWithToolId(board, toolName, toolLogo, commentCount, images, isScraped, toolId);
     }
 
-    public static BoardRes createBoardRes(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images) {
+    public static BoardRes createBoardRes(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images, final Long toolId) {
         return BoardRes.builder()
-                .boardId(board.getId())
                 .boardId(board.getId())
                 .toolName(toolName)
                 .toolLogo(toolLogo)
@@ -48,6 +47,7 @@ public class BoardRes {
                 .commentCount(commentCount)
                 .updatedAt(board.getUpdatedAt())
                 .isScraped(false)
+                .toolId(toolId)
                 .build();
     }
 
