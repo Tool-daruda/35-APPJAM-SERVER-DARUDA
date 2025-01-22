@@ -15,7 +15,7 @@ public class CorsConfig {
 
         ArrayList<String> allowedOriginPatters = new ArrayList<>();
         allowedOriginPatters.add("http://localhost:5173");
-        allowedOriginPatters.add("https://www.daruda.site");
+        allowedOriginPatters.add("https://daruda.shop");
         allowedOriginPatters.add("http://localhost:8080");
         configuration.setAllowedOrigins(allowedOriginPatters);
 
