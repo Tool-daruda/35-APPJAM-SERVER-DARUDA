@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.community.controller;
 
+import com.daruda.darudaserver.domain.community.ValidateBoard;
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
