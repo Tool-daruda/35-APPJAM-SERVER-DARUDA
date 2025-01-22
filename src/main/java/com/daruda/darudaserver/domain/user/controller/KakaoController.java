@@ -43,7 +43,7 @@ public class KakaoController {
 
 
     @GetMapping("/kakao/login-url")
-    public ResponseEntity<?> requestLogin(HttpServletResponse response) throws IOException {
+    public ResponseEntity<ApiResponse<String>> requestLogin(HttpServletResponse response) throws IOException {
         String location = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri=" + redirectUri;
 
 
@@ -51,7 +51,7 @@ public class KakaoController {
     }
 
     @PostMapping("/token")
-    public ResponseEntity<?> postAuthenticationCode(@RequestHeader(value = "Authorization") String code){
+    public ResponseEntity<ApiResponse<LoginResponse>> postAuthenticationCode(@RequestHeader(value = "Authorization") String code){
         log.debug("CODE = "+code);
         UserInfo userInfo = kakaoService.getInfo(code);
         LoginResponse loginResponse = userService.oAuthLogin(userInfo);
@@ -59,31 +59,31 @@ public class KakaoController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest){
+    public ResponseEntity<ApiResponse<SignUpSuccessResponse>> signUp(@Valid @RequestBody SignUpRequest signUpRequest){
         SignUpSuccessResponse signUpSuccessResponse = userService.createUser(signUpRequest.email(), signUpRequest.nickname(),signUpRequest.positions());
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(signUpSuccessResponse,SuccessCode.SUCCESS_LOGIN));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logOut(@UserId Long userId){
+    public ResponseEntity<ApiResponse<Long>> logOut(@UserId Long userId){
         Long returnedUserId = userService.deleteUser(userId);
         return  ResponseEntity.ok(ApiResponse.ofSuccessWithData(returnedUserId,SuccessCode.SUCCESS_LOGOUT));
     }
 
     @PostMapping("/nickname")
-    public ResponseEntity<?> checkDuplicate(@NotNull(message = "닉네임은 필수입력값입니다") @RequestParam("nickname")String nickName){
+    public ResponseEntity<ApiResponse<Boolean>> checkDuplicate(@NotNull(message = "닉네임은 필수입력값입니다") @RequestParam("nickname")String nickName){
         boolean result = userService.isDuplicated(nickName);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result,SuccessCode.SUCCESS_FETCH));
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> regenerateToken(@UserId Long userId){
+    public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(@UserId Long userId){
         JwtTokenResponse jwtTokenResponse = userService.reissueToken(userId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse,SuccessCode.SUCCESS_REISSUE));
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<?> withdrawUser(@UserId Long userId){
+    public ResponseEntity<ApiResponse<?>> withdrawUser(@UserId Long userId){
         userService.withdrawMe(userId);
         return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_WITHDRAW));
     }

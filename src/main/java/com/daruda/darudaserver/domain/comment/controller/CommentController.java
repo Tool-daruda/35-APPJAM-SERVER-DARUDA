@@ -22,7 +22,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<?> postComment(@UserId Long userId,
+    public ResponseEntity<ApiResponse<CreateCommentResponse>> postComment(@UserId Long userId,
                                          @RequestParam("board-id")Long boardId,
                                          @Valid @ModelAttribute CreateCommentRequest createCommentRequest,
                                          @Nullable @RequestPart(value = "image", required = false)MultipartFile image) throws IOException {
@@ -31,14 +31,14 @@ public class CommentController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteComment(@UserId Long userId,
+    public ResponseEntity<ApiResponse<?>> deleteComment(@UserId Long userId,
                                            @RequestParam("comment-id")Long commentId){
         commentService.deleteComment(userId, commentId);
         return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
     }
 
     @GetMapping
-    public ResponseEntity<?> getComment(@RequestParam("board-id")Long boardId,
+    public ResponseEntity<ApiResponse<GetCommentRetrieveResponse>> getComment(@RequestParam("board-id")Long boardId,
                                         @RequestParam(value = "size", defaultValue = "10") int size,
                                         @RequestParam(value = "lastCommentId", required = false) Long commentId){
         GetCommentRetrieveResponse getCommentRetrieveResponse = commentService.getComments(boardId, size, commentId);
