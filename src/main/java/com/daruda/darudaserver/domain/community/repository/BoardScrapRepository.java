@@ -23,5 +23,7 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap,Long> {
     @Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.delYn = false")
     Page<BoardScrap> findAllActiveByUserId(@Param("userId") Long userId, Pageable pageable);
 
-    Optional<BoardScrap> findByUserAndBoard(UserEntity user, Board board);
+    @Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.id = :boardId")
+    Optional<BoardScrap> findByUserAndBoard(@Param("userId") Long userId, @Param("boardId") Long boardId);
+
 }
