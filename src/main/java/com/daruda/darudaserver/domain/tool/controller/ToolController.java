@@ -68,15 +68,16 @@ public class ToolController {
     public ResponseEntity<ApiResponse<?>> getToolList(
             @AuthenticationPrincipal Long userIdOrNull,
             @RequestParam(defaultValue = "popular", value="criteria") String criteria,
-            @RequestParam(defaultValue = "ALL",value="category") String category,
+            @RequestParam(defaultValue = "ALL", value="category") String category,
             @RequestParam(value = "size", defaultValue = "18") int size,
-            @RequestParam(value = "lastToolId", required = false) Long lastToolId
+            @RequestParam(value = "lastToolId", required = false ) Long lastToolId,
+            @RequestParam(value="isFree") Boolean isFree
                                                              ){
-        Category categoryEnum = Category.fromEnglishName(category);
         ToolListRes toolListRes = toolService.
-                getToolList(userIdOrNull, criteria , categoryEnum, size, lastToolId);
+                getToolList(userIdOrNull, criteria , category, size, lastToolId , isFree);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolListRes,SuccessCode.SUCCESS_FETCH));
     }
+
     /**
      * 툴 찜하기
      */
