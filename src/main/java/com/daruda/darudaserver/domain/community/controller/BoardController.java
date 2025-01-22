@@ -94,12 +94,12 @@ public class BoardController {
     @GetMapping("/boards/board/list")
     public ResponseEntity <ApiResponse<?>> getBoardList(
             @AuthenticationPrincipal Long userIdOrNull,
-            @RequestParam(name="isFree") Boolean isFree,
+            @RequestParam(name="noTopic",required = false) Boolean noTopic,
             @RequestParam(name = "toolId",required = false) Long toolId,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "lastBoardId", required = false) Long lastBoardId )
     {
-        GetBoardResponse boardResponse =  boardService.getBoardList(userIdOrNull, isFree, toolId, size, lastBoardId);
+        GetBoardResponse boardResponse =  boardService.getBoardList(userIdOrNull, noTopic, toolId, size, lastBoardId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardResponse, SuccessCode.SUCCESS_FETCH));
     }
 
