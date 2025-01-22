@@ -18,7 +18,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry){
         corsRegistry.addMapping("/**")
-                .allowedOriginPatterns("http://localhost:5173","https://daruda.shop","http://localhost:8080", "https://kauth.kakao.com")
+                .allowedOriginPatterns("http://localhost:5173","https://daruda.shop","http://localhost:8080", "https://kauth.kakao.com","https://www.daruda.site")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH")
                 .allowedHeaders("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With","Location","status","code")
                 .allowCredentials(true);
