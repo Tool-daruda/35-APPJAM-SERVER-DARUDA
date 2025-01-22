@@ -4,6 +4,7 @@ import com.daruda.darudaserver.domain.community.entity.Board;
 
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 
@@ -40,4 +41,9 @@ public interface BoardRepository extends JpaRepository<Board,Long> {
     Page<Board> findAllByUserIdAndDelYnFalse(Long userId, Pageable pageable);
 
     Optional<Board> findByIdAndDelYn(Long boardId, boolean delYn);
+
+    @Query("SELECT COUNT(b) FROM Board b WHERE b.id >= :lastBoardId")
+    long countBoardsAfterCursor(@Param("lastBoardId") Long lastBoardId);
+
+
 }

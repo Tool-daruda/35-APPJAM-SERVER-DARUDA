@@ -24,9 +24,11 @@ import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.service.ImageService;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,6 +39,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
+
+import static com.daruda.darudaserver.domain.community.entity.QBoard.board;
 
 @Service
 @Transactional
@@ -57,6 +62,7 @@ public class BoardService {
     private final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/daruda+logo.svg";
     private final String FREE = "자유";
 
+    private final JPAQueryFactory jpaQueryFactory;
     // 게시판 생성
     public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
         UserEntity user = getUserById(userId);
@@ -97,7 +103,7 @@ public class BoardService {
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
         boolean isScrapped=false;
-        BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user, board)
+        BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId())
                 .orElse(null);
 
         if(boardScrap!=null){
@@ -122,7 +128,7 @@ public class BoardService {
         UserEntity user = getUserById(userId);
         Board board = getBoardById(boardId);
 
-        BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user, board).orElse(null);
+        BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId()).orElse(null);
 
         if (boardScrap == null) {
             boardScrap = BoardScrap.builder().user(user).board(board).build();
@@ -161,35 +167,48 @@ public class BoardService {
         return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), boardImageUrls, isScraped);
     }
 
-    // 게시판 리스트 조회
-    public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean isFree,final Long toolId, final int size, final Long lastBoardId) {
+    public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId, final int size, final Long lastBoardId) {
+        if ((Boolean.FALSE.equals(noTopic) && toolId == null) ||
+                (Boolean.TRUE.equals(noTopic) && toolId != null)) {
+            throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
+        }
 
-        List<Board> boards;
         Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId;
         PageRequest pageRequest = PageRequest.of(0, size + 1);
-
         UserEntity user = getUser(userIdOrNull);
-        // 전체 조회
-        if(Boolean.TRUE.equals(isFree)){
-            log.info("자유 게시판을 조회합니다");
-            boards = boardRepository.findBoards(null, true, cursor, pageRequest);
-        }
-        // 특정 Tool 게시판 조회
-        else if (toolId != null) {
-            Tool tool = getToolById(toolId);
-            log.info(tool.getToolMainName() + " 게시판을 조회합니다");
-            boards = boardRepository.findBoards(tool, false, cursor,pageRequest);
-        }
-        //전체 게시판 조회
-        else{
-            log.info("전체 게시판을 조회합니다");
-            boards = boardRepository.findBoards(null, null, cursor, pageRequest);
 
-        }
-        ScrollPaginationCollection<Board> boardsCursor = ScrollPaginationCollection.of(boards, size);
+        // 전체 데이터 개수를 가져옴 (cursor 조건 없음)
+        long totalElements = Optional.ofNullable(jpaQueryFactory
+                .select(board.count())
+                .from(board)
+                .where(
+                        board.delYn.eq(false),
+                        noTopic != null ? board.isFree.eq(noTopic) : null,
+                        toolId != null ? board.tool.toolId.eq(toolId) : null
+                )
+                .fetchOne()).orElse(0L);
 
+        // Cursor 기반 페이징을 적용한 게시글 목록 가져오기
+        List<Board> boards = jpaQueryFactory
+                .selectFrom(board)
+                .where(
+                        noTopic != null ? board.isFree.eq(noTopic) : null,
+                        toolId != null ? board.tool.toolId.eq(toolId) : null,
+                        board.delYn.eq(Boolean.FALSE),
+                        board.id.lt(cursor)
+                )
+                .orderBy(board.id.desc())
+                .limit(size + 1)
+                .fetch();
 
-        List<BoardRes> boardResList = boardsCursor.getCurrentScrollItems().stream()
+        // 다음 페이지 여부 확인
+        boolean hasNextPage = boards.size() > size;
+        List<Board> paginatedBoards = hasNextPage ? boards.subList(0, size) : boards;
+
+        // nextCursor 설정
+        long nextCursor = hasNextPage ? boards.get(size).getId() : -1L;
+
+        List<BoardRes> boardResList = paginatedBoards.stream()
                 .map(board -> {
                     String toolName = (board.getTool() != null) ? board.getTool().getToolMainName() : FREE;
                     String toolLogo = (board.getTool() != null) ? board.getTool().getToolLogo() : TOOL_LOGO;
@@ -198,15 +217,15 @@ public class BoardService {
                     List<String> boardImageUrls = boardImages.stream()
                             .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
                             .toList();
-                    boolean isScrapped = (user != null) && getBoardScrap(user, board);
-
+                    boolean isScrapped = getBoardScrap(user, board);
                     return BoardRes.of(board, toolName, toolLogo, commentCount, boardImageUrls, isScrapped);
-                }).toList();
-        long nextCursor = boardsCursor.isLastScroll() ? -1L : boardsCursor.getNextCursor().getId();
+                })
+                .toList();
 
-        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(boardsCursor.getTotalElements(), nextCursor);
-        return new GetBoardResponse(boardResList,scrollPaginationDto);
+        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
+        return new GetBoardResponse(boardResList, scrollPaginationDto);
     }
+
 
 
     public FavoriteBoardsRetrieveResponse getFavoriteBoards(final Long userId, final Pageable pageable){
@@ -302,10 +321,18 @@ public class BoardService {
     }
 
     public Boolean getBoardScrap(final UserEntity user, final Board board){
-        return (user != null &&
-                boardScrapRepository.findByUserAndBoard(user, board)
-                        .map(toolScrap -> !toolScrap.isDelYn())
-                        .orElse(false));
+
+        if (user == null) {
+            log.info("** Board : " + board.getId() + " 스크랩 여부 : false (비로그인 사용자)");
+            return false;
+        }
+        boolean isScrapped = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId())
+                .map(BoardScrap::isDelYn)
+                .map(delYn -> !delYn)
+                .orElse(false);
+
+        log.info("** Board : " + board.getId() + " 스크랩 여부 :"+isScrapped);
+        return isScrapped;
     }
 
     public UserEntity getUser(Long userIdOrNull) {
@@ -320,7 +347,7 @@ public class BoardService {
     }
 
     public String freeName(Board board) {
-      return board.getTool() != null ? board.getTool().getToolMainName() : FREE;
+        return board.getTool() != null ? board.getTool().getToolMainName() : FREE;
     }
     public String freeLogo(Board board){
         return board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
