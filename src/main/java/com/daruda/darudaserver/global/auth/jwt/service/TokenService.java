@@ -42,8 +42,7 @@ public class TokenService {
     }
 
     @Transactional
-    public String getRefreshTokenByUserId(Long userId)
-    {
+    public String getRefreshTokenByUserId(Long userId) {
         Token token = tokenRepository.findByUserId(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
         return token.getRefreshToken();

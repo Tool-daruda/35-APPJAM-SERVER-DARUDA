@@ -28,6 +28,7 @@ public enum ErrorCode {
     AUTHENTICATION_CODE_EXPIRED(HttpStatus.UNAUTHORIZED,"E401001", "인가코드가 만료되었습니다"),
     REFRESH_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED,"E401002","리프레쉬 토큰이 만료되었습니다"),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "E401003", "리소스 접근 권한이 없습니다."),
+    EMPTY_OR_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "E401004", "토큰이 존재하지 않거나 유효하지 않습니다"),
 
     /* 403 */
     BOARD_FORBIDDEN(HttpStatus.FORBIDDEN, "E403001", "게시판 접근 권한이 없습니다."),

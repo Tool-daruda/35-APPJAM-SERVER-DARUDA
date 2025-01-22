@@ -83,7 +83,7 @@ public class UserService {
                 .positions(Positions.fromString(positions))
                 .build();
         Long userId = userRepository.save(userEntity).getId();
-        log.debug("유저 아이디를 성공적으로 조회했습니다. userId : ,{}", userId);
+        log.debug("유저 아이디를 성공적으로 조회했습니다. userId : {}", userId);
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
         String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
@@ -192,18 +192,25 @@ public class UserService {
         //사용자 찾기
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
         //FK로 묶여있는 toolScrap삭제
         toolScrapRepository.deleteAllByUserId(userId);
+        log.info("toolScrap을 성공적으로 삭제하였습니다");
 
         //FK로 묶여있는 boardScrap 삭제
         boardScrapRepository.deleteAllByUserId(userId);
+        log.info("boardScrap을 성공적으로 삭제하였습니다");
 
         //FK로 묶여있는 board 삭제
         boardRepository.deleteAllByUserId(userId);
+        log.info("board를 성공적으로 삭제하였습니다");
 
+        //User 탈퇴
         userRepository.delete(userEntity);
+        log.info("정상적으로 탈퇴되었습니다");
 
         tokenService.deleteRefreshToken(userId);
+        log.info("Refresh 토큰을 정상적으로 삭제하였습니다");
     }
 
     private void verifyUserIdWithStoredToken(final Long userId, final String refreshToken) {
