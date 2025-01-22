@@ -36,8 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/v1/users/signup",
             "/api/v1/users/nickname",
             "/api/v1/users/kakao/login-url",
-            "/api/v1/tools/**",
-            "/api/v1/boards/board/**");
+            "/api/v1/tools/**");
 
 
     @Override
@@ -80,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
         }catch(Exception e){
             log.error("AccessToken 추출 실패: {}", e.getMessage());
-            throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
+            return null;
         }
     }
 
