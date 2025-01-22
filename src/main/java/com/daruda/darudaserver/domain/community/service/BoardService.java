@@ -169,9 +169,11 @@ public class BoardService {
 
     public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId, final int size, final Long lastBoardId) {
 
+        log.info("USERID OR NULL " + userIdOrNull);
         Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId;
         PageRequest pageRequest = PageRequest.of(0, size + 1);
         UserEntity user = getUser(userIdOrNull);
+        log.info("USER : " + user);
 
         //NoTopic = null, toolId = null -> 전체 게시판 조회
         //NoTopic = False , toolId != null -> 툴 게시판
@@ -238,7 +240,6 @@ public class BoardService {
                             .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
                             .toList();
                     boolean isScrapped = getBoardScrap(user, board);
-
                     return BoardRes.of(board, toolName, toolLogo, commentCount, boardImageUrls, isScrapped,savedToolid);
                 })
                 .toList();
@@ -342,7 +343,6 @@ public class BoardService {
     }
 
     public Boolean getBoardScrap(final UserEntity user, final Board board){
-
         if (user == null) {
             log.info("** Board : " + board.getId() + " 스크랩 여부 : false (비로그인 사용자)");
             return false;
@@ -356,7 +356,7 @@ public class BoardService {
         return isScrapped;
     }
 
-    public UserEntity getUser(Long userIdOrNull) {
+    public UserEntity getUser(final Long userIdOrNull) {
         UserEntity user = null;
         if (userIdOrNull != null) {
             Long userId = userIdOrNull;
