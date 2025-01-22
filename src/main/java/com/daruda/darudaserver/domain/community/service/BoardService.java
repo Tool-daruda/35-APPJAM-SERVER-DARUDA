@@ -349,10 +349,7 @@ public class BoardService {
 
     public Long getToolId(Long boardId){
         Board board = getBoardById(boardId);
-        if(board.isFree()){
-            return null;
-        }
-        Long toolId = board.getTool().getToolId();
+        Long toolId = board.isFree() ? null : board.getTool().getToolId();
         return toolId;
     }
 
