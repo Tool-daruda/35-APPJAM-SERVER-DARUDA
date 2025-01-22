@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.domain.community;
+package com.daruda.darudaserver.domain.community.util;
 
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;

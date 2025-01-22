@@ -2,7 +2,7 @@ package com.daruda.darudaserver.domain.community.service;
 
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
-import com.daruda.darudaserver.domain.community.ValidateBoard;
+import com.daruda.darudaserver.domain.community.util.ValidateBoard;
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
@@ -21,7 +21,6 @@ import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveRe
 import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
-import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
@@ -59,7 +58,7 @@ public class BoardService {
     private final CommentRepository commentRepository;
     private final ValidateBoard validateBoard;
 
-    private final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/daruda+logo.svg";
+    private final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png";
     private final String FREE = "자유";
 
     private final JPAQueryFactory jpaQueryFactory;
@@ -211,8 +210,8 @@ public class BoardService {
 
         List<BoardRes> boardResList = paginatedBoards.stream()
                 .map(board -> {
-                    String toolName = (board.getTool() != null) ? board.getTool().getToolMainName() : FREE;
-                    String toolLogo = (board.getTool() != null) ? board.getTool().getToolLogo() : TOOL_LOGO;
+                    String toolName = (noTopic.equals(Boolean.FALSE)) ? board.getTool().getToolMainName() : FREE;
+                    String toolLogo = (noTopic.equals(Boolean.FALSE)) ? board.getTool().getToolLogo() : TOOL_LOGO;
                     int commentCount = getCommentCount(board.getId());
                     List<String> boardImages = boardImageService.getBoardImageUrls(board.getId());
                     List<String> boardImageUrls = boardImages.stream()
