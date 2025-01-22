@@ -76,7 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(accessToken) && accessToken.startsWith("Bearer")) {
                 return accessToken.substring("Bearer".length());
             }
-            throw new RuntimeException("유효하지 않은 토큰입니다");
+            throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
         }catch(Exception e){
             log.error("AccessToken 추출 실패: {}", e.getMessage());
             throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
@@ -87,7 +87,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (userId == null) {
             throw new BadRequestException(ErrorCode.USER_NOT_FOUND);
         }
-        log.debug("SecurityContextHolder : "+userId);
+        log.debug("SecurityContextHolder : {}", userId);
         UserAuthentication authentication = UserAuthentication.createUserAuthentication(userId);
         createAndSetWebAuthenticationDetails(request, authentication);
 
