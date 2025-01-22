@@ -26,7 +26,7 @@ public class MyPageController {
     private final BoardService boardService;
 
     @PatchMapping
-    public ResponseEntity<?> patchMy(@UserId Long userId,
+    public ResponseEntity<ApiResponse<UpdateMyResponse>> patchMy(@UserId Long userId,
                                      @Valid @RequestBody UpdateMyRequest updateMyRequest){
         if(updateMyRequest.positions() ==null && updateMyRequest.nickname() ==null){
             throw new BusinessException(ErrorCode.MISSING_PARAMETER);
@@ -36,7 +36,7 @@ public class MyPageController {
     }
 
     @GetMapping("/tools")
-    public ResponseEntity<?> getFavoriteTools(@UserId Long userId){
+    public ResponseEntity<ApiResponse<FavoriteToolsResponse>> getFavoriteTools(@UserId Long userId){
         FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId);
 
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteToolsResponse, SuccessCode.SUCCESS_FETCH));
@@ -44,7 +44,7 @@ public class MyPageController {
 
 
     @GetMapping("/boards")
-    public ResponseEntity<?> getMyBoards(@AuthenticationPrincipal Long userIdOrNull,
+    public ResponseEntity<ApiResponse<BoardListResponse>> getMyBoards(@AuthenticationPrincipal Long userIdOrNull,
                                          @RequestParam(defaultValue = "1", value = "page") int pageNo,
                                          @RequestParam(defaultValue = "5", value = "size") int size,
                                          @RequestParam(defaultValue = "createdAt", value = "criteria") String criteria){
@@ -55,7 +55,7 @@ public class MyPageController {
 
 
     @GetMapping("/me")
-    public ResponseEntity<?> getMyProfile(@UserId Long userId){
+    public ResponseEntity<ApiResponse<MyProfileResponse>> getMyProfile(@UserId Long userId){
         MyProfileResponse myProfileResponse = userService.getMyInfo(userId);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(myProfileResponse, SuccessCode.SUCCESS_FETCH));
     }

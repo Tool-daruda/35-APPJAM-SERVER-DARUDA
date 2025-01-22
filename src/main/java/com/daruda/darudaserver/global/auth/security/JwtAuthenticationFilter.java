@@ -5,6 +5,7 @@ import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtValidationType;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BadRequestException;
+import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,6 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             log.error("JWT 인증 실패: {}", e.getMessage(), e);
+            throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
         }
         filterChain.doFilter(request, response);
     }
@@ -74,18 +76,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(accessToken) && accessToken.startsWith("Bearer")) {
                 return accessToken.substring("Bearer".length());
             }
-            throw new RuntimeException("유효하지 않은 토큰입니다");
+            throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
         }catch(Exception e){
             log.error("AccessToken 추출 실패: {}", e.getMessage());
-            return null;
+            throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
         }
     }
 
     private void doAuthentication( HttpServletRequest request, final  Long userId) {
         if (userId == null) {
-            throw new BadRequestException(ErrorCode.REFRESH_TOKEN_USER_ID_MISMATCH_ERROR);
+            throw new BadRequestException(ErrorCode.USER_NOT_FOUND);
         }
-        log.debug("SecurityContextHolder : "+userId);
+        log.debug("SecurityContextHolder : {}", userId);
         UserAuthentication authentication = UserAuthentication.createUserAuthentication(userId);
         createAndSetWebAuthenticationDetails(request, authentication);
 
