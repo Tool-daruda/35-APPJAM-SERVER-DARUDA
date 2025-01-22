@@ -168,14 +168,19 @@ public class BoardService {
     }
 
     public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId, final int size, final Long lastBoardId) {
-        if ((Boolean.FALSE.equals(noTopic) && toolId == null) ||
-                (Boolean.TRUE.equals(noTopic) && toolId != null)) {
-            throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
-        }
 
         Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId;
         PageRequest pageRequest = PageRequest.of(0, size + 1);
         UserEntity user = getUser(userIdOrNull);
+
+        //NoTopic = null, toolId = null -> 전체 게시판 조회
+        //NoTopic = False , toolId != null -> 툴 게시판
+        //NoTopic = True , toolId == null -> 자유게시판
+        if(noTopic != null) {
+            if ((noTopic.equals(Boolean.TRUE) && toolId != null) || (noTopic.equals(Boolean.FALSE) && toolId == null)) {
+                throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
+            }
+        }
 
         // 전체 데이터 개수를 가져옴 (cursor 조건 없음)
         long totalElements = Optional.ofNullable(jpaQueryFactory
@@ -208,17 +213,33 @@ public class BoardService {
         // nextCursor 설정
         long nextCursor = hasNextPage ? boards.get(size).getId() : -1L;
 
+        // 응답 데이터 가공
         List<BoardRes> boardResList = paginatedBoards.stream()
                 .map(board -> {
-                    String toolName = (noTopic.equals(Boolean.FALSE)) ? board.getTool().getToolMainName() : FREE;
-                    String toolLogo = (noTopic.equals(Boolean.FALSE)) ? board.getTool().getToolLogo() : TOOL_LOGO;
+                    String toolName;
+                    String toolLogo;
+                    Long savedToolid = null;
+                    if (Boolean.FALSE.equals(noTopic) && toolId != null) {  // 툴 게시판
+                        toolName = board.getTool().getToolMainName();
+                        toolLogo = board.getTool().getToolLogo();
+                        savedToolid = board.getTool().getToolId();
+                    } else if (Boolean.TRUE.equals(noTopic) && toolId == null) { // 자유 게시판
+                        toolName = FREE;
+                        toolLogo = TOOL_LOGO;
+                    } else { // 전체 게시판 (툴이 있는 경우만 가져옴)
+                        toolName = (board.getTool() != null) ? board.getTool().getToolMainName() : FREE;
+                        toolLogo = (board.getTool() != null) ? board.getTool().getToolLogo() : TOOL_LOGO;
+                        savedToolid = (board.getTool() != null) ? board.getTool().getToolId() : null;
+                    }
+
                     int commentCount = getCommentCount(board.getId());
                     List<String> boardImages = boardImageService.getBoardImageUrls(board.getId());
                     List<String> boardImageUrls = boardImages.stream()
                             .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
                             .toList();
                     boolean isScrapped = getBoardScrap(user, board);
-                    return BoardRes.of(board, toolName, toolLogo, commentCount, boardImageUrls, isScrapped);
+
+                    return BoardRes.of(board, toolName, toolLogo, commentCount, boardImageUrls, isScrapped,savedToolid);
                 })
                 .toList();
 
