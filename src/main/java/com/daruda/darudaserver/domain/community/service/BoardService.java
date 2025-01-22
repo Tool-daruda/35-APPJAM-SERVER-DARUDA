@@ -143,6 +143,7 @@ public class BoardService {
     public BoardRes getBoard(final Long userIdOrNull, final Long boardId) {
         UserEntity user = getUser(userIdOrNull);
         Board board = getBoardById(boardId);
+        Long toolId = getToolId(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
         List<String> boardImageList = imageUrls.stream()
                 .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
@@ -150,7 +151,7 @@ public class BoardService {
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
         Boolean isScraped = getBoardScrap(user, board);
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), boardImageList, isScraped);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), boardImageList, isScraped, toolId);
     }
 
     // 내가 쓴  게시판 조회
@@ -344,6 +345,15 @@ public class BoardService {
             log.debug("유저 정보를 조회했습니다: {}", user.getId());
         }
         return user;
+    }
+
+    public Long getToolId(Long boardId){
+        Board board = getBoardById(boardId);
+        if(board.isFree()){
+            return null;
+        }
+        Long toolId = board.getTool().getToolId();
+        return toolId;
     }
 
     public String freeName(Board board) {

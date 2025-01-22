@@ -19,6 +19,7 @@ public class BoardRes {
     private String content;
     private List<String> images;
     private Boolean isScraped;
+    private Long toolId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
     private Timestamp updatedAt;
@@ -29,6 +30,9 @@ public class BoardRes {
     }
     public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images,final Boolean isScraped) {
         return getBoardRes(board, toolName, toolLogo, commentCount, images, isScraped);
+    }
+    public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images,final Boolean isScraped, final Long toolId) {
+        return getBoardResWithToolId(board, toolName, toolLogo, commentCount, images, isScraped, toolId);
     }
 
     public static BoardRes createBoardRes(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images) {
@@ -60,6 +64,23 @@ public class BoardRes {
                 .commentCount(commentCount)
                 .updatedAt(board.getUpdatedAt())
                 .isScraped(isScraped)
+                .build();
+    }
+
+    public static BoardRes getBoardResWithToolId(final Board board, final String toolName, final String toolLogo, final int commentCount, final List<String> images,final Boolean isScraped, final Long toolId) {
+        return BoardRes.builder()
+                .boardId(board.getId())
+                .boardId(board.getId())
+                .toolName(toolName)
+                .toolLogo(toolLogo)
+                .author(board.getUser().getNickname())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .images(images)
+                .commentCount(commentCount)
+                .updatedAt(board.getUpdatedAt())
+                .isScraped(isScraped)
+                .toolId(toolId)
                 .build();
     }
 
