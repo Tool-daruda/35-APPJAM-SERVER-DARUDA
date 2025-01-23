@@ -14,6 +14,7 @@ public class BoardImageService {
 
     private final BoardImageRepository boardImageRepository;
     private final ImageService imageService;
+    private final String IMAGE_URL = "https://daruda.s3.ap-northeast-2.amazonaws.com/";
 
     public void saveBoardImages(Long boardId, List<Long> imageIds){
         imageIds.forEach(imageId ->{
@@ -25,7 +26,7 @@ public class BoardImageService {
     public List<String> getBoardImageUrls(Long boardId){
         return boardImageRepository.findAllByBoardId(boardId).stream()
                 .map(boardImage->
-                        imageService.getImageUrlById(boardImage.getImageId())
+                       IMAGE_URL +  imageService.getImageUrlById(boardImage.getImageId())
                 )
                 .toList();
     }
