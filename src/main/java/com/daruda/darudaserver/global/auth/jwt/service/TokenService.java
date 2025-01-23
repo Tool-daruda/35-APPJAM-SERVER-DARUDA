@@ -52,14 +52,10 @@ public class TokenService {
     }
 
     public String updateRefreshTokenByUserId(Long userId){
-        Token token = tokenRepository.findByUserId(userId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        tokenRepository.findByUserId(userId).ifPresent(tokenRepository::delete);
 
-        tokenRepository.delete(token);
         UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
-
-        return refreshToken;
+        return  jwtTokenProvider.generateRefreshToken(userAuthentication);
     }
 
 }
