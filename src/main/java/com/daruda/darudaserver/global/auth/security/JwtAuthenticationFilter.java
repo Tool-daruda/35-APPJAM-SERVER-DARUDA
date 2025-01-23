@@ -36,8 +36,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/v1/users/signup",
             "/api/v1/users/nickname",
             "/api/v1/users/kakao/login-url",
-            "/api/v1/tools/**",
-            "/api/v1/boards/board/**");
+            "/api/v1/tools/**"
+//            "/api/v1/boards/board/**"
+    );
 
     @Override
     protected void doFilterInternal( HttpServletRequest request,  HttpServletResponse response,  FilterChain filterChain) throws ServletException, IOException {
@@ -64,7 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
         String method = request.getMethod();
 //        // GET 요청만 인증 우회
-//        if (path.startsWith("/api/v1/boards/") && method.equals("GET")) {
+//        if (path.startsWith("/api/v1/boards/board/**") && method.equals("GET")) {
 //            return true;
 //        }
         return EXCLUDE_URL.stream().anyMatch(exclude -> new AntPathMatcher().match(exclude, path));

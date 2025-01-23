@@ -59,6 +59,7 @@ public class BoardService {
     private final ValidateBoard validateBoard;
 
     private final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png";
+    private final String IMAGE_URL = "https://daruda.s3.ap-northeast-2.amazonaws.com/";
     private final String FREE = "자유";
 
     private final JPAQueryFactory jpaQueryFactory;
@@ -73,7 +74,7 @@ public class BoardService {
         // 이미지 처리
         List<String> imageUrls = processImages(board, images);
         List<String> boardImageUrls = imageUrls.stream()
-                .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
+                .map(url -> IMAGE_URL + url)
                 .toList();
 
         // Tool 정보 설정
@@ -121,9 +122,6 @@ public class BoardService {
 
     // 스크랩 처리
     public BoardScrapRes postScrap(final Long userId, final Long boardId) {
-        boardRepository.findById(boardId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
-
         UserEntity user = getUserById(userId);
         Board board = getBoardById(boardId);
 
@@ -144,27 +142,22 @@ public class BoardService {
         Board board = getBoardById(boardId);
         Long toolId = getToolId(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
-        List<String> boardImageList = imageUrls.stream()
-                .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
-                .toList();
+
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
         Boolean isScraped = getBoardScrap(user, board);
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), boardImageList, isScraped, toolId);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped, toolId);
     }
 
     // 내가 쓴  게시판 조회
     public BoardRes getMyBoard(final UserEntity user,final  Long boardId) {
         Board board = getBoardById(boardId);
         List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
-        List<String> boardImageUrls = imageUrls.stream()
-                .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
-                .toList();
         String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
         String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
         Boolean isScraped = getBoardScrap(user, board);
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), boardImageUrls, isScraped);
+        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped);
     }
 
     public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId, final int size, final Long lastBoardId) {
@@ -212,10 +205,10 @@ public class BoardService {
         boolean hasNextPage = boards.size() > size;
         List<Board> paginatedBoards = hasNextPage ? boards.subList(0, size) : boards;
 
-        // nextCursor 설정
+        // nextCursor
         long nextCursor = hasNextPage ? boards.get(size).getId() : -1L;
 
-        // 응답 데이터 가공
+        // 응답 데이터
         List<BoardRes> boardResList = paginatedBoards.stream()
                 .map(board -> {
                     String toolName;
@@ -236,11 +229,8 @@ public class BoardService {
 
                     int commentCount = getCommentCount(board.getId());
                     List<String> boardImages = boardImageService.getBoardImageUrls(board.getId());
-                    List<String> boardImageUrls = boardImages.stream()
-                            .map(url -> "https://daruda.s3.ap-northeast-2.amazonaws.com/" + url)
-                            .toList();
                     boolean isScrapped = getBoardScrap(user, board);
-                    return BoardRes.of(board, toolName, toolLogo, commentCount, boardImageUrls, isScrapped,savedToolid);
+                    return BoardRes.of(board, toolName, toolLogo, commentCount, boardImages, isScrapped,savedToolid);
                 })
                 .toList();
 
