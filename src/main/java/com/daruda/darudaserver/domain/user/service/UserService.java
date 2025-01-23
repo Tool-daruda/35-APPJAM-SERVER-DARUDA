@@ -1,4 +1,5 @@
 package com.daruda.darudaserver.domain.user.service;
+import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
@@ -15,6 +16,7 @@ import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 
+import com.daruda.darudaserver.global.auth.jwt.repository.TokenRepository;
 import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
 import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -46,6 +48,8 @@ public class UserService {
     private final ToolScrapRepository toolScrapRepository;
     private final ToolService toolService;
     private final BoardRepository boardRepository;
+    private final CommentRepository commentRepository;
+    private final TokenRepository tokenRepository;
 
     public LoginResponse oAuthLogin(final UserInfo userInfo) {
         String email = userInfo.email();
@@ -60,7 +64,7 @@ public class UserService {
 
             //토큰 생성 및 refreshToken db에 저장
             String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
-            String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
+            String refreshToken = tokenService.updateRefreshTokenByUserId(userId);
             log.info("토큰을 정상적으로 생성하였습니다");
             tokenService.saveRefreshtoken(userId, refreshToken);
             JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
@@ -196,6 +200,13 @@ public class UserService {
         //FK로 묶여있는 toolScrap삭제
         toolScrapRepository.deleteAllByUserId(userId);
         log.info("toolScrap을 성공적으로 삭제하였습니다");
+
+        commentRepository.deleteAllByUserId(userId);
+
+        List<Board> boardList = boardRepository.findAllByUserId(userId);
+
+        boardList.stream()
+                .forEach(board -> commentRepository.deleteByBoardId(board.getId()));
 
         //FK로 묶여있는 boardScrap 삭제
         boardScrapRepository.deleteAllByUserId(userId);

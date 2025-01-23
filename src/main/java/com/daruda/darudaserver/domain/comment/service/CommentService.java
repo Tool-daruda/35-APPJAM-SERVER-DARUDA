@@ -53,7 +53,7 @@ public class CommentService {
         }
         //댓글 entity 생성
         CommentEntity commentEntity = CommentEntity.builder()
-                .userEntity(userEntity)
+                .user(userEntity)
                 .board(board)
                 .photoUrl(photoUrl)
                 .content(createCommentRequest.content())
@@ -96,7 +96,7 @@ public class CommentService {
                         .content(commentEntity.getContent())
                         .image(commentEntity.getPhotoUrl())
                         .commentId(commentEntity.getId())
-                        .nickname(commentEntity.getUserEntity().getNickname())
+                        .nickname(commentEntity.getUser().getNickname())
                         .updatedAt(commentEntity.getUpdatedAt())
                         .build())
                 .toList();

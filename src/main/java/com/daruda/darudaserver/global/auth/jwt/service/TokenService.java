@@ -2,7 +2,9 @@ package com.daruda.darudaserver.global.auth.jwt.service;
 
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.global.auth.jwt.entity.Token;
+import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.auth.jwt.repository.TokenRepository;
+import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TokenService {
     private final TokenRepository tokenRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
     @Transactional
@@ -46,6 +49,17 @@ public class TokenService {
         Token token = tokenRepository.findByUserId(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
         return token.getRefreshToken();
+    }
+
+    public String updateRefreshTokenByUserId(Long userId){
+        Token token = tokenRepository.findByUserId(userId)
+                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        tokenRepository.delete(token);
+        UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
+
+        return refreshToken;
     }
 
 }
