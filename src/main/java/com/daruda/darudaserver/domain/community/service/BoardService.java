@@ -128,7 +128,6 @@ public class BoardService {
         Board board = getBoardById(boardId);
 
         BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId()).orElse(null);
-        log.debug("boardScrapId : {}", boardScrap.getBoardScrapId());
 
         if (boardScrap == null) {
             boardScrap = BoardScrap.builder().user(user).board(board).build();
