@@ -52,7 +52,7 @@ public class UserService {
         Optional<UserEntity> userEntity = userRepository.findByEmail(email);
         //등록된 회원이 아닌 경우
         if (userEntity.isEmpty()) {
-            return LoginResponse.of(false, email);
+            return LoginResponse.of(false, email,null);
         } else { //등록된 회원인 경우
             Long userId = userEntity.get().getId();
             log.debug("유저 아이디를 성공적으로 조회했습니다. userId : ,{}", userId);
@@ -68,7 +68,7 @@ public class UserService {
                     .refreshToken(refreshToken)
                     .build();
 
-            return LoginResponse.of(true, jwtTokenResponse);
+            return LoginResponse.of(true, jwtTokenResponse,userEntity.get().getNickname());
         }
     }
 
