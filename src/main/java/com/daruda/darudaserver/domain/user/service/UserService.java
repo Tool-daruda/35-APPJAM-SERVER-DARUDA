@@ -1,4 +1,5 @@
 package com.daruda.darudaserver.domain.user.service;
+import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
@@ -46,6 +47,7 @@ public class UserService {
     private final ToolScrapRepository toolScrapRepository;
     private final ToolService toolService;
     private final BoardRepository boardRepository;
+    private final CommentRepository commentRepository;
 
     public LoginResponse oAuthLogin(final UserInfo userInfo) {
         String email = userInfo.email();
@@ -196,6 +198,8 @@ public class UserService {
         //FK로 묶여있는 toolScrap삭제
         toolScrapRepository.deleteAllByUserId(userId);
         log.info("toolScrap을 성공적으로 삭제하였습니다");
+
+        commentRepository.deleteAllByUserId(userId);
 
         //FK로 묶여있는 boardScrap 삭제
         boardScrapRepository.deleteAllByUserId(userId);
