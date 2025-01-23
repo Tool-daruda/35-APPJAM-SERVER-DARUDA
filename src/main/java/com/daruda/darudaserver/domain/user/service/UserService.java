@@ -1,7 +1,6 @@
 package com.daruda.darudaserver.domain.user.service;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
-import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDtoGetRes;
@@ -26,10 +25,6 @@ import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,7 +44,6 @@ public class UserService {
     private final ToolService toolService;
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
-    private final TokenRepository tokenRepository;
 
     public LoginResponse oAuthLogin(final UserInfo userInfo) {
         String email = userInfo.email();
@@ -59,7 +53,7 @@ public class UserService {
             return LoginResponse.of(false, email,null);
         } else { //등록된 회원인 경우
             Long userId = userEntity.get().getId();
-            log.debug("유저 아이디를 성공적으로 조회했습니다. userId : ,{}", userId);
+            log.debug("유저 아이디를 성공적으로 조회했습니다. userId : {}", userId);
             UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
             //토큰 생성 및 refreshToken db에 저장
