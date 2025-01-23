@@ -317,7 +317,7 @@ public class ToolService {
         if (lastToolId == null) {
             return "popular".equals(criteria) ? Long.MAX_VALUE : System.currentTimeMillis();
         }
-        Tool tool = getToolById(lastToolId);
+        Tool tool = getToolById(lastToolId+1);
         return "popular".equals(criteria) ? tool.getPopular() : tool.getCreatedAt().getTime();
     }
 
