@@ -30,4 +30,8 @@ public interface CommentRepository extends JpaRepository<CommentEntity,Long> {
     @Transactional
     void deleteAllByUserId(@Param("userId") Long userId);
 
+    @Modifying
+    @Transactional
+    void deleteByBoardId(@Param("boardId") Long boardId);
+
 }
