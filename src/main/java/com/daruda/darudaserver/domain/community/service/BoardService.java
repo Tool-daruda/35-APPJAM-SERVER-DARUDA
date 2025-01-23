@@ -163,7 +163,7 @@ public class BoardService {
     public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId, final int size, final Long lastBoardId) {
 
         log.info("USERID OR NULL " + userIdOrNull);
-        Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId;
+        Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId+1;
         PageRequest pageRequest = PageRequest.of(0, size + 1);
         UserEntity user = getUser(userIdOrNull);
         log.info("USER : " + user);
