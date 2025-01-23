@@ -25,17 +25,17 @@ public class CommentEntity extends BaseTimeEntity {
 
     @ManyToOne(targetEntity = UserEntity.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity userEntity;
+    private UserEntity user;
 
     @ManyToOne(targetEntity = Board.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
     @Builder
-    public CommentEntity(String content, String photoUrl, UserEntity userEntity, Board board){
+    public CommentEntity(String content, String photoUrl, UserEntity user, Board board){
         this.content = content;
         this.photoUrl = photoUrl;
         this.board = board;
-        this.userEntity = userEntity;
+        this.user = user;
     }
 }

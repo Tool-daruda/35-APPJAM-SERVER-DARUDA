@@ -37,6 +37,8 @@ public interface BoardRepository extends JpaRepository<Board,Long> {
     @Transactional
     void deleteAllByUserId(@Param("userId") Long userId);
 
+    List<Board> findAllByUserId(Long userId);
+
 
     Page<Board> findAllByUserIdAndDelYnFalse(Long userId, Pageable pageable);
 
