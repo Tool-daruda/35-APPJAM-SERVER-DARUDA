@@ -30,8 +30,7 @@ public class SecurityConfig {
             "/api/v1/users/nickname",
             "/api/v1/tools/**",
             "/api/v1/comments",
-            "/api/v1/boards/board/**",
-            "/api/v1/users/kakao/login-url"};
+            "/api/v1/boards/board/**"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
