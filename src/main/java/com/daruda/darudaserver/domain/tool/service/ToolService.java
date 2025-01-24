@@ -116,7 +116,7 @@ public class ToolService {
 
         //  1. 모든 데이터 한 번에 가져오기
         List<Tool> allTools = toolRepository.findAll();
-        log.debug("📊 전체 데이터 개수: {}", allTools.size());
+        log.debug(" 전체 데이터 개수: {}", allTools.size());
 
         //  2. 필터링 (카테고리 & 무료 여부)
         List<Tool> filteredTools = allTools.stream()
@@ -124,7 +124,7 @@ public class ToolService {
                 .filter(tool -> (isFree == null || (isFree && tool.getLicense() == License.FREE) || (!isFree)))
                 .toList();
 
-        log.debug("🎯 필터링 후 데이터 개수: {}", filteredTools.size());
+        log.debug("필터링 후 데이터 개수: {}", filteredTools.size());
 
         //  3. 정렬 (인기순 또는 등록순)
         if ("popular".equals(criteria)) {
