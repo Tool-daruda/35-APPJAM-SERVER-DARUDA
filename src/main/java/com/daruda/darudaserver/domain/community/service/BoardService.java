@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.daruda.darudaserver.domain.community.entity.QBoard.board;
@@ -117,6 +118,12 @@ public class BoardService {
     public void deleteBoard(final Long userId, final Long boardId) {
         Board board = validateBoardAndUser(userId, boardId);
         deleteOriginImages(boardId);
+        List<CommentEntity> commentEntityList = commentRepository.findAllByBoardId(boardId);
+        List<BoardScrap> scraps = boardScrapRepository.findAllByBoardId(boardId);
+        if (!scraps.isEmpty()) {
+            boardScrapRepository.deleteAll(scraps);
+            log.info("삭제된 게시글과 연관된 스크랩 데이터를 제거했습니다. Scrap Count: {}", scraps.size());
+        }
         board.delete();
     }
 
@@ -245,9 +252,12 @@ public class BoardService {
 
         Page<BoardScrap> boardScraps = boardScrapRepository.findAllActiveByUserId(userId, pageable);
         List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
-                .filter(boardScrap -> !boardScrap.isDelYn())
+                .filter(boardScrap -> !boardScrap.isDelYn()) // 스크랩 데이터의 삭제 여부 체크
                 .map(boardScrap -> {
                     Board board = boardScrap.getBoard();
+                    if (board.isDelYn()) { // 삭제된 게시판인지 확인
+                        return null; // 삭제된 게시판은 제외
+                    }
                     return FavoriteBoardsResponse.builder()
                             .boardId(board.getId())
                             .title(board.getTitle())
@@ -258,7 +268,9 @@ public class BoardService {
                             .isScrapped(!boardScrap.isDelYn())
                             .build();
                 })
+                .filter(Objects::nonNull) // null 값 제외
                 .toList();
+
         PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
         return  new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
 
