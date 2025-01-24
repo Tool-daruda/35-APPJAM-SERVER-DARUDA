@@ -112,41 +112,74 @@ public class ToolService {
         } else {
             user = null;
         }
-        // lastToolId 가 null 일 경우 에러 발생
-        Long lastSortValue = getLastSortValue(lastToolId, criteria);
-
-        List<Tool> tools = jpaQueryFactory
-                .selectFrom(qTool)
-                .where(
-                        categoryEq(category),
-                        isFreeEq(isFree),
-                        cursorCondition(lastToolId, lastSortValue, criteria) // Cursor 페이징 조건
-                )
-                .orderBy(getSortOrder(criteria))
-                .limit(size + 1)
-                .fetch();
-
-        validateCriteria(criteria);
 
 
-        long totalElements = getTotalElements(category,isFree);
-        long nextCursor = getNextCursor(tools, size);
+        //  1. 모든 데이터 한 번에 가져오기
+        List<Tool> allTools = toolRepository.findAll();
+        log.debug(" 전체 데이터 개수: {}", allTools.size());
 
+        //  2. 필터링 (카테고리 & 무료 여부)
+        List<Tool> filteredTools = allTools.stream()
+                .filter(tool -> (category == null || category.equals("ALL") || tool.getCategory().name().equals(category)))
+                .filter(tool -> (isFree == null || (isFree && tool.getLicense() == License.FREE) || (!isFree)))
+                .toList();
 
-        boolean hasNextPage = tools.size() > size;
-        List<Tool> paginatedTools = hasNextPage ? tools.subList(0, size) : tools;
+        log.debug("필터링 후 데이터 개수: {}", filteredTools.size());
+
+        //  3. 정렬 (인기순 또는 등록순)
+        if ("popular".equals(criteria)) {
+            filteredTools = filteredTools.stream()
+                    .sorted((t1, t2) -> {
+                        int cmp = Integer.compare(t2.getPopular(), t1.getPopular());
+                        return cmp != 0 ? cmp : Long.compare(t2.getToolId(), t1.getToolId());
+                    })
+                    .toList();
+        } else {
+            filteredTools = filteredTools.stream()
+                    .sorted((t1, t2) -> {
+                        int cmp = t2.getCreatedAt().compareTo(t1.getCreatedAt());
+                        return cmp != 0 ? cmp : Long.compare(t2.getToolId(), t1.getToolId());
+                    })
+                    .toList();
+        }
+
+        log.debug("정렬 후 데이터 개수 : " + filteredTools.size());
+
+        // `lastToolId` 포함하여 이후 데이터 가져오기
+        int startIndex = 0;
+        if (lastToolId != null) {
+            Optional<Tool> lastTool = filteredTools.stream()
+                    .filter(tool -> tool.getToolId().equals(lastToolId))
+                    .findFirst();
+
+            if (lastTool.isPresent()) {
+                startIndex = filteredTools.indexOf(lastTool.get());  //`lastToolId`부터 포함하여 시작
+            } else {
+                log.warn(" lastToolId({})에 해당하는 데이터가 존재하지 않음. 처음부터 시작", lastToolId);
+            }
+        }
+
+        List<Tool> paginatedTools = filteredTools.subList(startIndex, Math.min(startIndex + size, filteredTools.size()));
+
+        //  nextCursor 설정 (현재 응답에서 마지막 `toolId` 다음에 나올 `toolId`)
+        Long nextCursor = -1L;
+        int lastIndex = startIndex + paginatedTools.size(); // 현재 페이지의 마지막 요소 인덱스
+
+        if (lastIndex < filteredTools.size()) {
+            nextCursor = filteredTools.get(lastIndex).getToolId(); // 다음 `toolId` 설정
+        }
+
+        //  응답 데이터 변환
         List<ToolResponse> toolResponses = paginatedTools.stream()
                 .map(tool -> {
-                    boolean isScraped = (
-                            toolScrapRepository.findByUserAndTool(user, tool)
-                                    .map(toolScrap -> !toolScrap.isDelYn())
-                                    .orElse(false));
-                    log.debug("스크랩 여부" + tool.getToolId() + isScraped);
+                    boolean isScraped = user != null && toolScrapRepository.findByUserAndTool(user, tool)
+                            .map(toolScrap -> !toolScrap.isDelYn())
+                            .orElse(false);
                     return ToolResponse.of(tool, convertToKeywordRes(tool), isScraped);
                 })
                 .toList();
 
-        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
+        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(filteredTools.size(), nextCursor);
         return ToolListRes.of(toolResponses, scrollPaginationDto);
     }
 
@@ -287,16 +320,17 @@ public class ToolService {
     }
 
     private BooleanExpression cursorCondition(Long lastToolId, Long lastSortValue, String criteria) {
-        if (lastSortValue == null || lastToolId == null) return null;  // 첫 페이지일 경우 null 반환
+        if (lastSortValue == null || lastToolId == null) return null;
 
         if ("popular".equals(criteria)) {
-            return qTool.popular.lt(lastSortValue.intValue())
-                    .or(qTool.popular.eq(lastSortValue.intValue()).and(qTool.toolId.lt(lastToolId)));
+            return qTool.popular.goe(lastSortValue.intValue())  //  인기 점수가 높은 것부터 조회
+                    .and(qTool.toolId.gt(lastToolId));          // 같은 popular 점수 내에서 toolId가 큰 것부터 조회
         } else {
-            return qTool.createdAt.lt(new Timestamp(lastSortValue))
-                    .or(qTool.createdAt.eq(new Timestamp(lastSortValue)).and(qTool.toolId.lt(lastToolId)));
+            return qTool.createdAt.loe(new Timestamp(lastSortValue))  //  최신순이면 createdAt을 기준으로 정렬
+                    .and(qTool.toolId.lt(lastToolId));          //  같은 createdAt이면 toolId가 작은 것부터 조회
         }
     }
+
 
 
     private OrderSpecifier<?>[] getSortOrder(String criteria) {
@@ -317,23 +351,21 @@ public class ToolService {
         if (lastToolId == null) {
             return "popular".equals(criteria) ? Long.MAX_VALUE : System.currentTimeMillis();
         }
-        Tool tool = getToolById(lastToolId+1);
+
+        Tool tool = getToolById(lastToolId);
+
+
         return "popular".equals(criteria) ? tool.getPopular() : tool.getCreatedAt().getTime();
     }
 
     private Long getNextCursor(List<Tool> tools, int size) {
         if (tools.size() > size) {
             return tools.get(size).getToolId();
-        } else if (!tools.isEmpty()) {
-            Long lastToolId = tools.get(tools.size() - 1).getToolId();
-            if (lastToolId.equals(tools.get(tools.size() - 1).getToolId())) {
-                return -1L;
-            }
-
-            return lastToolId;
         }
         return -1L;
     }
+
+
 
     private long getTotalElements(String category, Boolean isFree) {
         BooleanExpression categoryCondition = categoryEq(category);
