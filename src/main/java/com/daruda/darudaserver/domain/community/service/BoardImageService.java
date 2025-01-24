@@ -14,7 +14,7 @@ public class BoardImageService {
 
     private final BoardImageRepository boardImageRepository;
     private final ImageService imageService;
-    private final String IMAGE_URL = "https://daruda.s3.ap-northeast-2.amazonaws.com/";
+    private final String IMAGE_URL = "https://d10hjhy1a1c8eq.cloudfront.net/";
 
     public void saveBoardImages(Long boardId, List<Long> imageIds){
         imageIds.forEach(imageId ->{
