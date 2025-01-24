@@ -1,8 +1,6 @@
 package com.daruda.darudaserver.domain.community.repository;
 
-import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +19,7 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap,Long> {
     @Transactional
     void deleteAllByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.delYn = false AND bs.delYn = false")
+    @Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.delYn = false")
     Page<BoardScrap> findAllActiveByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.id = :boardId")
