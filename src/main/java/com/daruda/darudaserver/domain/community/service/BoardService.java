@@ -193,7 +193,7 @@ public class BoardService {
                         noTopic != null ? board.isFree.eq(noTopic) : null,
                         toolId != null ? board.tool.toolId.eq(toolId) : null
                 )
-                .fetchOne()).orElse(0L);
+                .fetchFirst()).orElse(0L);
 
         // Cursor 기반 페이징을 적용한 게시글 목록 가져오기
         List<Board> boards = jpaQueryFactory
