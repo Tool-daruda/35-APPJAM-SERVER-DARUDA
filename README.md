@@ -1,5 +1,3 @@
-# 35-APPJAM-SERVER-DARUDA
-
 <img alt="image" src="https://github.com/user-attachments/assets/e3d3d985-6ac6-40fe-a061-5cb8d86a189f">
 
 # <img src="https://github.com/user-attachments/assets/cadac378-353e-40a8-8645-2140114f6e0b" alt="Group 2085665014" width="27" /> 35-APPJAM-WEB-DARUDA
