@@ -214,6 +214,7 @@ public class UserService {
         userRepository.delete(userEntity);
         log.info("정상적으로 탈퇴되었습니다");
 
+        //토큰 삭제
         tokenService.deleteRefreshToken(userId);
         log.info("Refresh 토큰을 정상적으로 삭제하였습니다");
     }
