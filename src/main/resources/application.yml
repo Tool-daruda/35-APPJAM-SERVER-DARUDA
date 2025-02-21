@@ -52,7 +52,7 @@ logging:
 
 kakao:
   client_id: ${CLIENT_ID}
-  redirect_uri: http://localhost:5173/api/v1/users/kakao/login-url
+  redirect_uri: ${REDIRECT_URI}
 
 jwt:
   secret: ${JWT_SECRET}
