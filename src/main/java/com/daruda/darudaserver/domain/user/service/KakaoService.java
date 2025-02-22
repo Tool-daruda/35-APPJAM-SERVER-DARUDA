@@ -27,13 +27,13 @@ public class KakaoService {
     private String redirectUri;
 
     public String getAccessTokenFromKakao(String code){
-        log.info("redirect uri {}", redirectUri);
+        log.debug("redirect uri {}", redirectUri);
         log.info("인가코드 {}", code);
         try{
             KakaoTokenResponse kakaoTokenResponse = kakaoAPiFeignClient.getAccessToken(
                     "authorization_code",
                     clientId,
-                    redirectUri,
+                    "https://daruda.shop",
                     code,
                     "application/x-www-form-urlencoded;charset=utf-8"
             );
