@@ -31,7 +31,9 @@ public class SecurityConfig {
             "/api/v1/tools/**",
             "/api/v1/comments",
             "/api/v1/boards/board/**",
-            "/api/v1/users/kakao/login-url"};
+            "/api/v1/users/kakao/login-url",
+            "https://daruda.shop/api/v1/users/token/**"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
