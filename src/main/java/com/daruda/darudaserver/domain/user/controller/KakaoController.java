@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.user.controller;
 
+import com.daruda.darudaserver.domain.user.dto.request.AuthCodeRequest;
 import com.daruda.darudaserver.domain.user.dto.request.NicknameRequest;
 import com.daruda.darudaserver.domain.user.dto.request.SignUpRequest;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,10 +52,10 @@ public class KakaoController {
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(location, SUCCESS_REDIRECT));
     }
 
-    @PostMapping("/token")
-    public ResponseEntity<ApiResponse<LoginResponse>> postAuthenticationCode(@RequestHeader(value = "Authorization") String code){
-        log.debug("CODE = "+code);
-        UserInfo userInfo = kakaoService.getInfo(code);
+    @PostMapping(value = "/token", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponse<LoginResponse>> postAuthenticationCode(@RequestBody AuthCodeRequest authCodeRequest){
+        log.debug("CODE = {}", authCodeRequest.getCode());
+        UserInfo userInfo = kakaoService.getInfo(authCodeRequest.getCode());
         LoginResponse loginResponse = userService.oAuthLogin(userInfo);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(loginResponse,SuccessCode.SUCCESS_CREATE));
     }
