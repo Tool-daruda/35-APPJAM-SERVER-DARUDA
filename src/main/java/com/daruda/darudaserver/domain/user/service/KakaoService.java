@@ -33,7 +33,7 @@ public class KakaoService {
             KakaoTokenResponse kakaoTokenResponse = kakaoAPiFeignClient.getAccessToken(
                     "authorization_code",
                     clientId,
-                    redirectUri,
+                    "https://daruda.shop",
                     code,
                     "application/x-www-form-urlencoded;charset=utf-8"
             );
