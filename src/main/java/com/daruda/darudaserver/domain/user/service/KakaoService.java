@@ -27,6 +27,8 @@ public class KakaoService {
     private String redirectUri;
 
     public String getAccessTokenFromKakao(String code){
+        log.info("redirect uri {}", redirectUri);
+        log.info("인가코드 {}", code);
         try{
             KakaoTokenResponse kakaoTokenResponse = kakaoAPiFeignClient.getAccessToken(
                     "authorization_code",
