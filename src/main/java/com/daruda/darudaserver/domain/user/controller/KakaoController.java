@@ -53,9 +53,9 @@ public class KakaoController {
     }
 
     @PostMapping(value = "/token", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponse<LoginResponse>> postAuthenticationCode(@RequestBody AuthCodeRequest authCodeRequest){
-        log.debug("CODE = {}", authCodeRequest.getCode());
-        UserInfo userInfo = kakaoService.getInfo(authCodeRequest.getCode());
+    public ResponseEntity<ApiResponse<LoginResponse>> postAuthenticationCode(@RequestHeader("Authorization") String code){
+        log.debug("CODE = {}", code);
+        UserInfo userInfo = kakaoService.getInfo(code);
         LoginResponse loginResponse = userService.oAuthLogin(userInfo);
         return ResponseEntity.ok(ApiResponse.ofSuccessWithData(loginResponse,SuccessCode.SUCCESS_CREATE));
     }
