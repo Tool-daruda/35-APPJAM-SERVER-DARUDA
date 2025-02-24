@@ -51,12 +51,12 @@ logging:
   config: classpath:logback-spring.xml
 
 kakao:
-  client_id: ${CLIENT_ID}
-  redirect_uri: ${REDIRECT_URI}
+  client_id: 65b8edb9273b17a701f937868170f95e
+  redirect_uri: http://localhost:5173/api/v1/users/kakao/login-url
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-expire-time: ${ACCESS_TOKEN_EXPIRE_TIME}
-  refresh-token-expire-time: ${REFRESH_TOKEN_EXPIRE_TIME}
+  access-token-expire-time: 12000000
+  refresh-token-expire-time: 604800000
 
 
