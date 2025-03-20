@@ -14,7 +14,6 @@
 3️⃣ **함께 다루다** _ <br>📍*함께 성장하는 공간, 다루다 커뮤니티*<br>
 툴 추천, 사용법, 궁금증에 대해서 주변에 물어볼 곳이 없다면 다루다에서 소통하세요.<br>
 <br>
-
 4️⃣**아키텍쳐 구조도**
 <br>
 <img width="825" alt="Image" src="https://github.com/user-attachments/assets/e938d807-6350-4796-8e34-9f655220d51b" />
