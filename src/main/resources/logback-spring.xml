@@ -2,18 +2,17 @@
 <configuration> <!-- 5분 초 간격으로 파일 확인하여 반영-->
     <!--  scan="true" scanPeriod="300 seconds" -->
 
-    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
     <!-- 로그 파일 경로 및 이름 설정 -->
     <springProperty scope="context" name="LOG_PATH" source="logging.file.path"/>
     <property name="LOG_FILE_NAME" value="logging"/>
     <property name="ERR_LOG_FILE_NAME" value="err_logging"/>
-    <property name="LOG_PATTERN" value="%-5level %d{yy-MM-dd HH:mm:ss, Asia/Seoul} [%thread] [%logger{0}:%line] - %msg%n"/>
 
     <!-- Console 로그 설정 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss, Asia/Seoul} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-4relative] %green([%thread]) %highlight(%-5level) %boldWhite([%C.%M:%yellow(%L)]) - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -50,18 +49,65 @@
         </filter>
     </appender>
 
-    <!-- 기본 (루트) 로그 레벨 -->
-    <root level="debug">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="Error"/>
-    </root>
+    <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+        <maxRequestBodySize>always</maxRequestBodySize>
+        <sendDefaultPii>true</sendDefaultPii>
+        <tracesSampleRate>1.0</tracesSampleRate>
+        <minimumEventLevel>ERROR</minimumEventLevel>
+        <minimumBreadcrumbLevel>DEBUG</minimumBreadcrumbLevel>
+    </appender>
 
-    <!-- 특정 패키지 로깅 레벨 -->
-    <logger name="org.apache.ibatis" level="debug" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="Error"/>
-    </logger>
+    <!-- Sentry 및 WebHook 설정 -->
+    <springProperty name="SENTRY_REPOSITORY_URI" source="logging.sentry.repository-uri"/>
+    <springProperty name="ENVIRONMENT" source="logging.sentry.environment"/>
+    <springProperty name="DISCORD_WEBHOOK_URL" source="logging.sentry.discord-webhook-url"/>
+    <appender name="DISCORD" class="com.github.napstr.logback.DiscordAppender">
+        <webhookUri>${DISCORD_WEBHOOK_URL}</webhookUri>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>*🚨[${ENVIRONMENT}] %d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level %class - %msg
+                [Go-To-Sentry](${SENTRY_REPOSITORY_URI})*%n
+            </pattern>
+        </layout>
+    </appender>
+    <appender name="ASYNC_DISCORD" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="DISCORD"/>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <!-- local 로그 레벨 및 WebHook 설정 -->
+    <springProfile name="local">
+        <include resource="console-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="Error"/>
+<!--            <appender-ref ref="Sentry"/>-->
+<!--            <appender-ref ref="ASYNC_DISCORD"/>-->
+        </root>
+    </springProfile>
+
+    <!-- local 로그 레벨 및 WebHook 설정 -->
+    <springProfile name="dev">
+        <include resource="console-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="Error"/>
+            <appender-ref ref="Sentry"/>
+            <appender-ref ref="ASYNC_DISCORD"/>
+        </root>
+    </springProfile>
+
+    <!-- local 로그 레벨 및 WebHook 설정 -->
+    <springProfile name="prod">
+        <include resource="console-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="Sentry"/>
+            <appender-ref ref="ASYNC_DISCORD"/>
+        </root>
+    </springProfile>
 
 </configuration>
