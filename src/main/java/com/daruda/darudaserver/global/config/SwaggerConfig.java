@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.global.config;
 
+import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.models.Components;
@@ -7,10 +8,12 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Collections;
 import java.util.List;
 
 @OpenAPIDefinition(info = @Info(
@@ -41,5 +44,16 @@ public class SwaggerConfig {
 			.servers(List.of(server))
 			.addSecurityItem(securityRequirement)
 			.components(components);
+	}
+
+	@Bean
+	public OperationCustomizer customize() {
+		return (operation, handlerMethod) -> {
+			DisableSwaggerSecurity methodAnnotation = handlerMethod.getMethodAnnotation(DisableSwaggerSecurity.class);
+			if (methodAnnotation != null) {
+				operation.setSecurity(Collections.emptyList());
+			}
+			return operation;
+		};
 	}
 }
