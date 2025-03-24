@@ -79,12 +79,10 @@
     <!-- local 로그 레벨 및 WebHook 설정 -->
     <springProfile name="local">
         <include resource="console-appender.xml"/>
-        <root level="INFO">
+        <root level="DEBUG">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
             <appender-ref ref="Error"/>
-<!--            <appender-ref ref="Sentry"/>-->
-<!--            <appender-ref ref="ASYNC_DISCORD"/>-->
         </root>
     </springProfile>
 

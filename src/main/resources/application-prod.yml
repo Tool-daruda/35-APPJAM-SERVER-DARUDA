@@ -38,9 +38,6 @@ cloud:
 logging:
   file:
     path: ./daruda_log
-  level:
-    org.springframework.web: DEBUG
-    org.hibernate.type: DEBUG
   config: classpath:logback-spring.xml
   sentry:
     repository-uri: ${SENTRY_REPOSITORY_URI}
