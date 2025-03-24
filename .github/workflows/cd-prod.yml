@@ -1,0 +1,32 @@
+name: Daruda prod CD 파이프라인
+env:
+  SECRET_CODE : ${{ secrets.SECRET_CODE}}
+
+on:
+  workflow_run:
+    workflows: ["Daruda CI 파이프라인"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    environment: production
+    permissions:
+      contents: read
+
+    steps:
+      - name: Docker 이미지 Prod 서버 배포
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            LOG_DIR="/home/ubuntu/daruda_log"
+            if [ ! -d "$LOG_DIR" ]; then
+              mkdir -p "$LOG_DIR"
+              echo "로그 폴더 생성 완료: $LOG_DIR"
+            fi
+            
+            sudo ~/deploy.sh
