@@ -1,6 +1,3 @@
-server:
-port : 8080
-
 spring:
   servlet:
     multipart:
@@ -8,23 +5,19 @@ spring:
       max-request-size: 10MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url : ${SPRING_DATASOURCE_URL}
+    url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
-  config:
-    import: optional:file:.env[.properties]
-
-  springdoc:
-    api-docs:
-      path: /v3/api-docs
-    swagger-ui:
-      path: /swagger-ui
 
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: none
     properties:
-      hibernate.dialect: org.hibernate.dialect.MySQLDialect
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
 cloud:
   aws:
     s3:
@@ -34,8 +27,8 @@ cloud:
           max-request-size: 10MB
       bucket: daruda
     credentials:
-      access-key: ${S3ACCESSKEY}
-      secret-key: ${S3SECRETKEY}
+      access-key: ENC(legTRlHg2eQ8A19FX7paqiS3xzZt+UekSmmVVbCDA2w=)
+      secret-key: ENC(pB33J4FIwn6S6bSYlYeGusMeoNJVx0PgQdcppWrdWYU9adxYA+VOY7pkmc6oDeL3ACpQAZss2pw=)
     region:
       static: ap-northeast-2
       auto: false
@@ -49,14 +42,23 @@ logging:
     org.springframework.web: DEBUG
     org.hibernate.type: DEBUG
   config: classpath:logback-spring.xml
+  sentry:
+    repository-uri: ${SENTRY_REPOSITORY_URI}
+    environment: prod
+    discord-webhook-url: ${DISCORD_WEBHOOK_URL}
 
 kakao:
   client_id: 65b8edb9273b17a701f937868170f95e
-  redirect_uri: http://localhost:5173/api/v1/users/kakao/login-url
+  redirect_uri: https://daruda.site/api/v1/users/kakao/login-url
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ENC(KF614u6s2bd7ypduz4hAbdyn7toyBp9jKoD2TYu8Ib8lyhL7y6Z4ki8oWs0L0Z5VmNWrX1nTDw231//ko+wDdvQC9mk5Uf4f4McDZWhUlrBhTci6z/5scJ6Q4TYCMIONpPTgVX1HYnc=)
   access-token-expire-time: 12000000
   refresh-token-expire-time: 604800000
 
+sentry:
+  dsn: ENC(L2Qt718YntVoAPXadfDDd7k5itveS5NfMBwjAE/BL1Blzz6LS+FzNQ1GHXnpXHWRCDk0o0ITmNL9M9ZeVDohhACWv24G7EcbSD10tyz5fC+cPHLJkxT1YG6b4PrPblsXvXuDpH5sJy8=)
+  environment: prod
+  servername: Daruda-prod
 
+server-uri: https://www.daruda.shop

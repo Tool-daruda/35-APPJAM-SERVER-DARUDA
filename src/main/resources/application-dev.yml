@@ -1,0 +1,64 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB # 파일의 용량 제한
+      max-request-size: 10MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+cloud:
+  aws:
+    s3:
+      servlet:
+        multipart:
+          max-file-size: 10MB  # 업로드 가능한 파일 크기
+          max-request-size: 10MB
+      bucket: daruda
+    credentials:
+      access-key: ENC(snr4At20t/yQs2mqS0QtmVJn5yORis6pzdm9tPzZbx4=)
+      secret-key: ENC(Y70HFDrbcoTY8kTt0YZ8de0py4Dj5Cu1uCZ7h5w+NeDnymjOOpUuxGGAd+qdaEJc93jbeE37DiE=)
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
+
+logging:
+  file:
+    path: ./daruda_log
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate.type: DEBUG
+  config: classpath:logback-spring.xml
+  sentry:
+    repository-uri: ${SENTRY_REPOSITORY_URI}
+    environment: dev
+    discord-webhook-url: ${DISCORD_WEBHOOK_URL}
+
+kakao:
+  client_id: 65b8edb9273b17a701f937868170f95e
+  redirect_uri: http://localhost:5173/api/v1/users/kakao/login-url
+
+jwt:
+  secret: ENC(Mzng6SahiZBXTfKCB6pdKIcdPTDMcAhJyyBjbwuSkNbbd9ysylQonYe7u4f3FYfQXYUXZJiC+k/fmUMYNzykCrFke+EloN7/1kt5PJiNPz8IFNDlm9j2BBr6q9wRU5pvxHj/oNOIVZg=)
+  access-token-expire-time: 12000000
+  refresh-token-expire-time: 604800000
+
+sentry:
+  dsn: ENC(sG+5gVfk4gTxxw0NRQrPhl0ak5EFfvpBGTZvgnTPjBSvotGwmgfSBC1/XkawwcgbnQEGKXwCFStH+v2FyVGO+5JMNnjRUxjCAFLlL7FcYxQBExiYBIU+gBMgnKBn7Ww5jVZ4883qUy4=)
+  environment: dev
+  servername: Daruda-dev
+
+server-uri: http://localhost:8080
