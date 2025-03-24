@@ -1,0 +1,42 @@
+name: Daruda CI 파이프라인
+env:
+  SECRET_CODE : ${{ secrets.SECRET_CODE}}
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  CI:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: branch checkout
+        uses: actions/checkout@v3
+
+      - name: JDK 17 설정
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Gradle Wrapper 권한 부여
+        run: chmod +x gradlew
+
+      - name: Gradle 빌드
+        run: ./gradlew clean build
+
+      - name: Docker 로그인
+        uses: docker/login-action@v2.2.0
+        with:
+          username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+          password: ${{ secrets.DOCKER_LOGIN_ACCESSTOKEN }}
+
+      - name: Docker 이미지 Push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: daruda241221/daruda
