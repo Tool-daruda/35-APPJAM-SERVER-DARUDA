@@ -58,4 +58,4 @@ sentry:
   environment: prod
   servername: Daruda-prod
 
-server-uri: https://www.daruda.shop
+server-uri: https://daruda.shop
