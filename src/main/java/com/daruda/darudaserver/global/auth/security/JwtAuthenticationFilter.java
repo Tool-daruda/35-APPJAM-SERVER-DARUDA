@@ -83,7 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
         }catch(Exception e){
-            log.error("AccessToken 추출 실패: {}", e.getMessage());
+            log.warn("AccessToken 추출 실패: {}", e.getMessage());
             return null;
         }
     }
