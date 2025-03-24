@@ -31,7 +31,10 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private static final List<String> EXCLUDE_URL = Arrays.asList("/api/v1/users/signin",
+    private static final List<String> EXCLUDE_URL = Arrays.asList(
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/api/v1/users/signin",
             "/api/v1/users/token",
             "/api/v1/users/signup",
             "/api/v1/users/nickname",

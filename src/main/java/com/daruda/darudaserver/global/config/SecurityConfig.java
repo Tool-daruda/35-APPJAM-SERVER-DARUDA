@@ -24,6 +24,8 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
 
     private static final String[] WHITE_LIST = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
             "/api/v1/users/signin",
             "/api/v1/users/token",
             "/api/v1/users/signup",
@@ -53,7 +55,7 @@ public class SecurityConfig {
                                 .anyRequest()
                                 .authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new    ExceptionHandlerFilter(), JwtAuthenticationFilter.class);
+                .addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class);
 
          http.cors(cors->cors.configurationSource(CorsConfig.configurationSource()));
 
