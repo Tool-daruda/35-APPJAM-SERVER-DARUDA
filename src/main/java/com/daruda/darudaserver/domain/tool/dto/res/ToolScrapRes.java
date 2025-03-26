@@ -4,13 +4,13 @@ import lombok.Builder;
 
 @Builder
 public record ToolScrapRes(
-         Long toolId,
-         Boolean scarp
+	Long toolId,
+	Boolean scarp
 ) {
-    public static ToolScrapRes of(final Long toolId, final Boolean scarp){
-        return ToolScrapRes.builder()
-                .toolId(toolId)
-                .scarp(scarp)
-                .build();
-    }
+	public static ToolScrapRes of(final Long toolId, final Boolean scarp) {
+		return ToolScrapRes.builder()
+			.toolId(toolId)
+			.scarp(scarp)
+			.build();
+	}
 }

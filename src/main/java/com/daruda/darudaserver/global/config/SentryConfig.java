@@ -1,9 +1,10 @@
 package com.daruda.darudaserver.global.config;
 
-import io.sentry.Sentry;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+
+import io.sentry.Sentry;
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class SentryConfig {
