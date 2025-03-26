@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class AuthCodeRequest {
-    @NotNull(message = "인가코드가 비었습니다")
-    String code;
+	@NotNull(message = "인가코드가 비었습니다")
+	String code;
 }

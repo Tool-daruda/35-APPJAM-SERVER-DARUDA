@@ -1,6 +1,6 @@
 name: Daruda CI 파이프라인
 env:
-  SECRET_CODE : ${{ secrets.SECRET_CODE}}
+  SECRET_CODE: ${{ secrets.SECRET_CODE}}
 
 on:
   push:
