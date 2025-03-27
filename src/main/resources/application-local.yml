@@ -1,64 +1,64 @@
 spring:
-    servlet:
-        multipart:
-            max-file-size: 10MB # 파일의 용량 제한
-            max-request-size: 10MB
-    datasource:
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        url: ${SPRING_DATASOURCE_URL}
-        username: ${SPRING_DATASOURCE_USERNAME}
-        password: ${SPRING_DATASOURCE_PASSWORD}
+  servlet:
+    multipart:
+      max-file-size: 10MB # 파일의 용량 제한
+      max-request-size: 10MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
-    jpa:
-        show-sql: true
-        hibernate:
-            ddl-auto: none
-        properties:
-            hibernate:
-                format_sql: true
-                use_sql_comments: true
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
 
 cloud:
-    aws:
-        s3:
-            servlet:
-                multipart:
-                    max-file-size: 10MB  # 업로드 가능한 파일 크기
-                    max-request-size: 10MB
-            bucket: daruda
-        credentials:
-            access-key: ENC(zUS78/F8P/qh/KpSGK/GV3vjanLZSodMm0O1b0JKuno=)
-            secret-key: ENC(9o72B0yxr1Mx4LpLpqoWdgIFhCt9/zhMy0FzGKmEaxxF7cuzI/ZvxmH685+s0xd+8YbC9HRRhjU=)
-        region:
-            static: ap-northeast-2
-            auto: false
-        stack:
-            auto: false
+  aws:
+    s3:
+      servlet:
+        multipart:
+          max-file-size: 10MB  # 업로드 가능한 파일 크기
+          max-request-size: 10MB
+      bucket: daruda
+    credentials:
+      access-key: ENC(zUS78/F8P/qh/KpSGK/GV3vjanLZSodMm0O1b0JKuno=)
+      secret-key: ENC(9o72B0yxr1Mx4LpLpqoWdgIFhCt9/zhMy0FzGKmEaxxF7cuzI/ZvxmH685+s0xd+8YbC9HRRhjU=)
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
 
 logging:
-    file:
-        path: ./daruda_log
-    level:
-        org.springframework.web: DEBUG
-        org.hibernate.type: DEBUG
-    config: classpath:logback-spring.xml
-    sentry:
-        repository-uri: ${SENTRY_REPOSITORY_URI}
-        environment: local
-        discord-webhook-url: ${DISCORD_WEBHOOK_URL}
+  file:
+    path: ./daruda_log
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate.type: DEBUG
+  config: classpath:logback-spring.xml
+  sentry:
+    repository-uri: ${SENTRY_REPOSITORY_URI}
+    environment: local
+    discord-webhook-url: ${DISCORD_WEBHOOK_URL}
 
 kakao:
-    client_id: 65b8edb9273b17a701f937868170f95e
-    redirect_uri: http://localhost:8080/api/v1/users/token
+  client_id: 65b8edb9273b17a701f937868170f95e
+  redirect_uri: http://localhost:8080/api/v1/users/token
 
 jwt:
-    secret: ENC(bfIop6GqxWVWfaxvq9gi3qzkoCp3ZK2dVvqhXpc5oyowPgPC7mBsk2NW5CSwHr0AH+znH7DiuCmNEVyamwx0HzzpVNOoGr2vhmcGMdXMAhOyiG9mHdFvdIAxN8/mYjdXNVvD6LwZsbY=)
-    access-token-expire-time: 12000000
-    refresh-token-expire-time: 604800000
+  secret: ENC(bfIop6GqxWVWfaxvq9gi3qzkoCp3ZK2dVvqhXpc5oyowPgPC7mBsk2NW5CSwHr0AH+znH7DiuCmNEVyamwx0HzzpVNOoGr2vhmcGMdXMAhOyiG9mHdFvdIAxN8/mYjdXNVvD6LwZsbY=)
+  access-token-expire-time: 12000000
+  refresh-token-expire-time: 604800000
 
 sentry:
-    dsn: ENC(SnVV8aytTF5eXk0jhluurJE2MmCiQxoln2R2Xs/if5L41n3m450ZcU/jAD8Kj4BIq0Z7lNABZyTmJnsmhcrjXW8tJFW9NrCQBRqT3n2IUcLsPX/LkjNoYuV9QMXqoWWOmw45DRIqVhA=)
-    environment: local
-    servername: Daruda-local
+  dsn: ENC(SnVV8aytTF5eXk0jhluurJE2MmCiQxoln2R2Xs/if5L41n3m450ZcU/jAD8Kj4BIq0Z7lNABZyTmJnsmhcrjXW8tJFW9NrCQBRqT3n2IUcLsPX/LkjNoYuV9QMXqoWWOmw45DRIqVhA=)
+  environment: local
+  servername: Daruda-local
 
 server-uri: http://localhost:8080
