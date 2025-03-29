@@ -48,12 +48,9 @@ public class KakaoController {
 
 	@GetMapping("/kakao/login-url")
 	public ResponseEntity<ApiResponse<String>> requestLogin(HttpServletResponse response) throws IOException {
-		// String location =
-		// 	"https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri="
-		// 		+ redirectUri;
-		
-		String location = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId
-			+ "&redirect_uri=http://localhost:5173/oauth/kakao";
+		String location =
+			"https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri="
+				+ redirectUri;
 
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(location, SUCCESS_REDIRECT));
 	}
