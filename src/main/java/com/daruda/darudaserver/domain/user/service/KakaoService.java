@@ -50,7 +50,7 @@ public class KakaoService {
 		String accessToken = getAccessTokenFromKakao(code);
 		try {
 			KakaoUserDto kakaoUserDto = kakaoFeignClient.getUserInformation(
-				"Bearer " + accessToken,
+				accessToken,
 				"application/x-www-form-urlencoded;charset=utf-8");
 			log.debug("카카오로부터 사용자 정보를 성공적으로 불러왔습니다. Id:, {}", kakaoUserDto.id());
 			return new UserInfo(
