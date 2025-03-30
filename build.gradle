@@ -61,7 +61,7 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.2.0'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.2.1'
 
     //AOP 의존성 추가
     implementation 'org.springframework.boot:spring-boot-starter-aop'
@@ -71,7 +71,6 @@ dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-
 
     //aws 추가
     implementation 'software.amazon.awssdk:s3:2.20.45'
@@ -98,5 +97,4 @@ tasks.named('test') {
 
 clean {
     delete file("/src/main/generated")
-
 }
