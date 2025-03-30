@@ -16,9 +16,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BoardImageService {
 
+	private static final String IMAGE_URL = "https://d10hjhy1a1c8eq.cloudfront.net/";
+
 	private final BoardImageRepository boardImageRepository;
 	private final ImageService imageService;
-	private final String IMAGE_URL = "https://d10hjhy1a1c8eq.cloudfront.net/";
 
 	public void saveBoardImages(Long boardId, List<Long> imageIds) {
 		imageIds.forEach(imageId -> {

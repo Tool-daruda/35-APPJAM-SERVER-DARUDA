@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.global.image.imageController;
+package com.daruda.darudaserver.global.image.controller;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/images")
 @RequiredArgsConstructor
-public class imageController {
+public class ImageController {
 	private final ImageService imageService;
 
 	@PostMapping

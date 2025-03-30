@@ -12,7 +12,7 @@ import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.image.entity.Image;
 import com.daruda.darudaserver.global.image.repository.ImageRepository;
-import com.daruda.darudaserver.global.infra.S3.S3Service;
+import com.daruda.darudaserver.global.s3.S3Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

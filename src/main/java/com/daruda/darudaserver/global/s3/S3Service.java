@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.global.infra.S3;
+package com.daruda.darudaserver.global.s3;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -23,19 +23,19 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 public class S3Service {
 
 	private final String bucketName;
-	private final AWSConfig awsConfig;
+	private final S3Config s3Config;
 	private static final List<String> IMAGE_EXTENSIONS = Arrays.asList("image/jpeg", "image/png", "image/jpg",
 		"image/webp", "image/heic", "image/heif");
 	private static final Long MAX_FILE_SIZE = 7 * 1024 * 1024L;
 
-	public S3Service(@Value("${cloud.aws.s3.bucket}") String bucketName, AWSConfig awsConfig) {
+	public S3Service(@Value("${cloud.aws.s3.bucket}") String bucketName, S3Config s3Config) {
 		this.bucketName = bucketName;
-		this.awsConfig = awsConfig;
+		this.s3Config = s3Config;
 	}
 
 	public String uploadImage(MultipartFile image) throws IOException {
 		final String imageName = generateImageFileName(image);
-		final S3Client s3Client = awsConfig.getS3Client();
+		final S3Client s3Client = s3Config.getS3Client();
 		validateExtension(image);
 		validateFileSize(image);
 		PutObjectRequest request = PutObjectRequest.builder()
@@ -54,7 +54,7 @@ public class S3Service {
 	}
 
 	public void deleteImage(String s3Key) {
-		final S3Client s3Client = awsConfig.getS3Client();
+		final S3Client s3Client = s3Config.getS3Client();
 		try {
 			s3Client.deleteObject(DeleteObjectRequest.builder()
 				.bucket(bucketName)

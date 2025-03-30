@@ -51,6 +51,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BoardService {
 
+	private static final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png";
+	private static final String IMAGE_URL = "https://daruda.s3.ap-northeast-2.amazonaws.com/";
+	private static final String FREE = "자유";
+
 	private final BoardRepository boardRepository;
 	private final BoardImageService boardImageService;
 	private final BoardImageRepository boardImageRepository;
@@ -60,11 +64,6 @@ public class BoardService {
 	private final ToolRepository toolRepository;
 	private final CommentRepository commentRepository;
 	private final ValidateBoard validateBoard;
-
-	private final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png";
-	private final String IMAGE_URL = "https://daruda.s3.ap-northeast-2.amazonaws.com/";
-	private final String FREE = "자유";
-
 	private final JPAQueryFactory jpaQueryFactory;
 
 	// 게시판 생성
@@ -72,8 +71,8 @@ public class BoardService {
 		final List<MultipartFile> images) {
 		UserEntity user = getUserById(userId);
 		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
-		Board board = boardCreateAndUpdateReq.isFree() ?
-			createFreeBoard(user, boardCreateAndUpdateReq) :
+		Board board = boardCreateAndUpdateReq.isFree()
+			? createFreeBoard(user, boardCreateAndUpdateReq) :
 			createToolBoard(tool, boardCreateAndUpdateReq, user);
 
 		// 이미지 처리

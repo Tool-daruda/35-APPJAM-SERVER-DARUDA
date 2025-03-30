@@ -16,10 +16,10 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
 
-	@Query("SELECT c FROM CommentEntity c " +
-		"WHERE c.board.id = :boardId " +
-		"AND c.id < :cursor " +
-		"ORDER BY c.createdAt DESC")
+	@Query("SELECT c FROM CommentEntity c "
+		+ "WHERE c.board.id = :boardId "
+		+ "AND c.id < :cursor "
+		+ "ORDER BY c.createdAt DESC")
 	List<CommentEntity> findAllByBoardId(
 		@Param("boardId") Long boardId,
 		@Param("cursor") Long cursor,

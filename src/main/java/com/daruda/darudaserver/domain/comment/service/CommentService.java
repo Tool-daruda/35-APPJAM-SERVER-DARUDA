@@ -21,7 +21,7 @@ import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
-import com.daruda.darudaserver.global.infra.S3.S3Service;
+import com.daruda.darudaserver.global.s3.S3Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
