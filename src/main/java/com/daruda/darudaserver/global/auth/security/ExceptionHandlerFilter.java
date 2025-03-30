@@ -33,16 +33,16 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 		}
 	}
 
-	public void handleUnauthorizedException(HttpServletResponse response, Exception e) throws IOException {
-		UnauthorizedException ue = (UnauthorizedException)e;
+	public void handleUnauthorizedException(HttpServletResponse response, Exception ex) throws IOException {
+		UnauthorizedException ue = (UnauthorizedException)ex;
 		ErrorCode errorCode = ue.getErrorCode();
 		HttpStatus httpStatus = errorCode.getHttpStatus();
 		setResponse(response, httpStatus, errorCode);
 		log.debug("handleUnauthorizedException" + ue.getMessage());
 	}
 
-	private void handleException(HttpServletResponse response, Exception e) throws IOException {
-		log.error(">>> Exception Handler Filter : ", e);
+	private void handleException(HttpServletResponse response, Exception ex) throws IOException {
+		log.error(">>> Exception Handler Filter : ", ex);
 		setResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR);
 	}
 

@@ -344,17 +344,19 @@ public class ToolService {
 
 	// 무료 여부 필터링
 	private BooleanExpression isFreeEq(Boolean isFree) {
-		if (isFree == null)
+		if (isFree == null) {
 			return null; // 필터링 없음
-		if (!isFree)
+		}
+		if (!isFree) {
 			return null; // false이면 모든 데이터
+		}
 		return qTool.license.eq(License.FREE); // true이면 무료 데이터만
 	}
 
 	private BooleanExpression cursorCondition(Long lastToolId, Long lastSortValue, String criteria) {
-		if (lastSortValue == null || lastToolId == null)
+		if (lastSortValue == null || lastToolId == null) {
 			return null;
-
+		}
 		if ("popular".equals(criteria)) {
 			return qTool.popular.goe(lastSortValue.intValue())  //  인기 점수가 높은 것부터 조회
 				.and(qTool.toolId.gt(lastToolId));          // 같은 popular 점수 내에서 toolId가 큰 것부터 조회

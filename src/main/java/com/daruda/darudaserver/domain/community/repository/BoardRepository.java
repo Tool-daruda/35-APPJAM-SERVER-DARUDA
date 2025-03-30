@@ -19,12 +19,12 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
-	@Query("SELECT b FROM Board b " +
-		"WHERE (:tool IS NULL OR b.tool = :tool) " +
-		"AND (:isFree IS NULL OR b.isFree = :isFree) " +
-		"AND b.id < :cursor " +
-		"AND b.delYn = false " +
-		"ORDER BY b.createdAt DESC")
+	@Query("SELECT b FROM Board b "
+		+ "WHERE (:tool IS NULL OR b.tool = :tool) "
+		+ "AND (:isFree IS NULL OR b.isFree = :isFree) "
+		+ "AND b.id < :cursor "
+		+ "AND b.delYn = false "
+		+ "ORDER BY b.createdAt DESC")
 	List<Board> findBoards(
 		@Param("tool") Tool tool,
 		@Param("isFree") Boolean isFree,
@@ -40,8 +40,4 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 	Page<Board> findAllByUserIdAndDelYnFalse(Long userId, Pageable pageable);
 
 	Optional<Board> findByIdAndDelYn(Long boardId, boolean delYn);
-
-	@Query("SELECT COUNT(b) FROM Board b WHERE b.id >= :lastBoardId")
-	long countBoardsAfterCursor(@Param("lastBoardId") Long lastBoardId);
-
 }

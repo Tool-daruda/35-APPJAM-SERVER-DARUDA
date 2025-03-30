@@ -28,7 +28,7 @@ class ToolServiceTest {
 
 	@DisplayName("유저 조회 성공")
 	@Test
-	void getUserById_유저조회성공() {
+	void getUserById_Success() {
 		// given
 		Long userId = 1L;
 		UserEntity mockUser = UserEntity.builder()
@@ -49,7 +49,7 @@ class ToolServiceTest {
 	}
 
 	@Test
-	void getUserById_유저조회실패() {
+	void getUserById_Fail() {
 		// given
 		Long userId = 1L;
 

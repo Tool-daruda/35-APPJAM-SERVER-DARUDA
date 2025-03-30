@@ -84,8 +84,8 @@ public class ToolController {
 		@RequestParam(value = "lastToolId", required = false) Long lastToolId,
 		@RequestParam(value = "isFree") Boolean isFree
 	) {
-		ToolListRes toolListRes = toolService.
-			getToolList(userIdOrNull, criteria, category, size, lastToolId, isFree);
+		ToolListRes toolListRes = toolService
+			.getToolList(userIdOrNull, criteria, category, size, lastToolId, isFree);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolListRes, SuccessCode.SUCCESS_FETCH));
 	}
 

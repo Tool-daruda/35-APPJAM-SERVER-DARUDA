@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.global.infra.S3;
+package com.daruda.darudaserver.global.s3;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +9,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
-public class AWSConfig {
+public class S3Config {
 
 	private static final String AWS_ACCESS_KEY_ID = "aws.accessKeyId";
 	private static final String AWS_SECRET_ACCESS_KEY = "aws.secretAccessKey";
@@ -17,7 +17,7 @@ public class AWSConfig {
 	private final String secretKey;
 	private final String regionString;
 
-	public AWSConfig(@Value("${cloud.aws.credentials.access-key}") final String accessKey,
+	public S3Config(@Value("${cloud.aws.credentials.access-key}") final String accessKey,
 		@Value("${cloud.aws.credentials.secret-key}") final String secretKey,
 		@Value("${cloud.aws.region.static}") final String regionString) {
 		this.accessKey = accessKey;

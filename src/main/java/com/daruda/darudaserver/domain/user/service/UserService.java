@@ -52,7 +52,7 @@ public class UserService {
 	private final BoardRepository boardRepository;
 	private final CommentRepository commentRepository;
 
-	public LoginResponse oAuthLogin(final UserInfo userInfo) {
+	public LoginResponse oauthlogin(final UserInfo userInfo) {
 		String email = userInfo.email();
 		Optional<UserEntity> userEntity = userRepository.findByEmail(email);
 		//등록된 회원이 아닌 경우
@@ -149,8 +149,7 @@ public class UserService {
 			.toList();
 
 		List<ToolDtoGetRes> toolDtoGetResList = tools.stream()
-			.map(tool ->
-			{
+			.map(tool -> {
 				tool.getToolMainName();
 				tool.getToolLogo();
 				toolService.convertToKeywordRes(tool);
@@ -164,10 +163,10 @@ public class UserService {
 	}
 
 	public Boolean getToolScrap(final UserEntity user, final Tool tool) {
-		return (user != null &&
-			toolScrapRepository.findByUserAndTool(user, tool)
-				.map(toolScrap -> !toolScrap.isDelYn())
-				.orElse(false));
+		return (user != null
+			&& toolScrapRepository.findByUserAndTool(user, tool)
+			.map(toolScrap -> !toolScrap.isDelYn())
+			.orElse(false));
 	}
 
 	public UpdateMyResponse updateMy(Long userId, String nickname, String positions) {
