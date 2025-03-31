@@ -60,7 +60,7 @@ public class KakaoController {
 		@RequestHeader("Authorization") String code) {
 		log.debug("CODE = {}", code);
 		UserInfo userInfo = kakaoService.getInfo(code);
-		LoginResponse loginResponse = userService.oAuthLogin(userInfo);
+		LoginResponse loginResponse = userService.oauthlogin(userInfo);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(loginResponse, SuccessCode.SUCCESS_CREATE));
 	}
 

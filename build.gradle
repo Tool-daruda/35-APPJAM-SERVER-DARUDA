@@ -1,19 +1,26 @@
 plugins {
     id 'java'
-//    id 'checkstyle'
+    id 'checkstyle'
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.ec4j.editorconfig' version '0.1.0'
 }
 
-//checkstyle {
-//	maxWarnings = 0
-//	configFile = file("${rootDir}/config/naver-checkstyle-rules.xml")
-//	configProperties = ["suppressionFile": "${rootDir}/config/naver-checkstyle-suppressions.xml"]
-//	toolVersion = "8.42"
-//}
+editorconfig {
+    excludes = ['build']
+}
 
-//compileJava.options.encoding = 'UTF-8'
-//compileTestJava.options.encoding = 'UTF-8'
+check.dependsOn editorconfigCheck
+
+checkstyle {
+    maxWarnings = 0
+    configFile = file("${rootDir}/config/naver-checkstyle-rules.xml")
+    configProperties = ["suppressionFile": "${rootDir}/config/naver-checkstyle-suppressions.xml"]
+    toolVersion = "8.42"
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
 
 group = 'com.sopt'
 version = '0.0.1-SNAPSHOT'

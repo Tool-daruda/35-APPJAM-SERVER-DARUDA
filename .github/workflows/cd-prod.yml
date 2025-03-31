@@ -1,10 +1,10 @@
 name: Daruda prod CD 파이프라인
 env:
-  SECRET_CODE : ${{ secrets.SECRET_CODE}}
+  SECRET_CODE: ${{ secrets.SECRET_CODE}}
 
 on:
   workflow_run:
-    workflows: ["Daruda CI 파이프라인"]
+    workflows: [ "Daruda CI 파이프라인" ]
     types:
       - completed
 
