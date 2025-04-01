@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.daruda.darudaserver.domain.user.dto.request.ReissueTokenRequest;
 import com.daruda.darudaserver.domain.user.dto.request.SignUpRequest;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
@@ -82,9 +83,8 @@ public class KakaoController {
 	}
 
 	@PostMapping("/reissue")
-	public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(
-		@RequestParam("refreshToken") String refreshToken) {
-		JwtTokenResponse jwtTokenResponse = userService.reissueToken(refreshToken);
+	public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(@RequestBody ReissueTokenRequest request) {
+		JwtTokenResponse jwtTokenResponse = userService.reissueToken(request.refreshToken());
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse, SuccessCode.SUCCESS_REISSUE));
 	}
 
