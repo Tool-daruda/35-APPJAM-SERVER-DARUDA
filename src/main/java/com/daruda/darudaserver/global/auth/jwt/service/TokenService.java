@@ -23,6 +23,8 @@ public class TokenService {
 
 	@Transactional
 	public void saveRefreshtoken(final Long userId, final String refreshToken) {
+		tokenRepository.findByUserId(userId).ifPresent(tokenRepository::delete);
+
 		tokenRepository.save(Token.builder()
 			.userId(userId)
 			.refreshToken(refreshToken)
