@@ -69,7 +69,7 @@ public class UserService {
 			String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
 			String refreshToken = tokenService.updateRefreshTokenByUserId(userId);
 			log.info("토큰을 정상적으로 생성하였습니다");
-			tokenService.saveRefreshtoken(userId, refreshToken);
+			tokenService.saveRefreshToken(userId, refreshToken);
 			JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
@@ -95,7 +95,7 @@ public class UserService {
 		String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
 		String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
 		log.info("토큰을 정상적으로 생성하였습니다");
-		tokenService.saveRefreshtoken(userId, refreshToken);
+		tokenService.saveRefreshToken(userId, refreshToken);
 
 		JwtTokenResponse jwtTokenResponse = JwtTokenResponse.of(accessToken, refreshToken);
 
@@ -127,7 +127,7 @@ public class UserService {
 
 		String newRefreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
 		log.debug("RefreshToken을 정상적으로 생성하였습니다, {}", newRefreshToken);
-		tokenService.saveRefreshtoken(userId, newRefreshToken);
+		tokenService.saveRefreshToken(userId, newRefreshToken);
 
 		return JwtTokenResponse.builder()
 			.accessToken(newAccessToken)

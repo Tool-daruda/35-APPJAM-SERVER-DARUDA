@@ -22,7 +22,7 @@ public class TokenService {
 	private final JwtTokenProvider jwtTokenProvider;
 
 	@Transactional
-	public void saveRefreshtoken(final Long userId, final String refreshToken) {
+	public void saveRefreshToken(final Long userId, final String refreshToken) {
 		tokenRepository.findByUserId(userId).ifPresent(tokenRepository::delete);
 
 		tokenRepository.save(Token.builder()
