@@ -1,14 +1,12 @@
 package com.daruda.darudaserver.domain.user.controller;
 
-import static com.daruda.darudaserver.global.error.code.SuccessCode.*;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,20 +19,23 @@ import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
 import com.daruda.darudaserver.domain.user.service.KakaoService;
 import com.daruda.darudaserver.domain.user.service.UserService;
-import com.daruda.darudaserver.global.auth.UserId;
+import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RequestMapping("/api/v1/users")
 @RestController
+@RequestMapping("/api/v1/auth")
+@Tag(name = "auth 컨트롤러", description = "로그인과 관련된 API를 처리합니다.")
 @RequiredArgsConstructor
-public class KakaoController {
+public class AuthController {
 	private final KakaoService kakaoService;
 	private final UserService userService;
 
@@ -44,25 +45,33 @@ public class KakaoController {
 	@Value("${kakao.redirect_uri}")
 	private String redirectUri;
 
+	@DisableSwaggerSecurity
 	@GetMapping("/kakao/login-url")
+	@Operation(summary = "카카오 로그인 URL 반환", description = "카카오 로그인 URL을 반환합니다.")
 	public ResponseEntity<ApiResponse<String>> requestLogin() {
 		String location =
 			"https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri="
 				+ redirectUri;
 
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(location, SUCCESS_REDIRECT));
+		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(location, SuccessCode.SUCCESS_REDIRECT));
 	}
 
-	@PostMapping(value = "/token")
+	@DisableSwaggerSecurity
+	@PostMapping(value = "/login")
+	@Operation(summary = "카카오 OAuth 로그인",
+		description = "카카오에서 발급한 Authorization Code를 통해, 로그인을 진행합니다.")
 	public ResponseEntity<ApiResponse<LoginResponse>> postAuthenticationCode(
-		@RequestHeader("Authorization") String code) {
+		@Parameter(description = "Authorization Code", example = "1234")
+		@RequestParam("code") String code) {
 		log.debug("CODE = {}", code);
 		UserInfo userInfo = kakaoService.getInfo(code);
 		LoginResponse loginResponse = userService.oauthlogin(userInfo);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(loginResponse, SuccessCode.SUCCESS_CREATE));
 	}
 
-	@PostMapping("/signup")
+	@DisableSwaggerSecurity
+	@PostMapping("/sign-up")
+	@Operation(summary = "회원 가입", description = "회원 가입을 진행합니다.")
 	public ResponseEntity<ApiResponse<SignUpSuccessResponse>> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
 		SignUpSuccessResponse signUpSuccessResponse = userService.createUser(signUpRequest.email(),
 			signUpRequest.nickname(), signUpRequest.positions());
@@ -70,26 +79,22 @@ public class KakaoController {
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<ApiResponse<Long>> logOut(@UserId Long userId) {
+	@Operation(summary = "로그아웃", description = "로그아웃을 진행합니다.")
+	public ResponseEntity<ApiResponse<Long>> logOut(@AuthenticationPrincipal Long userId) {
 		Long returnedUserId = userService.deleteUser(userId);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(returnedUserId, SuccessCode.SUCCESS_LOGOUT));
 	}
 
-	@PostMapping("/nickname")
-	public ResponseEntity<ApiResponse<Boolean>> checkDuplicate(
-		@NotNull(message = "닉네임은 필수입력값입니다") @RequestParam("nickname") String nickName) {
-		boolean result = userService.isDuplicated(nickName);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result, SuccessCode.SUCCESS_FETCH));
-	}
-
 	@PostMapping("/reissue")
+	@Operation(summary = "Access Token 재발급", description = "Refresh Token을 통해 Access Token을 재발급합니다.")
 	public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(@RequestBody ReissueTokenRequest request) {
 		JwtTokenResponse jwtTokenResponse = userService.reissueToken(request.refreshToken());
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse, SuccessCode.SUCCESS_REISSUE));
 	}
 
 	@DeleteMapping("/withdraw")
-	public ResponseEntity<ApiResponse<?>> withdrawUser(@UserId Long userId) {
+	@Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 진행합니다.")
+	public ResponseEntity<ApiResponse<?>> withdrawUser(@AuthenticationPrincipal Long userId) {
 		userService.withdrawMe(userId);
 		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_WITHDRAW));
 	}
