@@ -85,8 +85,8 @@ public class KakaoController {
 	}
 
 	@PostMapping("/reissue")
-	public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(@UserId Long userId) {
-		JwtTokenResponse jwtTokenResponse = userService.reissueToken(userId);
+	public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(@RequestParam("refreshToken") String refreshToken) {
+		JwtTokenResponse jwtTokenResponse = userService.reissueToken(refreshToken);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse, SuccessCode.SUCCESS_REISSUE));
 	}
 
@@ -95,5 +95,4 @@ public class KakaoController {
 		userService.withdrawMe(userId);
 		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_WITHDRAW));
 	}
-
 }
