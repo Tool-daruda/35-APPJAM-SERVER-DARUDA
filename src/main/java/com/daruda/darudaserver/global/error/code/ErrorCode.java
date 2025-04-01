@@ -51,7 +51,8 @@ public enum ErrorCode {
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E500001", "서버 내부에서 오류가 발생했습니다"),
 	FILE_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "E500002", "이미지 업로드에 실패했습니다"),
 	FILE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "E500003", "이미지를 찾을 수 없습니다"),
-	FILE_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "E500004", "이미지 삭제에 실패했습니다");
+	FILE_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "E500004", "이미지 삭제에 실패했습니다"),
+	UNKNOWN_REFRESH_TOKEN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E500005", "알 수 없는 리프레쉬 토큰 오류가 발생했습니다");
 
 	private final HttpStatus httpStatus;
 	private final String code;

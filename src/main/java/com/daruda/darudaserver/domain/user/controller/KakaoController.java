@@ -2,8 +2,6 @@ package com.daruda.darudaserver.domain.user.controller;
 
 import static com.daruda.darudaserver.global.error.code.SuccessCode.*;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.daruda.darudaserver.domain.user.dto.request.ReissueTokenRequest;
 import com.daruda.darudaserver.domain.user.dto.request.SignUpRequest;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
@@ -26,7 +25,6 @@ import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +45,7 @@ public class KakaoController {
 	private String redirectUri;
 
 	@GetMapping("/kakao/login-url")
-	public ResponseEntity<ApiResponse<String>> requestLogin(HttpServletResponse response) throws IOException {
+	public ResponseEntity<ApiResponse<String>> requestLogin() {
 		String location =
 			"https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri="
 				+ redirectUri;
@@ -85,8 +83,8 @@ public class KakaoController {
 	}
 
 	@PostMapping("/reissue")
-	public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(@UserId Long userId) {
-		JwtTokenResponse jwtTokenResponse = userService.reissueToken(userId);
+	public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(@RequestBody ReissueTokenRequest request) {
+		JwtTokenResponse jwtTokenResponse = userService.reissueToken(request.refreshToken());
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse, SuccessCode.SUCCESS_REISSUE));
 	}
 
@@ -95,5 +93,4 @@ public class KakaoController {
 		userService.withdrawMe(userId);
 		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_WITHDRAW));
 	}
-
 }

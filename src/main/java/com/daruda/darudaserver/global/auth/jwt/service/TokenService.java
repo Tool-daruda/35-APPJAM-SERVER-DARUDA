@@ -22,7 +22,9 @@ public class TokenService {
 	private final JwtTokenProvider jwtTokenProvider;
 
 	@Transactional
-	public void saveRefreshtoken(final Long userId, final String refreshToken) {
+	public void saveRefreshToken(final Long userId, final String refreshToken) {
+		tokenRepository.findByUserId(userId).ifPresent(tokenRepository::delete);
+
 		tokenRepository.save(Token.builder()
 			.userId(userId)
 			.refreshToken(refreshToken)
@@ -42,13 +44,6 @@ public class TokenService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
 		tokenRepository.delete(token);
-	}
-
-	@Transactional
-	public String getRefreshTokenByUserId(Long userId) {
-		Token token = tokenRepository.findByUserId(userId)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-		return token.getRefreshToken();
 	}
 
 	public String updateRefreshTokenByUserId(Long userId) {

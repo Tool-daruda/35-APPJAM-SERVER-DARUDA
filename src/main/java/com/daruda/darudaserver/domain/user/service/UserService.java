@@ -26,12 +26,14 @@ import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
+import com.daruda.darudaserver.global.auth.jwt.provider.JwtValidationType;
 import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
 import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +69,7 @@ public class UserService {
 			String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
 			String refreshToken = tokenService.updateRefreshTokenByUserId(userId);
 			log.info("토큰을 정상적으로 생성하였습니다");
-			tokenService.saveRefreshtoken(userId, refreshToken);
+			tokenService.saveRefreshToken(userId, refreshToken);
 			JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
@@ -93,7 +95,7 @@ public class UserService {
 		String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
 		String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
 		log.info("토큰을 정상적으로 생성하였습니다");
-		tokenService.saveRefreshtoken(userId, refreshToken);
+		tokenService.saveRefreshToken(userId, refreshToken);
 
 		JwtTokenResponse jwtTokenResponse = JwtTokenResponse.of(accessToken, refreshToken);
 
@@ -109,25 +111,28 @@ public class UserService {
 		return userRepository.existsByNickname(nickname);
 	}
 
-	public JwtTokenResponse reissueToken(Long userId) {
-		String requestToken = tokenService.getRefreshTokenByUserId(userId);
-		log.debug("RefreshToken을 성공적으로 조회하였습니다, {}", requestToken);
-		UserEntity userEntity = userRepository.findById(userId)
-			.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-		verifyUserIdWithStoredToken(userId, requestToken);
+	@Transactional
+	public JwtTokenResponse reissueToken(String refreshToken) {
+		validateRefreshToken(refreshToken);
+
+		Long userId = jwtTokenProvider.getUserIdFromJwt(refreshToken);
+
+		verifyUserIdWithStoredToken(userId, refreshToken);
 
 		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
 		//새 토큰 생성
-		String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
-		log.debug("토큰을 정상적으로 생성하였습니다, {}", accessToken);
+		String newAccessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
+		log.debug("AccessToken을 정상적으로 생성하였습니다, {}", newAccessToken);
 
-		JwtTokenResponse jwtTokenResponse = JwtTokenResponse.builder()
-			.accessToken(accessToken)
-			.refreshToken(requestToken)
+		String newRefreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
+		log.debug("RefreshToken을 정상적으로 생성하였습니다, {}", newRefreshToken);
+		tokenService.saveRefreshToken(userId, newRefreshToken);
+
+		return JwtTokenResponse.builder()
+			.accessToken(newAccessToken)
+			.refreshToken(newRefreshToken)
 			.build();
-		return jwtTokenResponse;
-
 	}
 
 	public MyProfileResponse getMyInfo(Long userId) {
@@ -222,6 +227,21 @@ public class UserService {
 		//토큰 삭제
 		tokenService.deleteRefreshToken(userId);
 		log.info("Refresh 토큰을 정상적으로 삭제하였습니다");
+	}
+
+	private void validateRefreshToken(String refreshToken) {
+		JwtValidationType validationType = jwtTokenProvider.validateToken(refreshToken);
+
+		if (!validationType.equals(JwtValidationType.VALID_JWT)) {
+			throw switch (validationType) {
+				case EXPIRED_JWT_TOKEN -> new UnauthorizedException(ErrorCode.REFRESH_TOKEN_EXPIRED_ERROR);
+				case INVALID_JWT_TOKEN -> new BadRequestException(ErrorCode.INVALID_REFRESH_TOKEN_ERROR);
+				case INVALID_JWT_SIGNATURE -> new BadRequestException(ErrorCode.REFRESH_TOKEN_SIGNATURE_ERROR);
+				case UNSUPPORTED_JWT_TOKEN -> new BadRequestException(ErrorCode.UNSUPPORTED_REFRESH_TOKEN_ERROR);
+				case EMPTY_JWT -> new BadRequestException(ErrorCode.REFRESH_TOKEN_EMPTY_ERROR);
+				default -> new BusinessException(ErrorCode.UNKNOWN_REFRESH_TOKEN_ERROR);
+			};
+		}
 	}
 
 	private void verifyUserIdWithStoredToken(final Long userId, final String refreshToken) {
