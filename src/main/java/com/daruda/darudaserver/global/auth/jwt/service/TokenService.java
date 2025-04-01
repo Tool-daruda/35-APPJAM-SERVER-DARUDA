@@ -46,13 +46,6 @@ public class TokenService {
 		tokenRepository.delete(token);
 	}
 
-	@Transactional
-	public String getRefreshTokenByUserId(Long userId) {
-		Token token = tokenRepository.findByUserId(userId)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-		return token.getRefreshToken();
-	}
-
 	public String updateRefreshTokenByUserId(Long userId) {
 		tokenRepository.findByUserId(userId).ifPresent(tokenRepository::delete);
 
