@@ -2,8 +2,6 @@ package com.daruda.darudaserver.domain.user.controller;
 
 import static com.daruda.darudaserver.global.error.code.SuccessCode.*;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +24,6 @@ import com.daruda.darudaserver.global.auth.UserId;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +44,7 @@ public class KakaoController {
 	private String redirectUri;
 
 	@GetMapping("/kakao/login-url")
-	public ResponseEntity<ApiResponse<String>> requestLogin(HttpServletResponse response) throws IOException {
+	public ResponseEntity<ApiResponse<String>> requestLogin() {
 		String location =
 			"https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri="
 				+ redirectUri;
