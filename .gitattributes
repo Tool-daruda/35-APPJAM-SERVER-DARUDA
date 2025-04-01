@@ -5,4 +5,3 @@
 *.jpeg binary
 *.gif binary
 *.bat text merge=union eol=crlf
-출처: https://yeongchan1228.tistory.com/129 [Dev-Logs:티스토리]
