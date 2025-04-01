@@ -85,7 +85,8 @@ public class KakaoController {
 	}
 
 	@PostMapping("/reissue")
-	public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(@RequestParam("refreshToken") String refreshToken) {
+	public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(
+		@RequestParam("refreshToken") String refreshToken) {
 		JwtTokenResponse jwtTokenResponse = userService.reissueToken(refreshToken);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(jwtTokenResponse, SuccessCode.SUCCESS_REISSUE));
 	}
