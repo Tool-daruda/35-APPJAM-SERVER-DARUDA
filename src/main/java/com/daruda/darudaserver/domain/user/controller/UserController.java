@@ -56,7 +56,7 @@ public class UserController {
 
 	@GetMapping("/scrap-tools")
 	@Operation(summary = "찜한 툴 목록 조회", description = "사용자의 찜한 툴 목록을 조회합니다.")
-	public ResponseEntity<ApiResponse<FavoriteToolsResponse>> getFavoriteTools(@UserId Long userId) {
+	public ResponseEntity<ApiResponse<FavoriteToolsResponse>> getFavoriteTools(@AuthenticationPrincipal Long userId) {
 		FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId);
 
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteToolsResponse, SuccessCode.SUCCESS_FETCH));
