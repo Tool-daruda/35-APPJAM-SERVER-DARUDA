@@ -47,7 +47,8 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<String>> requestLogin(
 		@Parameter(description = "소셜 로그인 타입", example = "KAKAO")
 		@RequestParam SocialType socialType) {
-		String redirectUrl = loginService.getLoginUrl(socialType);
+		SocialService socialService = loginService.findSocialService(socialType);
+		String redirectUrl = socialService.getLoginUrl();
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(redirectUrl, SuccessCode.SUCCESS_REDIRECT));
 	}
 
