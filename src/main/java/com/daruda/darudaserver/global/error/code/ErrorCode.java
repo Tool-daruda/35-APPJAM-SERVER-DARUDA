@@ -24,6 +24,7 @@ public enum ErrorCode {
 	INVALID_PAGE_MIN_SIZE(HttpStatus.BAD_REQUEST, "E400013", "페이지는 1 이상이어야 합니다."),
 	INVALID_PAGE_MAX_SIZE(HttpStatus.BAD_REQUEST, "E400014", "한 번에 18개 이하만 조회할 수 있습니다."),
 	REFREH_TOKEN_EMPTY_ERROR(HttpStatus.BAD_REQUEST, "E400015", "리프레시 토큰이 비었습니다"),
+	SOCIAL_TYPE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "E400016", "로그인 요청이 유효하지 않습니다."),
 	/* 401 */
 
 	AUTHENTICATION_CODE_EXPIRED(HttpStatus.UNAUTHORIZED, "E401001", "인가코드가 만료되었습니다"),
