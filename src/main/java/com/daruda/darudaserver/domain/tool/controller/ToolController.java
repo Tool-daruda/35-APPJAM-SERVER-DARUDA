@@ -93,7 +93,7 @@ public class ToolController {
 		@RequestParam(value = "size", defaultValue = "18") int size,
 		@Parameter(description = "조회했을 때 마지막 tool Id", example = "18")
 		@RequestParam(value = "lastToolId", required = false) Long lastToolId,
-		@Parameter(description = "무료 도구 여부", example = "true")
+		@Parameter(description = "무료 tool 여부", example = "true")
 		@RequestParam(value = "isFree") Boolean isFree
 	) {
 		ToolListRes toolListRes = toolService
