@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class KakaoService {
+public class KakaoService implements SocialService {
 	private final KakaoFeignClient kakaoFeignClient;
 	private final KakaoAPiFeignClient kakaoAPiFeignClient;
 
@@ -27,7 +27,7 @@ public class KakaoService {
 	@Value("${kakao.redirect_uri}")
 	private String redirectUri;
 
-	public String getAccessTokenFromKakao(String code) {
+	public String getAccessToken(String code) {
 		log.debug("redirect uri {}", redirectUri);
 		log.info("인가코드 {}", code);
 		try {
@@ -47,7 +47,7 @@ public class KakaoService {
 	}
 
 	public UserInfo getInfo(String code) {
-		String accessToken = getAccessTokenFromKakao(code);
+		String accessToken = getAccessToken(code);
 		try {
 			KakaoUserDto kakaoUserDto = kakaoFeignClient.getUserInformation(
 				"Bearer " + accessToken,
