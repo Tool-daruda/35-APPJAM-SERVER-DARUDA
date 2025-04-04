@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
+import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
 import com.daruda.darudaserver.domain.user.dto.response.MyProfileResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
@@ -89,5 +90,22 @@ public class UserController {
 		@NotNull(message = "닉네임은 필수 입력값입니다.") @RequestParam("nickname") String nickName) {
 		boolean result = userService.isDuplicated(nickName);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result, SuccessCode.SUCCESS_FETCH));
+	}
+
+	@GetMapping("/scrap-tools")
+	@Operation(summary = "스크랩 글 목록 조회", description = "스크랩 글 목록을 조회합니다.")
+	public ResponseEntity<?> getFavoriteBoards(@AuthenticationPrincipal Long userIdOrNull,
+		@Parameter(description = "조회할 페이지", example = "1")
+		@RequestParam(value = "page", defaultValue = "1") int pageNo,
+		@Parameter(description = "조회할 게시글 개수", example = "5")
+		@RequestParam(value = "size", defaultValue = "5") int size,
+		@Parameter(description = "정렬 기준", example = "createdAt")
+		@RequestParam(value = "criteria", defaultValue = "createdAt") String criteria) {
+		Pageable pageable = PageRequest.of(pageNo - 1, size, Sort.by(Sort.Direction.DESC, criteria));
+		FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = boardService.getFavoriteBoards(userIdOrNull,
+			pageable);
+
+		return ResponseEntity.ok(
+			ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse, SuccessCode.SUCCESS_FETCH));
 	}
 }

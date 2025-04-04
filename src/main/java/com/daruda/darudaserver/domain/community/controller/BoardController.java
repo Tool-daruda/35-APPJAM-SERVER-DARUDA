@@ -2,9 +2,6 @@ package com.daruda.darudaserver.domain.community.controller;
 
 import java.util.List;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +21,6 @@ import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
 import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.service.BoardService;
-import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
@@ -114,22 +110,5 @@ public class BoardController {
 		@RequestParam(value = "lastBoardId", required = false) Long lastBoardId) {
 		GetBoardResponse boardResponse = boardService.getBoardList(userIdOrNull, noTopic, toolId, size, lastBoardId);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardResponse, SuccessCode.SUCCESS_FETCH));
-	}
-
-	@GetMapping("/scraps")
-	@Operation(summary = "스크랩 글 목록 조회", description = "스크랩 글 목록을 조회합니다.")
-	public ResponseEntity<?> getFavoriteBoards(@AuthenticationPrincipal Long userIdOrNull,
-		@Parameter(description = "조회할 페이지", example = "1")
-		@RequestParam(value = "page", defaultValue = "1") int pageNo,
-		@Parameter(description = "조회할 게시글 개수", example = "5")
-		@RequestParam(value = "size", defaultValue = "5") int size,
-		@Parameter(description = "정렬 기준", example = "createdAt")
-		@RequestParam(value = "criteria", defaultValue = "createdAt") String criteria) {
-		Pageable pageable = PageRequest.of(pageNo - 1, size, Sort.by(Sort.Direction.DESC, criteria));
-		FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = boardService.getFavoriteBoards(userIdOrNull,
-			pageable);
-
-		return ResponseEntity.ok(
-			ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse, SuccessCode.SUCCESS_FETCH));
 	}
 }
