@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.daruda.darudaserver.domain.user.dto.request.LoginRequest;
 import com.daruda.darudaserver.domain.user.dto.request.ReissueTokenRequest;
 import com.daruda.darudaserver.domain.user.dto.request.SignUpRequest;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
@@ -17,8 +18,8 @@ import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
-import com.daruda.darudaserver.domain.user.service.KakaoService;
 import com.daruda.darudaserver.domain.user.service.LoginService;
+import com.daruda.darudaserver.domain.user.service.SocialService;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
@@ -37,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "auth 컨트롤러", description = "로그인과 관련된 API를 처리합니다.")
 @RequiredArgsConstructor
 public class AuthController {
-	private final KakaoService kakaoService;
 	private final UserService userService;
 	private final LoginService loginService;
 
@@ -53,13 +53,15 @@ public class AuthController {
 
 	@DisableSwaggerSecurity
 	@PostMapping(value = "/login")
-	@Operation(summary = "카카오 OAuth 로그인",
-		description = "카카오에서 발급한 Authorization Code를 통해, 로그인을 진행합니다.")
+	@Operation(summary = "소셜 로그인",
+		description = "소셜 로그인에서 발급받은 Authorization Code를 통해, 로그인을 진행합니다.")
 	public ResponseEntity<ApiResponse<LoginResponse>> postAuthenticationCode(
 		@Parameter(description = "Authorization Code", example = "1234")
-		@RequestParam("code") String code) {
+		@RequestParam("code") String code,
+		@RequestBody LoginRequest loginRequest) {
 		log.debug("CODE = {}", code);
-		UserInfo userInfo = kakaoService.getInfo(code);
+		SocialService socialService = loginService.findSocialService(loginRequest.socialType());
+		UserInfo userInfo = socialService.getInfo(code);
 		LoginResponse loginResponse = userService.oauthlogin(userInfo);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(loginResponse, SuccessCode.SUCCESS_CREATE));
 	}
