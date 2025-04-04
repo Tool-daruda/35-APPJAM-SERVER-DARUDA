@@ -1,6 +1,5 @@
 package com.daruda.darudaserver.domain.user.controller;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +16,9 @@ import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
+import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.service.KakaoService;
+import com.daruda.darudaserver.domain.user.service.LoginService;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
@@ -38,22 +39,16 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 	private final KakaoService kakaoService;
 	private final UserService userService;
-
-	@Value("${kakao.client_id}")
-	private String clientId;
-
-	@Value("${kakao.redirect_uri}")
-	private String redirectUri;
+	private final LoginService loginService;
 
 	@DisableSwaggerSecurity
-	@GetMapping("/kakao/login-url")
-	@Operation(summary = "카카오 로그인 URL 반환", description = "카카오 로그인 URL을 반환합니다.")
-	public ResponseEntity<ApiResponse<String>> requestLogin() {
-		String location =
-			"https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri="
-				+ redirectUri;
-
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(location, SuccessCode.SUCCESS_REDIRECT));
+	@GetMapping("/login-url")
+	@Operation(summary = "소셜 로그인 URL 반환", description = "소셜 로그인 URL을 반환합니다.")
+	public ResponseEntity<ApiResponse<String>> requestLogin(
+		@Parameter(description = "소셜 로그인 타입", example = "KAKAO")
+		@RequestParam SocialType socialType) {
+		String redirectUrl = loginService.getLoginUrl(socialType);
+		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(redirectUrl, SuccessCode.SUCCESS_REDIRECT));
 	}
 
 	@DisableSwaggerSecurity
