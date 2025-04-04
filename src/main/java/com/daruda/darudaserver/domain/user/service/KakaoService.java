@@ -27,23 +27,9 @@ public class KakaoService implements SocialService {
 	@Value("${kakao.redirect_uri}")
 	private String redirectUri;
 
-	public String getAccessToken(String code) {
-		log.debug("redirect uri {}", redirectUri);
-		log.info("인가코드 {}", code);
-		try {
-			KakaoTokenResponse kakaoTokenResponse = kakaoAPiFeignClient.getAccessToken(
-				"authorization_code",
-				clientId,
-				redirectUri,
-				code,
-				"application/x-www-form-urlencoded;charset=utf-8"
-			);
-			log.debug("카카오로부터 AccessToken을 성공적으로 받았습니다, {}", kakaoTokenResponse.getAccessToken());
-			return kakaoTokenResponse.getAccessToken();
-		} catch (Exception e) {
-			log.error("Error on: ", e);
-			throw new BusinessException(ErrorCode.AUTHENTICATION_CODE_EXPIRED);
-		}
+	public String getLoginUrl() {
+		return "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri="
+			+ redirectUri;
 	}
 
 	public UserInfo getInfo(String code) {
@@ -60,6 +46,25 @@ public class KakaoService implements SocialService {
 			);
 		} catch (Exception e) {
 			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private String getAccessToken(String code) {
+		log.debug("redirect uri {}", redirectUri);
+		log.info("인가코드 {}", code);
+		try {
+			KakaoTokenResponse kakaoTokenResponse = kakaoAPiFeignClient.getAccessToken(
+				"authorization_code",
+				clientId,
+				redirectUri,
+				code,
+				"application/x-www-form-urlencoded;charset=utf-8"
+			);
+			log.debug("카카오로부터 AccessToken을 성공적으로 받았습니다, {}", kakaoTokenResponse.getAccessToken());
+			return kakaoTokenResponse.getAccessToken();
+		} catch (Exception e) {
+			log.error("Error on: ", e);
+			throw new BusinessException(ErrorCode.AUTHENTICATION_CODE_EXPIRED);
 		}
 	}
 }
