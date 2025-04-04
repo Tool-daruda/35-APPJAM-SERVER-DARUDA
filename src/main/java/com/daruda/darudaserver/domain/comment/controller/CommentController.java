@@ -60,11 +60,11 @@ public class CommentController {
 	}
 
 	@DisableSwaggerSecurity
-	@GetMapping("/{board-id}")
+	@GetMapping("/")
 	@Operation(summary = "댓글 조회", description = "댓글을 조회합니다.")
 	public ResponseEntity<ApiResponse<GetCommentRetrieveResponse>> getComment(
 		@Parameter(description = "board Id", example = "1")
-		@PathVariable("board-id") Long boardId,
+		@RequestParam("board-id") Long boardId,
 		@Parameter(description = "조회할 댓글 개수", example = "10")
 		@RequestParam(value = "size", defaultValue = "10") int size,
 		@Parameter(description = "조회했을 때 마지막 comment Id", example = "10")
