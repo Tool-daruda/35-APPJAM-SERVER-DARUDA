@@ -92,7 +92,7 @@ public class UserController {
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result, SuccessCode.SUCCESS_FETCH));
 	}
 
-	@GetMapping("/scrap-tools")
+	@GetMapping("/scrap-boards")
 	@Operation(summary = "스크랩 글 목록 조회", description = "스크랩 글 목록을 조회합니다.")
 	public ResponseEntity<?> getFavoriteBoards(@AuthenticationPrincipal Long userIdOrNull,
 		@Parameter(description = "조회할 페이지", example = "1")
