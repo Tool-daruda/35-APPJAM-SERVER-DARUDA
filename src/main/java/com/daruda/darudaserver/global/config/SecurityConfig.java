@@ -29,7 +29,7 @@ public class SecurityConfig {
 		"/swagger-ui/**",
 		"/v3/api-docs/**",
 		"/api/v1/user/nickname",
-		"/api/v1/comment/{board-id}",
+		"/api/v1/comment",
 		"/api/v1/auth/sign-up",
 		"/api/v1/auth/login",
 		"/api/v1/auth/login-url",
