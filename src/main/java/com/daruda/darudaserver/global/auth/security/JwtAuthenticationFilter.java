@@ -35,14 +35,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private static final List<String> EXCLUDE_URL = Arrays.asList(
 		"/swagger-ui/**",
 		"/v3/api-docs/**",
-		"/api/v1/users/signin",
-		"/api/v1/users/token",
-		"/api/v1/users/signup",
-		"/api/v1/users/nickname",
-		"/api/v1/users/kakao/login-url",
-		"/api/v1/tools/category"
-		//            "/api/v1/tools/**"
-		//            "/api/v1/boards/board/**"
+		"/api/v1/user/nickname",
+		"/api/v1/comment/{board-id}",
+		"/api/v1/auth/sign-up",
+		"/api/v1/auth/login",
+		"/api/v1/auth/login-url",
+		"/api/v1/tool",
+		"/api/v1/tool/{tool-id}",
+		"/api/v1/tool/{tool-id}/plans",
+		"/api/v1/tool/{tool-id}/core-features",
+		"/api/v1/tool/{tool-id}/alternatives",
+		"/api/v1/tool/category",
+		"/api/v1/board",
+		"/api/v1/board/{board-id}"
 	);
 
 	@Override

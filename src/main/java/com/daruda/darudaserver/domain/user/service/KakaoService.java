@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class KakaoService {
+public class KakaoService implements SocialService {
 	private final KakaoFeignClient kakaoFeignClient;
 	private final KakaoAPiFeignClient kakaoAPiFeignClient;
 
@@ -27,7 +27,29 @@ public class KakaoService {
 	@Value("${kakao.redirect_uri}")
 	private String redirectUri;
 
-	public String getAccessTokenFromKakao(String code) {
+	public String getLoginUrl() {
+		return "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + clientId + "&redirect_uri="
+			+ redirectUri;
+	}
+
+	public UserInfo getInfo(String code) {
+		String accessToken = getAccessToken(code);
+		try {
+			KakaoUserDto kakaoUserDto = kakaoFeignClient.getUserInformation(
+				"Bearer " + accessToken,
+				"application/x-www-form-urlencoded;charset=utf-8");
+			log.debug("카카오로부터 사용자 정보를 성공적으로 불러왔습니다. Id:, {}", kakaoUserDto.id());
+			return new UserInfo(
+				kakaoUserDto.id(),
+				kakaoUserDto.kakaoAccount().email(),
+				kakaoUserDto.kakaoAccount().kakaoUserProfile().nickname()
+			);
+		} catch (Exception e) {
+			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private String getAccessToken(String code) {
 		log.debug("redirect uri {}", redirectUri);
 		log.info("인가코드 {}", code);
 		try {
@@ -43,23 +65,6 @@ public class KakaoService {
 		} catch (Exception e) {
 			log.error("Error on: ", e);
 			throw new BusinessException(ErrorCode.AUTHENTICATION_CODE_EXPIRED);
-		}
-	}
-
-	public UserInfo getInfo(String code) {
-		String accessToken = getAccessTokenFromKakao(code);
-		try {
-			KakaoUserDto kakaoUserDto = kakaoFeignClient.getUserInformation(
-				"Bearer " + accessToken,
-				"application/x-www-form-urlencoded;charset=utf-8");
-			log.debug("카카오로부터 사용자 정보를 성공적으로 불러왔습니다. Id:, {}", kakaoUserDto.id());
-			return new UserInfo(
-				kakaoUserDto.id(),
-				kakaoUserDto.kakaoAccount().email(),
-				kakaoUserDto.kakaoAccount().kakaoUserProfile().nickname()
-			);
-		} catch (Exception e) {
-			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

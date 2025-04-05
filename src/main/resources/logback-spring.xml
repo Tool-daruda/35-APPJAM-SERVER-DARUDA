@@ -12,8 +12,7 @@
     <!-- Console 로그 설정 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-4relative] %green([%thread]) %highlight(%-5level)
-                %boldWhite([%C.%M:%yellow(%L)]) - %msg%n
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-4relative] %green([%thread]) %highlight(%-5level) %boldWhite([%C.%M:%yellow(%L)]) - %msg%n
             </pattern>
         </encoder>
     </appender>
@@ -66,8 +65,8 @@
     <appender name="DISCORD" class="com.github.napstr.logback.DiscordAppender">
         <webhookUri>${DISCORD_WEBHOOK_URL}</webhookUri>
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>*🚨[${ENVIRONMENT}] %d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level %class - %msg
-                [Go-To-Sentry](${SENTRY_REPOSITORY_URI})*%n
+            <pattern>*🚨[${ENVIRONMENT}] %d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level %class - %msg &lt;[Go-To-Sentry](${SENTRY_REPOSITORY_URI})&gt;*
+                %n
             </pattern>
         </layout>
     </appender>
