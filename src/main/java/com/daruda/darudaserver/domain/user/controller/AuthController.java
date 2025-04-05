@@ -83,6 +83,7 @@ public class AuthController {
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(returnedUserId, SuccessCode.SUCCESS_LOGOUT));
 	}
 
+	@DisableSwaggerSecurity
 	@PostMapping("/reissue")
 	@Operation(summary = "Access Token 재발급", description = "Refresh Token을 통해 Access Token을 재발급합니다.")
 	public ResponseEntity<ApiResponse<JwtTokenResponse>> regenerateToken(@RequestBody ReissueTokenRequest request) {
