@@ -60,7 +60,7 @@ public class CommentController {
 	}
 
 	@DisableSwaggerSecurity
-	@GetMapping("/")
+	@GetMapping
 	@Operation(summary = "댓글 조회", description = "댓글을 조회합니다.")
 	public ResponseEntity<ApiResponse<GetCommentRetrieveResponse>> getComment(
 		@Parameter(description = "board Id", example = "1")
