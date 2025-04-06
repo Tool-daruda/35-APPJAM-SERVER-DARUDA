@@ -94,8 +94,8 @@
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
             <appender-ref ref="Error"/>
-            <appender-ref ref="Sentry"/>
-            <appender-ref ref="ASYNC_DISCORD"/>
+<!--            <appender-ref ref="Sentry"/>-->
+<!--            <appender-ref ref="ASYNC_DISCORD"/>-->
         </root>
     </springProfile>
 
@@ -104,8 +104,8 @@
         <include resource="console-appender.xml"/>
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="Sentry"/>
-            <appender-ref ref="ASYNC_DISCORD"/>
+<!--            <appender-ref ref="Sentry"/>-->
+<!--            <appender-ref ref="ASYNC_DISCORD"/>-->
         </root>
     </springProfile>
 
