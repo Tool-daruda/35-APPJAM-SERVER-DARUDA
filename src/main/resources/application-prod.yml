@@ -5,14 +5,14 @@ spring:
       max-request-size: 10MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ENC(patHhgyuROokfleqCEunolVqUsNCeLMk282/CuieDGQaUVHUkcDd2lBrlHyBeXxMhKs/AXgbVH7RWVG0gCZO+loQnEqV1k1JkDlEZTqVZBhHw69aZrTFXg==)
+    username: ENC(nJZfcHF+It0X4f8rxo8Glg==)
+    password: ENC(Hs1X8mIXeW4ZEhEMsaKAkITnB9KQUA1kuryXHSgO4fc=)
 
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
