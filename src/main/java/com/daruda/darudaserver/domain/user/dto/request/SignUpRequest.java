@@ -1,5 +1,7 @@
 package com.daruda.darudaserver.domain.user.dto.request;
 
+import com.daruda.darudaserver.domain.user.entity.enums.Positions;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -12,7 +14,7 @@ public record SignUpRequest(
 	String nickname,
 
 	@NotNull(message = "소속은 필수 입력값입니다")
-	String positions,
+	Positions positions,
 
 	@NotNull(message = "이메일은 필수 입력값입니다")
 	@Email(message = "이메일 형식에 맞지 않습니다")
