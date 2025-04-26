@@ -205,12 +205,12 @@ public class UserService {
 		toolScrapRepository.deleteAllByUserId(userId);
 		log.info("toolScrap을 성공적으로 삭제하였습니다");
 
-		commentRepository.deleteCommentsByUserId(userId);
+		commentRepository.deleteAllByUserId(userId);
 
 		List<Board> boardList = boardRepository.findAllByUserId(userId);
 
 		boardList.stream()
-			.forEach(board -> commentRepository.deleteCommentsByBoardId(board.getId()));
+			.forEach(board -> commentRepository.deleteByBoardId(board.getId()));
 
 		//FK로 묶여있는 boardScrap 삭제
 		boardScrapRepository.deleteAllByUserId(userId);
