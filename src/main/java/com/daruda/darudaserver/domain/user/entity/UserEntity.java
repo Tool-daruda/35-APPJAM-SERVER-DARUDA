@@ -66,6 +66,14 @@ public class UserEntity extends BaseTimeEntity {
 			.build();
 	}
 
+	public static UserEntity of(String email, String nickname, Positions positions) {
+		return UserEntity.builder()
+			.email(email)
+			.nickname(nickname)
+			.positions(positions)
+			.build();
+	}
+
 	public void updatePositions(Positions positions) {
 		this.positions = positions;
 	}
