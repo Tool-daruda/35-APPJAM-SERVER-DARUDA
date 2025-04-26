@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user")
 public class UserEntity extends BaseTimeEntity {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_id")
@@ -41,6 +42,14 @@ public class UserEntity extends BaseTimeEntity {
 		this.email = email;
 		this.nickname = nickname;
 		this.positions = positions;
+	}
+
+	public static UserEntity of(String email, String nickname, Positions positions) {
+		return UserEntity.builder()
+			.email(email)
+			.nickname(nickname)
+			.positions(positions)
+			.build();
 	}
 
 	public void updatePositions(Positions positions) {
