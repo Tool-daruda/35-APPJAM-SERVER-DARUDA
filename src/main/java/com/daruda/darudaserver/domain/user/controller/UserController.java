@@ -38,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/user")
 @Tag(name = "user 컨트롤러", description = "사용자와 관련된 API를 처리합니다.")
 public class UserController {
+
 	private final UserService userService;
 	private final BoardService boardService;
 
@@ -78,7 +79,7 @@ public class UserController {
 	@GetMapping("/profile")
 	@Operation(summary = "프로필 조회", description = "사용자의 프로필을 조회합니다.")
 	public ResponseEntity<ApiResponse<MyProfileResponse>> getMyProfile(@AuthenticationPrincipal Long userId) {
-		MyProfileResponse myProfileResponse = userService.getMyInfo(userId);
+		MyProfileResponse myProfileResponse = userService.getMyProfile(userId);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(myProfileResponse, SuccessCode.SUCCESS_FETCH));
 	}
 
@@ -88,7 +89,7 @@ public class UserController {
 	public ResponseEntity<ApiResponse<Boolean>> checkDuplicate(
 		@Parameter(description = "닉네임", example = "test")
 		@NotNull(message = "닉네임은 필수 입력값입니다.") @RequestParam("nickname") String nickName) {
-		boolean result = userService.isDuplicated(nickName);
+		boolean result = userService.isDuplicatedNickname(nickName);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result, SuccessCode.SUCCESS_FETCH));
 	}
 
