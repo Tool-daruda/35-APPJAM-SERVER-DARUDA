@@ -10,12 +10,12 @@ public record LoginResponse(
 	JwtTokenResponse jwtTokenResponse
 ) {
 	//등록된 회원이 아닌 경우
-	public static LoginResponse of(boolean isUser, String email, String nickname) {
-		return new LoginResponse(email, false, nickname, null);
+	public static LoginResponse ofNonRegisteredUser(String email) {
+		return new LoginResponse(email, false, null, null);
 	}
 
 	//등록된 회원인 경우
-	public static LoginResponse of(boolean isUser, JwtTokenResponse jwtTokenResponse, String nickname) {
+	public static LoginResponse ofRegisteredUser(JwtTokenResponse jwtTokenResponse, String nickname) {
 		return new LoginResponse(null, true, nickname, jwtTokenResponse);
 	}
 }
