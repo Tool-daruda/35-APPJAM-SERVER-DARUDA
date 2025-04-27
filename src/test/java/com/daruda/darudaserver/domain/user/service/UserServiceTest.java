@@ -133,7 +133,7 @@ class UserServiceTest {
 		when(userRepository.existsByNickname(newNickname)).thenReturn(false);
 
 		// when
-		UpdateMyResponse response = userService.updateProfile(userId, newNickname, newPositions);
+		UpdateMyResponse response = userService.updateProfile(userId, newNickname, Positions.NORMAL.getName());
 
 		// then
 		assertNotNull(response);
@@ -177,7 +177,7 @@ class UserServiceTest {
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 
 		// when
-		UpdateMyResponse response = userService.updateProfile(userId, null, newPositions);
+		UpdateMyResponse response = userService.updateProfile(userId, null, newPositions.getName());
 
 		// then
 		assertNotNull(response);
@@ -204,11 +204,11 @@ class UserServiceTest {
 		// given
 		Long userId = 1L;
 		String nickname = "tester";
-		Positions positions = Positions.STUDENT;
+		String positionStr = Positions.STUDENT.getName();
 
 		// when
 		BusinessException exception = assertThrows(BusinessException.class,
-			() -> userService.updateProfile(userId, nickname, positions));
+			() -> userService.updateProfile(userId, nickname, positionStr));
 
 		// then
 		assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
@@ -229,7 +229,7 @@ class UserServiceTest {
 
 		// when
 		BusinessException exception = assertThrows(BusinessException.class,
-			() -> userService.updateProfile(userId, nickname, positions));
+			() -> userService.updateProfile(userId, nickname, positions.name()));
 
 		// then
 		assertEquals(ErrorCode.DUPLICATED_NICKNAME, exception.getErrorCode());
