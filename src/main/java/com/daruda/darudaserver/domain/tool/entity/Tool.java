@@ -78,6 +78,44 @@ public class Tool {
 	@Column(name = "popular", columnDefinition = "integer default 0")
 	private int popular;
 
+	@Builder
+	private Tool(String toolMainName, String toolSubName, Category category, String toolLink, String description,
+		License license, Boolean supportKorea, String detailDescription, String planLink, String bgColor,
+		boolean fontColor, String toolLogo) {
+		this.toolMainName = toolMainName;
+		this.toolSubName = toolSubName;
+		this.category = category;
+		this.toolLink = toolLink;
+		this.description = description;
+		this.license = license;
+		this.supportKorea = supportKorea;
+		this.detailDescription = detailDescription;
+		this.planLink = planLink;
+		this.bgColor = bgColor;
+		this.fontColor = fontColor;
+		this.toolLogo = toolLogo;
+	}
+
+	public static Tool of(String toolMainName, String toolSubName, Category category, String toolLink,
+		String description,
+		License license, Boolean supportKorea, String detailDescription, String planLink, String bgColor,
+		boolean fontColor, String toolLogo) {
+		return Tool.builder()
+			.toolMainName(toolMainName)
+			.toolSubName(toolSubName)
+			.category(category)
+			.toolLink(toolLink)
+			.description(description)
+			.license(license)
+			.supportKorea(supportKorea)
+			.detailDescription(detailDescription)
+			.planLink(planLink)
+			.bgColor(bgColor)
+			.fontColor(fontColor)
+			.toolLogo(toolLogo)
+			.build();
+	}
+
 	public void incrementViewCount() {
 		this.viewCount++;
 	}

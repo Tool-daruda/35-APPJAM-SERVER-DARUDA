@@ -41,6 +41,20 @@ public class ToolScrap extends BaseTimeEntity {
 	@Builder.Default
 	private boolean delYn = false;
 
+	@Builder
+	private ToolScrap(final Long toolScrapId, final UserEntity user, final Tool tool) {
+		this.toolScrapId = toolScrapId;
+		this.user = user;
+		this.tool = tool;
+	}
+
+	public static ToolScrap of(final UserEntity user, final Tool tool) {
+		return ToolScrap.builder()
+			.user(user)
+			.tool(tool)
+			.build();
+	}
+
 	public void update() {
 		this.delYn = !this.delYn;
 	}
