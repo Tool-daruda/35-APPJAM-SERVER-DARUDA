@@ -80,7 +80,7 @@ class UserControllerTest {
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
-		UpdateMyRequest request = UpdateMyRequest.of(nickname, positions);
+		UpdateMyRequest request = UpdateMyRequest.of(nickname, positions.getName());
 		UpdateMyResponse response = UpdateMyResponse.of(nickname, positions);
 
 		when(userService.updateProfile(userId, request.nickname(), request.positions())).thenReturn(response);

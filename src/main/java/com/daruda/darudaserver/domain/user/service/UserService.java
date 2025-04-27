@@ -65,8 +65,8 @@ public class UserService {
 
 	}
 
-	public UpdateMyResponse updateProfile(Long userId, String nickname, Positions positions) {
-		if (positions == null && nickname == null) {
+	public UpdateMyResponse updateProfile(Long userId, String nickname, String positionStr) {
+		if (positionStr == null && nickname == null) {
 			throw new BusinessException(ErrorCode.MISSING_PARAMETER);
 		}
 
@@ -77,10 +77,14 @@ public class UserService {
 		if (isDuplicatedNickname(nickname)) {
 			throw new BusinessException(ErrorCode.DUPLICATED_NICKNAME);
 		}
+
+		Positions positions = positionStr != null ? Positions.fromString(positionStr) : null;
+
 		if (nickname == null) {
 			userEntity.updatePositions(positions);
 			return UpdateMyResponse.of(userEntity.getNickname(), positions);
 		}
+
 		if (positions == null) {
 			userEntity.updateNickname(nickname);
 			return UpdateMyResponse.of(nickname, userEntity.getPositions());
