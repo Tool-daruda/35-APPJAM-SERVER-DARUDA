@@ -40,7 +40,7 @@ public class UserService {
 	public MyProfileResponse getMyProfile(Long userId) {
 		UserEntity userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-		return MyProfileResponse.of(userEntity.getNickname(), userEntity.getPositions().toString());
+		return MyProfileResponse.of(userEntity.getNickname(), userEntity.getPositions());
 	}
 
 	public FavoriteToolsResponse getFavoriteTools(Long userId) {
@@ -72,7 +72,7 @@ public class UserService {
 			.orElse(false));
 	}
 
-	public UpdateMyResponse updateMy(Long userId, String nickname, String positions) {
+	public UpdateMyResponse updateMy(Long userId, String nickname, Positions positions) {
 		UserEntity userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 		log.debug("사용자를 성공적으로 조회하였습니다., {}", userId);
@@ -81,16 +81,16 @@ public class UserService {
 			throw new BusinessException(ErrorCode.DUPLICATED_NICKNAME);
 		}
 		if (nickname == null) {
-			userEntity.updatePositions(Positions.fromString(positions));
+			userEntity.updatePositions(positions);
 			return UpdateMyResponse.of(userEntity.getNickname(), positions);
 		}
 		if (positions == null) {
 			userEntity.updateNickname(nickname);
-			return UpdateMyResponse.of(nickname, userEntity.getPositions().getName());
+			return UpdateMyResponse.of(nickname, userEntity.getPositions());
 		}
 
 		userEntity.updateNickname(nickname);
-		userEntity.updatePositions(Positions.fromString(positions));
+		userEntity.updatePositions(positions);
 		log.debug("사용자 정보를 성공적으로 업데이트 했습니다., {} {}", nickname, positions);
 
 		return UpdateMyResponse.of(nickname, positions);
