@@ -328,7 +328,7 @@ public class BoardService {
 		imageService.deleteImages(imageIds);
 	}
 
-	public BoardListResponse getMyBoards(Long userIdOrNull, Pageable pageable) {
+	public BoardListResponse getUserBoards(Long userIdOrNull, Pageable pageable) {
 		validateBoard.validateUser(userIdOrNull);
 		log.debug("사용자를 조회합니다, {}", userIdOrNull);
 		Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userIdOrNull, pageable);
