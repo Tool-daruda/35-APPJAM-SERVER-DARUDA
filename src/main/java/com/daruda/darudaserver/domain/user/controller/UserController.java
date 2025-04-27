@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -61,9 +62,9 @@ public class UserController {
 	@Operation(summary = "작성한 게시글 목록 조회", description = "사용자가 작성한 게시글 목록을 조회합니다.")
 	public ResponseEntity<ApiResponse<BoardListResponse>> getUserBoards(@AuthenticationPrincipal Long userIdOrNull,
 		@Parameter(description = "조회할 페이지", example = "1")
-		@RequestParam(defaultValue = "1", value = "page") int pageNo,
+		@RequestParam(defaultValue = "1", value = "page") @Positive int pageNo,
 		@Parameter(description = "조회할 게시글 개수", example = "5")
-		@RequestParam(defaultValue = "5", value = "size") int size,
+		@RequestParam(defaultValue = "5", value = "size") @Positive int size,
 		@Parameter(description = "정렬 기준", example = "createdAt")
 		@RequestParam(defaultValue = "createdAt", value = "criteria") String criteria) {
 		Pageable pageable = PageRequest.of(pageNo - 1, size, Sort.by(Sort.Direction.DESC, criteria));
@@ -92,9 +93,9 @@ public class UserController {
 	@Operation(summary = "스크랩 글 목록 조회", description = "스크랩 글 목록을 조회합니다.")
 	public ResponseEntity<?> getFavoriteBoards(@AuthenticationPrincipal Long userIdOrNull,
 		@Parameter(description = "조회할 페이지", example = "1")
-		@RequestParam(value = "page", defaultValue = "1") int pageNo,
+		@RequestParam(value = "page", defaultValue = "1") @Positive int pageNo,
 		@Parameter(description = "조회할 게시글 개수", example = "5")
-		@RequestParam(value = "size", defaultValue = "5") int size,
+		@RequestParam(value = "size", defaultValue = "5") @Positive int size,
 		@Parameter(description = "정렬 기준", example = "createdAt")
 		@RequestParam(value = "criteria", defaultValue = "createdAt") String criteria) {
 		Pageable pageable = PageRequest.of(pageNo - 1, size, Sort.by(Sort.Direction.DESC, criteria));
