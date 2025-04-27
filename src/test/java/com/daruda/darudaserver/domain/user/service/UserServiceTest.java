@@ -87,8 +87,11 @@ class UserServiceTest {
 		Long userId = 1L;
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-		// when & then
+		// when
+		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 		NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getMyProfile(userId));
+
+		// then
 		assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
 	}
 
@@ -207,6 +210,7 @@ class UserServiceTest {
 		String positionStr = Positions.STUDENT.getName();
 
 		// when
+		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 		BusinessException exception = assertThrows(BusinessException.class,
 			() -> userService.updateProfile(userId, nickname, positionStr));
 

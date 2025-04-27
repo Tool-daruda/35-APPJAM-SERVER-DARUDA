@@ -217,6 +217,7 @@ public class AuthServiceTest {
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
 		// when
+		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 		BusinessException exception = assertThrows(BusinessException.class,
 			() -> authService.withdraw(userId));
 
