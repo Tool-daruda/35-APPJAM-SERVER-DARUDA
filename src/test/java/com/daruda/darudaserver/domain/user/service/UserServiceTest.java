@@ -233,7 +233,7 @@ class UserServiceTest {
 
 		// when
 		BusinessException exception = assertThrows(BusinessException.class,
-			() -> userService.updateProfile(userId, nickname, positions.name()));
+			() -> userService.updateProfile(userId, nickname, positions.getName()));
 
 		// then
 		assertEquals(ErrorCode.DUPLICATED_NICKNAME, exception.getErrorCode());
