@@ -61,7 +61,7 @@ public class AuthController {
 		@Parameter(description = "Authorization Code", example = "1234")
 		@RequestParam("code") String code,
 		@RequestBody LoginRequest loginRequest) {
-		log.debug("CODE = {}", code);
+		log.debug("소셜 로그인 요청 수신 (socialType = {})", loginRequest.socialType());
 		SocialService socialService = authService.findSocialService(loginRequest.socialType());
 		UserInformationResponse userInformationResponse = socialService.getInfo(code);
 		LoginResponse loginResponse = authService.login(userInformationResponse);
