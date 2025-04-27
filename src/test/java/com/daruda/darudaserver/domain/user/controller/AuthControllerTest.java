@@ -136,7 +136,7 @@ class AuthControllerTest {
 		String nickname = "tester";
 		String email = "test@example.com";
 		JwtTokenResponse jwtTokenResponse = new JwtTokenResponse("accessToken", "refreshToken");
-		SignUpRequest signUpRequest = new SignUpRequest(nickname, Positions.STUDENT, email);
+		SignUpRequest signUpRequest = new SignUpRequest(nickname, Positions.STUDENT.getName(), email);
 		SignUpSuccessResponse mockResponse = SignUpSuccessResponse.of(nickname, null, email, jwtTokenResponse);
 
 		when(authService.register(signUpRequest.email(), signUpRequest.nickname(), signUpRequest.positions()))

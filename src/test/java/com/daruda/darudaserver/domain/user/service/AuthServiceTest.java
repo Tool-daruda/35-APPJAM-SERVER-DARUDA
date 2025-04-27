@@ -65,8 +65,8 @@ public class AuthServiceTest {
 		// given
 		String email = "test@example.com";
 		String nickname = "tester";
-		Positions positions = Positions.STUDENT;
-		UserEntity mockUser = UserEntity.of(email, nickname, positions);
+		String positionStr = Positions.STUDENT.getName();
+		UserEntity mockUser = UserEntity.of(email, nickname, Positions.fromString(positionStr));
 		ReflectionTestUtils.setField(mockUser, "id", 1L);
 		JwtTokenResponse mockTokenResponse = new JwtTokenResponse("accessToken", "refreshToken");
 
@@ -75,7 +75,7 @@ public class AuthServiceTest {
 		when(tokenService.createToken(1L)).thenReturn(mockTokenResponse);
 
 		// when
-		SignUpSuccessResponse response = authService.register(email, nickname, positions);
+		SignUpSuccessResponse response = authService.register(email, nickname, positionStr);
 
 		// then
 		assertThat(response).isNotNull();
@@ -94,13 +94,13 @@ public class AuthServiceTest {
 		// given
 		String email = "test@example.com";
 		String nickname = "tester";
-		Positions positions = Positions.STUDENT;
+		String positionStr = Positions.STUDENT.getName();
 
 		when(userRepository.existsByEmail(email)).thenReturn(true);
 
 		// when
 		BusinessException exception = assertThrows(BusinessException.class,
-			() -> authService.register(email, nickname, positions));
+			() -> authService.register(email, nickname, positionStr));
 
 		// then
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.DUPLICATED_EMAIL);

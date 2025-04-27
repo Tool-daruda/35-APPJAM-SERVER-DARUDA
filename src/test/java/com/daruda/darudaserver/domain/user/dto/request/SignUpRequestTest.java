@@ -43,7 +43,7 @@ class SignUpRequestTest {
 	@DisplayName("검증 성공")
 	void validSignUpRequest() {
 		// given
-		SignUpRequest request = new SignUpRequest("tester", Positions.STUDENT, "test@example.com");
+		SignUpRequest request = new SignUpRequest("tester", Positions.STUDENT.getName(), "test@example.com");
 		when(validator.validate(request)).thenReturn(Set.of());
 
 		// when
@@ -58,7 +58,7 @@ class SignUpRequestTest {
 	@DisplayName("검증 실패 - 닉네임이 null")
 	void invalidNickname_Null() {
 		// given
-		SignUpRequest request = new SignUpRequest(null, Positions.STUDENT, "test@example.com");
+		SignUpRequest request = new SignUpRequest(null, Positions.STUDENT.getName(), "test@example.com");
 		ConstraintViolation<SignUpRequest> violation = createViolation(request, "닉네임은 필수 입력값입니다");
 		when(validator.validate(request)).thenReturn(Set.of(violation));
 
@@ -75,7 +75,7 @@ class SignUpRequestTest {
 	@DisplayName("검증 실패 - 닉네임이 10자를 초과")
 	void invalidNickname_TooLong() {
 		// given
-		SignUpRequest request = new SignUpRequest("tester123456789", Positions.STUDENT, "test@example.com");
+		SignUpRequest request = new SignUpRequest("tester123456789", Positions.STUDENT.getName(), "test@example.com");
 		ConstraintViolation<SignUpRequest> violation = createViolation(request, "닉네임은 최대 10자까지 가능합니다.");
 		when(validator.validate(request)).thenReturn(Set.of(violation));
 
@@ -109,7 +109,7 @@ class SignUpRequestTest {
 	@DisplayName("검증 실패 - 이메일이 null")
 	void invalidEmail_Null() {
 		// given
-		SignUpRequest request = new SignUpRequest("tester", Positions.STUDENT, null);
+		SignUpRequest request = new SignUpRequest("tester", Positions.STUDENT.getName(), null);
 		ConstraintViolation<SignUpRequest> violation = createViolation(request, "이메일은 필수 입력값입니다");
 		when(validator.validate(request)).thenReturn(Set.of(violation));
 
@@ -126,7 +126,7 @@ class SignUpRequestTest {
 	@DisplayName("검증 실패 - 이메일 형식이 잘못됨")
 	void invalidEmail_Format() {
 		// given
-		SignUpRequest request = new SignUpRequest("tester", Positions.STUDENT, "invalid-email");
+		SignUpRequest request = new SignUpRequest("tester", Positions.STUDENT.getName(), "invalid-email");
 		ConstraintViolation<SignUpRequest> violation = createViolation(request, "이메일 형식에 맞지 않습니다");
 		when(validator.validate(request)).thenReturn(Set.of(violation));
 

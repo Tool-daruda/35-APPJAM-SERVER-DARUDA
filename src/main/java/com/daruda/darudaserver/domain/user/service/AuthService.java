@@ -41,10 +41,12 @@ public class AuthService {
 	private final ToolScrapRepository toolScrapRepository;
 
 	@Transactional
-	public SignUpSuccessResponse register(final String email, final String nickname, final Positions positions) {
+	public SignUpSuccessResponse register(final String email, final String nickname, final String positionStr) {
 		if (userRepository.existsByEmail(email)) {
 			throw new BusinessException(ErrorCode.DUPLICATED_EMAIL);
 		}
+
+		Positions positions = Positions.fromString(positionStr);
 
 		UserEntity userEntity = UserEntity.of(email, nickname, positions);
 
