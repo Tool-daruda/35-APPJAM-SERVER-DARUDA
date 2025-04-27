@@ -74,15 +74,15 @@ public class UserService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 		log.debug("사용자를 성공적으로 조회하였습니다., {}", userId);
 
-		if (isDuplicatedNickname(nickname)) {
-			throw new BusinessException(ErrorCode.DUPLICATED_NICKNAME);
-		}
-
 		Positions positions = positionStr != null ? Positions.fromString(positionStr) : null;
 
 		if (nickname == null) {
 			userEntity.updatePositions(positions);
 			return UpdateMyResponse.of(userEntity.getNickname(), positions);
+		}
+
+		if (isDuplicatedNickname(nickname)) {
+			throw new BusinessException(ErrorCode.DUPLICATED_NICKNAME);
 		}
 
 		if (positions == null) {
