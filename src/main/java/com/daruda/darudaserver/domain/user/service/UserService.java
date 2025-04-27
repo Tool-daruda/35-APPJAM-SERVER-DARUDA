@@ -65,13 +65,6 @@ public class UserService {
 
 	}
 
-	public Boolean getToolScrap(final UserEntity user, final Tool tool) {
-		return (user != null
-			&& toolScrapRepository.findByUserAndTool(user, tool)
-			.map(toolScrap -> !toolScrap.isDelYn())
-			.orElse(false));
-	}
-
 	public UpdateMyResponse updateMy(Long userId, String nickname, Positions positions) {
 		UserEntity userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -94,5 +87,11 @@ public class UserService {
 		log.debug("사용자 정보를 성공적으로 업데이트 했습니다., {} {}", nickname, positions);
 
 		return UpdateMyResponse.of(nickname, positions);
+	}
+
+	private Boolean getToolScrap(final UserEntity user, final Tool tool) {
+		return toolScrapRepository.findByUserAndTool(user, tool)
+			.map(toolScrap -> !toolScrap.isDelYn())
+			.orElse(false);
 	}
 }
