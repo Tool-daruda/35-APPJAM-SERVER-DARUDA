@@ -91,7 +91,6 @@ class KakaoServiceTest {
 		String clientId = "test-client-id";
 		String redirectUri = "http://localhost:8080/callback";
 		String code = "test-code";
-		String accessToken = "test-access-token";
 		KakaoTokenResponse tokenResponse = new KakaoTokenResponse("test", "accessToken", "refreshToken");
 
 		when(kakaoAPiFeignClient.getAccessToken(
@@ -103,5 +102,20 @@ class KakaoServiceTest {
 		// when & then
 		BusinessException exception = assertThrows(BusinessException.class, () -> kakaoService.getInfo(code));
 		assertEquals(ErrorCode.INTERNAL_SERVER_ERROR, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("인가 코드 가져오기 실패")
+	void getAccessToken_ShouldThrowException_WhenErrorOccurs() {
+		// given
+		String code = "test-code";
+		when(kakaoAPiFeignClient.getAccessToken(
+			eq("authorization_code"), eq("test-client-id"), eq("http://localhost:8080/callback"),
+			eq(code), anyString()))
+			.thenThrow(new RuntimeException("API Error"));
+
+		// when & then
+		BusinessException exception = assertThrows(BusinessException.class, () -> kakaoService.getInfo(code));
+		assertEquals(ErrorCode.AUTHENTICATION_CODE_EXPIRED, exception.getErrorCode());
 	}
 }
