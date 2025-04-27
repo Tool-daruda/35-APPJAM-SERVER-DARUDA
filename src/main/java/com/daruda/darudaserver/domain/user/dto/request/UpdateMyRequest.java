@@ -13,4 +13,7 @@ public record UpdateMyRequest(
 	@Nullable
 	Positions positions
 ) {
+	public static UpdateMyRequest of(String nickname, Positions positions) {
+		return new UpdateMyRequest(nickname, positions);
+	}
 }
