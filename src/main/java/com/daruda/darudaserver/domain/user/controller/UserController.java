@@ -22,9 +22,7 @@ import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
-import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
-import com.daruda.darudaserver.global.error.exception.BusinessException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,9 +44,6 @@ public class UserController {
 	@Operation(summary = "프로필 수정", description = "사용자의 프로필을 수정합니다.")
 	public ResponseEntity<ApiResponse<UpdateMyResponse>> updateProfile(@AuthenticationPrincipal Long userId,
 		@Valid @RequestBody UpdateMyRequest updateMyRequest) {
-		if (updateMyRequest.positions() == null && updateMyRequest.nickname() == null) {
-			throw new BusinessException(ErrorCode.MISSING_PARAMETER);
-		}
 		UpdateMyResponse updateMyResponse = userService.updateProfile(userId, updateMyRequest.nickname(),
 			updateMyRequest.positions());
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(updateMyResponse, SuccessCode.SUCCESS_UPDATE));
