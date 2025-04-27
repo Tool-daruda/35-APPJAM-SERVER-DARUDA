@@ -32,10 +32,10 @@ public class TokenService {
 		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 
 		String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
-		log.debug("AccessToken을 정상적으로 생성하였습니다, {}", accessToken);
+		log.debug("AccessToken 생성 완료 (length={} / masked)", accessToken.length());
 
 		String refreshToken = updateRefreshToken(userId, userAuthentication);
-		log.debug("RefreshToken을 정상적으로 생성하였습니다, {}", refreshToken);
+		log.debug("RefreshToken 생성 완료 (length={} / masked)", refreshToken.length());
 
 		return JwtTokenResponse.of(accessToken, refreshToken);
 	}
