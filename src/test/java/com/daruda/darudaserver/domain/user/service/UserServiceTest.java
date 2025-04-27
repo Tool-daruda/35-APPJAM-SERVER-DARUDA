@@ -185,6 +185,36 @@ class UserServiceTest {
 	}
 
 	@Test
+	@DisplayName("프로필 업데이트 실패 - 파라미터 없음")
+	void updateProfile_noParameter() {
+		// given
+		Long userId = 1L;
+
+		// when
+		BusinessException exception = assertThrows(BusinessException.class,
+			() -> userService.updateProfile(userId, null, null));
+
+		// then
+		assertEquals(ErrorCode.MISSING_PARAMETER, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("프로필 업데이트 실패 - 사용자 없음")
+	void updateProfile_userNotFound() {
+		// given
+		Long userId = 1L;
+		String nickname = "tester";
+		Positions positions = Positions.STUDENT;
+
+		// when
+		BusinessException exception = assertThrows(BusinessException.class,
+			() -> userService.updateProfile(userId, nickname, positions));
+
+		// then
+		assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+	}
+
+	@Test
 	@DisplayName("프로필 업데이트 실패 - 중복된 닉네임")
 	void updateProfile_duplicatedNickname() {
 		// given
@@ -197,9 +227,11 @@ class UserServiceTest {
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 		when(userRepository.existsByNickname(nickname)).thenReturn(true);
 
-		// when & then
+		// when
 		BusinessException exception = assertThrows(BusinessException.class,
 			() -> userService.updateProfile(userId, nickname, positions));
+
+		// then
 		assertEquals(ErrorCode.DUPLICATED_NICKNAME, exception.getErrorCode());
 	}
 }
