@@ -78,10 +78,11 @@ class AuthControllerTest {
 		SocialType socialType = SocialType.KAKAO;
 		SocialService socialService = mock(SocialService.class);
 
+		// when
 		when(authService.findSocialService(socialType)).thenReturn(socialService);
 		when(socialService.getLoginUrl()).thenReturn(redirectUrl);
 
-		// when & then
+		// then
 		mockMvc.perform(get("/api/v1/auth/login-url")
 				.param("socialType", socialType.name()))
 			.andExpect(status().isOk())
@@ -104,13 +105,14 @@ class AuthControllerTest {
 		UserInformationResponse userInformationResponse = UserInformationResponse.of(1L, "test@example.com", nickname);
 		JwtTokenResponse jwtTokenResponse = JwtTokenResponse.of("accessToken", "refreshToken");
 		LoginResponse loginResponse = LoginResponse.ofRegisteredUser(jwtTokenResponse, nickname);
-
 		SocialService socialService = mock(SocialService.class);
+
+		// when
 		when(authService.findSocialService(loginRequest.socialType())).thenReturn(socialService);
 		when(socialService.getInfo(code)).thenReturn(userInformationResponse);
 		when(authService.login(userInformationResponse)).thenReturn(loginResponse);
 
-		// when & then
+		// then
 		mockMvc.perform(post("/api/v1/auth/login")
 				.param("code", code)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -139,10 +141,11 @@ class AuthControllerTest {
 		SignUpRequest signUpRequest = new SignUpRequest(nickname, Positions.STUDENT.getName(), email);
 		SignUpSuccessResponse mockResponse = SignUpSuccessResponse.of(nickname, null, email, jwtTokenResponse);
 
+		// when
 		when(authService.register(signUpRequest.email(), signUpRequest.nickname(), signUpRequest.positions()))
 			.thenReturn(mockResponse);
 
-		// when & then
+		// then
 		mockMvc.perform(post("/api/v1/auth/sign-up")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(signUpRequest)))
@@ -162,14 +165,17 @@ class AuthControllerTest {
 		// given
 		Long userId = 1L;
 		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
-		String token = jwtTokenProvider.generateAccessToken(authentication);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 
+		// when
 		doReturn(userId).when(authService).logout(userId);
+		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
-		// when & then
+		// then
+		String token = jwtTokenProvider.generateAccessToken(authentication);
+
 		mockMvc.perform(post("/api/v1/auth/logout")
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
@@ -187,9 +193,10 @@ class AuthControllerTest {
 		ReissueTokenRequest request = new ReissueTokenRequest("refreshToken");
 		JwtTokenResponse jwtTokenResponse = new JwtTokenResponse("newAccessToken", "newRefreshToken");
 
+		// when
 		when(tokenService.reissueToken(request.refreshToken())).thenReturn(jwtTokenResponse);
 
-		// when & then
+		// then
 		mockMvc.perform(post("/api/v1/auth/reissue")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
@@ -206,7 +213,6 @@ class AuthControllerTest {
 	@Test
 	@DisplayName("회원 탈퇴 성공")
 	void withdraw() throws Exception {
-
 		mockMvc.perform(delete("/api/v1/auth/withdraw")
 				.principal(() -> Long.toString(1L)))
 			.andExpect(status().isOk())
