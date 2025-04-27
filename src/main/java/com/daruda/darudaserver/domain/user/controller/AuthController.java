@@ -16,7 +16,7 @@ import com.daruda.darudaserver.domain.user.dto.request.SignUpRequest;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
-import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
+import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.service.AuthService;
 import com.daruda.darudaserver.domain.user.service.SocialService;
@@ -63,8 +63,8 @@ public class AuthController {
 		@RequestBody LoginRequest loginRequest) {
 		log.debug("CODE = {}", code);
 		SocialService socialService = authService.findSocialService(loginRequest.socialType());
-		UserInfo userInfo = socialService.getInfo(code);
-		LoginResponse loginResponse = authService.login(userInfo);
+		UserInformationResponse userInformationResponse = socialService.getInfo(code);
+		LoginResponse loginResponse = authService.login(userInformationResponse);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(loginResponse, SuccessCode.SUCCESS_LOGIN));
 	}
 
