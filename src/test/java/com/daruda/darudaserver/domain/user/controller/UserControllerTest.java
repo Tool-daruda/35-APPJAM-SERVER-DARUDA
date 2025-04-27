@@ -76,16 +76,19 @@ class UserControllerTest {
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
 		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
-		String token = jwtTokenProvider.generateAccessToken(authentication);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 		UpdateMyRequest request = UpdateMyRequest.of(nickname, positions.getName());
 		UpdateMyResponse response = UpdateMyResponse.of(nickname, positions);
 
+		// when
 		when(userService.updateProfile(userId, request.nickname(), request.positions())).thenReturn(response);
+		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
-		// when & then
+		// then
+		String token = jwtTokenProvider.generateAccessToken(authentication);
+
 		mockMvc.perform(patch("/api/v1/user/profile")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))
@@ -103,15 +106,18 @@ class UserControllerTest {
 		// given
 		Long userId = 1L;
 		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
-		String token = jwtTokenProvider.generateAccessToken(authentication);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 		FavoriteToolsResponse response = FavoriteToolsResponse.of(List.of());
 
+		// when
 		when(userService.getFavoriteTools(userId)).thenReturn(response);
+		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
-		// when & then
+		// then
+		String token = jwtTokenProvider.generateAccessToken(authentication);
+
 		mockMvc.perform(get("/api/v1/user/scrap-tools")
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
@@ -126,18 +132,18 @@ class UserControllerTest {
 		// given
 		Long userId = 1L;
 		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
-		String token = jwtTokenProvider.generateAccessToken(authentication);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
-
-		// Pageable 객체 생성 (컨트롤러에서 사용하는 값과 동일하게 설정)
 		Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-		// 스터빙 수정: Pageable 객체를 인자로 전달
+		// when
 		when(boardService.getUserBoards(userId, pageable)).thenReturn(null);
+		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
-		// when & then
+		// hen
+		String token = jwtTokenProvider.generateAccessToken(authentication);
+
 		mockMvc.perform(get("/api/v1/user/boards")
 				.header("Authorization", "Bearer " + token)
 				.param("page", "1") // 페이지 번호
@@ -156,15 +162,18 @@ class UserControllerTest {
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
 		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
-		String token = jwtTokenProvider.generateAccessToken(authentication);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 		MyProfileResponse response = MyProfileResponse.of(nickname, positions);
 
+		// when
 		when(userService.getMyProfile(userId)).thenReturn(response);
+		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
-		// when & then
+		// then
+		String token = jwtTokenProvider.generateAccessToken(authentication);
+
 		mockMvc.perform(get("/api/v1/user/profile")
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
@@ -181,13 +190,17 @@ class UserControllerTest {
 		Long userId = 1L;
 		String nickname = "tester";
 		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
-		String token = jwtTokenProvider.generateAccessToken(authentication);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
-		when(userService.isDuplicatedNickname(nickname)).thenReturn(false);
 
-		// when & then
+		// when
+		when(userService.isDuplicatedNickname(nickname)).thenReturn(false);
+		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
+
+		// then
+		String token = jwtTokenProvider.generateAccessToken(authentication);
+
 		mockMvc.perform(
 				get("/api/v1/user/nickname")
 					.header("Authorization", "Bearer " + token)
@@ -204,12 +217,16 @@ class UserControllerTest {
 		// given
 		Long userId = 1L;
 		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
-		String token = jwtTokenProvider.generateAccessToken(authentication);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 
-		// when & then
+		// when
+		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
+
+		// then
+		String token = jwtTokenProvider.generateAccessToken(authentication);
+
 		mockMvc.perform(get("/api/v1/user/scrap-boards")
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
