@@ -44,12 +44,12 @@ public class UserController {
 
 	@PatchMapping("/profile")
 	@Operation(summary = "프로필 수정", description = "사용자의 프로필을 수정합니다.")
-	public ResponseEntity<ApiResponse<UpdateMyResponse>> patchMy(@AuthenticationPrincipal Long userId,
+	public ResponseEntity<ApiResponse<UpdateMyResponse>> updateProfile(@AuthenticationPrincipal Long userId,
 		@Valid @RequestBody UpdateMyRequest updateMyRequest) {
 		if (updateMyRequest.positions() == null && updateMyRequest.nickname() == null) {
 			throw new BusinessException(ErrorCode.MISSING_PARAMETER);
 		}
-		UpdateMyResponse updateMyResponse = userService.updateMy(userId, updateMyRequest.nickname(),
+		UpdateMyResponse updateMyResponse = userService.updateProfile(userId, updateMyRequest.nickname(),
 			updateMyRequest.positions());
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(updateMyResponse, SuccessCode.SUCCESS_UPDATE));
 	}
@@ -64,7 +64,7 @@ public class UserController {
 
 	@GetMapping("/boards")
 	@Operation(summary = "작성한 게시글 목록 조회", description = "사용자가 작성한 게시글 목록을 조회합니다.")
-	public ResponseEntity<ApiResponse<BoardListResponse>> getMyBoards(@AuthenticationPrincipal Long userIdOrNull,
+	public ResponseEntity<ApiResponse<BoardListResponse>> getUserBoards(@AuthenticationPrincipal Long userIdOrNull,
 		@Parameter(description = "조회할 페이지", example = "1")
 		@RequestParam(defaultValue = "1", value = "page") int pageNo,
 		@Parameter(description = "조회할 게시글 개수", example = "5")
@@ -72,7 +72,7 @@ public class UserController {
 		@Parameter(description = "정렬 기준", example = "createdAt")
 		@RequestParam(defaultValue = "createdAt", value = "criteria") String criteria) {
 		Pageable pageable = PageRequest.of(pageNo - 1, size, Sort.by(Sort.Direction.DESC, criteria));
-		BoardListResponse boardListResponse = boardService.getMyBoards(userIdOrNull, pageable);
+		BoardListResponse boardListResponse = boardService.getUserBoards(userIdOrNull, pageable);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardListResponse, SuccessCode.SUCCESS_FETCH));
 	}
 

@@ -65,7 +65,7 @@ public class UserService {
 
 	}
 
-	public UpdateMyResponse updateMy(Long userId, String nickname, Positions positions) {
+	public UpdateMyResponse updateProfile(Long userId, String nickname, Positions positions) {
 		UserEntity userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 		log.debug("사용자를 성공적으로 조회하였습니다., {}", userId);
