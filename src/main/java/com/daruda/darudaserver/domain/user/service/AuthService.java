@@ -13,7 +13,7 @@ import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
-import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
+import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
@@ -58,8 +58,8 @@ public class AuthService {
 		return SignUpSuccessResponse.of(nickname, positions, email, jwtTokenResponse);
 	}
 
-	public LoginResponse login(final UserInfo userInfo) {
-		String email = userInfo.email();
+	public LoginResponse login(final UserInformationResponse userInformationResponse) {
+		String email = userInformationResponse.email();
 		Optional<UserEntity> userEntity = userRepository.findByEmail(email);
 		//등록된 회원이 아닌 경우
 		if (userEntity.isEmpty()) {

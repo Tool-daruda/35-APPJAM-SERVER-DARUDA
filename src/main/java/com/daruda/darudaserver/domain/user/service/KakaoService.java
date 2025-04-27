@@ -3,7 +3,7 @@ package com.daruda.darudaserver.domain.user.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
+import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
 import com.daruda.darudaserver.domain.user.dto.response.kakao.KakaoTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.kakao.KakaoUserDto;
 import com.daruda.darudaserver.global.auth.client.KakaoAPiFeignClient;
@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class KakaoService implements SocialService {
+
 	private final KakaoFeignClient kakaoFeignClient;
 	private final KakaoAPiFeignClient kakaoAPiFeignClient;
 
@@ -32,14 +33,14 @@ public class KakaoService implements SocialService {
 			+ redirectUri;
 	}
 
-	public UserInfo getInfo(String code) {
+	public UserInformationResponse getInfo(String code) {
 		String accessToken = getAccessToken(code);
 		try {
 			KakaoUserDto kakaoUserDto = kakaoFeignClient.getUserInformation(
 				"Bearer " + accessToken,
 				"application/x-www-form-urlencoded;charset=utf-8");
 			log.debug("카카오로부터 사용자 정보를 성공적으로 불러왔습니다. Id:, {}", kakaoUserDto.id());
-			return new UserInfo(
+			return new UserInformationResponse(
 				kakaoUserDto.id(),
 				kakaoUserDto.kakaoAccount().email(),
 				kakaoUserDto.kakaoAccount().kakaoUserProfile().nickname()
@@ -60,8 +61,8 @@ public class KakaoService implements SocialService {
 				code,
 				"application/x-www-form-urlencoded;charset=utf-8"
 			);
-			log.debug("카카오로부터 AccessToken을 성공적으로 받았습니다, {}", kakaoTokenResponse.getAccessToken());
-			return kakaoTokenResponse.getAccessToken();
+			log.debug("카카오로부터 AccessToken을 성공적으로 받았습니다, {}", kakaoTokenResponse.accessToken());
+			return kakaoTokenResponse.accessToken();
 		} catch (Exception e) {
 			log.error("Error on: ", e);
 			throw new BusinessException(ErrorCode.AUTHENTICATION_CODE_EXPIRED);
