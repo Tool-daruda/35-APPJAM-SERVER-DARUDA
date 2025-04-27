@@ -119,7 +119,7 @@ class UserServiceTest {
 
 	@Test
 	@DisplayName("프로필 업데이트 성공 - 닉네임과 포지션 모두 변경")
-	void updateMy_success() {
+	void updateProfile_success() {
 		// given
 		Long userId = 1L;
 		String email = "test@example.com";
@@ -133,7 +133,7 @@ class UserServiceTest {
 		when(userRepository.existsByNickname(newNickname)).thenReturn(false);
 
 		// when
-		UpdateMyResponse response = userService.updateMy(userId, newNickname, newPositions);
+		UpdateMyResponse response = userService.updateProfile(userId, newNickname, newPositions);
 
 		// then
 		assertNotNull(response);
@@ -143,7 +143,7 @@ class UserServiceTest {
 
 	@Test
 	@DisplayName("프로필 업데이트 성공 - 닉네임 변경")
-	void updateMy_nickname_success() {
+	void updateProfile_nickname_success() {
 		// given
 		Long userId = 1L;
 		String email = "test@example.com";
@@ -156,7 +156,7 @@ class UserServiceTest {
 		when(userRepository.existsByNickname(newNickname)).thenReturn(false);
 
 		// when
-		UpdateMyResponse response = userService.updateMy(userId, newNickname, null);
+		UpdateMyResponse response = userService.updateProfile(userId, newNickname, null);
 
 		// then
 		assertNotNull(response);
@@ -165,7 +165,7 @@ class UserServiceTest {
 
 	@Test
 	@DisplayName("프로필 업데이트 성공 - 포지션 변경")
-	void updateMy_position_success() {
+	void updateProfile_position_success() {
 		// given
 		Long userId = 1L;
 		String email = "test@example.com";
@@ -177,7 +177,7 @@ class UserServiceTest {
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 
 		// when
-		UpdateMyResponse response = userService.updateMy(userId, null, newPositions);
+		UpdateMyResponse response = userService.updateProfile(userId, null, newPositions);
 
 		// then
 		assertNotNull(response);
@@ -186,7 +186,7 @@ class UserServiceTest {
 
 	@Test
 	@DisplayName("프로필 업데이트 실패 - 중복된 닉네임")
-	void updateMy_duplicatedNickname() {
+	void updateProfile_duplicatedNickname() {
 		// given
 		Long userId = 1L;
 		String email = "test@example.com";
@@ -199,7 +199,7 @@ class UserServiceTest {
 
 		// when & then
 		BusinessException exception = assertThrows(BusinessException.class,
-			() -> userService.updateMy(userId, nickname, positions));
+			() -> userService.updateProfile(userId, nickname, positions));
 		assertEquals(ErrorCode.DUPLICATED_NICKNAME, exception.getErrorCode());
 	}
 }
