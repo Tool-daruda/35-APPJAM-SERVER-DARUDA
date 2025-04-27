@@ -94,7 +94,7 @@ public class AuthController {
 
 	@DeleteMapping("/withdraw")
 	@Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 진행합니다.")
-	public ResponseEntity<ApiResponse<?>> withdraw(@AuthenticationPrincipal Long userId) {
+	public ResponseEntity<ApiResponse<Void>> withdraw(@AuthenticationPrincipal Long userId) {
 		authService.withdraw(userId);
 		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_WITHDRAW));
 	}
