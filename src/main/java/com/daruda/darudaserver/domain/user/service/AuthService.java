@@ -79,6 +79,7 @@ public class AuthService {
 		return userId;
 	}
 
+	@Transactional
 	public void withdraw(Long userId) {
 		//사용자 찾기
 		UserEntity userEntity = userRepository.findById(userId)
