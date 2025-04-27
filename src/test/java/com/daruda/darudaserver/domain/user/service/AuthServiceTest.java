@@ -23,7 +23,7 @@ import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
-import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
+import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
@@ -125,10 +125,10 @@ public class AuthServiceTest {
 		when(mockUser.getNickname()).thenReturn(nickname);
 		when(tokenService.createToken(userId)).thenReturn(mockTokenResponse);
 
-		UserInfo userInfo = UserInfo.of(userId, email, nickname);
+		UserInformationResponse userInformationResponse = UserInformationResponse.of(userId, email, nickname);
 
 		// when
-		LoginResponse response = authService.login(userInfo);
+		LoginResponse response = authService.login(userInformationResponse);
 
 		// then
 		assertThat(response).isNotNull();
@@ -151,10 +151,10 @@ public class AuthServiceTest {
 
 		when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-		UserInfo userInfo = UserInfo.of(userId, email, nickname);
+		UserInformationResponse userInformationResponse = UserInformationResponse.of(userId, email, nickname);
 
 		// when
-		LoginResponse response = authService.login(userInfo);
+		LoginResponse response = authService.login(userInformationResponse);
 
 		// then
 		assertThat(response).isNotNull();

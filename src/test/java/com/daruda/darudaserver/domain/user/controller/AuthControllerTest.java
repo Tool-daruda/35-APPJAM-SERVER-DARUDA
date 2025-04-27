@@ -26,7 +26,7 @@ import com.daruda.darudaserver.domain.user.dto.request.SignUpRequest;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
-import com.daruda.darudaserver.domain.user.dto.response.UserInfo;
+import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.service.AuthService;
@@ -101,14 +101,14 @@ class AuthControllerTest {
 		String code = "1234";
 		String nickname = "tester";
 		LoginRequest loginRequest = new LoginRequest(SocialType.KAKAO);
-		UserInfo userInfo = UserInfo.of(1L, "test@example.com", nickname);
+		UserInformationResponse userInformationResponse = UserInformationResponse.of(1L, "test@example.com", nickname);
 		JwtTokenResponse jwtTokenResponse = JwtTokenResponse.of("accessToken", "refreshToken");
 		LoginResponse loginResponse = LoginResponse.ofRegisteredUser(jwtTokenResponse, nickname);
 
 		SocialService socialService = mock(SocialService.class);
 		when(authService.findSocialService(loginRequest.socialType())).thenReturn(socialService);
-		when(socialService.getInfo(code)).thenReturn(userInfo);
-		when(authService.login(userInfo)).thenReturn(loginResponse);
+		when(socialService.getInfo(code)).thenReturn(userInformationResponse);
+		when(authService.login(userInformationResponse)).thenReturn(loginResponse);
 
 		// when & then
 		mockMvc.perform(post("/api/v1/auth/login")
@@ -126,7 +126,7 @@ class AuthControllerTest {
 		// verify
 		verify(authService).findSocialService(loginRequest.socialType());
 		verify(socialService).getInfo(code);
-		verify(authService).login(userInfo);
+		verify(authService).login(userInformationResponse);
 	}
 
 	@Test
