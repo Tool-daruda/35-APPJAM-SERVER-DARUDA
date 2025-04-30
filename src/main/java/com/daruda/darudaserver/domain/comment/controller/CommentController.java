@@ -38,7 +38,7 @@ public class CommentController {
 
 		@Parameter(description = "작성할 댓글")
 		@RequestBody @Valid CreateCommentRequest request
-	) throws IOException {
+	) {
 		CreateCommentResponse response = commentService.postComment(userId, boardId, request);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(response, SuccessCode.SUCCESS_CREATE));
 	}
@@ -66,8 +66,8 @@ public class CommentController {
 		@AuthenticationPrincipal Long userId,
 
 		@Parameter(description = "comment Id", example = "1")
-		@PathVariable("comment-id") Long commentId)
-	{
+		@PathVariable("comment-id") Long commentId
+	) {
 		commentService.deleteComment(userId, commentId);
 		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
 	}

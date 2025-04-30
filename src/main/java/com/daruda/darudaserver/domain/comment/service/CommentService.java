@@ -19,6 +19,7 @@ import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import com.daruda.darudaserver.global.error.exception.ForbiddenException;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -64,19 +65,6 @@ public class CommentService {
 		);
 	}
 
-	public void deleteComment(Long userId, Long commentId) {
-		//사용자 존재 여부 검사
-		userRepository.findById(userId)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-		log.debug("사용자를 성공적으로 조회하였습니다. {}", userId);
-		//댓글 존재 여부 검사 및 entity 반환
-		CommentEntity commentEntity = commentRepository.findById(commentId)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
-		log.debug("댓글을 성공적으로 조회하였습니다. {}", commentId);
-		//댓글 삭제
-		commentRepository.delete(commentEntity);
-	}
-
 	public GetCommentRetrieveResponse getComments(Long boardId, int size, Long lastCommentId) {
 		Long cursor = (lastCommentId == null) ? Long.MAX_VALUE : lastCommentId;
 		PageRequest pageRequest = PageRequest.of(0, size + 1);
@@ -107,4 +95,16 @@ public class CommentService {
 		return new GetCommentRetrieveResponse(commentResponse, scrollPaginationDto);
 	}
 
+	public void deleteComment(Long userId, Long commentId) {
+		// 댓글 유효성 검사
+		CommentEntity comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
+
+		// 댓글을 작성한 사용자와 요청한 사용자가 일치하는지 확인
+		if (!comment.getUser().getId().equals(userId)) {
+			throw new ForbiddenException(ErrorCode.NO_PERMISSION_TO_DELETE);
+		}
+
+		commentRepository.delete(comment);
+	}
 }

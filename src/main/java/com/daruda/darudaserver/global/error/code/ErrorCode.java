@@ -34,6 +34,7 @@ public enum ErrorCode {
 
 	/* 403 */
 	BOARD_FORBIDDEN(HttpStatus.FORBIDDEN, "E403001", "게시판 접근 권한이 없습니다."),
+	NO_PERMISSION_TO_DELETE(HttpStatus.FORBIDDEN, "E403002", "삭제 권한이 없습니다."),
 
 	/* 404 NOT FOUND */
 
