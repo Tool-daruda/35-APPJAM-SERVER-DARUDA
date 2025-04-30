@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,9 +21,6 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
-	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-	private final JwtTokenProvider jwtTokenProvider;
-
 	private static final String[] WHITE_LIST = {
 		"/swagger-ui/**",
 		"/v3/api-docs/**",
@@ -43,6 +39,8 @@ public class SecurityConfig {
 		"/api/v1/board",
 		"/api/v1/board/{board-id}"
 	};
+	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	private final JwtTokenProvider jwtTokenProvider;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -58,7 +56,15 @@ public class SecurityConfig {
 					.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 			.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
 				authorizationManagerRequestMatcherRegistry
-					.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() //OPTION 추가
+					.requestMatchers(HttpMethod.OPTIONS, "/**")
+					.permitAll() //OPTION 추가
+
+					.requestMatchers(HttpMethod.POST, "/api/v1/comment", "/api/v1/board", "/api/v1/board/{board-id}")
+					.authenticated()
+
+					.requestMatchers(WHITE_LIST)
+					.permitAll()
+
 					.anyRequest()
 					.authenticated())
 			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
@@ -67,10 +73,5 @@ public class SecurityConfig {
 		http.cors(cors -> cors.configurationSource(CorsConfig.configurationSource()));
 
 		return http.build();
-	}
-
-	@Bean
-	public WebSecurityCustomizer webSecurityCustomizer() {
-		return web -> web.ignoring().requestMatchers(WHITE_LIST);
 	}
 }
