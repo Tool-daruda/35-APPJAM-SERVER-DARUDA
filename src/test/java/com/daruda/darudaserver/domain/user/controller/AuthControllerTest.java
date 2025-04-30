@@ -213,10 +213,26 @@ class AuthControllerTest {
 	@Test
 	@DisplayName("회원 탈퇴 성공")
 	void withdraw() throws Exception {
+		// given
+		Long userId = 1L;
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		SecurityContext context = SecurityContextHolder.createEmptyContext();
+		context.setAuthentication(authentication);
+		SecurityContextHolder.setContext(context);
+
+		// when
+		doNothing().when(authService).withdraw(userId);
+		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
+
+		// then
+		String token = jwtTokenProvider.generateAccessToken(authentication);
+
 		mockMvc.perform(delete("/api/v1/auth/withdraw")
-				.principal(() -> Long.toString(1L)))
+				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_WITHDRAW.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_WITHDRAW.getMessage()));
+
+		verify(authService).withdraw(userId);
 	}
 }
