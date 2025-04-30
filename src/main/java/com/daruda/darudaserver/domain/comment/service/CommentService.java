@@ -66,33 +66,33 @@ public class CommentService {
 	}
 
 	public GetCommentRetrieveResponse getComments(Long boardId, int size, Long lastCommentId) {
+		// 커서 계산 및 댓글 조회
 		Long cursor = (lastCommentId == null) ? Long.MAX_VALUE : lastCommentId;
 		PageRequest pageRequest = PageRequest.of(0, size + 1);
 
-		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId, cursor, pageRequest);
+		List<CommentEntity> rows = commentRepository.findCommentsByBoardId(boardId, cursor, pageRequest);
 
-		ScrollPaginationCollection<CommentEntity> commentCursor = ScrollPaginationCollection.of(commentEntityList,
-			size);
+		// 현재 페이지와 nextCursor 분리
+		boolean hasNext = rows.size() > size;
 
-		List<GetCommentResponse> commentResponse = commentCursor.getCurrentScrollItems().stream()
-			.map(commentEntity -> GetCommentResponse.builder()
-				.content(commentEntity.getContent())
-				.image(commentEntity.getPhotoUrl())
-				.commentId(commentEntity.getId())
-				.nickname(commentEntity.getUser().getNickname())
-				.updatedAt(commentEntity.getUpdatedAt())
+		List<CommentEntity> currentRows = hasNext ? rows.subList(0, size) : rows;
+		long nextCursor = hasNext ? currentRows.get(currentRows.size() - 1).getId() : -1L;
+
+		// DTO 매핑 및 페이지 정보 생성
+		List<GetCommentResponse> commentDtos = currentRows.stream()
+			.map(c -> GetCommentResponse.builder()
+				.commentId(c.getId())
+				.content(c.getContent())
+				.image(c.getPhotoUrl())
+				.nickname(c.getUser().getNickname())
+				.updatedAt(c.getUpdatedAt())
 				.build())
 			.toList();
 
-		// ScrollPaginationCollection을 이용한 페이지네이션 처리
-		// 다음 페이지를 위한 커서 계산
-		long nextCursor = commentCursor.isLastScroll() ? -1L : commentCursor.getNextCursor().getId();
-
-		// ScrollPaginationDto 생성
-		ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(commentCursor.getTotalElements(), nextCursor);
+		ScrollPaginationDto pageInfo = ScrollPaginationDto.of(commentDtos.size(), nextCursor);
 
 		// 최종 결과 반환
-		return new GetCommentRetrieveResponse(commentResponse, scrollPaginationDto);
+		return new GetCommentRetrieveResponse(commentDtos, pageInfo);
 	}
 
 	public void deleteComment(Long userId, Long commentId) {
