@@ -122,7 +122,7 @@ public class BoardService {
 	public void deleteBoard(final Long userId, final Long boardId) {
 		Board board = validateBoardAndUser(userId, boardId);
 		deleteOriginImages(boardId);
-		List<CommentEntity> commentEntityList = commentRepository.findAllByBoardId(boardId);
+		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
 		List<BoardScrap> scraps = boardScrapRepository.findAllByBoardId(boardId);
 		if (!scraps.isEmpty()) {
 			boardScrapRepository.deleteAll(scraps);
@@ -344,7 +344,7 @@ public class BoardService {
 	}
 
 	public int getCommentCount(final Long boardId) {
-		List<CommentEntity> commentEntityList = commentRepository.findAllByBoardId(boardId);
+		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
 		log.debug("댓글 Entity리스트를 받아옵니다 : " + commentEntityList.size());
 		return commentEntityList.size();
 	}

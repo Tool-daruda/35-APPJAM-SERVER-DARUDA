@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 @Slf4j
 public class CommentService {
+
 	private final CommentRepository commentRepository;
 	private final BoardRepository boardRepository;
 	private final UserRepository userRepository;
@@ -87,11 +88,10 @@ public class CommentService {
 	}
 
 	public GetCommentRetrieveResponse getComments(Long boardId, int size, Long lastCommentId) {
-		List<CommentEntity> commentList;
 		Long cursor = (lastCommentId == null) ? Long.MAX_VALUE : lastCommentId;
 		PageRequest pageRequest = PageRequest.of(0, size + 1);
 
-		List<CommentEntity> commentEntityList = commentRepository.findAllByBoardId(boardId, cursor, pageRequest);
+		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId, cursor, pageRequest);
 
 		ScrollPaginationCollection<CommentEntity> commentCursor = ScrollPaginationCollection.of(commentEntityList,
 			size);
