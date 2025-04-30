@@ -1,11 +1,9 @@
 package com.daruda.darudaserver.domain.comment.service;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.daruda.darudaserver.domain.comment.dto.request.CreateCommentRequest;
 import com.daruda.darudaserver.domain.comment.dto.response.CreateCommentResponse;
@@ -21,7 +19,6 @@ import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
-import com.daruda.darudaserver.global.s3.S3Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,42 +33,35 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final BoardRepository boardRepository;
 	private final UserRepository userRepository;
-	private final S3Service s3Service;
 
-	public CreateCommentResponse postComment(Long userId, Long boardId, CreateCommentRequest createCommentRequest,
-		MultipartFile image) throws IOException {
-		//게시글과 사용자 존재 여부 검사
+	public CreateCommentResponse postComment(
+		Long userId, Long boardId, CreateCommentRequest request
+	) {
+		// 사용자 및 게시글 유효성 검사
+		UserEntity user = userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
 		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
-		log.debug("게시글을 성공적으로 조회하였습니다. {}", boardId);
-		UserEntity userEntity = userRepository.findById(userId)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-		log.debug("사용자를 성공적으로 조회하였습니다. {}", userId);
 
-		String photoUrl = null;
+		// 엔티티 생성 및 저장
+		CommentEntity comment = CommentEntity.of(
+			request.content(),
+			request.photoUrl(),
+			user,
+			board
+		);
 
-		if (!(image == null || image.isEmpty())) {
-			//S3에 이미지 저장
-			String imageName = s3Service.uploadImage(image);
-			photoUrl = s3Service.getImageUrl(imageName);
-		}
-		//댓글 entity 생성
-		CommentEntity commentEntity = CommentEntity.builder()
-			.user(userEntity)
-			.board(board)
-			.photoUrl(photoUrl)
-			.content(createCommentRequest.content())
-			.build();
+		commentRepository.save(comment);
 
-		//댓글 entity 생성 및 댓글 ID 추출
-		Long commentId = commentRepository.save(commentEntity).getId();
-		log.debug("댓글을 정상적으로 생성하였습니다. {}", commentId);
-
-		//ResponseDto 변환
-		CreateCommentResponse createCommentResponse = CreateCommentResponse.of(commentId, commentEntity.getContent(),
-			commentEntity.getUpdatedAt(), commentEntity.getPhotoUrl(), userEntity.getNickname());
-
-		return createCommentResponse;
+		// 응답 DTO 반환
+		return CreateCommentResponse.of(
+			comment.getId(),
+			comment.getContent(),
+			comment.getCreatedAt(),
+			comment.getPhotoUrl(),
+			user.getNickname()
+		);
 	}
 
 	public void deleteComment(Long userId, Long commentId) {
