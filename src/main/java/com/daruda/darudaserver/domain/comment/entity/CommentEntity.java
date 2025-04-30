@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Table(name = "comment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql =
-	"UPDATE comment SET is_deleted = true, deleted_at = NOW()" +
+	"UPDATE comment SET is_deleted = true, deleted_at = NOW() " +
 	"WHERE comment_id = ?")
 @SQLRestriction("is_deleted = false")
 public class CommentEntity extends BaseTimeEntity {

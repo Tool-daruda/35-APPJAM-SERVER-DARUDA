@@ -31,8 +31,6 @@ import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
-import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.ForbiddenException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
@@ -172,7 +170,7 @@ class CommentServiceTest {
 				commentService.deleteComment(stranger.getId(), comment.getId()))
 				.isInstanceOf(ForbiddenException.class);
 
-			then(commentRepository).shouldHaveNoMoreInteractions();
+			then(commentRepository).should(never()).delete(any());
 		}
 
 		@Test
