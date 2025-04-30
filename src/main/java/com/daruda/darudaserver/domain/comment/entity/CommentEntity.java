@@ -28,7 +28,7 @@ public class CommentEntity extends BaseTimeEntity {
 	@Column(name = "comment_id")
 	private Long id;
 
-	@Column(nullable = false, length = 1_000)
+	@Column(length = 1_000)
 	private String content;
 
 	@Column(name = "comment_photo_url")
