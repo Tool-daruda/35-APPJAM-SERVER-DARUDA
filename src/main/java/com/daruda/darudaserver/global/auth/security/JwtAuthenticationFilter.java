@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
@@ -31,12 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-	private final JwtTokenProvider jwtTokenProvider;
 	private static final List<String> EXCLUDE_URL = Arrays.asList(
 		"/swagger-ui/**",
 		"/v3/api-docs/**",
 		"/api/v1/user/nickname",
-		"/api/v1/comment",
 		"/api/v1/auth/sign-up",
 		"/api/v1/auth/login",
 		"/api/v1/auth/login-url",
@@ -46,10 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		"/api/v1/tool/{tool-id}/plans",
 		"/api/v1/tool/{tool-id}/core-features",
 		"/api/v1/tool/{tool-id}/alternatives",
-		"/api/v1/tool/category",
-		"/api/v1/board",
-		"/api/v1/board/{board-id}"
+		"/api/v1/tool/category"
 	);
+	private final JwtTokenProvider jwtTokenProvider;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -73,15 +71,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-
+	protected boolean shouldNotFilter(HttpServletRequest request) {
 		String path = request.getServletPath();
 		String method = request.getMethod();
-		//        // GET 요청만 인증 우회
-		//        if (path.startsWith("/api/v1/boards/board/**") && method.equals("GET")) {
-		//            return true;
-		//        }
-		return EXCLUDE_URL.stream().anyMatch(exclude -> new AntPathMatcher().match(exclude, path));
+
+		// GET 요청만 필터 제외
+		if (method.equals(HttpMethod.GET.name())) {
+			return EXCLUDE_URL.stream().anyMatch(exclude -> new AntPathMatcher().match(exclude, path));
+		}
+		return false;
 	}
 
 	private String getAccessToken(HttpServletRequest request) {
