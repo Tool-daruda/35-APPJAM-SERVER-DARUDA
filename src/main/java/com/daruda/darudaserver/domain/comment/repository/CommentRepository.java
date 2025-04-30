@@ -20,19 +20,19 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
 		+ "WHERE c.board.id = :boardId "
 		+ "AND c.id < :cursor "
 		+ "ORDER BY c.createdAt DESC")
-	List<CommentEntity> findAllByBoardId(
+	List<CommentEntity> findCommentsByBoardId(
 		@Param("boardId") Long boardId,
 		@Param("cursor") Long cursor,
-		Pageable pageable);
+		Pageable pageable
+	);
 
-	List<CommentEntity> findAllByBoardId(Long boardId);
-
-	@Modifying
-	@Transactional
-	void deleteAllByUserId(@Param("userId") Long userId);
+	List<CommentEntity> findCommentsByBoardId(Long boardId);
 
 	@Modifying
 	@Transactional
-	void deleteByBoardId(@Param("boardId") Long boardId);
+	void deleteCommentsByUserId(@Param("userId") Long userId);
 
+	@Modifying
+	@Transactional
+	void deleteCommentsByBoardId(@Param("boardId") Long boardId);
 }
