@@ -72,14 +72,12 @@ public class CommentService {
 
 		List<CommentEntity> rows = commentRepository.findCommentsByBoardId(boardId, cursor, pageRequest);
 
-		// 현재 페이지와 nextCursor 분리
-		boolean hasNext = rows.size() > size;
+		ScrollPaginationCollection<CommentEntity> scroll = ScrollPaginationCollection.of(rows, size);
 
-		List<CommentEntity> currentRows = hasNext ? rows.subList(0, size) : rows;
-		long nextCursor = hasNext ? currentRows.get(currentRows.size() - 1).getId() : -1L;
+		List<CommentEntity> currentRows = scroll.getCurrentScrollItems();
 
 		// DTO 매핑 및 페이지 정보 생성
-		List<GetCommentResponse> commentDtos = currentRows.stream()
+		List<GetCommentResponse> items = currentRows.stream()
 			.map(c -> GetCommentResponse.builder()
 				.commentId(c.getId())
 				.content(c.getContent())
@@ -89,10 +87,13 @@ public class CommentService {
 				.build())
 			.toList();
 
-		ScrollPaginationDto pageInfo = ScrollPaginationDto.of(commentDtos.size(), nextCursor);
+		long nextCursor = scroll.isLastScroll()   // 마지막 페이지 여부
+			? -1L
+			: scroll.getNextCursor().getId();	// 다음 페이지 커서
 
-		// 최종 결과 반환
-		return new GetCommentRetrieveResponse(commentDtos, pageInfo);
+		ScrollPaginationDto pageInfo = ScrollPaginationDto.of(items.size(), nextCursor);  // 현재 페이지 건수만 전달
+
+		return new GetCommentRetrieveResponse(items, pageInfo);
 	}
 
 	public void deleteComment(Long userId, Long commentId) {
