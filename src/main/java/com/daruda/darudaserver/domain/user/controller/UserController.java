@@ -22,15 +22,14 @@ import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
-import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
-import com.daruda.darudaserver.global.error.exception.BusinessException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -38,17 +37,15 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/user")
 @Tag(name = "user 컨트롤러", description = "사용자와 관련된 API를 처리합니다.")
 public class UserController {
+
 	private final UserService userService;
 	private final BoardService boardService;
 
 	@PatchMapping("/profile")
 	@Operation(summary = "프로필 수정", description = "사용자의 프로필을 수정합니다.")
-	public ResponseEntity<ApiResponse<UpdateMyResponse>> patchMy(@AuthenticationPrincipal Long userId,
+	public ResponseEntity<ApiResponse<UpdateMyResponse>> updateProfile(@AuthenticationPrincipal Long userId,
 		@Valid @RequestBody UpdateMyRequest updateMyRequest) {
-		if (updateMyRequest.positions() == null && updateMyRequest.nickname() == null) {
-			throw new BusinessException(ErrorCode.MISSING_PARAMETER);
-		}
-		UpdateMyResponse updateMyResponse = userService.updateMy(userId, updateMyRequest.nickname(),
+		UpdateMyResponse updateMyResponse = userService.updateProfile(userId, updateMyRequest.nickname(),
 			updateMyRequest.positions());
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(updateMyResponse, SuccessCode.SUCCESS_UPDATE));
 	}
@@ -63,22 +60,22 @@ public class UserController {
 
 	@GetMapping("/boards")
 	@Operation(summary = "작성한 게시글 목록 조회", description = "사용자가 작성한 게시글 목록을 조회합니다.")
-	public ResponseEntity<ApiResponse<BoardListResponse>> getMyBoards(@AuthenticationPrincipal Long userIdOrNull,
+	public ResponseEntity<ApiResponse<BoardListResponse>> getUserBoards(@AuthenticationPrincipal Long userIdOrNull,
 		@Parameter(description = "조회할 페이지", example = "1")
-		@RequestParam(defaultValue = "1", value = "page") int pageNo,
+		@RequestParam(defaultValue = "1", value = "page") @Positive int pageNo,
 		@Parameter(description = "조회할 게시글 개수", example = "5")
-		@RequestParam(defaultValue = "5", value = "size") int size,
+		@RequestParam(defaultValue = "5", value = "size") @Positive int size,
 		@Parameter(description = "정렬 기준", example = "createdAt")
 		@RequestParam(defaultValue = "createdAt", value = "criteria") String criteria) {
 		Pageable pageable = PageRequest.of(pageNo - 1, size, Sort.by(Sort.Direction.DESC, criteria));
-		BoardListResponse boardListResponse = boardService.getMyBoards(userIdOrNull, pageable);
+		BoardListResponse boardListResponse = boardService.getUserBoards(userIdOrNull, pageable);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardListResponse, SuccessCode.SUCCESS_FETCH));
 	}
 
 	@GetMapping("/profile")
 	@Operation(summary = "프로필 조회", description = "사용자의 프로필을 조회합니다.")
 	public ResponseEntity<ApiResponse<MyProfileResponse>> getMyProfile(@AuthenticationPrincipal Long userId) {
-		MyProfileResponse myProfileResponse = userService.getMyInfo(userId);
+		MyProfileResponse myProfileResponse = userService.getMyProfile(userId);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(myProfileResponse, SuccessCode.SUCCESS_FETCH));
 	}
 
@@ -88,7 +85,7 @@ public class UserController {
 	public ResponseEntity<ApiResponse<Boolean>> checkDuplicate(
 		@Parameter(description = "닉네임", example = "test")
 		@NotNull(message = "닉네임은 필수 입력값입니다.") @RequestParam("nickname") String nickName) {
-		boolean result = userService.isDuplicated(nickName);
+		boolean result = userService.isDuplicatedNickname(nickName);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result, SuccessCode.SUCCESS_FETCH));
 	}
 
@@ -96,9 +93,9 @@ public class UserController {
 	@Operation(summary = "스크랩 글 목록 조회", description = "스크랩 글 목록을 조회합니다.")
 	public ResponseEntity<?> getFavoriteBoards(@AuthenticationPrincipal Long userIdOrNull,
 		@Parameter(description = "조회할 페이지", example = "1")
-		@RequestParam(value = "page", defaultValue = "1") int pageNo,
+		@RequestParam(value = "page", defaultValue = "1") @Positive int pageNo,
 		@Parameter(description = "조회할 게시글 개수", example = "5")
-		@RequestParam(value = "size", defaultValue = "5") int size,
+		@RequestParam(value = "size", defaultValue = "5") @Positive int size,
 		@Parameter(description = "정렬 기준", example = "createdAt")
 		@RequestParam(value = "criteria", defaultValue = "createdAt") String criteria) {
 		Pageable pageable = PageRequest.of(pageNo - 1, size, Sort.by(Sort.Direction.DESC, criteria));

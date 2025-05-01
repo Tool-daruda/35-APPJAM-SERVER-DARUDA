@@ -1,5 +1,10 @@
 package com.daruda.darudaserver.domain.user.entity;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 
@@ -18,9 +23,12 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@SQLDelete(sql = "UPDATE user SET is_deleted = true, deleted_at = NOW() WHERE user_id = ?")
+@SQLRestriction("is_deleted = false")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user")
 public class UserEntity extends BaseTimeEntity {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_id")
@@ -36,11 +44,26 @@ public class UserEntity extends BaseTimeEntity {
 	@Column(nullable = false)
 	private Positions positions;
 
+	@Column(name = "is_deleted", nullable = false)
+	private boolean isDeleted;
+
+	@Column(name = "deleted_at")
+	private LocalDateTime deletedAt;
+
 	@Builder
 	private UserEntity(String email, String nickname, Positions positions) {
 		this.email = email;
 		this.nickname = nickname;
 		this.positions = positions;
+		this.isDeleted = false;
+	}
+
+	public static UserEntity of(String email, String nickname, Positions positions) {
+		return UserEntity.builder()
+			.email(email)
+			.nickname(nickname)
+			.positions(positions)
+			.build();
 	}
 
 	public void updatePositions(Positions positions) {

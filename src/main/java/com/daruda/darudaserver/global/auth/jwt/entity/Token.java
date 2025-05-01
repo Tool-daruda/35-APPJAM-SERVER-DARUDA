@@ -26,9 +26,15 @@ public class Token {
 	private Long userId;
 
 	@Builder
-	public Token(Long userId, String refreshToken) {
+	private Token(Long userId, String refreshToken) {
 		this.userId = userId;
 		this.refreshToken = refreshToken;
 	}
 
+	public static Token of(Long userId, String refreshToken) {
+		return Token.builder()
+			.userId(userId)
+			.refreshToken(refreshToken)
+			.build();
+	}
 }
