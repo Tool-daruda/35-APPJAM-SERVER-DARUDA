@@ -1,3 +1,21 @@
 spring:
   profiles:
     active: local
+
+cloud:
+  aws:
+    s3:
+      servlet:
+        multipart:
+          max-file-size: 10MB  # 업로드 가능한 파일 크기
+          max-request-size: 10MB
+      bucket: daruda
+    credentials:
+      access-key: ENC(zUS78/F8P/qh/KpSGK/GV3vjanLZSodMm0O1b0JKuno=)
+      secret-key: ENC(9o72B0yxr1Mx4LpLpqoWdgIFhCt9/zhMy0FzGKmEaxxF7cuzI/ZvxmH685+s0xd+8YbC9HRRhjU=)
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
+
