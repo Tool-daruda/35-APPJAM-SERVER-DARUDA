@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
@@ -67,8 +66,8 @@ public class BoardService {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	// 게시판 생성
-	public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
-		final List<MultipartFile> images) {
+	public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+		log.info("유저아이디: {}", userId);
 		UserEntity user = getUserById(userId);
 		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
 		Board board = boardCreateAndUpdateReq.isFree()
@@ -76,21 +75,18 @@ public class BoardService {
 			createToolBoard(tool, boardCreateAndUpdateReq, user);
 
 		// 이미지 처리
-		List<String> imageUrls = processImages(board, images);
-		List<String> boardImageUrls = imageUrls.stream()
-			.map(url -> IMAGE_URL + url)
-			.toList();
+		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());
 
 		// Tool 정보 설정
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), boardImageUrls, tool.getToolId());
+		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, tool.getToolId());
 	}
 
 	// 게시판 업데이트
 	public BoardRes updateBoard(final Long userId, final Long boardId,
-		final BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
+		final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
 		Board board = validateBoardAndUser(userId, boardId);
 		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
 		UserEntity user = getUser(userId);
@@ -102,7 +98,7 @@ public class BoardService {
 			boardCreateAndUpdateReq.isFree()
 		);
 
-		List<String> imageUrls = processImages(board, images);
+		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());
 
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
@@ -289,13 +285,13 @@ public class BoardService {
 		return board;
 	}
 
-	private List<String> processImages(final Board board, final List<MultipartFile> images) {
-		if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
+	private List<String> processImages(final Board board, final List<String> images) {
+		if (images == null || images.isEmpty()) {
 			deleteOriginImages(board.getId());
 			return List.of();
 		}
 		deleteOriginImages(board.getId());
-		List<Long> imageIds = imageService.uploadImages(images);
+		List<Long> imageIds = imageService.createImage(images);
 		boardImageService.saveBoardImages(board.getId(), imageIds);
 		return boardImageService.getBoardImageUrls(board.getId());
 	}

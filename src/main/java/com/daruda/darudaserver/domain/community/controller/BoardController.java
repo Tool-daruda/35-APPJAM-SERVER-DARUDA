@@ -1,7 +1,5 @@
 package com.daruda.darudaserver.domain.community.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,11 +8,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
@@ -29,7 +26,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -44,10 +40,9 @@ public class BoardController {
 	public ResponseEntity<ApiResponse<?>> createBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "작성할 게시글")
-		@ModelAttribute @Valid BoardCreateAndUpdateReq boardCreateAndUpdateReq,
-		@RequestPart(value = "images", required = false) @Size(max = 5) List<MultipartFile> images) {
+		@RequestBody @Valid BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
 
-		BoardRes boardRes = boardService.createBoard(userId, boardCreateAndUpdateReq, images);
+		BoardRes boardRes = boardService.createBoard(userId, boardCreateAndUpdateReq);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes, SuccessCode.SUCCESS_CREATE));
 	}
 
@@ -58,9 +53,8 @@ public class BoardController {
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId,
 		@Parameter(description = "수정할 게시글")
-		@ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq,
-		@RequestPart(value = "images", required = false) @Size(max = 5) List<MultipartFile> images) {
-		BoardRes boardRes = boardService.updateBoard(userId, boardId, boardCreateAndUpdateReq, images);
+		@ModelAttribute @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+		BoardRes boardRes = boardService.updateBoard(userId, boardId, boardCreateAndUpdateReq);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes, SuccessCode.SUCCESS_UPDATE));
 	}
 
