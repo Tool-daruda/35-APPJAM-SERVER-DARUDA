@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.comment.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.ForbiddenException;
+import com.daruda.darudaserver.global.s3.S3Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final BoardRepository boardRepository;
 	private final UserRepository userRepository;
+	private final S3Service s3Service;
 
 	public CreateCommentResponse postComment(
 		Long userId, Long boardId, CreateCommentRequest request
