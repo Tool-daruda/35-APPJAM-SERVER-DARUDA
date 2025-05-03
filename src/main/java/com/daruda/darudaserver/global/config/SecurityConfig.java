@@ -37,6 +37,7 @@ public class SecurityConfig {
 		"/api/v1/tool/{tool-id}/alternatives",
 		"/api/v1/tool/category",
 		"/api/v1/board",
+		"/api/v1/image/*",
 		"/api/v1/board/{board-id}"
 	};
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
