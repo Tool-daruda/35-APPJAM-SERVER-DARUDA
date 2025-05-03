@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.daruda.darudaserver.domain.comment.dto.request.CreateCommentRequest;
 import com.daruda.darudaserver.domain.comment.dto.response.CreateCommentResponse;
@@ -26,7 +24,6 @@ import com.daruda.darudaserver.global.error.code.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -43,10 +40,8 @@ public class CommentController {
 		@Parameter(description = "board Id", example = "1")
 		@RequestParam("board-id") Long boardId,
 		@Parameter(description = "작성할 댓글")
-		@Valid @ModelAttribute CreateCommentRequest createCommentRequest,
-		@Nullable @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
-		CreateCommentResponse createCommentResponse = commentService.postComment(userId, boardId, createCommentRequest,
-			image);
+		@Valid @ModelAttribute CreateCommentRequest createCommentRequest) throws IOException {
+		CreateCommentResponse createCommentResponse = commentService.postComment(userId, boardId, createCommentRequest);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(createCommentResponse, SuccessCode.SUCCESS_CREATE));
 	}
 

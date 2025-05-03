@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.daruda.darudaserver.domain.comment.dto.request.CreateCommentRequest;
 import com.daruda.darudaserver.domain.comment.dto.response.CreateCommentResponse;
@@ -37,8 +36,8 @@ public class CommentService {
 	private final UserRepository userRepository;
 	private final S3Service s3Service;
 
-	public CreateCommentResponse postComment(Long userId, Long boardId, CreateCommentRequest createCommentRequest,
-		MultipartFile image) throws IOException {
+	public CreateCommentResponse postComment(Long userId, Long boardId,
+		CreateCommentRequest createCommentRequest) throws IOException {
 		//게시글과 사용자 존재 여부 검사
 		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
@@ -47,18 +46,11 @@ public class CommentService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 		log.debug("사용자를 성공적으로 조회하였습니다. {}", userId);
 
-		String photoUrl = null;
-
-		if (!(image == null || image.isEmpty())) {
-			//S3에 이미지 저장
-			String imageName = s3Service.uploadImage(image);
-			photoUrl = s3Service.getImageUrl(imageName);
-		}
 		//댓글 entity 생성
 		CommentEntity commentEntity = CommentEntity.builder()
 			.user(userEntity)
 			.board(board)
-			.photoUrl(photoUrl)
+			.photoUrl(createCommentRequest.image())
 			.content(createCommentRequest.content())
 			.build();
 
