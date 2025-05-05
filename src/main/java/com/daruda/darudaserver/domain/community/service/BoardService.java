@@ -309,11 +309,11 @@ public class BoardService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 	}
 
-	public Tool getToolById(final Long toolId) {
+	private Tool getToolById(final Long toolId) {
 		return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
 	}
 
-	public UserEntity getUserById(final Long userId) {
+	private UserEntity getUserById(final Long userId) {
 		return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 	}
 
