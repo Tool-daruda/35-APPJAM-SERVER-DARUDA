@@ -66,7 +66,6 @@ public class SecurityConfig {
 
 					.requestMatchers(WHITE_LIST)
 					.permitAll()
-
 					.anyRequest()
 					.authenticated())
 			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
