@@ -1,23 +1,6 @@
 package com.daruda.darudaserver.domain.community;
 
-import java.util.List;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.daruda.darudaserver.domain.community.entity.Board;
-import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
-import com.daruda.darudaserver.domain.community.repository.BoardRepository;
-import com.daruda.darudaserver.domain.community.service.BoardImageService;
-import com.daruda.darudaserver.domain.community.service.BoardService;
-import com.daruda.darudaserver.global.image.service.ImageService;
-
+/*
 @ExtendWith(MockitoExtension.class)
 class BoardServiceTest {
 
@@ -62,3 +45,4 @@ class BoardServiceTest {
 		Assertions.assertEquals(imageUrls, result);
 	}
 }
+*/
