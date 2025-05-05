@@ -116,12 +116,16 @@ public class ImageService {
 		List<Long> imageIdList = imageUrlList.stream()
 			.map(
 				imageUrl -> {
-					Image image = Image.builder()
-						.imageUrl(imageUrl)
-						.build();
-					Image savedImage = imageRepository.save(image);
-					log.info("Image saved to database: imageId={}", savedImage.getImageId());
-					return savedImage.getImageId();
+					try {
+						Image image = Image.builder()
+							.imageUrl(imageUrl)
+							.build();
+						Image savedImage = imageRepository.save(image);
+						log.info("Image saved to database: imageId={}", savedImage.getImageId());
+						return savedImage.getImageId();
+					} catch (Exception e) {
+						throw new BusinessException(ErrorCode.FILE_UPLOAD_FAIL);
+					}
 				}
 			)
 			.toList();

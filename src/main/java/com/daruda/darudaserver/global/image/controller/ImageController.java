@@ -20,6 +20,7 @@ import com.daruda.darudaserver.global.image.service.ImageService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -46,7 +47,7 @@ public class ImageController {
 	@GetMapping("/presigned-url")
 	@Operation(summary = "이미지 업로드 용 presigned-url발급", description = "이미지 업로드를 위한 presignedUrl을 발급합니다")
 	public ResponseEntity<SuccessResponse<?>> getPresignedUrl(
-		@RequestBody GetPresignedUrlRequest getPresignedUrlRequest) {
+		@Valid @RequestBody GetPresignedUrlRequest getPresignedUrlRequest) {
 		GetPresignedUrlListResponse getPresignedUrlResponseList = imageService.getUploadPresignedURL(
 			getPresignedUrlRequest);
 
