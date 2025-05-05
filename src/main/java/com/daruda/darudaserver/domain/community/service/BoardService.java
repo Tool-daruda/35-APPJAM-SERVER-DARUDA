@@ -285,7 +285,7 @@ public class BoardService {
 		return board;
 	}
 
-	private List<String> processImages(final Board board, final List<String> images) {
+	public List<String> processImages(final Board board, final List<String> images) {
 		if (images == null || images.isEmpty()) {
 			deleteOriginImages(board.getId());
 			return List.of();
@@ -309,11 +309,11 @@ public class BoardService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 	}
 
-	private Tool getToolById(final Long toolId) {
+	public Tool getToolById(final Long toolId) {
 		return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
 	}
 
-	private UserEntity getUserById(final Long userId) {
+	public UserEntity getUserById(final Long userId) {
 		return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 	}
 
