@@ -86,6 +86,9 @@ dependencies {
     // Sentry 추가
     implementation 'io.sentry:sentry-logback:7.17.0'
     implementation 'com.github.napstr:logback-discord-appender:1.0.0'
+
+    // 테스트 의존성 추가
+    testImplementation 'org.mockito:mockito-core:5.5.0'
 }
 
 dependencyManagement {
