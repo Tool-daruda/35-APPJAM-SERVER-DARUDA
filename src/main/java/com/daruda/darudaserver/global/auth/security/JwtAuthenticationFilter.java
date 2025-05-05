@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
@@ -78,11 +79,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String path = request.getServletPath();
 		String method = request.getMethod();
-		//        // GET 요청만 인증 우회
-		//        if (path.startsWith("/api/v1/boards/board/**") && method.equals("GET")) {
-		//            return true;
-		//        }
-		return EXCLUDE_URL.stream().anyMatch(exclude -> new AntPathMatcher().match(exclude, path));
+
+		if (method.equals(HttpMethod.GET.name())) {
+			return EXCLUDE_URL.stream().anyMatch(exclude -> new AntPathMatcher().match(exclude, path));
+		}
+		return false;
 	}
 
 	private String getAccessToken(HttpServletRequest request) {
