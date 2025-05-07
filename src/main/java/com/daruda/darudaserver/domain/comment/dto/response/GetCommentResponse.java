@@ -12,7 +12,6 @@ public record GetCommentResponse(
 	Long commentId,
 	String nickname,
 	String image,
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
 	Timestamp updatedAt
 ) {
 
