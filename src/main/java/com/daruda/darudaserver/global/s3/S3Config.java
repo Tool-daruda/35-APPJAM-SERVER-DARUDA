@@ -21,7 +21,7 @@ public class S3Config {
 
 	public S3Config(@Value("${cloud.aws.credentials.access-key}") final String accessKey,
 		@Value("${cloud.aws.credentials.secret-key}") final String secretKey,
-		@Value("${cloud.aws.region.static}") final String regionString) {
+		@Value("${cloud.aws.region}") final String regionString) {
 		this.accessKey = accessKey;
 		this.secretKey = secretKey;
 		this.regionString = regionString;
@@ -52,7 +52,7 @@ public class S3Config {
 	@Bean
 	public S3Presigner s3Presigner() {
 		return S3Presigner.builder()
-			.region(Region.AP_NORTHEAST_2)
+			.region(getRegion())
 			.credentialsProvider(credentialsProvider())
 			.build();
 	}
