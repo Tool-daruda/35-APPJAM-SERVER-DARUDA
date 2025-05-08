@@ -89,11 +89,11 @@ public class AuthService {
 		toolScrapRepository.deleteAllByUserId(userId);
 		log.info("toolScrap을 성공적으로 삭제하였습니다");
 
-		commentRepository.deleteAllByUserId(userId);
+		commentRepository.deleteCommentsByUserId(userId);
 
 		List<Board> boardList = boardRepository.findAllByUserId(userId);
 
-		boardList.forEach(board -> commentRepository.deleteByBoardId(board.getId()));
+		boardList.forEach(board -> commentRepository.deleteCommentsByBoardId(board.getId()));
 
 		//FK로 묶여있는 boardScrap 삭제
 		boardScrapRepository.deleteAllByUserId(userId);
