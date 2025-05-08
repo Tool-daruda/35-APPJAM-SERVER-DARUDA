@@ -75,8 +75,8 @@ dependencies {
 
     //aws 추가
     implementation 'software.amazon.awssdk:s3:2.20.45'
-    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
-
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.0.2'
+    
     // Jasypt 추가
     implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
 
