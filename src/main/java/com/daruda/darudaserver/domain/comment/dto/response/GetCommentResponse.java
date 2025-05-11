@@ -2,8 +2,6 @@ package com.daruda.darudaserver.domain.comment.dto.response;
 
 import java.sql.Timestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.Builder;
 
 @Builder

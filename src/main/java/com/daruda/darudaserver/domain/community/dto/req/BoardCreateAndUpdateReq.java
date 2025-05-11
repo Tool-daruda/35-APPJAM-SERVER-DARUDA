@@ -15,7 +15,7 @@ public record BoardCreateAndUpdateReq(
 	String content,
 	Long toolId,
 	@NotNull(message = "자유 게시판 선택은 필수 입니다")
-	boolean isFree,// 자유 게시판 여부 추가
+	boolean isFree,
 	@NotNull
 	List<String> imageList
 ) {

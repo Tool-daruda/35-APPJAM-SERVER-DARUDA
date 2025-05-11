@@ -291,6 +291,12 @@ public class BoardService {
 			return List.of();
 		}
 		deleteOriginImages(board.getId());
+		List<String> validImages = images.stream()
+			.filter(url -> url != null && !url.isBlank())
+			.toList();
+		if (validImages.isEmpty()) {
+			return List.of();
+		}
 		List<Long> imageIds = imageService.createImage(images);
 		boardImageService.saveBoardImages(board.getId(), imageIds);
 		return boardImageService.getBoardImageUrls(board.getId());

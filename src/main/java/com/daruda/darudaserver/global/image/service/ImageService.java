@@ -90,7 +90,7 @@ public class ImageService {
 		return getImageById(imageId).getImageUrl();
 	}
 
-	public String createUploadPresignedURL(String key) {
+	public String createUploadPresignedUrl(String key) {
 		PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(
 			req -> req.signatureDuration(Duration.ofMinutes(15)) // 유효시간 15분
 				.putObjectRequest(
@@ -103,9 +103,9 @@ public class ImageService {
 		return presignedRequest.url().toString();
 	}
 
-	public GetPresignedUrlListResponse getUploadPresignedURL(GetPresignedUrlRequest getPresignedUrlRequestList) {
+	public GetPresignedUrlListResponse getUploadPresignedUrl(GetPresignedUrlRequest getPresignedUrlRequestList) {
 		List<String> urls = getPresignedUrlRequestList.keyList().stream()
-			.map(this::createUploadPresignedURL)
+			.map(this::createUploadPresignedUrl)
 			.toList();
 
 		return GetPresignedUrlListResponse.of(urls);
@@ -124,6 +124,7 @@ public class ImageService {
 						log.info("Image saved to database: imageId={}", savedImage.getImageId());
 						return savedImage.getImageId();
 					} catch (Exception e) {
+						log.error("Image creation failed: error={}", e.getMessage(), e);
 						throw new BusinessException(ErrorCode.FILE_UPLOAD_FAIL);
 					}
 				}

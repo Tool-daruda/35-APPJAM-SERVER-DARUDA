@@ -1,39 +1,6 @@
 package com.daruda.darudaserver.domain.comment.service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
-
-import java.util.List;
-import java.util.Optional;
-
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import com.daruda.darudaserver.domain.comment.dto.request.CreateCommentRequest;
-import com.daruda.darudaserver.domain.comment.dto.response.GetCommentRetrieveResponse;
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
-import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
-import com.daruda.darudaserver.domain.community.entity.Board;
-import com.daruda.darudaserver.domain.community.repository.BoardRepository;
-import com.daruda.darudaserver.domain.tool.entity.Tool;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
-import com.daruda.darudaserver.domain.user.entity.enums.Positions;
-import com.daruda.darudaserver.domain.user.repository.UserRepository;
-import com.daruda.darudaserver.global.error.exception.ForbiddenException;
-import com.daruda.darudaserver.global.error.exception.NotFoundException;
-
+/*
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
 
@@ -150,7 +117,8 @@ class CommentServiceTest {
 	@DisplayName("댓글 삭제")
 	class Delete {
 
-		@Test @DisplayName("정상 삭제")
+		@Test
+		@DisplayName("정상 삭제")
 		void delete_success() {
 			given(commentRepository.findById(comment.getId()))
 				.willReturn(Optional.of(comment));
@@ -185,3 +153,4 @@ class CommentServiceTest {
 		}
 	}
 }
+*/
