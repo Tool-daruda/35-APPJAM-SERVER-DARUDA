@@ -30,9 +30,7 @@ public class BoardImageService {
 
 	public List<String> getBoardImageUrls(Long boardId) {
 		return boardImageRepository.findAllByBoardId(boardId).stream()
-			.map(boardImage ->
-				IMAGE_URL + imageService.getImageUrlById(boardImage.getImageId())
-			)
+			.map(boardImage -> imageService.getImageUrlById(boardImage.getImageId()))
 			.toList();
 	}
 

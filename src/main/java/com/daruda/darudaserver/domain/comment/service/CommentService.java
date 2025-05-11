@@ -18,8 +18,9 @@ import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.ForbiddenException;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import com.daruda.darudaserver.global.s3.S3Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final BoardRepository boardRepository;
 	private final UserRepository userRepository;
+	private final S3Service s3Service;
 
 	public CreateCommentResponse postComment(
 		Long userId, Long boardId, CreateCommentRequest request
@@ -89,7 +91,7 @@ public class CommentService {
 
 		long nextCursor = scroll.isLastScroll()   // 마지막 페이지 여부
 			? -1L
-			: scroll.getNextCursor().getId();	// 다음 페이지 커서
+			: scroll.getNextCursor().getId();    // 다음 페이지 커서
 
 		ScrollPaginationDto pageInfo = ScrollPaginationDto.of(items.size(), nextCursor);  // 현재 페이지 건수만 전달
 

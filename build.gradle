@@ -49,6 +49,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
@@ -74,6 +75,7 @@ dependencies {
 
     //aws 추가
     implementation 'software.amazon.awssdk:s3:2.20.45'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.0.2'
 
     // Jasypt 추가
     implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
@@ -84,6 +86,9 @@ dependencies {
     // Sentry 추가
     implementation 'io.sentry:sentry-logback:7.17.0'
     implementation 'com.github.napstr:logback-discord-appender:1.0.0'
+
+    // 테스트 의존성 추가
+    testImplementation 'org.mockito:mockito-core:5.5.0'
 }
 
 dependencyManagement {

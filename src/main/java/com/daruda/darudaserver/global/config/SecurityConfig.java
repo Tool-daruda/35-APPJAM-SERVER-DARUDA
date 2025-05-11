@@ -37,7 +37,9 @@ public class SecurityConfig {
 		"/api/v1/tool/{tool-id}/alternatives",
 		"/api/v1/tool/category",
 		"/api/v1/board",
-		"/api/v1/board/{board-id}"
+		"/api/v1/image/**",
+		"/api/v1/board/{board-id}",
+		"/api/v1/image/presigned-url"
 	};
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final JwtTokenProvider jwtTokenProvider;
@@ -64,7 +66,6 @@ public class SecurityConfig {
 
 					.requestMatchers(WHITE_LIST)
 					.permitAll()
-
 					.anyRequest()
 					.authenticated())
 			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)

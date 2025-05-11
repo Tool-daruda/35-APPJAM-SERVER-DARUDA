@@ -1,7 +1,9 @@
 package com.daruda.darudaserver.global.image.service;
 
+import java.time.Duration;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,12 +12,17 @@ import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import com.daruda.darudaserver.global.image.dto.request.GetPresignedUrlRequest;
+import com.daruda.darudaserver.global.image.dto.response.GetPresignedUrlListResponse;
 import com.daruda.darudaserver.global.image.entity.Image;
 import com.daruda.darudaserver.global.image.repository.ImageRepository;
 import com.daruda.darudaserver.global.s3.S3Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 @Slf4j
 @Service
@@ -23,6 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageService {
 	private final S3Service s3Service;
 	private final ImageRepository imageRepository;
+	private final S3Presigner s3Presigner;
+
+	@Value("${cloud.aws.s3.bucket}")
+	private String bucketName;
 
 	// 1. 이미지 업로드
 	@Transactional
@@ -77,5 +88,48 @@ public class ImageService {
 	@Transactional(readOnly = true)
 	public String getImageUrlById(final Long imageId) {
 		return getImageById(imageId).getImageUrl();
+	}
+
+	public String createUploadPresignedUrl(String key) {
+		PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(
+			req -> req.signatureDuration(Duration.ofMinutes(15)) // 유효시간 15분
+				.putObjectRequest(
+					PutObjectRequest.builder()
+						.bucket(bucketName)
+						.key(key)
+						.build()
+				)
+		);
+		return presignedRequest.url().toString();
+	}
+
+	public GetPresignedUrlListResponse getUploadPresignedUrl(GetPresignedUrlRequest getPresignedUrlRequestList) {
+		List<String> urls = getPresignedUrlRequestList.keyList().stream()
+			.map(this::createUploadPresignedUrl)
+			.toList();
+
+		return GetPresignedUrlListResponse.of(urls);
+
+	}
+
+	public List<Long> createImage(List<String> imageUrlList) {
+		List<Long> imageIdList = imageUrlList.stream()
+			.map(
+				imageUrl -> {
+					try {
+						Image image = Image.builder()
+							.imageUrl(imageUrl)
+							.build();
+						Image savedImage = imageRepository.save(image);
+						log.info("Image saved to database: imageId={}", savedImage.getImageId());
+						return savedImage.getImageId();
+					} catch (Exception e) {
+						log.error("Image creation failed: error={}", e.getMessage(), e);
+						throw new BusinessException(ErrorCode.FILE_UPLOAD_FAIL);
+					}
+				}
+			)
+			.toList();
+		return imageIdList;
 	}
 }
