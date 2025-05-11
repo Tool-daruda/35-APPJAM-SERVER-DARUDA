@@ -285,7 +285,7 @@ public class BoardService {
 		return board;
 	}
 
-	public List<String> processImages(final Board board, final List<String> images) {
+	private List<String> processImages(final Board board, final List<String> images) {
 		if (images == null || images.isEmpty()) {
 			deleteOriginImages(board.getId());
 			return List.of();
