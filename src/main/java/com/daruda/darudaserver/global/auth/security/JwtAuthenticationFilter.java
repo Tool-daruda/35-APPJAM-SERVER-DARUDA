@@ -49,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		"/api/v1/tool/{tool-id}/alternatives",
 		"/api/v1/tool/category",
 		"/api/v1/board",
-		"/api/v1/image/*",
+		"/api/v1/image/**",
 		"/api/v1/board/{board-id}"
 	);
 
@@ -75,7 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+	protected boolean shouldNotFilter(HttpServletRequest request) {
 
 		String path = request.getServletPath();
 		String method = request.getMethod();
