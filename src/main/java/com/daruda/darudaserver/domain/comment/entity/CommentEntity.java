@@ -1,25 +1,35 @@
 package com.daruda.darudaserver.domain.comment.entity;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Entity
 @Table(name = "comment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql =
-	"UPDATE comment SET is_deleted = true, deleted_at = NOW() " +
-	"WHERE comment_id = ?")
+	"UPDATE comment SET is_deleted = true, deleted_at = NOW() "
+		+ "WHERE comment_id = ?")
 @SQLRestriction("is_deleted = false")
 public class CommentEntity extends BaseTimeEntity {
 

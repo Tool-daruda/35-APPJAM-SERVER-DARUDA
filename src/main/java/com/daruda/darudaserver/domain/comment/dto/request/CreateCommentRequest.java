@@ -14,7 +14,8 @@ public record CreateCommentRequest(
 ) {
 	@AssertTrue(message = "content와 photoUrl 중 하나는 반드시 입력해야 합니다.")
 	private boolean isValid() {
-		return (content != null && !content.isBlank()) ||
+		return (content != null && !content.isBlank())
+			||
 			(photoUrl != null && !photoUrl.isBlank());
 	}
 }

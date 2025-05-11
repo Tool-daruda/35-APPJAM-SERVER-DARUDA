@@ -48,7 +48,7 @@ public class ImageController {
 	@Operation(summary = "이미지 업로드 용 presigned-url발급", description = "이미지 업로드를 위한 presignedUrl을 발급합니다")
 	public ResponseEntity<SuccessResponse<?>> getPresignedUrl(
 		@Valid @RequestBody GetPresignedUrlRequest getPresignedUrlRequest) {
-		GetPresignedUrlListResponse getPresignedUrlResponseList = imageService.getUploadPresignedURL(
+		GetPresignedUrlListResponse getPresignedUrlResponseList = imageService.getUploadPresignedUrl(
 			getPresignedUrlRequest);
 
 		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_CREATE, getPresignedUrlResponseList));
