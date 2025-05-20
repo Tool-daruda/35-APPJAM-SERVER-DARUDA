@@ -94,9 +94,9 @@ class CommentServiceTest {
 			given(boardRepository.findById(board.getId())).willReturn(Optional.of(board));
 			given(commentRepository.save(any(CommentEntity.class)))
 				.willAnswer(inv -> {
-					CommentEntity c = inv.getArgument(0);
-					ReflectionTestUtils.setField(c, "id", 100L);
-					return c;
+					CommentEntity commentEntity = inv.getArgument(0);
+					ReflectionTestUtils.setField(commentEntity, "id", 100L);
+					return commentEntity;
 				});
 
 			CreateCommentRequest req = new CreateCommentRequest("내용", null);

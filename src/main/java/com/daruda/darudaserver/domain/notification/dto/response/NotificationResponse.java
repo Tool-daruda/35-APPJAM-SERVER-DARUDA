@@ -21,8 +21,8 @@ public record NotificationResponse(
 			notificationEntity.getId(),
 			notificationEntity.getTitle(),
 			notificationEntity.getContent(),
-			notificationEntity.getComment() != null ?
-				notificationEntity.getComment().getBoard().getId() : null,
+			notificationEntity.getComment() != null
+				? notificationEntity.getComment().getBoard().getId() : null,
 			notificationEntity.getType(),
 			notificationEntity.getCreatedAt(),
 			notificationEntity.isRead()
