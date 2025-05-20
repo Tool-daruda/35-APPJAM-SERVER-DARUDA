@@ -1,0 +1,30 @@
+name: 테스트 통과 여부 검사
+
+on:
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  test-result:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: GitHub Checkout
+        uses: actions/checkout@v4
+
+      - name: JDK 17 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Gradle Wrapper 권한 부여
+        run: chmod +x gradlew
+
+      - name: Gradle 테스트
+        run: ./gradlew --info test
+
+      - name: Test 결과 출력
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          junit_files: '**/build/test-results/test/TEST-*.xml'
