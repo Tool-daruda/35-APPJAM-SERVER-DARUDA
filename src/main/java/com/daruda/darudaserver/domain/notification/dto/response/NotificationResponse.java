@@ -2,6 +2,7 @@ package com.daruda.darudaserver.domain.notification.dto.response;
 
 import java.sql.Timestamp;
 
+import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.notification.entity.NotificationEntity;
 import com.daruda.darudaserver.domain.notification.entity.enums.NotificationType;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,11 +22,17 @@ public record NotificationResponse(
 			notificationEntity.getId(),
 			notificationEntity.getTitle(),
 			notificationEntity.getContent(),
-			notificationEntity.getComment() != null
-				? notificationEntity.getComment().getBoard().getId() : null,
+			getBoardId(notificationEntity.getComment()),
 			notificationEntity.getType(),
 			notificationEntity.getCreatedAt(),
 			notificationEntity.isRead()
 		);
+	}
+
+	private static Long getBoardId(CommentEntity comment) {
+		if (comment != null) {
+			return comment.getBoard().getId();
+		}
+		return null;
 	}
 }
