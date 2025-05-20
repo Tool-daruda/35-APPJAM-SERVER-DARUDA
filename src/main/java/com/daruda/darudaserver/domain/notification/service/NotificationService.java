@@ -23,8 +23,10 @@ import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 public class NotificationService {
@@ -55,7 +57,13 @@ public class NotificationService {
 				String.valueOf(userId));
 			events.entrySet().stream()
 				.filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
-				.forEach(entry -> sendToClient(emitter, entry.getKey(), entry.getValue()));
+				.forEach(entry -> {
+					try {
+						sendToClient(emitter, entry.getKey(), entry.getValue());
+					} catch (Exception e) {
+						log.error("알림 전송을 실패하였습니다. - emitterId: {}", entry.getKey());
+					}
+				});
 		}
 		return emitter;
 
