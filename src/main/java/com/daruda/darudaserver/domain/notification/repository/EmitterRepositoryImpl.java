@@ -45,13 +45,9 @@ public class EmitterRepositoryImpl implements EmitterRepository {
 
 	@Override
 	public void deleteAllEmitterStartWithId(String userId) {
-		emitters.forEach(
-			(key, emitter) -> {
-				if (key.startsWith(userId)) {
-					emitters.remove(key);
-				}
-			}
-		);
+		emitters.keySet().stream()
+			.filter(key -> key.startsWith(userId))
+			.toList().forEach(emitters::remove);
 	}
 
 	@Override
