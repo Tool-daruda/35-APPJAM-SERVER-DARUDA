@@ -1,8 +1,9 @@
 package com.daruda.darudaserver.domain.notification.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,11 +51,12 @@ class NotificationServiceTest {
 
 	@Test
 	@DisplayName("SSE 연결 성공 - 신규")
-	void subscribe_ShouldReturnNewSseEmitter() {
+	void subscribe_ShouldReturnNewSseEmitter() throws IOException {
 		// given
 		Long userId = 1L;
 		String lastEventId = "";
-		SseEmitter emitter = new SseEmitter();
+		SseEmitter emitter = mock(SseEmitter.class);
+		doThrow(new IOException()).when(emitter).send((SseEmitter.SseEventBuilder)any());
 
 		// when
 		when(emitterRepository.save(anyString(), any(SseEmitter.class))).thenReturn(emitter);
@@ -72,11 +74,12 @@ class NotificationServiceTest {
 
 	@Test
 	@DisplayName("SSE 연결 성공 - 기존")
-	void subscribe_ShouldReturnSseEmitter() {
+	void subscribe_ShouldReturnSseEmitter() throws IOException {
 		// given
 		Long userId = 1L;
 		String lastEventId = userId + "_12345";
-		SseEmitter emitter = new SseEmitter();
+		SseEmitter emitter = mock(SseEmitter.class);
+		doThrow(new IOException()).when(emitter).send((SseEmitter.SseEventBuilder)any());
 		Map<String, Object> cachedEvents = Map.of("1_12345", "Event 1");
 
 		// when
@@ -103,7 +106,7 @@ class NotificationServiceTest {
 
 	@Test
 	@DisplayName("댓글 알림 전송 성공")
-	void sendCommentNotification_ShouldSendNotification() {
+	void sendCommentNotification_ShouldSendNotification() throws IOException {
 		// given
 		Long userId = 1L;
 		String userIdString = "1";
@@ -126,7 +129,8 @@ class NotificationServiceTest {
 		NotificationEntity notification = NotificationEntity.of(userEntity, NotificationType.COMMENT, title, content,
 			comment);
 
-		SseEmitter emitter = new SseEmitter();
+		SseEmitter emitter = mock(SseEmitter.class);
+		doThrow(new IOException()).when(emitter).send((SseEmitter.SseEventBuilder)any());
 		String emitterId = "1_12345";
 
 		// when
