@@ -1,10 +1,8 @@
 package com.daruda.darudaserver.domain.notification.repository;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
@@ -22,11 +20,10 @@ class EmitterRepositoryTest {
 
 	@Test
 	@DisplayName("Emitter 저장 성공")
-	void saveEmitter_Success() throws IOException {
+	void saveEmitter_Success() {
 		// given
 		String emitterId = "1_12345";
 		SseEmitter emitter = mock(SseEmitter.class);
-		doThrow(new IOException()).when(emitter).send((SseEmitter.SseEventBuilder)any());
 
 		// when
 		SseEmitter result = emitterRepository.save(emitterId, emitter);
@@ -53,14 +50,12 @@ class EmitterRepositoryTest {
 
 	@Test
 	@DisplayName("UserId로 시작하는 모든 Emitter 조회")
-	void findAllEmitterStartWithByUserId_Success() throws IOException {
+	void findAllEmitterStartWithByUserId_Success() {
 		// given
 		String emitterId1 = "1_12345";
 		String emitterId2 = "1_67890";
 		SseEmitter sseEmitter1 = mock(SseEmitter.class);
-		doThrow(new IOException()).when(sseEmitter1).send((SseEmitter.SseEventBuilder)any());
 		SseEmitter sseEmitter2 = mock(SseEmitter.class);
-		doThrow(new IOException()).when(sseEmitter2).send((SseEmitter.SseEventBuilder)any());
 		emitterRepository.save(emitterId1, sseEmitter1);
 		emitterRepository.save(emitterId2, sseEmitter2);
 
@@ -74,11 +69,10 @@ class EmitterRepositoryTest {
 
 	@Test
 	@DisplayName("Emitter ID로 삭제 성공")
-	void deleteById_Success() throws IOException {
+	void deleteById_Success() {
 		// given
 		String emitterId = "1_12345";
 		SseEmitter emitter = mock(SseEmitter.class);
-		doThrow(new IOException()).when(emitter).send((SseEmitter.SseEventBuilder)any());
 		emitterRepository.save(emitterId, emitter);
 
 		// when
@@ -90,14 +84,12 @@ class EmitterRepositoryTest {
 
 	@Test
 	@DisplayName("UserId로 시작하는 모든 Emitter 삭제")
-	void deleteAllEmitterStartWithId_Success() throws IOException {
+	void deleteAllEmitterStartWithId_Success() {
 		// given
 		String emitterId1 = "1_12345";
 		String emitterId2 = "2_67890";
 		SseEmitter emitter1 = mock(SseEmitter.class);
-		doThrow(new IOException()).when(emitter1).send((SseEmitter.SseEventBuilder)any());
 		SseEmitter emitter2 = mock(SseEmitter.class);
-		doThrow(new IOException()).when(emitter2).send((SseEmitter.SseEventBuilder)any());
 		emitterRepository.save(emitterId1, emitter1);
 		emitterRepository.save(emitterId2, emitter2);
 
