@@ -55,19 +55,19 @@ public class NotificationService {
 		});
 
 		// 최초 연결시 발생하는 503 오류에 대응하기 위한 더미 데이터
-		sendToClient(emitter, emitterId, "EventStream Created. [userId=" + userId + "]");
+		if (isSendFailedToClient(emitter, emitterId, "EventStream Created. [userId=" + userId + "]")) {
+			log.warn("초기 연결 이벤트 전송 실패 - userId: {}", userId);
+		}
 
 		// lastEventId가 남아있다면 남은 데이터를 전송
-		if (!lastEventId.isEmpty()) {
+		if (lastEventId != null && !lastEventId.isEmpty()) {
 			Map<String, Object> events = emitterRepository.findAllEventCacheStartWithByUserId(
 				String.valueOf(userId));
 			events.entrySet().stream()
 				.filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
 				.forEach(entry -> {
-					try {
-						sendToClient(emitter, entry.getKey(), entry.getValue());
-					} catch (Exception e) {
-						log.error("알림 전송을 실패하였습니다. - emitterId: {}", entry.getKey());
+					if (isSendFailedToClient(emitter, entry.getKey(), entry.getValue())) {
+						log.error("캐시된 이벤트 전송 실패 - key: {}", entry.getKey());
 					}
 				});
 		}
@@ -134,19 +134,22 @@ public class NotificationService {
 		sseEmitters.forEach(
 			(key, emitter) -> {
 				emitterRepository.saveEventCache(key, notificationEntity);
-				sendToClient(emitter, key, NotificationResponse.from(notificationEntity));
+				if (isSendFailedToClient(emitter, key, NotificationResponse.from(notificationEntity))) {
+					log.warn("알림 전송 실패 - emitterId: {}, 수신자: {}", key, receiver.getEmail());
+				}
 			}
 		);
 	}
 
-	private void sendToClient(SseEmitter emitter, String emitterId, Object data) {
+	private boolean isSendFailedToClient(SseEmitter emitter, String emitterId, Object data) {
 		try {
 			emitter.send(SseEmitter.event()
 				.id(emitterId)
 				.data(data));
+			return false;
 		} catch (IOException exception) {
 			emitterRepository.deleteById(emitterId);
-			throw new BadRequestException(ErrorCode.SEND_NOTIFICATION_FAIL);
+			return true;
 		}
 	}
 }
