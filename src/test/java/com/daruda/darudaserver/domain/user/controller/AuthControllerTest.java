@@ -171,10 +171,9 @@ class AuthControllerTest {
 
 		// when
 		doReturn(userId).when(authService).logout(userId);
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(post("/api/v1/auth/logout")
 				.header("Authorization", "Bearer " + token))
@@ -222,10 +221,9 @@ class AuthControllerTest {
 
 		// when
 		doNothing().when(authService).withdraw(userId);
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(delete("/api/v1/auth/withdraw")
 				.header("Authorization", "Bearer " + token))
