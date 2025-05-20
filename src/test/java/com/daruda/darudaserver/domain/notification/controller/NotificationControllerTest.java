@@ -76,11 +76,8 @@ class NotificationControllerTest {
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 
-		// when
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
-
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(get("/api/v1/notification/connect")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -99,11 +96,8 @@ class NotificationControllerTest {
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 
-		// when
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
-
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(patch("/api/v1/notification/read/{notification-id}", notificationId)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -144,10 +138,9 @@ class NotificationControllerTest {
 
 		// when
 		when(notificationService.getNotifications(anyLong())).thenReturn(notifications);
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(get("/api/v1/notification")
 				.header("Authorization", "Bearer " + token))
@@ -188,10 +181,9 @@ class NotificationControllerTest {
 
 		// when
 		when(notificationService.getRecentNotifications(anyLong())).thenReturn(notifications);
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(get("/api/v1/notification/recent")
 				.header("Authorization", "Bearer " + token))
@@ -212,11 +204,8 @@ class NotificationControllerTest {
 		SecurityContextHolder.setContext(context);
 		NoticeRequest request = new NoticeRequest("공지 제목", "공지 내용");
 
-		// when
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
-
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(post("/api/v1/notification/notice")
 				.contentType(MediaType.APPLICATION_JSON)
