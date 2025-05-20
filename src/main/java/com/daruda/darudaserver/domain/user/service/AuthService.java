@@ -9,6 +9,7 @@ import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
+import com.daruda.darudaserver.domain.notification.service.NotificationService;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
@@ -39,6 +40,7 @@ public class AuthService {
 	private final BoardScrapRepository boardScrapRepository;
 	private final CommentRepository commentRepository;
 	private final ToolScrapRepository toolScrapRepository;
+	private final NotificationService notificationService;
 
 	@Transactional
 	public SignUpSuccessResponse register(final String email, final String nickname, final String positionStr) {
@@ -102,6 +104,10 @@ public class AuthService {
 		//FK로 묶여있는 board 삭제
 		boardRepository.deleteAllByUserId(userId);
 		log.info("board를 성공적으로 삭제하였습니다");
+
+		// 알림 삭제
+		notificationService.delete(userId);
+		log.info("알림을 성공적으로 삭제하였습니다");
 
 		//토큰 삭제
 		tokenService.deleteRefreshToken(userId);
