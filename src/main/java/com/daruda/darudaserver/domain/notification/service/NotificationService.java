@@ -45,8 +45,14 @@ public class NotificationService {
 		SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
 
 		// 시간 초과나 비동기 요청이 안되면 자동으로 emitter 삭제
-		emitter.onCompletion(() -> emitterRepository.deleteById(emitterId));
-		emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
+		emitter.onCompletion(() -> {
+			emitterRepository.deleteById(emitterId);
+			emitterRepository.deleteAllEventCacheStartWithId(emitterId);
+		});
+		emitter.onTimeout(() -> {
+			emitterRepository.deleteById(emitterId);
+			emitterRepository.deleteAllEventCacheStartWithId(emitterId);
+		});
 
 		// 최초 연결시 발생하는 503 오류에 대응하기 위한 더미 데이터
 		sendToClient(emitter, emitterId, "EventStream Created. [userId=" + userId + "]");
