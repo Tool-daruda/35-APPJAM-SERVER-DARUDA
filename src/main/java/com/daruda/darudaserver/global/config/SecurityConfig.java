@@ -64,6 +64,9 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.POST, "/api/v1/comment", "/api/v1/board", "/api/v1/board/{board-id}")
 					.authenticated()
 
+					.requestMatchers("/api/v1/notification/notice")
+					.denyAll()
+
 					.requestMatchers(WHITE_LIST)
 					.permitAll()
 					.anyRequest()
