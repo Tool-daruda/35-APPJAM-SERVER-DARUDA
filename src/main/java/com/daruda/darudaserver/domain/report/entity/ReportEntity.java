@@ -52,7 +52,7 @@ public class ReportEntity extends BaseTimeEntity {
     @Column(name = "report_type", nullable = false, length = 50)
     private ReportType reportType;
 
-    @Column(name = "detail", length = 1_000)
+    @Column(name = "detail", length = 1_000, nullable = true)
     private String detail;
 
     @Enumerated(EnumType.STRING)
