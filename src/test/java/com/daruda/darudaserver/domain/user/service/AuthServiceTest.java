@@ -1,6 +1,38 @@
 package com.daruda.darudaserver.domain.user.service;
 
-/*
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
+import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.community.repository.BoardRepository;
+import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
+import com.daruda.darudaserver.domain.notification.service.NotificationService;
+import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
+import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
+import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
+import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
+import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
+import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.enums.Positions;
+import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
+import com.daruda.darudaserver.domain.user.repository.UserRepository;
+import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.BusinessException;
+
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
 
@@ -24,6 +56,9 @@ public class AuthServiceTest {
 
 	@Mock
 	private KakaoService kakaoService;
+
+	@Mock
+	private NotificationService notificationService;
 
 	@InjectMocks
 	private AuthService authService;
@@ -168,13 +203,14 @@ public class AuthServiceTest {
 		// then
 		verify(userRepository).findById(userId);
 		verify(toolScrapRepository).deleteAllByUserId(userId);
-		verify(commentRepository).deleteAllByUserId(userId);
+		verify(commentRepository).deleteCommentsByUserId(userId);
 		verify(boardRepository).findAllByUserId(userId);
-		verify(commentRepository, times(mockBoardList.size())).deleteByBoardId(anyLong());
+		verify(commentRepository, times(mockBoardList.size())).deleteCommentsByBoardId(anyLong());
 		verify(boardScrapRepository).deleteAllByUserId(userId);
 		verify(boardRepository).deleteAllByUserId(userId);
 		verify(tokenService).deleteRefreshToken(userId);
 		verify(userRepository).delete(mockUser);
+		verify(notificationService).delete(userId);
 	}
 
 	@Test
@@ -195,9 +231,9 @@ public class AuthServiceTest {
 
 		verify(userRepository).findById(userId);
 		verify(toolScrapRepository, never()).deleteAllByUserId(userId);
-		verify(commentRepository, never()).deleteAllByUserId(userId);
+		verify(commentRepository, never()).deleteCommentsByUserId(userId);
 		verify(boardRepository, never()).findAllByUserId(userId);
-		verify(commentRepository, never()).deleteByBoardId(anyLong());
+		verify(commentRepository, never()).deleteCommentsByBoardId(anyLong());
 		verify(boardScrapRepository, never()).deleteAllByUserId(userId);
 		verify(boardRepository, never()).deleteAllByUserId(userId);
 		verify(tokenService, never()).deleteRefreshToken(userId);
@@ -217,4 +253,3 @@ public class AuthServiceTest {
 		assertThat(result).isEqualTo(kakaoService);
 	}
 }
-*/

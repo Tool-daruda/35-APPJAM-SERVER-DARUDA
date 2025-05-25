@@ -1,28 +1,62 @@
 package com.daruda.darudaserver.domain.comment.service;
 
-/*
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.daruda.darudaserver.domain.comment.dto.request.CreateCommentRequest;
+import com.daruda.darudaserver.domain.comment.dto.response.GetCommentRetrieveResponse;
+import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
+import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.community.repository.BoardRepository;
+import com.daruda.darudaserver.domain.notification.repository.NotificationRepository;
+import com.daruda.darudaserver.domain.notification.service.NotificationService;
+import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.enums.Positions;
+import com.daruda.darudaserver.domain.user.repository.UserRepository;
+import com.daruda.darudaserver.global.error.exception.ForbiddenException;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
+
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
 
+	private final Validator validator =
+		Validation.buildDefaultValidatorFactory().getValidator();
 	@Mock
 	CommentRepository commentRepository;
-
 	@Mock
 	BoardRepository boardRepository;
-
 	@Mock
 	UserRepository userRepository;
-
+	@Mock
+	NotificationRepository notificationRepository;
+	@Mock
+	NotificationService notificationService;
 	@InjectMocks
 	CommentService commentService;
-
 	private UserEntity author;
 	private UserEntity stranger;
 	private Board board;
 	private CommentEntity comment;
-
-	private final Validator validator =
-		Validation.buildDefaultValidatorFactory().getValidator();
 
 	@BeforeEach
 	void setUp() {
@@ -60,9 +94,9 @@ class CommentServiceTest {
 			given(boardRepository.findById(board.getId())).willReturn(Optional.of(board));
 			given(commentRepository.save(any(CommentEntity.class)))
 				.willAnswer(inv -> {
-					CommentEntity c = inv.getArgument(0);
-					ReflectionTestUtils.setField(c, "id", 100L);
-					return c;
+					CommentEntity commentEntity = inv.getArgument(0);
+					ReflectionTestUtils.setField(commentEntity, "id", 100L);
+					return commentEntity;
 				});
 
 			CreateCommentRequest req = new CreateCommentRequest("내용", null);
@@ -72,6 +106,7 @@ class CommentServiceTest {
 
 			// then
 			assertThat(result.commentId()).isEqualTo(100L);
+			then(notificationService).should().sendCommentNotification(any(CommentEntity.class));
 		}
 
 		@Test
@@ -126,6 +161,7 @@ class CommentServiceTest {
 			commentService.deleteComment(author.getId(), comment.getId());
 
 			then(commentRepository).should().delete(comment);
+			then(notificationRepository).should().deleteAllByComment(comment);
 		}
 
 		@Test
@@ -138,7 +174,7 @@ class CommentServiceTest {
 				commentService.deleteComment(stranger.getId(), comment.getId()))
 				.isInstanceOf(ForbiddenException.class);
 
-			then(commentRepository).should(never()).delete(any());
+			then(commentRepository).shouldHaveNoMoreInteractions();
 		}
 
 		@Test
@@ -153,4 +189,3 @@ class CommentServiceTest {
 		}
 	}
 }
-*/

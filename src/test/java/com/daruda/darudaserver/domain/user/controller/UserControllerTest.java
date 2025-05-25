@@ -84,10 +84,9 @@ class UserControllerTest {
 
 		// when
 		when(userService.updateProfile(userId, request.nickname(), request.positions())).thenReturn(response);
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(patch("/api/v1/user/profile")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -113,10 +112,9 @@ class UserControllerTest {
 
 		// when
 		when(userService.getFavoriteTools(userId)).thenReturn(response);
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(get("/api/v1/user/scrap-tools")
 				.header("Authorization", "Bearer " + token))
@@ -139,10 +137,9 @@ class UserControllerTest {
 
 		// when
 		when(boardService.getUserBoards(userId, pageable)).thenReturn(null);
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
 		// hen
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(get("/api/v1/user/boards")
 				.header("Authorization", "Bearer " + token)
@@ -169,10 +166,9 @@ class UserControllerTest {
 
 		// when
 		when(userService.getMyProfile(userId)).thenReturn(response);
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(get("/api/v1/user/profile")
 				.header("Authorization", "Bearer " + token))
@@ -196,10 +192,9 @@ class UserControllerTest {
 
 		// when
 		when(userService.isDuplicatedNickname(nickname)).thenReturn(false);
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
 
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(
 				get("/api/v1/user/nickname")
@@ -221,11 +216,8 @@ class UserControllerTest {
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 
-		// when
-		when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn("accessToken");
-
 		// then
-		String token = jwtTokenProvider.generateAccessToken(authentication);
+		String token = "accessToken";
 
 		mockMvc.perform(get("/api/v1/user/scrap-boards")
 				.header("Authorization", "Bearer " + token))
