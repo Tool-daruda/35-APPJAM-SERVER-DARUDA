@@ -57,6 +57,8 @@ public class AuthService {
 
 		JwtTokenResponse jwtTokenResponse = tokenService.createToken(userId);
 
+		notificationService.sendRegisterNotice(userEntity);
+
 		return SignUpSuccessResponse.of(nickname, positions, email, jwtTokenResponse);
 	}
 

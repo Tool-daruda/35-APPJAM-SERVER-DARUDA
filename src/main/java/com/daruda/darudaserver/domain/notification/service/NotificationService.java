@@ -1,5 +1,7 @@
 package com.daruda.darudaserver.domain.notification.service;
 
+import static com.daruda.darudaserver.domain.notification.entity.enums.NotificationFormat.*;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +17,7 @@ import com.daruda.darudaserver.domain.notification.dto.request.CommunityBlockNot
 import com.daruda.darudaserver.domain.notification.dto.request.NoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.response.NotificationResponse;
 import com.daruda.darudaserver.domain.notification.entity.NotificationEntity;
+import com.daruda.darudaserver.domain.notification.entity.enums.BlockDurationInDay;
 import com.daruda.darudaserver.domain.notification.entity.enums.NotificationType;
 import com.daruda.darudaserver.domain.notification.repository.EmitterRepository;
 import com.daruda.darudaserver.domain.notification.repository.NotificationRepository;
@@ -36,14 +39,6 @@ public class NotificationService {
 
 	// 한 시간 동안 연결
 	private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
-	private static final String COMMENT_NOTIFICATION_TITLE_FORMAT = "내가 쓴 글에 댓글이 달렸어요: %s";
-	private static final String COMMENT_NOTIFICATION_CONTENT_FORMAT = "제목: %s";
-	private static final String COMMUNITY_BLOCK_NOTICE_TITLE_FORMAT = "[공지] %s님의 신고가 접수되었습니다.";
-	private static final String COMMUNITY_BLOCK_NOTICE_CONTENT_FORMAT = "회원님께서는 \n"
-		+ "커뮤니티이용규칙을 위반하여\n"
-		+ "%s부로 %d일간 커뮤니티의 일부 활동을 제한합니다. \n"
-		+ "문의사항이 있다면 홈 화면 우측 상단의 ‘문의하기’를 이용해 주시기 바랍니다.\n"
-		+ "감사합니다.";
 
 	private final UserRepository userRepository;
 	private final EmitterRepository emitterRepository;
@@ -87,8 +82,8 @@ public class NotificationService {
 	public void sendCommentNotification(CommentEntity commentEntity) {
 		Board board = commentEntity.getBoard();
 
-		String title = String.format(COMMENT_NOTIFICATION_TITLE_FORMAT, commentEntity.getContent());
-		String content = String.format(COMMENT_NOTIFICATION_CONTENT_FORMAT, board.getTitle());
+		String title = String.format(COMMENT_NOTIFICATION_TITLE.getMessageFormat(), commentEntity.getContent());
+		String content = String.format(COMMENT_NOTIFICATION_CONTENT.getMessageFormat(), board.getTitle());
 
 		send(board.getUser(), NotificationType.COMMENT, title, content, commentEntity);
 	}
@@ -103,15 +98,23 @@ public class NotificationService {
 		UserEntity receiver = userRepository.findById(communityBlockNoticeRequest.userId())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
+		BlockDurationInDay blockDurationInDay = BlockDurationInDay.fromString(
+			communityBlockNoticeRequest.blockDurationInDay());
+
 		LocalDate now = LocalDate.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일");
 		String formattedDate = now.format(formatter);
 
-		String title = String.format(COMMUNITY_BLOCK_NOTICE_TITLE_FORMAT, receiver.getNickname());
-		String content = String.format(COMMUNITY_BLOCK_NOTICE_CONTENT_FORMAT, formattedDate,
-			communityBlockNoticeRequest.blockDurationInDays());
+		String title = String.format(COMMUNITY_BLOCK_NOTICE_TITLE.getMessageFormat(), receiver.getNickname());
+		String content = String.format(COMMUNITY_BLOCK_NOTICE_CONTENT.getMessageFormat(), formattedDate,
+			blockDurationInDay.getDays());
 
 		send(receiver, NotificationType.NOTICE, title, content, null);
+	}
+
+	public void sendRegisterNotice(UserEntity userEntity) {
+		send(userEntity, NotificationType.NOTICE, REGISTER_NOTICE_TITLE.getMessageFormat(),
+			REGISTER_NOTICE_CONTENT.getMessageFormat(), null);
 	}
 
 	public void delete(Long userId) {
