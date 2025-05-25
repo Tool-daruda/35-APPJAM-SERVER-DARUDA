@@ -36,7 +36,7 @@ import lombok.NoArgsConstructor;
 @SQLDelete(sql =
 	"UPDATE board SET del_yn = true, deleted_at = NOW() "
 		+ "WHERE board_id = ?")
-@SQLRestriction("is_deleted = false")
+@SQLRestriction("del_yn = false")
 public class Board extends BaseTimeEntity {
 
 	@Id
