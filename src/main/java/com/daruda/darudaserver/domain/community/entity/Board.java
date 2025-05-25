@@ -1,5 +1,10 @@
 package com.daruda.darudaserver.domain.community.entity;
 
+import java.sql.Timestamp;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
@@ -28,6 +33,10 @@ import lombok.NoArgsConstructor;
 @Table(name = "board")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql =
+	"UPDATE board SET del_yn = true, deleted_at = NOW() "
+		+ "WHERE board_id = ?")
+@SQLRestriction("is_deleted = false")
 public class Board extends BaseTimeEntity {
 
 	@Id
@@ -55,6 +64,8 @@ public class Board extends BaseTimeEntity {
 
 	@Builder.Default
 	private boolean isFree = true;
+
+	private Timestamp deletedAt;
 
 	@Builder
 	public Board(final String title, final String content, final Tool tool, final UserEntity user, final boolean delYn,
