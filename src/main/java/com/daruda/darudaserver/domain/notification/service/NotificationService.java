@@ -171,8 +171,8 @@ public class NotificationService {
 
 	private void send(UserEntity receiver, NotificationType notificationType, String title, String content,
 		CommentEntity commentEntity) {
-		NotificationEntity notificationEntity = notificationRepository.save(
-			NotificationEntity.of(receiver, notificationType, title, content, commentEntity));
+		NotificationEntity notificationEntity = NotificationEntity.of(receiver, notificationType, title, content,
+			commentEntity);
 		String userId = String.valueOf(receiver.getId());
 
 		Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByUserId(userId);
@@ -181,6 +181,8 @@ public class NotificationService {
 				emitterRepository.saveEventCache(key, notificationEntity);
 				if (isSendFailedToClient(emitter, key, NotificationResponse.from(notificationEntity))) {
 					log.warn("알림 전송 실패 - emitterId: {}, 수신자: {}", key, receiver.getEmail());
+				} else {
+					notificationRepository.save(notificationEntity);
 				}
 			}
 		);
