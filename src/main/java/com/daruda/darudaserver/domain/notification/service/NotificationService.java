@@ -1,6 +1,8 @@
 package com.daruda.darudaserver.domain.notification.service;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.notification.dto.request.CommunityBlockNoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.request.NoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.response.NotificationResponse;
 import com.daruda.darudaserver.domain.notification.entity.NotificationEntity;
@@ -35,6 +38,12 @@ public class NotificationService {
 	private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
 	private static final String COMMENT_NOTIFICATION_TITLE_FORMAT = "내가 쓴 글에 댓글이 달렸어요: %s";
 	private static final String COMMENT_NOTIFICATION_CONTENT_FORMAT = "제목: %s";
+	private static final String COMMUNITY_BLOCK_NOTICE_TITLE_FORMAT = "[공지] %s님의 신고가 접수되었습니다.";
+	private static final String COMMUNITY_BLOCK_NOTICE_CONTENT_FORMAT = "회원님께서는 \n"
+		+ "커뮤니티이용규칙을 위반하여\n"
+		+ "%s부로 %d일간 커뮤니티의 일부 활동을 제한합니다. \n"
+		+ "문의사항이 있다면 홈 화면 우측 상단의 ‘문의하기’를 이용해 주시기 바랍니다.\n"
+		+ "감사합니다.";
 
 	private final UserRepository userRepository;
 	private final EmitterRepository emitterRepository;
@@ -77,8 +86,10 @@ public class NotificationService {
 
 	public void sendCommentNotification(CommentEntity commentEntity) {
 		Board board = commentEntity.getBoard();
+
 		String title = String.format(COMMENT_NOTIFICATION_TITLE_FORMAT, commentEntity.getContent());
 		String content = String.format(COMMENT_NOTIFICATION_CONTENT_FORMAT, board.getTitle());
+
 		send(board.getUser(), NotificationType.COMMENT, title, content, commentEntity);
 	}
 
@@ -86,6 +97,21 @@ public class NotificationService {
 		for (UserEntity userEntity : userRepository.findAll()) {
 			send(userEntity, NotificationType.NOTICE, noticeRequest.title(), noticeRequest.content(), null);
 		}
+	}
+
+	public void sendBlockNotice(CommunityBlockNoticeRequest communityBlockNoticeRequest) {
+		UserEntity receiver = userRepository.findById(communityBlockNoticeRequest.userId())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+		LocalDate now = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일");
+		String formattedDate = now.format(formatter);
+
+		String title = String.format(COMMUNITY_BLOCK_NOTICE_TITLE_FORMAT, receiver.getNickname());
+		String content = String.format(COMMUNITY_BLOCK_NOTICE_CONTENT_FORMAT, formattedDate,
+			communityBlockNoticeRequest.blockDurationInDays());
+
+		send(receiver, NotificationType.NOTICE, title, content, null);
 	}
 
 	public void delete(Long userId) {
