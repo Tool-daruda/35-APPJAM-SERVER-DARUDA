@@ -8,6 +8,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -89,9 +92,22 @@ public class NotificationService {
 	}
 
 	public void sendNotice(NoticeRequest noticeRequest) {
-		for (UserEntity userEntity : userRepository.findAll()) {
-			send(userEntity, NotificationType.NOTICE, noticeRequest.title(), noticeRequest.content(), null);
-		}
+		int batchSize = 1000;
+		int page = 0;
+		Pageable pageable;
+		Page<UserEntity> users;
+		do {
+			pageable = PageRequest.of(page, batchSize);
+			users = userRepository.findAll(pageable);
+			for (UserEntity userEntity : users.getContent()) {
+				send(userEntity,
+					NotificationType.NOTICE,
+					noticeRequest.title(),
+					noticeRequest.content(),
+					null);
+			}
+			page++;
+		} while (users.hasNext());
 	}
 
 	public void sendBlockNotice(CommunityBlockNoticeRequest communityBlockNoticeRequest) {
