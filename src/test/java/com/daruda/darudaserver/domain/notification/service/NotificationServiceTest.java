@@ -14,6 +14,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -90,9 +93,7 @@ class NotificationServiceTest {
 		verify(emitterRepository).findAllEventCacheStartWithByUserId(String.valueOf(userId));
 		cachedEvents.entrySet().stream()
 			.filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
-			.forEach(entry -> {
-				verify(emitterRepository).saveEventCache(entry.getKey(), entry.getValue());
-			});
+			.forEach(entry -> verify(emitterRepository).saveEventCache(entry.getKey(), entry.getValue()));
 
 		ArgumentCaptor<String> emitterIdCaptor = ArgumentCaptor.forClass(String.class);
 		verify(emitterRepository).save(emitterIdCaptor.capture(), any(SseEmitter.class));
@@ -166,7 +167,8 @@ class NotificationServiceTest {
 			comment);
 
 		// when
-		when(userRepository.findAll()).thenReturn(List.of(user1, user2));
+		Pageable pageable = PageRequest.of(0, 1000);
+		when(userRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(user1, user2)));
 		when(emitterRepository.findAllEmitterStartWithByUserId(anyString())).thenReturn(Map.of());
 		when(notificationRepository.save(any(NotificationEntity.class))).thenReturn(notification);
 
