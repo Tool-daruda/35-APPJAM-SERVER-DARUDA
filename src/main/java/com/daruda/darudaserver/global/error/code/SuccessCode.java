@@ -12,6 +12,7 @@ public enum SuccessCode {
 	SUCCESS_CREATE(HttpStatus.CREATED, "생성이 완료되었습니다"),
 	SUCCESS_REISSUE(HttpStatus.CREATED, "토큰이 재발급되었습니다"),
 	SUCCESS_SEND_NOTICE(HttpStatus.CREATED, "공지사항이 발송되었습니다"),
+	SUCCESS_SEND_COMMUNITY_BLOCK_NOTICE(HttpStatus.CREATED, "제한 공지가 발송되었습니다"),
 
 	/* 200 OK */
 	SUCCESS_UPDATE(HttpStatus.OK, "업데이트가 완료되었습니다"),
