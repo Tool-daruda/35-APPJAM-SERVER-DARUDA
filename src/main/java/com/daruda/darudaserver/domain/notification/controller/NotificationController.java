@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.daruda.darudaserver.domain.notification.dto.request.CommunityBlockNoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.request.NoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.response.NotificationResponse;
 import com.daruda.darudaserver.domain.notification.service.NotificationService;
@@ -73,5 +74,13 @@ public class NotificationController {
 	public ResponseEntity<ApiResponse<?>> notice(@RequestBody NoticeRequest noticeRequest) {
 		notificationService.sendNotice(noticeRequest);
 		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_SEND_NOTICE));
+	}
+
+	@PostMapping("/block-notice")
+	@Operation(summary = "커뮤니티 제한 공지 발송(관리자)", description = "커뮤니티가 제한된 사용자에게 공지를 발송합니다.")
+	public ResponseEntity<ApiResponse<?>> blockNotice(
+		@RequestBody CommunityBlockNoticeRequest communityBlockNoticeRequest) {
+		notificationService.sendBlockNotice(communityBlockNoticeRequest);
+		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_SEND_COMMUNITY_BLOCK_NOTICE));
 	}
 }
