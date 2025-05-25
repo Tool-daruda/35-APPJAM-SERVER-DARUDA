@@ -1,8 +1,12 @@
 package com.daruda.darudaserver.domain.notification.service;
 
+import static com.daruda.darudaserver.domain.notification.entity.enums.NotificationFormat.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,16 +19,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.notification.dto.request.CommunityBlockNoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.request.NoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.response.NotificationResponse;
 import com.daruda.darudaserver.domain.notification.entity.NotificationEntity;
+import com.daruda.darudaserver.domain.notification.entity.enums.BlockDurationInDay;
+import com.daruda.darudaserver.domain.notification.entity.enums.NotificationFormat;
 import com.daruda.darudaserver.domain.notification.entity.enums.NotificationType;
 import com.daruda.darudaserver.domain.notification.repository.EmitterRepository;
 import com.daruda.darudaserver.domain.notification.repository.NotificationRepository;
@@ -103,6 +109,30 @@ class NotificationServiceTest {
 	}
 
 	@Test
+	@DisplayName("SSE 연결 실패 - 초기 이벤트 전송 실패")
+	void subscribe_ShouldHandleInitialEventSendFailure() throws IOException {
+		// given
+		Long userId = 1L;
+		String lastEventId = "";
+		SseEmitter emitter = mock(SseEmitter.class);
+
+		// when
+		when(emitterRepository.save(anyString(), any(SseEmitter.class))).thenReturn(emitter);
+		doThrow(new IOException("이벤트 전송 실패")).when(emitter).send(any(SseEmitter.SseEventBuilder.class));
+
+		// then
+		SseEmitter result = notificationService.subscribe(userId, lastEventId);
+		assertNotNull(result);
+
+		ArgumentCaptor<String> emitterIdCaptor = ArgumentCaptor.forClass(String.class);
+		verify(emitterRepository).save(emitterIdCaptor.capture(), any(SseEmitter.class));
+
+		String capturedEmitterId = emitterIdCaptor.getValue();
+		assertTrue(capturedEmitterId.startsWith(userId + "_"));
+		verify(emitterRepository).deleteById(capturedEmitterId);
+	}
+
+	@Test
 	@DisplayName("댓글 알림 전송 성공")
 	void sendCommentNotification_ShouldSendNotification() {
 		// given
@@ -117,12 +147,17 @@ class NotificationServiceTest {
 		String toolName = "test";
 		Tool tool = Tool.builder().toolMainName(toolName).build();
 
-		String title = "title";
-		String content = "content";
-		Board board = Board.create(tool, userEntity, title, content);
+		String communityTitle = "title";
+		String communityContent = "content";
+		Board board = Board.create(tool, userEntity, communityTitle, communityContent);
 
 		String photoUrl = "http://test.test";
-		CommentEntity comment = CommentEntity.of(content, photoUrl, userEntity, board);
+		CommentEntity comment = CommentEntity.of(communityContent, photoUrl, userEntity, board);
+
+		String title = String.format(NotificationFormat.COMMENT_NOTIFICATION_TITLE.getMessageFormat(),
+			comment.getContent());
+		String content = String.format(NotificationFormat.COMMENT_NOTIFICATION_CONTENT.getMessageFormat(),
+			board.getTitle());
 
 		NotificationEntity notification = NotificationEntity.of(userEntity, NotificationType.COMMENT, title, content,
 			comment);
@@ -137,9 +172,16 @@ class NotificationServiceTest {
 		notificationService.sendCommentNotification(comment);
 
 		// then
-		verify(notificationRepository).save(any(NotificationEntity.class));
+		ArgumentCaptor<NotificationEntity> notificationCaptor = ArgumentCaptor.forClass(NotificationEntity.class);
+		verify(notificationRepository).save(notificationCaptor.capture());
+		NotificationEntity capturedNotification = notificationCaptor.getValue();
+
+		assertEquals(notification.getTitle(), capturedNotification.getTitle());
+		assertEquals(notification.getContent(), capturedNotification.getContent());
+		assertEquals(notification.getType(), capturedNotification.getType());
+
 		verify(emitterRepository).findAllEmitterStartWithByUserId(userIdString);
-		verify(emitterRepository).saveEventCache(emitterId, notification);
+		verify(emitterRepository).saveEventCache(eq(emitterId), any(NotificationEntity.class));
 		verifyNoMoreInteractions(emitterRepository);
 	}
 
@@ -153,30 +195,143 @@ class NotificationServiceTest {
 		UserEntity user1 = UserEntity.of(email, nickname, positions);
 		UserEntity user2 = UserEntity.of(email, nickname, positions);
 
-		String toolName = "test";
-		Tool tool = Tool.builder().toolMainName(toolName).build();
-
 		String title = "title";
 		String content = "content";
-		Board board = Board.create(tool, user1, title, content);
-
-		String photoUrl = "http://test.test";
-		CommentEntity comment = CommentEntity.of(content, photoUrl, user1, board);
-
-		NotificationEntity notification = NotificationEntity.of(user1, NotificationType.COMMENT, title, content,
-			comment);
 
 		// when
-		Pageable pageable = PageRequest.of(0, 1000);
-		when(userRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(user1, user2)));
+		when(userRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(user1, user2)));
 		when(emitterRepository.findAllEmitterStartWithByUserId(anyString())).thenReturn(Map.of());
-		when(notificationRepository.save(any(NotificationEntity.class))).thenReturn(notification);
 
 		NoticeRequest noticeRequest = new NoticeRequest(title, content);
 		notificationService.sendNotice(noticeRequest);
 
 		// then
-		verify(notificationRepository, times(2)).save(any(NotificationEntity.class));
+		verify(userRepository).findAll(any(Pageable.class));
+		verify(emitterRepository, times(2)).findAllEmitterStartWithByUserId(anyString());
+		verifyNoMoreInteractions(emitterRepository);
+	}
+
+	@Test
+	@DisplayName("제한 알림 전송 성공")
+	void sendBlockNotification_ShouldSendNotification() {
+		// given
+		Long userId = 1L;
+		String userIdString = "1";
+		String email = "test@example.com";
+		String nickname = "tester";
+		Positions positions = Positions.STUDENT;
+		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		ReflectionTestUtils.setField(userEntity, "id", userId); // id 설정
+
+		String blockDurationInDayString = "1일";
+		BlockDurationInDay blockDurationInDay = BlockDurationInDay.fromString(blockDurationInDayString);
+
+		LocalDate now = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일");
+		String formattedDate = now.format(formatter);
+
+		String title = String.format(NotificationFormat.COMMUNITY_BLOCK_NOTICE_TITLE.getMessageFormat(), nickname);
+		String content = String.format(NotificationFormat.COMMUNITY_BLOCK_NOTICE_CONTENT.getMessageFormat(),
+			formattedDate, blockDurationInDay.getDays());
+
+		NotificationEntity expectedNotification = NotificationEntity.of(userEntity, NotificationType.NOTICE, title,
+			content, null);
+
+		SseEmitter emitter = mock(SseEmitter.class);
+		String emitterId = "1_12345";
+
+		CommunityBlockNoticeRequest communityBlockNoticeRequest = new CommunityBlockNoticeRequest(userId,
+			blockDurationInDayString);
+
+		// when
+		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
+		when(emitterRepository.findAllEmitterStartWithByUserId(userIdString)).thenReturn(Map.of(emitterId, emitter));
+		when(notificationRepository.save(any(NotificationEntity.class))).thenReturn(expectedNotification);
+
+		notificationService.sendBlockNotice(communityBlockNoticeRequest);
+
+		// then
+		ArgumentCaptor<NotificationEntity> notificationCaptor = ArgumentCaptor.forClass(NotificationEntity.class);
+		verify(notificationRepository).save(notificationCaptor.capture());
+		NotificationEntity capturedNotification = notificationCaptor.getValue();
+
+		assertEquals(expectedNotification.getTitle(), capturedNotification.getTitle());
+		assertEquals(expectedNotification.getContent(), capturedNotification.getContent());
+		assertEquals(expectedNotification.getType(), capturedNotification.getType());
+
+		verify(emitterRepository).findAllEmitterStartWithByUserId(userIdString);
+		verify(emitterRepository).saveEventCache(eq(emitterId), any(NotificationEntity.class));
+		verifyNoMoreInteractions(emitterRepository);
+	}
+
+	@Test
+	@DisplayName("회원가입 알림 전송 성공")
+	void sendRegisterNotification_ShouldSendNotification() {
+		// given
+		Long userId = 1L;
+		String userIdString = "1";
+		String email = "test@example.com";
+		String nickname = "tester";
+		Positions positions = Positions.STUDENT;
+		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		ReflectionTestUtils.setField(userEntity, "id", userId); // id 설정
+
+		String title = REGISTER_NOTICE_TITLE.getMessageFormat();
+		String content = REGISTER_NOTICE_CONTENT.getMessageFormat();
+
+		NotificationEntity expectedNotification = NotificationEntity.of(userEntity, NotificationType.NOTICE, title,
+			content, null);
+
+		SseEmitter emitter = mock(SseEmitter.class);
+		String emitterId = "1_12345";
+
+		// when
+		when(emitterRepository.findAllEmitterStartWithByUserId(userIdString)).thenReturn(Map.of(emitterId, emitter));
+		when(notificationRepository.save(any(NotificationEntity.class))).thenReturn(expectedNotification);
+
+		notificationService.sendRegisterNotice(userEntity);
+
+		// then
+		ArgumentCaptor<NotificationEntity> notificationCaptor = ArgumentCaptor.forClass(NotificationEntity.class);
+		verify(notificationRepository).save(notificationCaptor.capture());
+		NotificationEntity capturedNotification = notificationCaptor.getValue();
+
+		assertEquals(expectedNotification.getTitle(), capturedNotification.getTitle());
+		assertEquals(expectedNotification.getContent(), capturedNotification.getContent());
+		assertEquals(expectedNotification.getType(), capturedNotification.getType());
+
+		verify(emitterRepository).findAllEmitterStartWithByUserId(userIdString);
+		verify(emitterRepository).saveEventCache(eq(emitterId), any(NotificationEntity.class));
+		verifyNoMoreInteractions(emitterRepository);
+	}
+
+	@Test
+	@DisplayName("회원가입 알림 전송 실패")
+	void sendRegisterNotification_FailSendNotification() throws IOException {
+		// given
+		Long userId = 1L;
+		String userIdString = "1";
+		String email = "test@example.com";
+		String nickname = "tester";
+		Positions positions = Positions.STUDENT;
+		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		ReflectionTestUtils.setField(userEntity, "id", userId);
+
+		SseEmitter emitter = mock(SseEmitter.class);
+		String emitterId = "1_12345";
+
+		// when
+		when(emitterRepository.findAllEmitterStartWithByUserId(userIdString)).thenReturn(Map.of(emitterId, emitter));
+		doThrow(new IOException("알림 전송 실패"))
+			.when(emitter).send(any(SseEmitter.SseEventBuilder.class));
+
+		// then
+		assertDoesNotThrow(() -> notificationService.sendRegisterNotice(userEntity));
+
+		verify(emitterRepository).findAllEmitterStartWithByUserId(userIdString);
+		verify(emitterRepository).saveEventCache(eq(emitterId), any(NotificationEntity.class));
+		verify(emitterRepository).deleteById(emitterId);
+		verifyNoMoreInteractions(emitterRepository);
 	}
 
 	@Test
