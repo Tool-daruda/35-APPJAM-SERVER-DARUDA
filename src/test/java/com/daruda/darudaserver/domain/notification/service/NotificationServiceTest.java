@@ -97,9 +97,12 @@ class NotificationServiceTest {
 		assertNotNull(result);
 
 		verify(emitterRepository).findAllEventCacheStartWithByUserId(String.valueOf(userId));
-		cachedEvents.entrySet().stream()
-			.filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
-			.forEach(entry -> verify(emitterRepository).saveEventCache(entry.getKey(), entry.getValue()));
+
+		if (cachedEvents.entrySet().stream().anyMatch(entry -> lastEventId.compareTo(entry.getKey()) < 0)) {
+			cachedEvents.entrySet().stream()
+				.filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
+				.forEach(entry -> verify(emitterRepository).saveEventCache(entry.getKey(), entry.getValue()));
+		}
 
 		ArgumentCaptor<String> emitterIdCaptor = ArgumentCaptor.forClass(String.class);
 		verify(emitterRepository).save(emitterIdCaptor.capture(), any(SseEmitter.class));
