@@ -26,6 +26,7 @@ public enum ErrorCode {
 	REFREH_TOKEN_EMPTY_ERROR(HttpStatus.BAD_REQUEST, "E400015", "리프레시 토큰이 비었습니다"),
 	SOCIAL_TYPE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "E400016", "로그인 요청이 유효하지 않습니다."),
 	ALREADY_REPORTED(HttpStatus.BAD_REQUEST, "E400017", "이미 신고한 대상입니다."),
+	ALREADY_PROCESSED_REPORT(HttpStatus.BAD_REQUEST, "E400018", "이미 처리된 신고입니다."),
 
 	/* 401 */
 
@@ -34,9 +35,12 @@ public enum ErrorCode {
 	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "E401003", "리소스 접근 권한이 없습니다."),
 	EMPTY_OR_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "E401004", "토큰이 존재하지 않거나 유효하지 않습니다"),
 
-	/* 403 */
+	/* 403  FORBIDDEN */
+
+	UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "E403000", "접근 권한이 없습니다."),
 	BOARD_FORBIDDEN(HttpStatus.FORBIDDEN, "E403001", "게시판 접근 권한이 없습니다."),
 	NO_PERMISSION_TO_DELETE(HttpStatus.FORBIDDEN, "E403002", "삭제 권한이 없습니다."),
+	USER_SUSPENDED(HttpStatus.FORBIDDEN, "E403003", "활동 정지된 사용자입니다."),
 
 	/* 404 NOT FOUND */
 
@@ -47,6 +51,7 @@ public enum ErrorCode {
 	TOOL_NOT_FOUND(HttpStatus.NOT_FOUND, "E404005", "툴 존재하지 않습니다"),
 	BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "E404006", "게시글이 존재하지 않습니다"),
 	SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND, "E404007", "스크랩이 존재하지 않습니다"),
+	REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "E404008", "신고가 존재하지 않습니다"),
 
 	/* 409 CONFLICT */
 	DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "E409001", "닉네임 중복입니다"),

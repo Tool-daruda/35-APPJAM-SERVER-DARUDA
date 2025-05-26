@@ -10,10 +10,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "report")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "report")
 public class ReportEntity extends BaseTimeEntity {
 
 	@Id
@@ -46,7 +48,19 @@ public class ReportEntity extends BaseTimeEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 20)
-	private ReportStatus status;
+	private ReportStatus status = ReportStatus.PENDING;
+
+	@Column(name = "suspension_days")
+	private Integer suspensionDays;
+
+	@Column(name = "processed_at")
+	private LocalDateTime processedAt;
+
+	@Column(name = "processed_by_id")
+	private Long processedById;
+
+	@Column(name = "process_note", length = 500)
+	private String processNote;
 
 	@Builder
 	private ReportEntity(
@@ -59,11 +73,10 @@ public class ReportEntity extends BaseTimeEntity {
 	) {
 		this.reporter = reporter;
 		this.reportedUser = reportedUser;
-		this.reportType = reportType;
 		this.board = board;
 		this.comment = comment;
+		this.reportType = reportType;
 		this.detail = detail;
-		this.status = ReportStatus.PENDING;
 	}
 
 	public static ReportEntity of(
@@ -88,7 +101,29 @@ public class ReportEntity extends BaseTimeEntity {
 		this.status = status;
 	}
 
+	public void updateProcessInfo(Long processedById, String processNote) {
+		this.processedById = processedById;
+		this.processNote = processNote;
+		this.processedAt = LocalDateTime.now();
+	}
+
+	public void updateSuspensionDays(Integer suspensionDays) {
+		this.suspensionDays = suspensionDays;
+	}
+
+	public boolean isPending() {
+		return status == ReportStatus.PENDING;
+	}
+
 	public boolean isCommentReport() {
 		return comment != null;
+	}
+
+	public boolean isApproved() {
+		return status == ReportStatus.APPROVED;
+	}
+
+	public boolean shouldApplySuspension() {
+		return isApproved() && suspensionDays != null && suspensionDays > 0;
 	}
 }
