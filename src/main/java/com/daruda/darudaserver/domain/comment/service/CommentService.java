@@ -44,6 +44,11 @@ public class CommentService {
 		UserEntity user = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
+		// 제재 상태 확인
+		if (user.isSuspended()) {
+			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
+		}
+
 		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 
