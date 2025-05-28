@@ -99,6 +99,8 @@ class ReportServiceTest {
 
 		report = ReportEntity.of(reporter, reportedUser, board, null, ReportType.SPAM, "스팸 게시글");
 		ReflectionTestUtils.setField(report, "id", 1000L);
+		ReflectionTestUtils.setField(report, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
+		ReflectionTestUtils.setField(report, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
 	}
 
 	@Nested
@@ -117,6 +119,8 @@ class ReportServiceTest {
 				.willAnswer(inv -> {
 					ReportEntity r = inv.getArgument(0);
 					ReflectionTestUtils.setField(r, "id", 1000L);
+					ReflectionTestUtils.setField(r, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
+					ReflectionTestUtils.setField(r, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
 					return r;
 				});
 
@@ -146,6 +150,8 @@ class ReportServiceTest {
 				.willAnswer(inv -> {
 					ReportEntity r = inv.getArgument(0);
 					ReflectionTestUtils.setField(r, "id", 1000L);
+					ReflectionTestUtils.setField(r, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
+					ReflectionTestUtils.setField(r, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
 					return r;
 				});
 
@@ -367,11 +373,11 @@ class ReportServiceTest {
 		void processReport_already_processed() {
 			// given
 			given(userRepository.findById(admin.getId())).willReturn(Optional.of(admin));
-			
+
 			// 이미 처리된 신고로 설정
 			ReportEntity processedReport = ReportEntity.of(reporter, reportedUser, board, null, ReportType.SPAM, "스팸");
 			processedReport.updateStatus(ReportStatus.APPROVED);
-			processedReport.updateProcessInfo(admin.getId(), "처리 완료");
+			processedReport.updateProcessInfo(admin.getId(), "처리 완료", LocalDateTime.now());
 			processedReport.updateSuspensionDays(7);
 			given(reportRepository.findById(anyLong())).willReturn(Optional.of(processedReport));
 
@@ -415,7 +421,7 @@ class ReportServiceTest {
 				.nickname("테스트")
 				.positions(Positions.WORKER)
 				.build();
-			
+
 			// 어제까지 제재
 			user.suspend(LocalDateTime.now().minusDays(1), "테스트 제재");
 
@@ -432,7 +438,7 @@ class ReportServiceTest {
 				.nickname("테스트")
 				.positions(Positions.WORKER)
 				.build();
-			
+
 			// 내일까지 제재
 			user.suspend(LocalDateTime.now().plusDays(1), "테스트 제재");
 
