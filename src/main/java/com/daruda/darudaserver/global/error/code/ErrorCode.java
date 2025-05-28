@@ -54,9 +54,8 @@ public enum ErrorCode {
 	TOOL_NOT_FOUND(HttpStatus.NOT_FOUND, "E404005", "툴 존재하지 않습니다"),
 	BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "E404006", "게시글이 존재하지 않습니다"),
 	SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND, "E404007", "스크랩이 존재하지 않습니다"),
-	NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "E404007", "알림이 존재하지 않습니다"),
-
-	REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "E404008", "신고가 존재하지 않습니다"),
+	NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "E404008", "알림이 존재하지 않습니다"),
+	REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "E404009", "신고가 존재하지 않습니다"),
 
 	/* 409 CONFLICT */
 
