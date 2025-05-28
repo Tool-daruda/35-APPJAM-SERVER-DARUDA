@@ -26,9 +26,8 @@ public enum ErrorCode {
 	REFREH_TOKEN_EMPTY_ERROR(HttpStatus.BAD_REQUEST, "E400015", "리프레시 토큰이 비었습니다"),
 	SOCIAL_TYPE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "E400016", "로그인 요청이 유효하지 않습니다."),
 	NOTIFICATION_READ_FORBIDDEN(HttpStatus.BAD_REQUEST, "E400017", "다른 사람의 알림을 읽을 수 없습니다."),
-
-	ALREADY_REPORTED(HttpStatus.BAD_REQUEST, "E400017", "이미 신고한 대상입니다."),
-	ALREADY_PROCESSED_REPORT(HttpStatus.BAD_REQUEST, "E400018", "이미 처리된 신고입니다."),
+	ALREADY_REPORTED(HttpStatus.BAD_REQUEST, "E400018", "이미 신고한 대상입니다."),
+	ALREADY_PROCESSED_REPORT(HttpStatus.BAD_REQUEST, "E400019", "이미 처리된 신고입니다."),
 
 	/* 401 */
 
