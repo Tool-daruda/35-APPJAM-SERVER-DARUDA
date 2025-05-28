@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +41,11 @@ public class ReportService {
 		Board board = null;
 
 		if (request.isCommentReport()) {
-			comment = commentRepository.findById(Objects.requireNonNull(request.getCommentId()))
+			if (request.getCommentId() == null) {
+				throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
+			}
+			
+			comment = commentRepository.findById(request.getCommentId())
 				.orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
 			board = comment.getBoard();
@@ -53,7 +56,11 @@ public class ReportService {
 				throw new BusinessException(ErrorCode.ALREADY_REPORTED);
 			}
 		} else {
-			board = boardRepository.findById(Objects.requireNonNull(request.getBoardId()))
+			if (request.getBoardId() == null) {
+				throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
+			}
+
+			board = boardRepository.findById(request.getBoardId())
 				.orElseThrow(() -> new BusinessException(ErrorCode.BOARD_NOT_FOUND));
 
 			reportedUser = board.getUser();
@@ -97,7 +104,7 @@ public class ReportService {
 
 		// 신고 상태 변경
 		report.updateStatus(request.getStatus());
-		report.updateProcessInfo(admin.getId(), request.getProcessNote());
+		report.updateProcessInfo(admin.getId(), request.getProcessNote(), LocalDateTime.now());
 		report.updateSuspensionDays(request.getSuspensionDays());
 
 		// 제재 적용

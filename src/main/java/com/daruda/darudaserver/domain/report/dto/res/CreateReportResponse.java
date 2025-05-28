@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Schema(description = "신고 생성 응답")
@@ -39,10 +39,10 @@ public class CreateReportResponse {
 	private final String detail;
 
 	@Schema(description = "생성 일시")
-	private final Timestamp createdAt;
+	private final LocalDateTime createdAt;
 
 	@Schema(description = "수정 일시")
-	private final Timestamp updatedAt;
+	private final LocalDateTime updatedAt;
 
 	@Builder
 	private CreateReportResponse(
@@ -55,8 +55,8 @@ public class CreateReportResponse {
 		Long commentId,
 		ReportType reportType,
 		String detail,
-		Timestamp createdAt,
-		Timestamp updatedAt
+		LocalDateTime createdAt,
+		LocalDateTime updatedAt
 	) {
 		this.id = id;
 		this.reporterId = reporterId;
@@ -82,8 +82,8 @@ public class CreateReportResponse {
 			.commentId(report.getComment() != null ? report.getComment().getId() : null)
 			.reportType(report.getReportType())
 			.detail(report.getDetail())
-			.createdAt(report.getCreatedAt())
-			.updatedAt(report.getUpdatedAt())
+			.createdAt(report.getCreatedAt().toLocalDateTime())
+			.updatedAt(report.getUpdatedAt().toLocalDateTime())
 			.build();
 	}
 }
