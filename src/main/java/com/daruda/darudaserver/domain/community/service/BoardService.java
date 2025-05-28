@@ -95,7 +95,7 @@ public class BoardService {
 	public BoardRes updateBoard(final Long userId, final Long boardId,
 		final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
 		Board board = validateBoardAndUser(userId, boardId);
-		UserEntity user = getUser(userId);
+		UserEntity user = board.getUser();
 		
 		// 제재 상태 확인
 		if (user.isSuspended()) {
@@ -105,7 +105,7 @@ public class BoardService {
 		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
 		board.update(
 			tool,
-			board.getUser(),
+			user,
 			boardCreateAndUpdateReq.title(),
 			boardCreateAndUpdateReq.content(),
 			boardCreateAndUpdateReq.isFree()
