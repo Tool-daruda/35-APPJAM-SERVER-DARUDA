@@ -5,6 +5,10 @@ import com.daruda.darudaserver.global.error.exception.BusinessException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Getter
 @RequiredArgsConstructor
 public enum SuspensionDuration {
@@ -18,12 +22,16 @@ public enum SuspensionDuration {
 	private final int days;
 	private final String description;
 
+	private static final Map<String, SuspensionDuration> DESCRIPTION_MAP = 
+		Arrays.stream(values())
+			.collect(Collectors.toMap(SuspensionDuration::getDescription, duration -> duration));
+
 	public static SuspensionDuration fromString(String description) {
-		for (SuspensionDuration suspensionDuration : SuspensionDuration.values()) {
-			if (suspensionDuration.getDescription().equals(description)) {
-				return suspensionDuration;
-			}
+		SuspensionDuration duration = DESCRIPTION_MAP.get(description);
+		if (duration == null) {
+			throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
 		}
-		throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
+		
+		return duration;
 	}
 } 
