@@ -51,12 +51,7 @@ public class CreateReportRequest {
 
 	@AssertTrue(message = "게시글 ID 또는 댓글 ID 중 하나만 입력해야 합니다.")
 	private boolean isValidTarget() {
-		// 둘 다 null이거나 둘 다 값이 있으면 false
-		return (boardId != null || commentId != null) && (boardId == null || commentId == null);
-	}
-
-	@AssertTrue(message = "신고 유형은 필수입니다.")
-	private boolean isValidReportType() {
-		return reportType != null;
+		// 정확히 하나만 있어야 함
+		return (boardId != null) ^ (commentId != null);
 	}
 }
