@@ -101,10 +101,10 @@ public class ReportEntity extends BaseTimeEntity {
 		this.status = status;
 	}
 
-	public void updateProcessInfo(Long processedById, String processNote) {
+	public void updateProcessInfo(Long processedById, String processNote, LocalDateTime processedAt) {
 		this.processedById = processedById;
 		this.processNote = processNote;
-		this.processedAt = LocalDateTime.now();
+		this.processedAt = processedAt;
 	}
 
 	public void updateSuspensionDays(Integer suspensionDays) {
