@@ -1,0 +1,17 @@
+# Dockerfile-elasticsearch
+
+FROM docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+
+# Nori 플러그인 설치
+RUN elasticsearch-plugin install analysis-nori
+
+# 환경 변수 설정
+ENV discovery.type=single-node
+ENV ES_JAVA_OPTS="-Xms512m -Xmx512m"
+ENV ingest.geoip.downloader.enabled=false
+ENV xpack.security.enabled=false
+ENV xpack.security.transport.ssl.enabled=false
+ENV xpack.security.http.ssl.enabled=false
+
+# 포트 오픈
+EXPOSE 9200 9300
