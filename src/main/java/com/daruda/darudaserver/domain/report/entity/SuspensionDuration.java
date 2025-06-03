@@ -19,19 +19,18 @@ public enum SuspensionDuration {
 	NINETY(90, "90일"),
 	ONE_YEAR(365, "1년");
 
-	private final int days;
-	private final String description;
-
-	private static final Map<String, SuspensionDuration> DESCRIPTION_MAP = 
+	private static final Map<String, SuspensionDuration> DESCRIPTION_MAP =
 		Arrays.stream(values())
 			.collect(Collectors.toMap(SuspensionDuration::getDescription, duration -> duration));
+	private final int days;
+	private final String description;
 
 	public static SuspensionDuration fromString(String description) {
 		SuspensionDuration duration = DESCRIPTION_MAP.get(description);
 		if (duration == null) {
 			throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
 		}
-		
+
 		return duration;
 	}
-} 
+}

@@ -44,7 +44,7 @@ public class ReportService {
 			if (request.getCommentId() == null) {
 				throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
 			}
-			
+
 			comment = commentRepository.findById(request.getCommentId())
 				.orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
@@ -87,7 +87,7 @@ public class ReportService {
 	@Transactional
 	public ProcessReportResponse processReport(Long adminId, Long reportId, ProcessReportRequest request) {
 		UserEntity admin = userRepository.findById(adminId)
-				.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
 		// 관리자 권한 검증
 		if (admin.getPositions() != Positions.ADMIN) {
@@ -95,7 +95,7 @@ public class ReportService {
 		}
 
 		ReportEntity report = reportRepository.findById(reportId)
-				.orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
+			.orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
 
 		// 이미 처리된 신고인지 확인
 		if (!report.isPending()) {
