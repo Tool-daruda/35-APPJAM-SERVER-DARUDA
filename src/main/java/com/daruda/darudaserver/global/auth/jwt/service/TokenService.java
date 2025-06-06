@@ -53,7 +53,7 @@ public class TokenService {
 
 	@Transactional
 	public void deleteRefreshToken(final Long userId) {
-		Token token = tokenRepository.findByUserId(userId)
+		Token token = tokenRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
 		tokenRepository.delete(token);
@@ -62,11 +62,11 @@ public class TokenService {
 	private Long findIdByRefreshToken(final String refreshToken) {
 		Token token = tokenRepository.findByRefreshToken(refreshToken)
 			.orElseThrow(() -> new InvalidValueException(ErrorCode.REFRESH_TOKEN_EMPTY_ERROR));
-		return token.getUserId();
+		return token.getId();
 	}
 
 	private String updateRefreshToken(final Long userId, final UserAuthentication userAuthentication) {
-		tokenRepository.findByUserId(userId).ifPresent(tokenRepository::delete);
+		tokenRepository.findById(userId).ifPresent(tokenRepository::delete);
 
 		String refreshToken = jwtTokenProvider.generateRefreshToken(userAuthentication);
 
