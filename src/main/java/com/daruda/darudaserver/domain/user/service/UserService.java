@@ -40,7 +40,7 @@ public class UserService {
 	public MyProfileResponse getMyProfile(Long userId) {
 		UserEntity userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-		return MyProfileResponse.of(userEntity.getNickname(), userEntity.getPositions());
+		return MyProfileResponse.of(userEntity);
 	}
 
 	public FavoriteToolsResponse getFavoriteTools(Long userId) {
