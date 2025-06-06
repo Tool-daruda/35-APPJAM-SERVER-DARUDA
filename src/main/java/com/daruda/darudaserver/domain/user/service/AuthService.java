@@ -12,7 +12,7 @@ import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.notification.service.NotificationService;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
-import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
+import com.daruda.darudaserver.domain.user.dto.response.LoginSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
@@ -62,19 +62,19 @@ public class AuthService {
 		return SignUpSuccessResponse.of(nickname, positions, email, jwtTokenResponse);
 	}
 
-	public LoginResponse login(final UserInformationResponse userInformationResponse) {
+	public LoginSuccessResponse login(final UserInformationResponse userInformationResponse) {
 		String email = userInformationResponse.email();
 		Optional<UserEntity> userEntity = userRepository.findByEmail(email);
 		//등록된 회원이 아닌 경우
 		if (userEntity.isEmpty()) {
-			return LoginResponse.ofNonRegisteredUser(email);
+			return LoginSuccessResponse.ofNonRegisteredUser(email);
 		} else { //등록된 회원인 경우
 			Long userId = userEntity.get().getId();
 			log.debug("유저 아이디를 성공적으로 조회했습니다. userId : {}", userId);
 
 			JwtTokenResponse jwtTokenResponse = tokenService.createToken(userId);
 
-			return LoginResponse.ofRegisteredUser(jwtTokenResponse, userEntity.get().getNickname());
+			return LoginSuccessResponse.ofRegisteredUser(jwtTokenResponse, userEntity.get().getNickname());
 		}
 	}
 
