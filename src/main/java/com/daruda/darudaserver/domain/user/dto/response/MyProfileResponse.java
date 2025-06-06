@@ -7,13 +7,13 @@ import lombok.Builder;
 
 @Builder
 public record MyProfileResponse(
-	Long userid,
+	Long userId,
 	String nickname,
 	Positions positions
 ) {
 	public static MyProfileResponse of(UserEntity userEntity) {
 		return MyProfileResponse.builder()
-			.userid(userEntity.getId())
+			.userId(userEntity.getId())
 			.nickname(userEntity.getNickname())
 			.positions(userEntity.getPositions())
 			.build();
