@@ -11,6 +11,12 @@ spring:
   elasticsearch:
     uris: ENC(ujedAq4s/+VPqcbnbDRJ8C7c0ZUL/+1fjKnVmLaHOeI=)
 
+  data:
+    redis:
+      host: ENC(A+kwW2rkFaibUEBP1hchbA==)
+      port: 6379
+      password: ENC(xCySc7GekCOPVUEN6QG+L71ROBSch6oc)
+  
   jpa:
     show-sql: true
     hibernate:
