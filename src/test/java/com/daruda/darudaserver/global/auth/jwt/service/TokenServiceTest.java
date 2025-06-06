@@ -180,7 +180,7 @@ class TokenServiceTest {
 		Long userId = 1L;
 		Token token = Token.of(userId, "refreshToken");
 
-		when(tokenRepository.findByUserId(userId)).thenReturn(Optional.of(token));
+		when(tokenRepository.findById(userId)).thenReturn(Optional.of(token));
 
 		// when
 		tokenService.deleteRefreshToken(userId);
@@ -195,7 +195,7 @@ class TokenServiceTest {
 		// given
 		Long userId = 1L;
 
-		when(tokenRepository.findByUserId(userId)).thenReturn(Optional.empty());
+		when(tokenRepository.findById(userId)).thenReturn(Optional.empty());
 
 		// when & then
 		NotFoundException exception = assertThrows(NotFoundException.class,

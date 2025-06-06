@@ -8,6 +8,4 @@ import com.daruda.darudaserver.global.auth.jwt.entity.Token;
 
 public interface TokenRepository extends CrudRepository<Token, Long> {
 	Optional<Token> findByRefreshToken(final String refreshToken);
-
-	Optional<Token> findByUserId(final Long userId);
 }
