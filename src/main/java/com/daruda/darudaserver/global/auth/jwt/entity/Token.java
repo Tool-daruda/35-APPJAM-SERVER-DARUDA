@@ -1,39 +1,26 @@
 package com.daruda.darudaserver.global.auth.jwt.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
+
 import jakarta.persistence.Id;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@RedisHash(value = "refreshToken", timeToLive = 604800000)
 public class Token {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "refresh_token")
+	@Indexed
 	private String refreshToken;
 
-	@Column(name = "user_id", nullable = false)
-	private Long userId;
-
-	@Builder
-	private Token(Long userId, String refreshToken) {
-		this.userId = userId;
-		this.refreshToken = refreshToken;
-	}
-
-	public static Token of(Long userId, String refreshToken) {
+	public static Token of(final Long id, final String refreshToken) {
 		return Token.builder()
-			.userId(userId)
+			.id(id)
 			.refreshToken(refreshToken)
 			.build();
 	}
