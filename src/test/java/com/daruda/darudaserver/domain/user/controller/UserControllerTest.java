@@ -22,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -30,6 +31,7 @@ import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
 import com.daruda.darudaserver.domain.user.dto.response.MyProfileResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
+import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
@@ -158,11 +160,19 @@ class UserControllerTest {
 		Long userId = 1L;
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
+
+		UserEntity user = UserEntity.builder()
+			.nickname(nickname)
+			.positions(positions)
+			.build();
+
+		ReflectionTestUtils.setField(user, "id", userId);
+
 		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
-		MyProfileResponse response = MyProfileResponse.of(nickname, positions);
+		MyProfileResponse response = MyProfileResponse.of(user);
 
 		// when
 		when(userService.getMyProfile(userId)).thenReturn(response);
@@ -173,6 +183,7 @@ class UserControllerTest {
 		mockMvc.perform(get("/api/v1/user/profile")
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.userId").value(userId))
 			.andExpect(jsonPath("$.data.nickname").value(nickname))
 			.andExpect(jsonPath("$.data.positions").value("STUDENT"))
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
