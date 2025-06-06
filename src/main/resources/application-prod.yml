@@ -9,6 +9,12 @@ spring:
     username: ENC(nJZfcHF+It0X4f8rxo8Glg==)
     password: ENC(Hs1X8mIXeW4ZEhEMsaKAkITnB9KQUA1kuryXHSgO4fc=)
 
+  data:
+    redis:
+      host: ENC(A+kwW2rkFaibUEBP1hchbA==)
+      port: 6379
+      password: ENC(xCySc7GekCOPVUEN6QG+L71ROBSch6oc)
+  
   jpa:
     show-sql: true
     hibernate:
