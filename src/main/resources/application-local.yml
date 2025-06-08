@@ -61,7 +61,7 @@ kakao:
 
 jwt:
   secret: ENC(bfIop6GqxWVWfaxvq9gi3qzkoCp3ZK2dVvqhXpc5oyowPgPC7mBsk2NW5CSwHr0AH+znH7DiuCmNEVyamwx0HzzpVNOoGr2vhmcGMdXMAhOyiG9mHdFvdIAxN8/mYjdXNVvD6LwZsbY=)
-  access-token-expire-time: 12000000
+  access-token-expire-time: 10800000
   refresh-token-expire-time: 604800000
 
 sentry:
