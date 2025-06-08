@@ -22,6 +22,7 @@ import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-	private final JwtTokenProvider jwtTokenProvider;
 	private static final List<String> EXCLUDE_URL = Arrays.asList(
 		"/swagger-ui/**",
 		"/v3/api-docs/**",
@@ -52,6 +52,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		"/api/v1/image/**",
 		"/api/v1/board/{board-id}"
 	);
+
+	private final JwtTokenProvider jwtTokenProvider;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -88,11 +90,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private String getAccessToken(HttpServletRequest request) {
 		try {
-			String accessToken = request.getHeader("Authorization");
-			if (StringUtils.hasText(accessToken) && accessToken.startsWith("Bearer")) {
-				return accessToken.substring("Bearer".length());
-			}
-			throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
+			return
+				Arrays.stream(request.getCookies())
+					.filter(cookie -> "accessToken".equals(cookie.getName()))
+					.map(Cookie::getValue)
+					.findFirst()
+					.orElseThrow(() -> new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN));
 		} catch (Exception e) {
 			log.warn("AccessToken 추출 실패: {}", e.getMessage());
 			return null;
