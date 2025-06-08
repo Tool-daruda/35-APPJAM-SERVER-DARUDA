@@ -43,7 +43,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthController {
 
-	private static final int COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
+	private static final int ACCESS_TOKEN_COOKIE_MAX_AGE = 3 * 60 * 60;
+	private static final int REFRESH_TOKEN_COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
+
+	private static final String ACCESS_TOKEN = "accessToken";
 	private static final String REFRESH_TOKEN = "refreshToken";
 	private final AuthService authService;
 	private final TokenService tokenService;
@@ -75,19 +78,29 @@ public class AuthController {
 		UserInformationResponse userInformationResponse = socialService.getInfo(code);
 		LoginSuccessResponse loginSuccessResponse = authService.login(userInformationResponse);
 
-		ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN,
-				loginSuccessResponse.jwtTokenResponse().refreshToken())
-			.maxAge(COOKIE_MAX_AGE)
+		ResponseCookie accessTokenCookie = ResponseCookie.from(ACCESS_TOKEN,
+				loginSuccessResponse.jwtTokenResponse().accessToken())
+			.maxAge(ACCESS_TOKEN_COOKIE_MAX_AGE)
 			.path("/")
 			.secure(true)
 			.sameSite("None")
 			.httpOnly(true)
 			.build();
 
-		httpServletResponse.setHeader("Set-Cookie", cookie.toString());
+		ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN,
+				loginSuccessResponse.jwtTokenResponse().refreshToken())
+			.maxAge(REFRESH_TOKEN_COOKIE_MAX_AGE)
+			.path("/")
+			.secure(true)
+			.sameSite("None")
+			.httpOnly(true)
+			.build();
+
+		httpServletResponse.setHeader("Set-Cookie", accessTokenCookie.toString());
+		httpServletResponse.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
 		LoginResponse loginResponse = LoginResponse.of(loginSuccessResponse.email(), loginSuccessResponse.isUser(),
-			loginSuccessResponse.nickname(), loginSuccessResponse.jwtTokenResponse().accessToken());
+			loginSuccessResponse.nickname());
 
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(loginResponse, SuccessCode.SUCCESS_LOGIN));
 	}
@@ -120,19 +133,28 @@ public class AuthController {
 	) {
 		JwtTokenResponse tokenResponse = tokenService.reissueToken(refreshToken);
 
-		ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN, tokenResponse.refreshToken())
-			.maxAge(COOKIE_MAX_AGE)
+		ResponseCookie accessTokenCookie = ResponseCookie.from(ACCESS_TOKEN,
+				tokenResponse.accessToken())
+			.maxAge(ACCESS_TOKEN_COOKIE_MAX_AGE)
 			.path("/")
 			.secure(true)
 			.sameSite("None")
 			.httpOnly(true)
 			.build();
 
-		httpServletResponse.setHeader("Set-Cookie", cookie.toString());
+		ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN,
+				tokenResponse.refreshToken())
+			.maxAge(REFRESH_TOKEN_COOKIE_MAX_AGE)
+			.path("/")
+			.secure(true)
+			.sameSite("None")
+			.httpOnly(true)
+			.build();
 
-		TokenResponse response = TokenResponse.from(tokenResponse.accessToken());
+		httpServletResponse.setHeader("Set-Cookie", accessTokenCookie.toString());
+		httpServletResponse.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(response, SuccessCode.SUCCESS_REISSUE));
+		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_REISSUE));
 	}
 
 	@DeleteMapping("/withdraw")
