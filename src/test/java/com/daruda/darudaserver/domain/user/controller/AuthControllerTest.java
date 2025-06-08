@@ -119,9 +119,10 @@ class AuthControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(loginRequest)))
 			.andExpect(status().isOk())
+			.andExpect(cookie().value("accessToken", jwtTokenResponse.accessToken()))
+			.andExpect(cookie().value("refreshToken", jwtTokenResponse.refreshToken()))
 			.andExpect(jsonPath("$.data.email").doesNotExist())
 			.andExpect(jsonPath("$.data.isUser").value(true))
-			.andExpect(jsonPath("$.data.accessToken").value(jwtTokenResponse.accessToken()))
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_LOGIN.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_LOGIN.getMessage()));
 
@@ -200,7 +201,8 @@ class AuthControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.cookie(new Cookie("refreshToken", refreshToken)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.accessToken").value("newAccessToken"))
+			.andExpect(cookie().value("accessToken", jwtTokenResponse.accessToken()))
+			.andExpect(cookie().value("refreshToken", jwtTokenResponse.refreshToken()))
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_REISSUE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_REISSUE.getMessage()));
 
