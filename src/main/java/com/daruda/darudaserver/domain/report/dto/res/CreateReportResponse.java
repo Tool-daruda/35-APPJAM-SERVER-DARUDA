@@ -1,12 +1,13 @@
 package com.daruda.darudaserver.domain.report.dto.res;
 
+import java.time.LocalDateTime;
+
 import com.daruda.darudaserver.domain.report.entity.ReportEntity;
 import com.daruda.darudaserver.domain.report.entity.ReportType;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Schema(description = "신고 생성 응답")

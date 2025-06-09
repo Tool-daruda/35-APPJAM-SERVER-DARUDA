@@ -1,5 +1,22 @@
 package com.daruda.darudaserver.domain.report.service;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
@@ -20,25 +37,6 @@ import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.ForbiddenException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
 class ReportServiceTest {
@@ -117,11 +115,11 @@ class ReportServiceTest {
 				.willReturn(false);
 			given(reportRepository.save(any(ReportEntity.class)))
 				.willAnswer(inv -> {
-					ReportEntity r = inv.getArgument(0);
-					ReflectionTestUtils.setField(r, "id", 1000L);
-					ReflectionTestUtils.setField(r, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
-					ReflectionTestUtils.setField(r, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
-					return r;
+					ReportEntity report = inv.getArgument(0);
+					ReflectionTestUtils.setField(report, "id", 1000L);
+					ReflectionTestUtils.setField(report, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
+					ReflectionTestUtils.setField(report, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
+					return report;
 				});
 
 			CreateReportRequest request = CreateReportRequest.builder()
@@ -148,11 +146,11 @@ class ReportServiceTest {
 				.willReturn(false);
 			given(reportRepository.save(any(ReportEntity.class)))
 				.willAnswer(inv -> {
-					ReportEntity r = inv.getArgument(0);
-					ReflectionTestUtils.setField(r, "id", 1000L);
-					ReflectionTestUtils.setField(r, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
-					ReflectionTestUtils.setField(r, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
-					return r;
+					ReportEntity report = inv.getArgument(0);
+					ReflectionTestUtils.setField(report, "id", 1000L);
+					ReflectionTestUtils.setField(report, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
+					ReflectionTestUtils.setField(report, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
+					return report;
 				});
 
 			CreateReportRequest request = CreateReportRequest.builder()
