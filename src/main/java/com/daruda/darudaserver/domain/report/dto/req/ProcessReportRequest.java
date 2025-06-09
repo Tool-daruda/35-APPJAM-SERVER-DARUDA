@@ -2,6 +2,7 @@ package com.daruda.darudaserver.domain.report.dto.req;
 
 import com.daruda.darudaserver.domain.report.entity.ReportStatus;
 import com.daruda.darudaserver.domain.report.entity.SuspensionDuration;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

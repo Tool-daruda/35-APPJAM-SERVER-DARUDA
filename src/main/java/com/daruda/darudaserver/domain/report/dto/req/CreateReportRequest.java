@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.report.dto.req;
 
 import com.daruda.darudaserver.domain.report.entity.ReportType;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.AssertTrue;
