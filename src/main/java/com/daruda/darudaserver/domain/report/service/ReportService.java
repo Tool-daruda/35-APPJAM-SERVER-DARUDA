@@ -1,5 +1,10 @@
 package com.daruda.darudaserver.domain.report.service;
 
+import java.time.LocalDateTime;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
@@ -16,11 +21,8 @@ import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.ForbiddenException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
