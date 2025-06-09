@@ -35,6 +35,7 @@ import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.ForbiddenException;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
@@ -69,6 +70,12 @@ public class BoardService {
 	public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
 		log.info("유저아이디: {}", userId);
 		UserEntity user = getUserById(userId);
+		
+		// 제재 상태 확인
+		if (user.isSuspended()) {
+			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
+		}
+		
 		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
 		Board board = boardCreateAndUpdateReq.isFree()
 			? createFreeBoard(user, boardCreateAndUpdateReq) :
@@ -88,11 +95,17 @@ public class BoardService {
 	public BoardRes updateBoard(final Long userId, final Long boardId,
 		final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
 		Board board = validateBoardAndUser(userId, boardId);
+		UserEntity user = board.getUser();
+		
+		// 제재 상태 확인
+		if (user.isSuspended()) {
+			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
+		}
+		
 		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
-		UserEntity user = getUser(userId);
 		board.update(
 			tool,
-			board.getUser(),
+			user,
 			boardCreateAndUpdateReq.title(),
 			boardCreateAndUpdateReq.content(),
 			boardCreateAndUpdateReq.isFree()

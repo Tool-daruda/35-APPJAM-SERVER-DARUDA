@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 public enum Positions {
 	STUDENT("학생"),
 	WORKER("직장인"),
-	NORMAL("일반인");
+	NORMAL("일반인"),
+	ADMIN("관리자");
 
 	private final String name;
 

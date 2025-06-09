@@ -50,6 +50,12 @@ public class UserEntity extends BaseTimeEntity {
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
+	@Column(name = "suspended_until")
+	private LocalDateTime suspendedUntil;
+
+	@Column(name = "suspension_reason", length = 500)
+	private String suspensionReason;
+
 	@Builder
 	private UserEntity(String email, String nickname, Positions positions) {
 		this.email = email;
@@ -74,4 +80,17 @@ public class UserEntity extends BaseTimeEntity {
 		this.nickname = nickname;
 	}
 
+	public void suspend(LocalDateTime until, String reason) {
+		this.suspendedUntil = until;
+		this.suspensionReason = reason;
+	}
+
+	public void releaseSuspension() {
+		this.suspendedUntil = null;
+		this.suspensionReason = null;
+	}
+
+	public boolean isSuspended() {
+		return suspendedUntil != null && LocalDateTime.now().isBefore(suspendedUntil);
+	}
 }
