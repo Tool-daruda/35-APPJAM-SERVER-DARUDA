@@ -264,6 +264,42 @@ class ReportServiceTest {
 				.isInstanceOf(BusinessException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_REPORTED);
 		}
+
+		@Test
+		@DisplayName("댓글ID와 게시글ID가 모두 있으면 BusinessException")
+		void createReport_both_ids_present() {
+			// given
+			given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+
+			CreateReportRequest request = CreateReportRequest.builder()
+				.commentId(comment.getId())
+				.boardId(board.getId())
+				.reportType(ReportType.SPAM)
+				.detail("잘못된 요청")
+				.build();
+
+			// when & then
+			assertThatThrownBy(() -> reportService.createReport(reporter.getId(), request))
+				.isInstanceOf(BusinessException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.COMMENT_NOT_FOUND);
+		}
+
+		@Test
+		@DisplayName("댓글ID와 게시글ID가 모두 없으면 BusinessException")
+		void createReport_no_target_specified() {
+			// given
+			given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+
+			CreateReportRequest request = CreateReportRequest.builder()
+				.reportType(ReportType.SPAM)
+				.detail("대상 없음")
+				.build();
+
+			// when & then
+			assertThatThrownBy(() -> reportService.createReport(reporter.getId(), request))
+				.isInstanceOf(BusinessException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_FIELD_ERROR);
+		}
 	}
 
 	@Nested
