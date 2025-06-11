@@ -93,7 +93,7 @@ public class ReportService {
 
 		// 관리자 권한 검증
 		if (admin.getPositions() != Positions.ADMIN) {
-			throw new ForbiddenException(ErrorCode.UNAUTHORIZED_ACCESS);
+			throw new ForbiddenException(ErrorCode.ACCESS_DENIED);
 		}
 
 		ReportEntity report = reportRepository.findById(reportId)

@@ -344,7 +344,7 @@ class ReportServiceTest {
 			// when & then
 			assertThatThrownBy(() -> reportService.processReport(reporter.getId(), report.getId(), request))
 				.isInstanceOf(ForbiddenException.class)
-				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNAUTHORIZED_ACCESS);
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.ACCESS_DENIED);
 		}
 
 		@Test

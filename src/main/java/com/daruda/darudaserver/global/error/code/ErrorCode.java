@@ -38,7 +38,7 @@ public enum ErrorCode {
 
 	/* 403  FORBIDDEN */
 
-	UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "E403000", "접근 권한이 없습니다."),
+	ACCESS_DENIED(HttpStatus.FORBIDDEN, "E403000", "접근 권한이 없습니다."),
 	BOARD_FORBIDDEN(HttpStatus.FORBIDDEN, "E403001", "게시판 접근 권한이 없습니다."),
 	NO_PERMISSION_TO_DELETE(HttpStatus.FORBIDDEN, "E403002", "삭제 권한이 없습니다."),
 	USER_SUSPENDED(HttpStatus.FORBIDDEN, "E403003", "활동 정지된 사용자입니다."),
