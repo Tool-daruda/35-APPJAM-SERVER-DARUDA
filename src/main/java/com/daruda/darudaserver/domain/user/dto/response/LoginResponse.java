@@ -11,11 +11,11 @@ public record LoginResponse(
 	boolean isUser,
 	String nickname
 ) {
-	public static LoginResponse of(String email, boolean isUser, String nickname) {
+	public static LoginResponse from(LoginSuccessResponse loginSuccessResponse) {
 		return LoginResponse.builder()
-			.email(email)
-			.isUser(isUser)
-			.nickname(nickname)
+			.email(loginSuccessResponse.email())
+			.isUser(loginSuccessResponse.isUser())
+			.nickname(loginSuccessResponse.nickname())
 			.build();
 	}
 }
