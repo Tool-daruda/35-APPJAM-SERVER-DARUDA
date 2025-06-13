@@ -9,6 +9,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
 
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+
   jpa:
     show-sql: true
     hibernate:
@@ -50,7 +56,7 @@ kakao:
 
 jwt:
   secret: ENC(Mzng6SahiZBXTfKCB6pdKIcdPTDMcAhJyyBjbwuSkNbbd9ysylQonYe7u4f3FYfQXYUXZJiC+k/fmUMYNzykCrFke+EloN7/1kt5PJiNPz8IFNDlm9j2BBr6q9wRU5pvxHj/oNOIVZg=)
-  access-token-expire-time: 12000000
+  access-token-expire-time: 10800000
   refresh-token-expire-time: 604800000
 
 sentry:

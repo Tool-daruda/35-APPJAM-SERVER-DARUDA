@@ -22,7 +22,7 @@ import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.notification.service.NotificationService;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
-import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
+import com.daruda.darudaserver.domain.user.dto.response.LoginSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
@@ -132,7 +132,7 @@ public class AuthServiceTest {
 		UserInformationResponse userInformationResponse = UserInformationResponse.of(userId, email, nickname);
 
 		// when
-		LoginResponse response = authService.login(userInformationResponse);
+		LoginSuccessResponse response = authService.login(userInformationResponse);
 
 		// then
 		assertThat(response).isNotNull();
@@ -158,7 +158,7 @@ public class AuthServiceTest {
 		UserInformationResponse userInformationResponse = UserInformationResponse.of(userId, email, nickname);
 
 		// when
-		LoginResponse response = authService.login(userInformationResponse);
+		LoginSuccessResponse response = authService.login(userInformationResponse);
 
 		// then
 		assertThat(response).isNotNull();

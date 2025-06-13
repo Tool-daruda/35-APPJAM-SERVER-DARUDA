@@ -67,6 +67,9 @@ dependencies {
     //AOP 의존성 추가
     implementation 'org.springframework.boot:spring-boot-starter-aop'
 
+    // Redis 추가
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     //QueryDSL 추가
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"

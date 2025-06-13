@@ -21,22 +21,24 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.daruda.darudaserver.domain.user.dto.request.LoginRequest;
-import com.daruda.darudaserver.domain.user.dto.request.ReissueTokenRequest;
 import com.daruda.darudaserver.domain.user.dto.request.SignUpRequest;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
-import com.daruda.darudaserver.domain.user.dto.response.LoginResponse;
+import com.daruda.darudaserver.domain.user.dto.response.LoginSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.service.AuthService;
 import com.daruda.darudaserver.domain.user.service.SocialService;
+import com.daruda.darudaserver.global.auth.cookie.CookieProvider;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
 import com.daruda.darudaserver.global.auth.security.JwtAuthenticationFilter;
 import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.Cookie;
 
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
@@ -51,6 +53,9 @@ class AuthControllerTest {
 
 	@Mock
 	private JwtTokenProvider jwtTokenProvider;
+
+	@Mock
+	private CookieProvider cookieProvider;
 
 	@InjectMocks
 	private AuthController authController;
@@ -99,19 +104,19 @@ class AuthControllerTest {
 	@DisplayName("소셜 로그인 성공")
 	void login() throws Exception {
 		// given
-		String code = "1234";
-		String nickname = "tester";
+		String code = "test.code";
+		String nickname = "testUser";
 		LoginRequest loginRequest = new LoginRequest(SocialType.KAKAO);
 		UserInformationResponse userInformationResponse = UserInformationResponse.of(1L, "test@example.com", nickname);
 		JwtTokenResponse jwtTokenResponse = JwtTokenResponse.of("accessToken", "refreshToken");
-		LoginResponse loginResponse = LoginResponse.ofRegisteredUser(jwtTokenResponse, nickname);
+		LoginSuccessResponse loginSuccessResponse = LoginSuccessResponse.ofRegisteredUser(jwtTokenResponse, nickname);
 		SocialService socialService = mock(SocialService.class);
 
 		// when
 		when(authService.findSocialService(loginRequest.socialType())).thenReturn(socialService);
 		when(socialService.getInfo(code)).thenReturn(userInformationResponse);
-		when(authService.login(userInformationResponse)).thenReturn(loginResponse);
-
+		when(authService.login(userInformationResponse)).thenReturn(loginSuccessResponse);
+		doNothing().when(cookieProvider).setTokenCookies(any(), anyString(), anyString());
 		// then
 		mockMvc.perform(post("/api/v1/auth/login")
 				.param("code", code)
@@ -120,8 +125,6 @@ class AuthControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.email").doesNotExist())
 			.andExpect(jsonPath("$.data.isUser").value(true))
-			.andExpect(jsonPath("$.data.jwtTokenResponse.accessToken").value(jwtTokenResponse.accessToken()))
-			.andExpect(jsonPath("$.data.jwtTokenResponse.refreshToken").value(jwtTokenResponse.refreshToken()))
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_LOGIN.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_LOGIN.getMessage()));
 
@@ -129,6 +132,7 @@ class AuthControllerTest {
 		verify(authService).findSocialService(loginRequest.socialType());
 		verify(socialService).getInfo(code);
 		verify(authService).login(userInformationResponse);
+		verify(cookieProvider).setTokenCookies(any(), eq("accessToken"), eq("refreshToken"));
 	}
 
 	@Test
@@ -144,7 +148,7 @@ class AuthControllerTest {
 		// when
 		when(authService.register(signUpRequest.email(), signUpRequest.nickname(), signUpRequest.positions()))
 			.thenReturn(mockResponse);
-
+		doNothing().when(cookieProvider).setTokenCookies(any(), anyString(), anyString());
 		// then
 		mockMvc.perform(post("/api/v1/auth/sign-up")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -157,6 +161,7 @@ class AuthControllerTest {
 
 		// verify
 		verify(authService).register(signUpRequest.email(), signUpRequest.nickname(), signUpRequest.positions());
+		verify(cookieProvider).setTokenCookies(any(), eq("accessToken"), eq("refreshToken"));
 	}
 
 	@Test
@@ -189,24 +194,24 @@ class AuthControllerTest {
 	@DisplayName("Access Token 재발급 성공")
 	void reissueToken() throws Exception {
 		// given
-		ReissueTokenRequest request = new ReissueTokenRequest("refreshToken");
+		String refreshToken = "refreshToken";
 		JwtTokenResponse jwtTokenResponse = new JwtTokenResponse("newAccessToken", "newRefreshToken");
 
 		// when
-		when(tokenService.reissueToken(request.refreshToken())).thenReturn(jwtTokenResponse);
+		when(tokenService.reissueToken(refreshToken)).thenReturn(jwtTokenResponse);
+		doNothing().when(cookieProvider).setTokenCookies(any(), anyString(), anyString());
 
 		// then
 		mockMvc.perform(post("/api/v1/auth/reissue")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)))
+				.cookie(new Cookie("refreshToken", refreshToken)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.accessToken").value("newAccessToken"))
-			.andExpect(jsonPath("$.data.refreshToken").value("newRefreshToken"))
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_REISSUE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_REISSUE.getMessage()));
 
 		// verify
-		verify(tokenService).reissueToken(request.refreshToken());
+		verify(tokenService).reissueToken(refreshToken);
+		verify(cookieProvider).setTokenCookies(any(), eq("newAccessToken"), eq("newRefreshToken"));
 	}
 
 	@Test

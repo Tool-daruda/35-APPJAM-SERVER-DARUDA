@@ -9,6 +9,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: daruda8688!
+
   jpa:
     show-sql: true
     hibernate:
@@ -38,9 +44,9 @@ cloud:
 logging:
   file:
     path: ./daruda_log
-  level:
-    org.springframework.web: DEBUG
-    org.hibernate.type: DEBUG
+  #  level:
+  #    org.springframework.web: DEBUG
+  #    org.hibernate.type: DEBUG
   config: classpath:logback-spring.xml
   sentry:
     repository-uri: ${SENTRY_REPOSITORY_URI}
@@ -53,7 +59,7 @@ kakao:
 
 jwt:
   secret: ENC(bfIop6GqxWVWfaxvq9gi3qzkoCp3ZK2dVvqhXpc5oyowPgPC7mBsk2NW5CSwHr0AH+znH7DiuCmNEVyamwx0HzzpVNOoGr2vhmcGMdXMAhOyiG9mHdFvdIAxN8/mYjdXNVvD6LwZsbY=)
-  access-token-expire-time: 12000000
+  access-token-expire-time: 10800000
   refresh-token-expire-time: 604800000
 
 sentry:
