@@ -25,8 +25,6 @@ import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.community.util.ValidateBoard;
-import com.daruda.darudaserver.domain.search.document.BoardDocument;
-import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
@@ -66,7 +64,6 @@ public class BoardService {
 	private final CommentRepository commentRepository;
 	private final ValidateBoard validateBoard;
 	private final JPAQueryFactory jpaQueryFactory;
-	private final BoardSearchRepository boardSearchRepository;
 
 	// 게시판 생성
 	public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
@@ -83,8 +80,6 @@ public class BoardService {
 		// Tool 정보 설정
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
-
-		boardSearchRepository.save(BoardDocument.from(board, imageUrls));
 
 		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, tool.getToolId());
 	}
