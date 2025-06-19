@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository;
 import com.daruda.darudaserver.domain.search.document.BoardDocument;
 
 @Repository
-public interface BoardSearchRepository extends ElasticsearchRepository<BoardDocument, Long> {
-
+public interface BoardSearchRepository extends ElasticsearchRepository<BoardDocument, String> {
 }
