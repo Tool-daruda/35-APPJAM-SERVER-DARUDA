@@ -47,7 +47,7 @@ public class BoardSearchService {
 			.should(titleMatch._toQuery())
 			.should(contentMatch._toQuery())
 			.should(toolMatch._toQuery())
-			.minimumShouldMatch("1")
+			.minimumShouldMatch("2")
 		)._toQuery();
 
 		NativeQuery query = NativeQuery.builder()
