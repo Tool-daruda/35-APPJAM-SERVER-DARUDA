@@ -8,11 +8,9 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
-  data:
-    elasticsearch:
-      repositories:
-        enabled: true
-      url: localhost:9200
+  elasticsearch:
+    uris: localhost:9200
+
   jpa:
     show-sql: true
     hibernate:

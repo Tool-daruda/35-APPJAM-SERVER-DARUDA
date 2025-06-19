@@ -39,7 +39,8 @@ public class SecurityConfig {
 		"/api/v1/board",
 		"/api/v1/image/**",
 		"/api/v1/board/{board-id}",
-		"/api/v1/image/presigned-url"
+		"/api/v1/image/presigned-url",
+		"/api/v1/search/**",
 	};
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final JwtTokenProvider jwtTokenProvider;
