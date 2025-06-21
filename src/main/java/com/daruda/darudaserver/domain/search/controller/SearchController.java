@@ -16,6 +16,7 @@ import com.daruda.darudaserver.domain.search.service.ToolSearchService;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -27,7 +28,7 @@ public class SearchController {
 
 	@GetMapping()
 	public ResponseEntity<SuccessResponse<SearchAllResponse>> searchAll(
-		@RequestParam(name = "keyword") String keyword) {
+		@RequestParam(name = "keyword") @NotBlank(message = "검색어는 필수 입력값입니다.") String keyword) {
 		List<BoardSearchResponse> boardSearchResponses = boardSearchService.searchByTitleAndContentAndTool(keyword);
 		List<ToolSearchResponse> toolSearchResponses = toolSearchService.searchByName(keyword);
 
