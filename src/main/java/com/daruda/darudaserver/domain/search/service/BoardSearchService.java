@@ -27,23 +27,23 @@ public class BoardSearchService {
 
 	public List<BoardSearchResponse> searchByTitleAndContentAndTool(String keyword) {
 
-		MatchQuery titleMatch = MatchQuery.of(m -> m
+		MatchQuery titleMatch = MatchQuery.of(title -> title
 			.field("title")
 			.query(keyword)
 			.fuzziness("AUTO")
 		);
-		MatchQuery contentMatch = MatchQuery.of(m -> m
+		MatchQuery contentMatch = MatchQuery.of(content -> content
 			.field("content")
 			.query(keyword)
 			.fuzziness("AUTO")
 		);
-		MatchQuery toolMatch = MatchQuery.of(m -> m
+		MatchQuery toolMatch = MatchQuery.of(tool -> tool
 			.field("tool")
 			.query(keyword)
 			.fuzziness("AUTO")
 		);
 
-		Query boolQuery = BoolQuery.of(b -> b
+		Query boolQuery = BoolQuery.of(board -> board
 			.should(titleMatch._toQuery())
 			.should(contentMatch._toQuery())
 			.should(toolMatch._toQuery())

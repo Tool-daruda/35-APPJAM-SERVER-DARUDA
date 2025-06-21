@@ -17,9 +17,11 @@ import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ElasticsearchDataLoader implements CommandLineRunner {
 	private final BoardRepository boardRepository;
 	private final BoardSearchRepository boardSearchRepository;
@@ -37,8 +39,7 @@ public class ElasticsearchDataLoader implements CommandLineRunner {
 			.toList();
 
 		boardSearchRepository.saveAll(documents);
-		System.out.println("✅ Elasticsearch 인덱싱 완료: " + documents.size() + "건");
-
+		log.info("Board 인덱싱 완료 : {}", documents.size());
 		List<Tool> tools = toolRepository.findAll();
 
 		List<ToolDocument> toolDocuments = tools.stream()
@@ -46,7 +47,7 @@ public class ElasticsearchDataLoader implements CommandLineRunner {
 			.toList();
 
 		toolSearchRepository.saveAll(toolDocuments);
-		System.out.println("✅ Elasticsearch 인덱싱 완료: " + documents.size() + "건");
+		log.info("Tool 인덱싱 완료 : {}", toolDocuments.size());
 	}
 
 }
