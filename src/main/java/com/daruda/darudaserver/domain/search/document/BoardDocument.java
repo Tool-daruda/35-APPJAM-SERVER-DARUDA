@@ -33,7 +33,7 @@ public class BoardDocument {
 	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String content;
 
-	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
+	@Field(type = FieldType.Text, analyzer = "custom_analyzer", name = "tool")
 	private String toolName;
 
 	@Field(type = FieldType.Keyword)
