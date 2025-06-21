@@ -9,7 +9,7 @@
       "my_ngram_filter": {
         "type": "edge_ngram",
         "min_gram": 1,
-        "max_gram": 20
+        "max_gram": 8
       }
     },
     "analyzer": {
