@@ -9,7 +9,7 @@ spring:
     username: ENC(nJZfcHF+It0X4f8rxo8Glg==)
     password: ENC(Hs1X8mIXeW4ZEhEMsaKAkITnB9KQUA1kuryXHSgO4fc=)
   elasticsearch:
-    uris: localhost:9200
+    uris: ENC(ujedAq4s/+VPqcbnbDRJ8C7c0ZUL/+1fjKnVmLaHOeI=)
 
   jpa:
     show-sql: true
