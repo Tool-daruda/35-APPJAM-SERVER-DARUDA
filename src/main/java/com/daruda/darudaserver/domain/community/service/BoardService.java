@@ -25,6 +25,8 @@ import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.community.util.ValidateBoard;
+import com.daruda.darudaserver.domain.search.document.BoardDocument;
+import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
@@ -65,6 +67,7 @@ public class BoardService {
 	private final CommentRepository commentRepository;
 	private final ValidateBoard validateBoard;
 	private final JPAQueryFactory jpaQueryFactory;
+	private final BoardSearchRepository boardSearchRepository;
 
 	// 게시판 생성
 	public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
@@ -102,10 +105,21 @@ public class BoardService {
 			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
 		}
 
+		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+
 		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
 		board.update(
 			tool,
 			user,
+			boardCreateAndUpdateReq.title(),
+			boardCreateAndUpdateReq.content(),
+			boardCreateAndUpdateReq.isFree()
+		);
+
+		boardDocument.update(
+			tool,
+			board.getUser(),
 			boardCreateAndUpdateReq.title(),
 			boardCreateAndUpdateReq.content(),
 			boardCreateAndUpdateReq.isFree()
@@ -130,6 +144,8 @@ public class BoardService {
 	// 게시판 삭제
 	public void deleteBoard(final Long userId, final Long boardId) {
 		Board board = validateBoardAndUser(userId, boardId);
+		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 		deleteOriginImages(boardId);
 		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
 		List<BoardScrap> scraps = boardScrapRepository.findAllByBoardId(boardId);
@@ -138,6 +154,7 @@ public class BoardService {
 			log.info("삭제된 게시글과 연관된 스크랩 데이터를 제거했습니다. Scrap Count: {}", scraps.size());
 		}
 		board.delete();
+		boardSearchRepository.delete(boardDocument);
 	}
 
 	// 스크랩 처리
@@ -298,7 +315,7 @@ public class BoardService {
 		return board;
 	}
 
-	private List<String> processImages(final Board board, final List<String> images) {
+	public List<String> processImages(final Board board, final List<String> images) {
 		if (images == null || images.isEmpty()) {
 			deleteOriginImages(board.getId());
 			return List.of();
@@ -316,11 +333,23 @@ public class BoardService {
 	}
 
 	private Board createToolBoard(final Tool tool, final BoardCreateAndUpdateReq req, final UserEntity user) {
-		return boardRepository.save(Board.create(tool, user, req.title(), req.content()));
+		Board board = Board.create(tool, user, req.title(), req.content());
+		board = boardRepository.save(board);
+
+		BoardDocument boardDocument =
+			BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()));
+
+		boardSearchRepository.save(boardDocument);
+
+		return board;
 	}
 
 	private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
-		return boardRepository.save(Board.createFree(user, req.title(), req.content()));
+		Board board = Board.createFree(user, req.title(), req.content());
+		BoardDocument boardDocument = BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()));
+		boardSearchRepository.save(boardDocument);
+
+		return boardRepository.save(board);
 	}
 
 	private Board getBoardById(final Long boardId) {
@@ -328,11 +357,11 @@ public class BoardService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 	}
 
-	private Tool getToolById(final Long toolId) {
+	public Tool getToolById(final Long toolId) {
 		return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
 	}
 
-	private UserEntity getUserById(final Long userId) {
+	public UserEntity getUserById(final Long userId) {
 		return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 	}
 

@@ -8,6 +8,14 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
+  elasticsearch:
+    uris: localhost:9200
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: daruda8688!
 
   data:
     redis:
