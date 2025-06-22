@@ -59,7 +59,7 @@ public class AuthService {
 
 		notificationService.sendRegisterNotice(userEntity);
 
-		return SignUpSuccessResponse.of(nickname, positions, email, jwtTokenResponse);
+		return SignUpSuccessResponse.of(userEntity.getId(), nickname, positions, email, jwtTokenResponse);
 	}
 
 	public LoginSuccessResponse login(final UserInformationResponse userInformationResponse) {
@@ -74,7 +74,7 @@ public class AuthService {
 
 			JwtTokenResponse jwtTokenResponse = tokenService.createToken(userId);
 
-			return LoginSuccessResponse.ofRegisteredUser(jwtTokenResponse, userEntity.get().getNickname());
+			return LoginSuccessResponse.ofRegisteredUser(jwtTokenResponse, userEntity.get());
 		}
 	}
 

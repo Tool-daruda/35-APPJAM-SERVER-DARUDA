@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -26,6 +27,7 @@ import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
+import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.service.AuthService;
@@ -104,12 +106,18 @@ class AuthControllerTest {
 	@DisplayName("소셜 로그인 성공")
 	void login() throws Exception {
 		// given
+		Long userId = 1L;
 		String code = "test.code";
 		String nickname = "testUser";
+		String email = "test@example.com";
+		Positions positions = Positions.STUDENT;
+		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		ReflectionTestUtils.setField(userEntity, "id", userId);
+
 		LoginRequest loginRequest = new LoginRequest(SocialType.KAKAO);
-		UserInformationResponse userInformationResponse = UserInformationResponse.of(1L, "test@example.com", nickname);
+		UserInformationResponse userInformationResponse = UserInformationResponse.of(userId, email, nickname);
 		JwtTokenResponse jwtTokenResponse = JwtTokenResponse.of("accessToken", "refreshToken");
-		LoginSuccessResponse loginSuccessResponse = LoginSuccessResponse.ofRegisteredUser(jwtTokenResponse, nickname);
+		LoginSuccessResponse loginSuccessResponse = LoginSuccessResponse.ofRegisteredUser(jwtTokenResponse, userEntity);
 		SocialService socialService = mock(SocialService.class);
 
 		// when
@@ -123,8 +131,10 @@ class AuthControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(loginRequest)))
 			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.userId").value(userId))
 			.andExpect(jsonPath("$.data.email").doesNotExist())
 			.andExpect(jsonPath("$.data.isUser").value(true))
+			.andExpect(jsonPath("$.data.positions").value(positions.toString()))
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_LOGIN.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_LOGIN.getMessage()));
 
@@ -139,11 +149,14 @@ class AuthControllerTest {
 	@DisplayName("회원 가입 성공")
 	void register() throws Exception {
 		// given
+		Long userId = 1L;
 		String nickname = "tester";
 		String email = "test@example.com";
+		Positions positions = Positions.STUDENT;
 		JwtTokenResponse jwtTokenResponse = new JwtTokenResponse("accessToken", "refreshToken");
-		SignUpRequest signUpRequest = new SignUpRequest(nickname, Positions.STUDENT.getName(), email);
-		SignUpSuccessResponse mockResponse = SignUpSuccessResponse.of(nickname, null, email, jwtTokenResponse);
+		SignUpRequest signUpRequest = new SignUpRequest(nickname, positions.getName(), email);
+		SignUpSuccessResponse mockResponse = SignUpSuccessResponse.of(userId, nickname, positions, email,
+			jwtTokenResponse);
 
 		// when
 		when(authService.register(signUpRequest.email(), signUpRequest.nickname(), signUpRequest.positions()))
@@ -154,8 +167,10 @@ class AuthControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(signUpRequest)))
 			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.userId").value(userId))
 			.andExpect(jsonPath("$.data.nickname").value(nickname))
 			.andExpect(jsonPath("$.data.email").value(email))
+			.andExpect(jsonPath("$.data.positions").value(positions.toString()))
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_CREATE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_CREATE.getMessage()));
 
