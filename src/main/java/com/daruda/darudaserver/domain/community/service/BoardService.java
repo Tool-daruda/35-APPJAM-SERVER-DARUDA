@@ -107,7 +107,6 @@ public class BoardService {
 			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
 		}
 
-
 		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 

@@ -174,7 +174,7 @@ class CommentServiceTest {
 				commentService.deleteComment(stranger.getId(), comment.getId()))
 				.isInstanceOf(ForbiddenException.class);
 
-			then(commentRepository).should(never()).delete(any());
+			then(commentRepository).shouldHaveNoMoreInteractions();
 		}
 
 		@Test
