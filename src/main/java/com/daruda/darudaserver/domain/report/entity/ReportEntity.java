@@ -54,6 +54,9 @@ public class ReportEntity extends BaseTimeEntity {
 	@Column(name = "report_type", nullable = false, length = 50)
 	private ReportType reportType;
 
+	@Column(name = "title", nullable = false, length = 100)
+	private String title;
+
 	@Column(name = "detail", nullable = true, length = 1_000)
 	private String detail;
 
@@ -80,6 +83,7 @@ public class ReportEntity extends BaseTimeEntity {
 		Board board,
 		CommentEntity comment,
 		ReportType reportType,
+		String title,
 		String detail
 	) {
 		this.reporter = reporter;
@@ -87,6 +91,7 @@ public class ReportEntity extends BaseTimeEntity {
 		this.board = board;
 		this.comment = comment;
 		this.reportType = reportType;
+		this.title = title;
 		this.detail = detail;
 	}
 
@@ -96,6 +101,7 @@ public class ReportEntity extends BaseTimeEntity {
 		Board board,
 		CommentEntity comment,
 		ReportType reportType,
+		String title,
 		String detail
 	) {
 		return ReportEntity.builder()
@@ -104,6 +110,7 @@ public class ReportEntity extends BaseTimeEntity {
 			.board(board)
 			.comment(comment)
 			.reportType(reportType)
+			.title(title)
 			.detail(detail)
 			.build();
 	}
