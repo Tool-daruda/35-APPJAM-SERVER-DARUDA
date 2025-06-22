@@ -91,8 +91,6 @@ public class BoardService {
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-		boardSearchRepository.save(BoardDocument.from(board, imageUrls));
-
 		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, tool.getToolId());
 	}
 
@@ -336,11 +334,14 @@ public class BoardService {
 
 	private Board createToolBoard(final Tool tool, final BoardCreateAndUpdateReq req, final UserEntity user) {
 		Board board = Board.create(tool, user, req.title(), req.content());
-		BoardDocument boardDocument = BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()));
+		board = boardRepository.save(board);
+
+		BoardDocument boardDocument =
+			BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()));
 
 		boardSearchRepository.save(boardDocument);
 
-		return boardRepository.save(board);
+		return board;
 	}
 
 	private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
