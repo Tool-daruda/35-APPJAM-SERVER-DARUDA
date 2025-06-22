@@ -95,7 +95,7 @@ class ReportServiceTest {
 		comment = CommentEntity.of("댓글 내용", null, reportedUser, board);
 		ReflectionTestUtils.setField(comment, "id", 100L);
 
-		report = ReportEntity.of(reporter, reportedUser, board, null, ReportType.SPAM, "스팸 게시글");
+		report = ReportEntity.of(reporter, reportedUser, board, null, ReportType.SPAM, "스팸 신고 제목", "스팸 게시글");
 		ReflectionTestUtils.setField(report, "id", 1000L);
 		ReflectionTestUtils.setField(report, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
 		ReflectionTestUtils.setField(report, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
@@ -125,6 +125,7 @@ class ReportServiceTest {
 			CreateReportRequest request = CreateReportRequest.builder()
 				.boardId(board.getId())
 				.reportType(ReportType.SPAM)
+				.title("스팸 게시글 신고")
 				.detail("스팸 게시글입니다")
 				.build();
 
@@ -156,6 +157,7 @@ class ReportServiceTest {
 			CreateReportRequest request = CreateReportRequest.builder()
 				.commentId(comment.getId())
 				.reportType(ReportType.SPAM)
+				.title("스팸 댓글 신고")
 				.detail("스팸 댓글입니다")
 				.build();
 
@@ -176,6 +178,7 @@ class ReportServiceTest {
 			CreateReportRequest request = CreateReportRequest.builder()
 				.boardId(board.getId())
 				.reportType(ReportType.SPAM)
+				.title("스팸 게시글 신고")
 				.detail("스팸 게시글")
 				.build();
 
@@ -195,6 +198,7 @@ class ReportServiceTest {
 			CreateReportRequest request = CreateReportRequest.builder()
 				.boardId(99L)
 				.reportType(ReportType.SPAM)
+				.title("존재하지 않는 게시글 신고")
 				.detail("스팸 게시글")
 				.build();
 
@@ -214,6 +218,7 @@ class ReportServiceTest {
 			CreateReportRequest request = CreateReportRequest.builder()
 				.commentId(99L)
 				.reportType(ReportType.SPAM)
+				.title("존재하지 않는 댓글 신고")
 				.detail("스팸 댓글")
 				.build();
 
@@ -235,6 +240,7 @@ class ReportServiceTest {
 			CreateReportRequest request = CreateReportRequest.builder()
 				.boardId(board.getId())
 				.reportType(ReportType.SPAM)
+				.title("중복 게시글 신고")
 				.detail("스팸 게시글")
 				.build();
 
@@ -256,6 +262,7 @@ class ReportServiceTest {
 			CreateReportRequest request = CreateReportRequest.builder()
 				.commentId(comment.getId())
 				.reportType(ReportType.SPAM)
+				.title("중복 댓글 신고")
 				.detail("스팸 댓글")
 				.build();
 
@@ -409,7 +416,7 @@ class ReportServiceTest {
 			given(userRepository.findById(admin.getId())).willReturn(Optional.of(admin));
 
 			// 이미 처리된 신고로 설정
-			ReportEntity processedReport = ReportEntity.of(reporter, reportedUser, board, null, ReportType.SPAM, "스팸");
+			ReportEntity processedReport = ReportEntity.of(reporter, reportedUser, board, null, ReportType.SPAM, "스팸 신고 제목", "스팸글입니다.");
 			processedReport.updateStatus(ReportStatus.APPROVED);
 			processedReport.updateProcessInfo(admin.getId(), "처리 완료", LocalDateTime.now());
 			processedReport.updateSuspensionDays(7);

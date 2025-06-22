@@ -79,6 +79,7 @@ public class ReportService {
 			board,
 			comment,
 			request.getReportType(),
+			request.getTitle(),
 			request.getDetail()
 		);
 

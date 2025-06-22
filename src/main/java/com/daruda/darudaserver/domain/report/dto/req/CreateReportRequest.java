@@ -33,16 +33,22 @@ public class CreateReportRequest {
 	@Schema(description = "신고 상세 내용 (선택)", example = "광고성 게시글입니다.", required = false, maxLength = 1000)
 	private String detail;
 
+	@NotNull(message = "신고 제목은 필수입니다.")
+	@Schema(description = "신고 제목", example = "광고성 게시로 인한 신고.", required = true, maxLength = 100)
+	private String title;
+
 	@Builder
 	public CreateReportRequest(
 		Long boardId,
 		Long commentId,
 		ReportType reportType,
+		String title,
 		String detail
 	) {
 		this.boardId = boardId;
 		this.commentId = commentId;
 		this.reportType = reportType;
+		this.title = title;
 		this.detail = detail;
 	}
 
