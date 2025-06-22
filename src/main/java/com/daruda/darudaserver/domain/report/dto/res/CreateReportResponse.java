@@ -36,6 +36,9 @@ public class CreateReportResponse {
 	@Schema(description = "신고 유형")
 	private final ReportType reportType;
 
+	@Schema(description = "신고 제목")
+	private final String title;
+
 	@Schema(description = "신고 상세 내용")
 	private final String detail;
 
@@ -55,6 +58,7 @@ public class CreateReportResponse {
 		Long boardId,
 		Long commentId,
 		ReportType reportType,
+		String title,
 		String detail,
 		LocalDateTime createdAt,
 		LocalDateTime updatedAt
@@ -67,6 +71,7 @@ public class CreateReportResponse {
 		this.boardId = boardId;
 		this.commentId = commentId;
 		this.reportType = reportType;
+		this.title = title;
 		this.detail = detail;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
@@ -82,6 +87,7 @@ public class CreateReportResponse {
 			.boardId(report.getBoard() != null ? report.getBoard().getId() : null)
 			.commentId(report.getComment() != null ? report.getComment().getId() : null)
 			.reportType(report.getReportType())
+			.title(report.getTitle())
 			.detail(report.getDetail())
 			.createdAt(report.getCreatedAt().toLocalDateTime())
 			.updatedAt(report.getUpdatedAt().toLocalDateTime())
