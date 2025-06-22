@@ -75,9 +75,13 @@ public class AuthController {
 		UserInformationResponse userInformationResponse = socialService.getInfo(code);
 		LoginSuccessResponse loginSuccessResponse = authService.login(userInformationResponse);
 
-		cookieProvider.setTokenCookies(httpServletResponse,
-			loginSuccessResponse.jwtTokenResponse().accessToken(),
-			loginSuccessResponse.jwtTokenResponse().refreshToken());
+		JwtTokenResponse jwtTokenResponse = loginSuccessResponse.jwtTokenResponse();
+
+		if (jwtTokenResponse != null) {
+			cookieProvider.setTokenCookies(httpServletResponse,
+				jwtTokenResponse.accessToken(),
+				jwtTokenResponse.refreshToken());
+		}
 
 		LoginResponse loginResponse = LoginResponse.from(loginSuccessResponse);
 

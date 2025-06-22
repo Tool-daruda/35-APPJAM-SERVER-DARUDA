@@ -416,7 +416,8 @@ class ReportServiceTest {
 			given(userRepository.findById(admin.getId())).willReturn(Optional.of(admin));
 
 			// 이미 처리된 신고로 설정
-			ReportEntity processedReport = ReportEntity.of(reporter, reportedUser, board, null, ReportType.SPAM, "스팸 신고 제목", "스팸글입니다.");
+			ReportEntity processedReport = ReportEntity.of(reporter, reportedUser, board, null, ReportType.SPAM,
+				"스팸 신고 제목", "스팸글입니다.");
 			processedReport.updateStatus(ReportStatus.APPROVED);
 			processedReport.updateProcessInfo(admin.getId(), "처리 완료", LocalDateTime.now());
 			processedReport.updateSuspensionDays(7);
