@@ -9,6 +9,8 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
+import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.user.entity.UserEntity;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -55,5 +57,12 @@ public class BoardDocument {
 			.createdAt(board.getCreatedAt().toString())
 			.imageUrl(imageUrls)
 			.build();
+	}
+
+	public void update(final Tool tool, final UserEntity user, final String title, final String content,
+		final boolean isFree) {
+		this.toolName = tool.getToolMainName();
+		this.title = title;
+		this.content = content;
 	}
 }

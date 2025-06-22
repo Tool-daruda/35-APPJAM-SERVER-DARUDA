@@ -107,10 +107,22 @@ public class BoardService {
 			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
 		}
 
+
+		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+
 		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
 		board.update(
 			tool,
 			user,
+			boardCreateAndUpdateReq.title(),
+			boardCreateAndUpdateReq.content(),
+			boardCreateAndUpdateReq.isFree()
+		);
+
+		boardDocument.update(
+			tool,
+			board.getUser(),
 			boardCreateAndUpdateReq.title(),
 			boardCreateAndUpdateReq.content(),
 			boardCreateAndUpdateReq.isFree()
@@ -135,6 +147,8 @@ public class BoardService {
 	// 게시판 삭제
 	public void deleteBoard(final Long userId, final Long boardId) {
 		Board board = validateBoardAndUser(userId, boardId);
+		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 		deleteOriginImages(boardId);
 		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
 		List<BoardScrap> scraps = boardScrapRepository.findAllByBoardId(boardId);
@@ -143,6 +157,7 @@ public class BoardService {
 			log.info("삭제된 게시글과 연관된 스크랩 데이터를 제거했습니다. Scrap Count: {}", scraps.size());
 		}
 		board.delete();
+		boardSearchRepository.delete(boardDocument);
 	}
 
 	// 스크랩 처리
@@ -321,11 +336,20 @@ public class BoardService {
 	}
 
 	private Board createToolBoard(final Tool tool, final BoardCreateAndUpdateReq req, final UserEntity user) {
-		return boardRepository.save(Board.create(tool, user, req.title(), req.content()));
+		Board board = Board.create(tool, user, req.title(), req.content());
+		BoardDocument boardDocument = BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()));
+
+		boardSearchRepository.save(boardDocument);
+
+		return boardRepository.save(board);
 	}
 
 	private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
-		return boardRepository.save(Board.createFree(user, req.title(), req.content()));
+		Board board = Board.createFree(user, req.title(), req.content());
+		BoardDocument boardDocument = BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()));
+		boardSearchRepository.save(boardDocument);
+
+		return boardRepository.save(board);
 	}
 
 	private Board getBoardById(final Long boardId) {
