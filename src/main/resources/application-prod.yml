@@ -8,8 +8,9 @@ spring:
     url: ENC(+M0lXgQmFPI+PIMA5yUr0T94RPWdBqI3k8PY5vYllTIMIX+3oi4xR4uSYbqfcoLzZ7xqaBrWji+D+lm/l5kZWnQ/917OXpYtZWC3WcO/Lt1gPQw1RkQHoWpJ8Thwuaa0)
     username: ENC(nJZfcHF+It0X4f8rxo8Glg==)
     password: ENC(Hs1X8mIXeW4ZEhEMsaKAkITnB9KQUA1kuryXHSgO4fc=)
+
   elasticsearch:
-    uris: ENC(ujedAq4s/+VPqcbnbDRJ8C7c0ZUL/+1fjKnVmLaHOeI=)
+    uris: ENC(XGfuzJd4cyI1YgDU2usOYyU/1kop7lIezK/ie1N16AI/S/WUTiS66Q==)
 
   data:
     redis:
