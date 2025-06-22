@@ -10,7 +10,7 @@ spring:
     password: ENC(Hs1X8mIXeW4ZEhEMsaKAkITnB9KQUA1kuryXHSgO4fc=)
 
   elasticsearch:
-    uris: ENC(XGfuzJd4cyI1YgDU2usOYyU/1kop7lIezK/ie1N16AI/S/WUTiS66Q==)
+    uris: ENC(FpLrPai/YvcQTPM/M0aJb5MQBC0OYy2CR5OK2K+frmY=)
 
   data:
     redis:
