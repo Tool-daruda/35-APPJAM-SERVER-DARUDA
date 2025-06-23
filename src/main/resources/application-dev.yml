@@ -8,14 +8,9 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
-  elasticsearch:
-    uris: localhost:9200
 
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS}
 
   data:
     redis:
@@ -26,7 +21,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -72,4 +67,4 @@ sentry:
   environment: dev
   servername: Daruda-dev
 
-server-uri: http://localhost:8080
+server-uri: ${SEVER_URI}
