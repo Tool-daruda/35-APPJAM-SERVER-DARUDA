@@ -19,6 +19,10 @@ public class CorsConfig {
 			"http://localhost:5173",
 			"http://localhost:8080",
 			"https://daruda.shop",
+			"https://api.daruda.shop",
+			"https://www.daruda.shop",
+			"https://daruda.site",
+			"https://api.daruda.site",
 			"https://www.daruda.site"
 		);
 		configuration.setAllowedOriginPatterns(allowedOriginPatterns);

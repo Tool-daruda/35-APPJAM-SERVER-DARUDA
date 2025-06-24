@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.global.auth.cookie;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,9 @@ public class CookieProvider {
 	private static final int ACCESS_TOKEN_MAX_AGE = 3 * 60 * 60;
 	private static final int REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60;
 
+	@Value("${cookie.domain}")
+	private String cookieDomain;
+
 	public void setTokenCookies(HttpServletResponse response, String accessToken, String refreshToken) {
 		ResponseCookie accessTokenCookie = createTokenCookie(ACCESS_TOKEN, accessToken, ACCESS_TOKEN_MAX_AGE);
 		ResponseCookie refreshTokenCookie = createTokenCookie(REFRESH_TOKEN, refreshToken, REFRESH_TOKEN_MAX_AGE);
@@ -27,7 +31,7 @@ public class CookieProvider {
 	private ResponseCookie createTokenCookie(String name, String value, int maxAge) {
 		return ResponseCookie.from(name, value)
 			.maxAge(maxAge)
-			.path("/")
+			.path(cookieDomain)
 			.secure(true)
 			.sameSite("None")
 			.httpOnly(true)
