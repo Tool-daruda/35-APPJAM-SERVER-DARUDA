@@ -21,7 +21,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -61,6 +61,9 @@ jwt:
   secret: ENC(Mzng6SahiZBXTfKCB6pdKIcdPTDMcAhJyyBjbwuSkNbbd9ysylQonYe7u4f3FYfQXYUXZJiC+k/fmUMYNzykCrFke+EloN7/1kt5PJiNPz8IFNDlm9j2BBr6q9wRU5pvxHj/oNOIVZg=)
   access-token-expire-time: 10800000
   refresh-token-expire-time: 604800000
+
+cookie:
+  domain: ${COOKIE_DOMAIN}
 
 sentry:
   dsn: ENC(sG+5gVfk4gTxxw0NRQrPhl0ak5EFfvpBGTZvgnTPjBSvotGwmgfSBC1/XkawwcgbnQEGKXwCFStH+v2FyVGO+5JMNnjRUxjCAFLlL7FcYxQBExiYBIU+gBMgnKBn7Ww5jVZ4883qUy4=)

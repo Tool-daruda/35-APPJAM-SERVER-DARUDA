@@ -62,6 +62,9 @@ jwt:
   access-token-expire-time: 10800000
   refresh-token-expire-time: 604800000
 
+cookie:
+  domain: ${COOKIE_DOMAIN}
+
 sentry:
   dsn: ENC(L2Qt718YntVoAPXadfDDd7k5itveS5NfMBwjAE/BL1Blzz6LS+FzNQ1GHXnpXHWRCDk0o0ITmNL9M9ZeVDohhACWv24G7EcbSD10tyz5fC+cPHLJkxT1YG6b4PrPblsXvXuDpH5sJy8=)
   environment: prod
