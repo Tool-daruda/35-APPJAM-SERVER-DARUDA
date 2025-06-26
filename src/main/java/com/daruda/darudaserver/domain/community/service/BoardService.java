@@ -346,10 +346,11 @@ public class BoardService {
 
 	private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
 		Board board = Board.createFree(user, req.title(), req.content());
+		board = boardRepository.save(board);
 		BoardDocument boardDocument = BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()));
 		boardSearchRepository.save(boardDocument);
 
-		return boardRepository.save(board);
+		return board;
 	}
 
 	private Board getBoardById(final Long boardId) {
