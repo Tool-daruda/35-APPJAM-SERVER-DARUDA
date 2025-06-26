@@ -1,4 +1,4 @@
-name: Daruda CI 파이프라인
+name: Daruda dev CI 파이프라인
 env:
   SECRET_CODE: ${{ secrets.SECRET_CODE}}
 
@@ -39,4 +39,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: daruda241221/daruda
+          tags: daruda241221/daruda-dev
