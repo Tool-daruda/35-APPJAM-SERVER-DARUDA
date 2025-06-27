@@ -11,4 +11,5 @@ import com.daruda.darudaserver.domain.tool.entity.ToolKeyword;
 @Repository
 public interface ToolKeywordRepository extends JpaRepository<ToolKeyword, Long> {
 	List<ToolKeyword> findAllByTool(final Tool toolById);
+
 }

@@ -3,6 +3,7 @@ package com.daruda.darudaserver.domain.search.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,9 +29,10 @@ public class SearchController {
 
 	@GetMapping()
 	public ResponseEntity<SuccessResponse<SearchAllResponse>> searchAll(
-		@RequestParam(name = "keyword") @NotBlank(message = "검색어는 필수 입력값입니다.") String keyword) {
+		@RequestParam(name = "keyword") @NotBlank(message = "검색어는 필수 입력값입니다.") String keyword,
+		@AuthenticationPrincipal Long userId) {
 		List<BoardSearchResponse> boardSearchResponses = boardSearchService.searchByTitleAndContentAndTool(keyword);
-		List<ToolSearchResponse> toolSearchResponses = toolSearchService.searchByName(keyword);
+		List<ToolSearchResponse> toolSearchResponses = toolSearchService.searchByName(keyword, userId);
 
 		SearchAllResponse searchAllResponse = SearchAllResponse.of(boardSearchResponses, toolSearchResponses);
 
