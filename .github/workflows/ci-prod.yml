@@ -1,10 +1,10 @@
-name: Daruda CI 파이프라인
+name: Daruda CI PROD 파이프라인
 env:
   SECRET_CODE: ${{ secrets.SECRET_CODE}}
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
