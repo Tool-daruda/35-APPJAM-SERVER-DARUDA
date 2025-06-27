@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.daruda.darudaserver.domain.search.document.BoardDocument;
 import com.daruda.darudaserver.domain.search.dto.response.BoardSearchResponse;
 import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
+import com.daruda.darudaserver.domain.tool.service.ToolService;
+import com.daruda.darudaserver.domain.user.service.UserService;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
@@ -24,6 +27,9 @@ public class BoardSearchService {
 	private final BoardSearchRepository boardSearchRepository;
 
 	private final ElasticsearchTemplate elasticsearchTemplate;
+	private final ToolScrapRepository toolScrapRepository;
+	private final UserService userService;
+	private final ToolService toolService;
 
 	public List<BoardSearchResponse> searchByTitleAndContentAndTool(String keyword) {
 

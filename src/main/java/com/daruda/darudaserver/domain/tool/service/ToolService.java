@@ -3,6 +3,7 @@ package com.daruda.darudaserver.domain.tool.service;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -411,5 +412,13 @@ public class ToolService {
 				.fetchOne())
 			.orElse(0L);
 
+	}
+
+	public List<String> getKeywords(final Long toolId) {
+		Tool tool = getToolById(toolId);
+		List<ToolKeyword> keywords = toolKeywordRepository.findAllByTool(tool);
+		log.debug("keywordList={}", keywords);
+		List<String> keywordsList = keywords.stream().map(ToolKeyword::getKeywordName).collect(Collectors.toList());
+		return keywordsList;
 	}
 }
