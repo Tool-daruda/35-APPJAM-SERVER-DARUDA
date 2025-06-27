@@ -36,6 +36,7 @@ public class ToolSearchService {
 	private final BoardService boardService;
 
 	public List<ToolSearchResponse> searchByName(String keyword, Long userId) {
+		log.debug("userId={}", userId);
 		// toolMainName 또는 toolSubName에 하나라도 포함되면 검색되도록 OR 조건 구성
 		MatchQuery mainMatch = MatchQuery.of(m -> m
 			.field("toolMainName")
