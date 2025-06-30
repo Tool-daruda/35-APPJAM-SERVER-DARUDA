@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.service.BoardImageService;
+import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.domain.search.document.BoardDocument;
 import com.daruda.darudaserver.domain.search.document.ToolDocument;
 import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
@@ -29,13 +30,18 @@ public class ElasticsearchDataLoader implements CommandLineRunner {
 
 	private final ToolRepository toolRepository;
 	private final ToolSearchRepository toolSearchRepository;
+	private final BoardService boardService;
 
 	@Override
 	@Transactional
 	public void run(String... args) {
 		List<Board> boards = boardRepository.findAll();
 		List<BoardDocument> documents = boards.stream()
-			.map(board -> BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId())))
+			.map(board -> {
+				int commentCount = boardService.getCommentCount(board.getId());
+				return BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()), commentCount,
+					false);
+			})
 			.toList();
 
 		boardSearchRepository.saveAll(documents);

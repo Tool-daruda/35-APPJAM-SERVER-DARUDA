@@ -9,8 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.daruda.darudaserver.domain.search.dto.response.BoardSearchResponse;
-import com.daruda.darudaserver.domain.search.dto.response.SearchAllResponse;
+import com.daruda.darudaserver.domain.search.dto.response.GetBoardDocumentResponse;
 import com.daruda.darudaserver.domain.search.dto.response.ToolSearchResponse;
 import com.daruda.darudaserver.domain.search.service.BoardSearchService;
 import com.daruda.darudaserver.domain.search.service.ToolSearchService;
@@ -27,15 +26,24 @@ public class SearchController {
 	private final BoardSearchService boardSearchService;
 	private final ToolSearchService toolSearchService;
 
-	@GetMapping()
-	public ResponseEntity<SuccessResponse<SearchAllResponse>> searchAll(
+	@GetMapping("/board")
+	public ResponseEntity<SuccessResponse<?>> searchBoard(
+		@RequestParam(name = "keyword") @NotBlank(message = "검색어는 필수 입력값입니다.") String keyword,
+		@RequestParam(name = "nextCursor", required = false) String nextCursor,
+		@RequestParam(name = "size", defaultValue = "10") int size
+	) {
+		GetBoardDocumentResponse getBoardDocumentResponse = boardSearchService.searchByTitleAndContentAndTool(keyword,
+			nextCursor, size);
+
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, getBoardDocumentResponse));
+	}
+
+	@GetMapping("/tool")
+	public ResponseEntity<SuccessResponse<?>> searchTool(
 		@RequestParam(name = "keyword") @NotBlank(message = "검색어는 필수 입력값입니다.") String keyword,
 		@AuthenticationPrincipal Long userId) {
-		List<BoardSearchResponse> boardSearchResponses = boardSearchService.searchByTitleAndContentAndTool(keyword);
 		List<ToolSearchResponse> toolSearchResponses = toolSearchService.searchByName(keyword, userId);
 
-		SearchAllResponse searchAllResponse = SearchAllResponse.of(boardSearchResponses, toolSearchResponses);
-
-		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, searchAllResponse));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, toolSearchResponses));
 	}
 }
