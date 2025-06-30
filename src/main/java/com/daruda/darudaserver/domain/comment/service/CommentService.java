@@ -15,6 +15,8 @@ import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.notification.repository.NotificationRepository;
 import com.daruda.darudaserver.domain.notification.service.NotificationService;
+import com.daruda.darudaserver.domain.search.document.BoardDocument;
+import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
@@ -38,6 +40,7 @@ public class CommentService {
 	private final UserRepository userRepository;
 	private final NotificationService notificationService;
 	private final NotificationRepository notificationRepository;
+	private final BoardSearchRepository boardSearchRepository;
 
 	public CreateCommentResponse postComment(
 		Long userId, Long boardId, CreateCommentRequest request
@@ -64,6 +67,13 @@ public class CommentService {
 
 		commentRepository.save(comment);
 		notificationService.sendCommentNotification(comment);
+
+		//BoardDocument commentCount 업데이트 및 색인
+		int commentCount = commentRepository.countByBoardId(boardId);
+		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+		boardDocument.updateCommentCount(commentCount);
+		boardSearchRepository.save(boardDocument);
 
 		// 응답 DTO 반환
 		return CreateCommentResponse.of(

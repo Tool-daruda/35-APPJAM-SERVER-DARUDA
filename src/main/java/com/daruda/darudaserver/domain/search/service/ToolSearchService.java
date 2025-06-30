@@ -61,10 +61,6 @@ public class ToolSearchService {
 
 		SearchHits<ToolDocument> hits = elasticsearchTemplate.search(query, ToolDocument.class);
 
-		List<Long> toolIdList = hits.getSearchHits().stream()
-			.map(hit -> Long.valueOf(hit.getContent().getId()))
-			.toList();
-
 		return hits.getSearchHits().stream()
 			.map(hit -> {
 					ToolDocument doc = hit.getContent();

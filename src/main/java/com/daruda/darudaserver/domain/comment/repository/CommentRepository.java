@@ -35,4 +35,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
 	@Modifying
 	@Transactional
 	void deleteCommentsByBoardId(@Param("boardId") Long boardId);
+
+	@Query("SELECT COUNT(c) FROM CommentEntity c WHERE c.board.id = :boardId AND c.isDeleted = false")
+	int countByBoardId(@Param("boardId") Long boardId);
 }
