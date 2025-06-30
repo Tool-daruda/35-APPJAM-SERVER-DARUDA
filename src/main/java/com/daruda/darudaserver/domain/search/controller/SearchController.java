@@ -16,6 +16,7 @@ import com.daruda.darudaserver.domain.search.service.ToolSearchService;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +28,7 @@ public class SearchController {
 	private final ToolSearchService toolSearchService;
 
 	@GetMapping("/board")
+	@Operation(summary = "게시글 검색", description = "게시글 검색을 합니다")
 	public ResponseEntity<SuccessResponse<?>> searchBoard(
 		@RequestParam(name = "keyword") @NotBlank(message = "검색어는 필수 입력값입니다.") String keyword,
 		@RequestParam(name = "nextCursor", required = false) String nextCursor,
@@ -39,6 +41,7 @@ public class SearchController {
 	}
 
 	@GetMapping("/tool")
+	@Operation(summary = "툴을 검색합니다", description = "툴 검색을 합니다")
 	public ResponseEntity<SuccessResponse<?>> searchTool(
 		@RequestParam(name = "keyword") @NotBlank(message = "검색어는 필수 입력값입니다.") String keyword,
 		@AuthenticationPrincipal Long userId) {
