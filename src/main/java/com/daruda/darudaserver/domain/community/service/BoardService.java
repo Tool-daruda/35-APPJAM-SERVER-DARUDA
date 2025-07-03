@@ -119,10 +119,8 @@ public class BoardService {
 
 		boardDocument.update(
 			tool,
-			board.getUser(),
 			boardCreateAndUpdateReq.title(),
-			boardCreateAndUpdateReq.content(),
-			boardCreateAndUpdateReq.isFree()
+			boardCreateAndUpdateReq.content()
 		);
 
 		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());
