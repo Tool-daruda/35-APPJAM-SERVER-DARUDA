@@ -71,7 +71,7 @@ public class CommentService {
 		//BoardDocument commentCount 업데이트 및 색인
 		int commentCount = commentRepository.countByBoardId(boardId);
 		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
-			.orElse(null);
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 
 		if (boardDocument != null) {
 			boardDocument.updateCommentCount(commentCount);
