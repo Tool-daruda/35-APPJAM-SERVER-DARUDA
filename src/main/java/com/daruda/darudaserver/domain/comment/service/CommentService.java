@@ -71,9 +71,15 @@ public class CommentService {
 		//BoardDocument commentCount 업데이트 및 색인
 		int commentCount = commentRepository.countByBoardId(boardId);
 		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
-		boardDocument.updateCommentCount(commentCount);
-		boardSearchRepository.save(boardDocument);
+			.orElse(null);
+
+		if (boardDocument != null) {
+			boardDocument.updateCommentCount(commentCount);
+			boardSearchRepository.save(boardDocument);
+		}else{
+			log.error("Board not found");
+		}
+
 
 		// 응답 DTO 반환
 		return CreateCommentResponse.of(

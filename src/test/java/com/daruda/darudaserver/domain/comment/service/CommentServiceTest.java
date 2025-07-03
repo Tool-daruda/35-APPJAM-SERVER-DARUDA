@@ -26,6 +26,7 @@ import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.notification.repository.NotificationRepository;
 import com.daruda.darudaserver.domain.notification.service.NotificationService;
+import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
@@ -43,6 +44,8 @@ class CommentServiceTest {
 		Validation.buildDefaultValidatorFactory().getValidator();
 	@Mock
 	CommentRepository commentRepository;
+	@Mock
+	BoardSearchRepository boardSearchRepository;
 	@Mock
 	BoardRepository boardRepository;
 	@Mock
