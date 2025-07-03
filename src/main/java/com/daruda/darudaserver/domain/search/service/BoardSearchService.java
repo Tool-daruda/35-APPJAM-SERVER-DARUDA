@@ -67,7 +67,7 @@ public class BoardSearchService {
 
 		// nextCursor 기반 range query 추가
 		Query finalQuery;
-		if (nextCursor != null && !nextCursor.equals(-1)) {
+		if (nextCursor != null && !nextCursor.equals("-1")) {
 			Query rangeQuery = RangeQuery.of(r -> r
 				.field("updatedAt")
 				.lt(JsonData.of(nextCursor))
