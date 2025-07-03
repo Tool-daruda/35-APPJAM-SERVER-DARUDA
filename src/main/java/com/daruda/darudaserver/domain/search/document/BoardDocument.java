@@ -82,8 +82,7 @@ public class BoardDocument {
 			.build();
 	}
 
-	public void update(final Tool tool, final UserEntity user, final String title, final String content,
-		final boolean isFree) {
+	public void update(final Tool tool, final String title, final String content) {
 		this.toolName = tool.getToolMainName();
 		this.title = title;
 		this.content = content;
