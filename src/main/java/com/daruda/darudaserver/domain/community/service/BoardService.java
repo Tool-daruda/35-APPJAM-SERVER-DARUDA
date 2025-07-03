@@ -119,10 +119,8 @@ public class BoardService {
 
 		boardDocument.update(
 			tool,
-			board.getUser(),
 			boardCreateAndUpdateReq.title(),
-			boardCreateAndUpdateReq.content(),
-			boardCreateAndUpdateReq.isFree()
+			boardCreateAndUpdateReq.content()
 		);
 
 		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());
@@ -164,12 +162,22 @@ public class BoardService {
 
 		BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId()).orElse(null);
 
+		boolean isScrapped;
+
 		if (boardScrap == null) {
 			boardScrap = BoardScrap.builder().user(user).board(board).build();
 			boardScrapRepository.save(boardScrap);
+			isScrapped = true;
 		} else {
 			boardScrap.update();
+			isScrapped = !boardScrap.isDelYn();
 		}
+		//ElasticSearch 색인 데이터 업데이트
+		boardSearchRepository.findById(boardId.toString()).ifPresent(boardDocument -> {
+			boardDocument.updateScraped(isScrapped);
+			boardSearchRepository.save(boardDocument);
+		});
+
 		return BoardScrapRes.of(boardId, !boardScrap.isDelYn());
 	}
 
@@ -337,7 +345,8 @@ public class BoardService {
 		board = boardRepository.save(board);
 
 		BoardDocument boardDocument =
-			BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()));
+			BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()),
+				getCommentCount(board.getId()), getBoardScrap(user, board));
 
 		boardSearchRepository.save(boardDocument);
 
@@ -346,10 +355,12 @@ public class BoardService {
 
 	private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
 		Board board = Board.createFree(user, req.title(), req.content());
-		BoardDocument boardDocument = BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()));
+		board = boardRepository.save(board);
+		BoardDocument boardDocument = BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()),
+			getCommentCount(board.getId()), getBoardScrap(user, board));
 		boardSearchRepository.save(boardDocument);
 
-		return boardRepository.save(board);
+		return board;
 	}
 
 	private Board getBoardById(final Long boardId) {

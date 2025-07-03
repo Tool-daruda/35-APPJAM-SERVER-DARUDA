@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.search.document;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -47,22 +48,51 @@ public class BoardDocument {
 	@Field(type = FieldType.Keyword)
 	private List<String> imageUrl;
 
-	public static BoardDocument from(Board board, List<String> imageUrls) {
+	@Field(type = FieldType.Keyword)
+	private String author;
+
+	@Field(type = FieldType.Keyword)
+	private int commentCount;
+
+	@Field(type = FieldType.Keyword)
+	private String toolLogo;
+
+	@Field(type = FieldType.Keyword)
+	private boolean isScraped;
+
+	@Field(type = FieldType.Date)
+	private Date updatedAt;
+
+	public static BoardDocument from(Board board, List<String> imageUrls, int commentCount, boolean isScraped) {
+		Tool tool = board.getTool();
+
 		return BoardDocument.builder()
 			.content(board.getContent())
 			.id(board.getId().toString())
 			.title(board.getTitle())
-			.toolId(board.getTool() != null ? board.getTool().getToolId() : null)
-			.toolName(board.getTool() != null ? board.getTool().getToolMainName() : null)
+			.author(board.getUser().getNickname())
+			.toolId(tool != null ? tool.getToolId() : null)
+			.toolName(tool != null ? tool.getToolMainName() : null)
+			.toolLogo(tool != null ? tool.getToolLogo() : null)
 			.createdAt(board.getCreatedAt().toString())
+			.updatedAt(board.getUpdatedAt() != null ? board.getUpdatedAt() : null)
 			.imageUrl(imageUrls)
+			.commentCount(commentCount)
+			.isScraped(isScraped)
 			.build();
 	}
 
-	public void update(final Tool tool, final UserEntity user, final String title, final String content,
-		final boolean isFree) {
+	public void update(final Tool tool, final String title, final String content) {
 		this.toolName = tool.getToolMainName();
 		this.title = title;
 		this.content = content;
+	}
+
+	public void updateCommentCount(int commentCount) {
+		this.commentCount = commentCount;
+	}
+
+	public void updateScraped(boolean scraped) {
+		this.isScraped = scraped;
 	}
 }

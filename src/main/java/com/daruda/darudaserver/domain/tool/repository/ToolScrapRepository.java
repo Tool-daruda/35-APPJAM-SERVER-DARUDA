@@ -33,4 +33,5 @@ public interface ToolScrapRepository extends JpaRepository<ToolScrap, Long> {
 	int countByTool_ToolIdAndDelYnFalse(final Long toolId);
 
 	boolean existsByUserAndTool(UserEntity user, Tool tool);
+
 }

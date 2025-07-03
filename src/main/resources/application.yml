@@ -10,6 +10,11 @@ spring:
       max-request-size: 10MB
   elasticsearch:
     uris: localhost:9200
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD}
 
   springdoc:
     api-docs:

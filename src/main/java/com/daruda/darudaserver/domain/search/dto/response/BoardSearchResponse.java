@@ -1,27 +1,38 @@
 package com.daruda.darudaserver.domain.search.dto.response;
 
+import java.util.Date;
 import java.util.List;
 
 import com.daruda.darudaserver.domain.search.document.BoardDocument;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public record BoardSearchResponse(
-	String id,
+	Long boardId,
+	String toolName,
+	String toolLogo,
+	String author,
 	String title,
 	String content,
-	String toolName,
-	String createdAt,
+	List<String> imageUrl,
+	boolean isScraped,
 	Long toolId,
-	List<String> imageUrl
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
+	Date updatedAt,
+	int commentCount
 ) {
 	public static BoardSearchResponse from(BoardDocument doc) {
 		return new BoardSearchResponse(
-			doc.getId().toString(),
+			Long.valueOf(doc.getId()),
+			doc.getToolName(),
+			doc.getToolLogo(),
+			doc.getAuthor(),
 			doc.getTitle(),
 			doc.getContent(),
-			doc.getToolName(),
-			doc.getCreatedAt(),
+			doc.getImageUrl(),
+			doc.isScraped(),
 			doc.getToolId(),
-			doc.getImageUrl()
+			doc.getUpdatedAt(),
+			doc.getCommentCount()
 		);
 	}
 }

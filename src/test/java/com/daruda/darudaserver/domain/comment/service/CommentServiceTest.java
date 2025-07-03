@@ -26,6 +26,8 @@ import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.notification.repository.NotificationRepository;
 import com.daruda.darudaserver.domain.notification.service.NotificationService;
+import com.daruda.darudaserver.domain.search.document.BoardDocument;
+import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
@@ -44,6 +46,8 @@ class CommentServiceTest {
 	@Mock
 	CommentRepository commentRepository;
 	@Mock
+	BoardSearchRepository boardSearchRepository;
+	@Mock
 	BoardRepository boardRepository;
 	@Mock
 	UserRepository userRepository;
@@ -57,6 +61,7 @@ class CommentServiceTest {
 	private UserEntity stranger;
 	private Board board;
 	private CommentEntity comment;
+	private BoardDocument boardDocument;
 
 	@BeforeEach
 	void setUp() {
@@ -80,6 +85,16 @@ class CommentServiceTest {
 
 		comment = CommentEntity.of("내용", null, author, board);
 		ReflectionTestUtils.setField(comment, "id", 100L);
+
+		boardDocument = BoardDocument.builder()
+			.author("작성자")
+			.commentCount(10)
+			.content("내용")
+			.id("10")
+			.title("제목")
+			.toolId(1L)
+			.isScraped(true)
+			.build();
 	}
 
 	@Nested
@@ -92,6 +107,7 @@ class CommentServiceTest {
 			// given
 			given(userRepository.findById(author.getId())).willReturn(Optional.of(author));
 			given(boardRepository.findById(board.getId())).willReturn(Optional.of(board));
+			given(boardSearchRepository.findById(board.getId().toString())).willReturn(Optional.of(boardDocument));
 			given(commentRepository.save(any(CommentEntity.class)))
 				.willAnswer(inv -> {
 					CommentEntity commentEntity = inv.getArgument(0);

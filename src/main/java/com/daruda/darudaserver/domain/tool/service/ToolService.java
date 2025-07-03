@@ -412,4 +412,9 @@ public class ToolService {
 			.orElse(0L);
 
 	}
+
+	public List<String> getKeywords(final Long toolId) {
+		Tool tool = getToolById(toolId);
+		return convertToKeywordRes(tool);
+	}
 }
