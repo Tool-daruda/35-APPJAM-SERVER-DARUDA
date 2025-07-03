@@ -30,12 +30,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional
 public class BoardSearchService {
-	private final BoardSearchRepository boardSearchRepository;
 
 	private final ElasticsearchTemplate elasticsearchTemplate;
-	private final ToolScrapRepository toolScrapRepository;
-	private final UserService userService;
-	private final ToolService toolService;
+
 
 	public GetBoardDocumentResponse searchByTitleAndContentAndTool(String keyword, String nextCursor, int size) {
 
