@@ -36,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@Transactional
 @RequiredArgsConstructor
 public class NotificationService {
 
@@ -82,6 +81,7 @@ public class NotificationService {
 
 	}
 
+	@Transactional
 	public void sendCommentNotification(CommentEntity commentEntity) {
 		Board board = commentEntity.getBoard();
 
@@ -91,6 +91,7 @@ public class NotificationService {
 		send(board.getUser(), NotificationType.COMMENT, title, content, commentEntity);
 	}
 
+	@Transactional
 	public void sendNotice(NoticeRequest noticeRequest) {
 		int batchSize = 1000;
 		int page = 0;
@@ -133,6 +134,7 @@ public class NotificationService {
 			REGISTER_NOTICE_CONTENT.getMessageFormat(), null);
 	}
 
+	@Transactional
 	public void delete(Long userId) {
 		String userIdString = String.valueOf(userId);
 		UserEntity userEntity = userRepository.findById(userId)
@@ -142,6 +144,7 @@ public class NotificationService {
 		notificationRepository.deleteAllByReceiver(userEntity);
 	}
 
+	@Transactional
 	public void readNotification(Long userId, Long notificationId) {
 		NotificationEntity notificationEntity = notificationRepository.findById(notificationId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.NOTIFICATION_NOT_FOUND));
@@ -151,6 +154,7 @@ public class NotificationService {
 		notificationEntity.markAsRead();
 	}
 
+	@Transactional
 	public List<NotificationResponse> getNotifications(Long userId) {
 		UserEntity userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -160,6 +164,7 @@ public class NotificationService {
 			.toList();
 	}
 
+	@Transactional
 	public List<NotificationResponse> getRecentNotifications(Long userId) {
 		UserEntity userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
