@@ -46,7 +46,7 @@ public class TokenService {
 
 	@Transactional
 	public JwtTokenResponse reissueToken(HttpServletRequest request) {
-		String refreshToken = getAccessToken(request);
+		String refreshToken = getRefreshToken(request);
 
 		validateRefreshToken(refreshToken);
 
@@ -81,7 +81,7 @@ public class TokenService {
 		return refreshToken;
 	}
 
-	private String getAccessToken(HttpServletRequest request) {
+	private String getRefreshToken(HttpServletRequest request) {
 		try {
 			return
 				Arrays.stream(request.getCookies())
