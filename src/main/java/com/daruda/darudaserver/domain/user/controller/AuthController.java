@@ -2,7 +2,6 @@ package com.daruda.darudaserver.domain.user.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +31,7 @@ import com.daruda.darudaserver.global.error.code.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -118,11 +118,10 @@ public class AuthController {
 	@DisableSwaggerSecurity
 	@PostMapping("/reissue")
 	@Operation(summary = "Access Token 재발급", description = "Refresh Token을 통해 Access Token을 재발급합니다.")
-	public ResponseEntity<ApiResponse<TokenResponse>> reissueToken(
-		@CookieValue(value = "refreshToken") final String refreshToken,
-		HttpServletResponse httpServletResponse
-	) {
-		JwtTokenResponse tokenResponse = tokenService.reissueToken(refreshToken);
+	public ResponseEntity<ApiResponse<TokenResponse>> reissueToken(HttpServletRequest httpServletRequest,
+		HttpServletResponse httpServletResponse) {
+
+		JwtTokenResponse tokenResponse = tokenService.reissueToken(httpServletRequest);
 
 		cookieProvider.setTokenCookies(httpServletResponse,
 			tokenResponse.accessToken(),
