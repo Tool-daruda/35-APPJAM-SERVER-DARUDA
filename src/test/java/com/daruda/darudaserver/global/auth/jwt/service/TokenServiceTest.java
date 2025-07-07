@@ -24,6 +24,9 @@ import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+
 @ExtendWith(MockitoExtension.class)
 class TokenServiceTest {
 
@@ -62,22 +65,25 @@ class TokenServiceTest {
 	@DisplayName("토큰 재발급 성공")
 	void reissueToken_success() {
 		// given
+		HttpServletRequest request = mock(HttpServletRequest.class);
 		String refreshToken = "validRefreshToken";
+		Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
 		Long userId = 1L;
 		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
 		String newAccessToken = "newAccessToken";
 		String newRefreshToken = "newRefreshToken";
 
+		// when
+		when(request.getCookies()).thenReturn(new Cookie[] {refreshCookie});
 		when(jwtTokenProvider.validateToken(refreshToken)).thenReturn(JwtValidationType.VALID_JWT);
 		when(jwtTokenProvider.getUserIdFromJwt(refreshToken)).thenReturn(userId);
 		when(tokenRepository.findByRefreshToken(refreshToken)).thenReturn(Optional.of(Token.of(userId, refreshToken)));
 		when(jwtTokenProvider.generateAccessToken(userAuthentication)).thenReturn(newAccessToken);
 		when(jwtTokenProvider.generateRefreshToken(userAuthentication)).thenReturn(newRefreshToken);
 
-		// when
-		JwtTokenResponse response = tokenService.reissueToken(refreshToken);
-
 		// then
+		JwtTokenResponse response = tokenService.reissueToken(request);
+
 		assertNotNull(response);
 		assertEquals(newAccessToken, response.accessToken());
 		assertEquals(newRefreshToken, response.refreshToken());
@@ -88,13 +94,17 @@ class TokenServiceTest {
 	@DisplayName("토큰 재발급 실패 - 만료된 토큰")
 	void reissueToken_expiredToken() {
 		// given
+		HttpServletRequest request = mock(HttpServletRequest.class);
 		String refreshToken = "expiredRefreshToken";
+		Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
 
+		// when
+		when(request.getCookies()).thenReturn(new Cookie[] {refreshCookie});
 		when(jwtTokenProvider.validateToken(refreshToken)).thenReturn(JwtValidationType.EXPIRED_JWT_TOKEN);
 
-		// when & then
+		// then
 		UnauthorizedException exception = assertThrows(UnauthorizedException.class,
-			() -> tokenService.reissueToken(refreshToken));
+			() -> tokenService.reissueToken(request));
 		assertEquals(ErrorCode.REFRESH_TOKEN_EXPIRED_ERROR, exception.getErrorCode());
 	}
 
@@ -102,13 +112,17 @@ class TokenServiceTest {
 	@DisplayName("토큰 재발급 실패 - 유효하지 않은 토큰")
 	void reissueToken_invalidToken() {
 		// given
+		HttpServletRequest request = mock(HttpServletRequest.class);
 		String refreshToken = "invalidRefreshToken";
+		Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
 
+		// when
+		when(request.getCookies()).thenReturn(new Cookie[] {refreshCookie});
 		when(jwtTokenProvider.validateToken(refreshToken)).thenReturn(JwtValidationType.INVALID_JWT_TOKEN);
 
-		// when & then
+		// then
 		BadRequestException exception = assertThrows(BadRequestException.class,
-			() -> tokenService.reissueToken(refreshToken));
+			() -> tokenService.reissueToken(request));
 		assertEquals(ErrorCode.INVALID_REFRESH_TOKEN_ERROR, exception.getErrorCode());
 	}
 
@@ -116,13 +130,17 @@ class TokenServiceTest {
 	@DisplayName("토큰 재발급 실패 - 잘못된 서명")
 	void reissueToken_invalidSignature() {
 		// given
+		HttpServletRequest request = mock(HttpServletRequest.class);
 		String refreshToken = "invalidSignatureRefreshToken";
+		Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
 
+		// when
+		when(request.getCookies()).thenReturn(new Cookie[] {refreshCookie});
 		when(jwtTokenProvider.validateToken(refreshToken)).thenReturn(JwtValidationType.INVALID_JWT_SIGNATURE);
 
-		// when & then
+		// then
 		BadRequestException exception = assertThrows(BadRequestException.class,
-			() -> tokenService.reissueToken(refreshToken));
+			() -> tokenService.reissueToken(request));
 		assertEquals(ErrorCode.REFRESH_TOKEN_SIGNATURE_ERROR, exception.getErrorCode());
 	}
 
@@ -130,13 +148,17 @@ class TokenServiceTest {
 	@DisplayName("토큰 재발급 실패 - 지원하지 않는 토큰")
 	void reissueToken_unsupportedToken() {
 		// given
+		HttpServletRequest request = mock(HttpServletRequest.class);
 		String refreshToken = "unsupportedRefreshToken";
+		Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
 
+		// when
+		when(request.getCookies()).thenReturn(new Cookie[] {refreshCookie});
 		when(jwtTokenProvider.validateToken(refreshToken)).thenReturn(JwtValidationType.UNSUPPORTED_JWT_TOKEN);
 
-		// when & then
+		// then
 		BadRequestException exception = assertThrows(BadRequestException.class,
-			() -> tokenService.reissueToken(refreshToken));
+			() -> tokenService.reissueToken(request));
 		assertEquals(ErrorCode.UNSUPPORTED_REFRESH_TOKEN_ERROR, exception.getErrorCode());
 	}
 
@@ -144,13 +166,17 @@ class TokenServiceTest {
 	@DisplayName("토큰 재발급 실패 - 비어있는 토큰")
 	void reissueToken_emptyToken() {
 		// given
+		HttpServletRequest request = mock(HttpServletRequest.class);
 		String refreshToken = "";
+		Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
 
+		// when
+		when(request.getCookies()).thenReturn(new Cookie[] {refreshCookie});
 		when(jwtTokenProvider.validateToken(refreshToken)).thenReturn(JwtValidationType.EMPTY_JWT);
 
-		// when & then
+		// then
 		BadRequestException exception = assertThrows(BadRequestException.class,
-			() -> tokenService.reissueToken(refreshToken));
+			() -> tokenService.reissueToken(request));
 		assertEquals(ErrorCode.REFRESH_TOKEN_EMPTY_ERROR, exception.getErrorCode());
 	}
 
@@ -158,18 +184,22 @@ class TokenServiceTest {
 	@DisplayName("토큰 재발급 실패 - 사용자 ID 불일치")
 	void reissueToken_userIdMismatch() {
 		// given
+		HttpServletRequest request = mock(HttpServletRequest.class);
 		String refreshToken = "validRefreshToken";
+		Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
 		Long userId = 1L;
 		Long storedUserId = 2L;
 
+		// when
+		when(request.getCookies()).thenReturn(new Cookie[] {refreshCookie});
 		when(jwtTokenProvider.validateToken(refreshToken)).thenReturn(JwtValidationType.VALID_JWT);
 		when(jwtTokenProvider.getUserIdFromJwt(refreshToken)).thenReturn(userId);
 		when(tokenRepository.findByRefreshToken(refreshToken)).thenReturn(
 			Optional.of(Token.of(storedUserId, refreshToken)));
 
-		// when & then
+		// then
 		BusinessException exception = assertThrows(BadRequestException.class,
-			() -> tokenService.reissueToken(refreshToken));
+			() -> tokenService.reissueToken(request));
 		assertEquals(ErrorCode.REFRESH_TOKEN_USER_ID_MISMATCH_ERROR, exception.getErrorCode());
 	}
 

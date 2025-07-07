@@ -40,7 +40,7 @@ import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
@@ -193,10 +193,7 @@ class AuthControllerTest {
 		doReturn(userId).when(authService).logout(userId);
 
 		// then
-		String token = "accessToken";
-
-		mockMvc.perform(post("/api/v1/auth/logout")
-				.header("Authorization", "Bearer " + token))
+		mockMvc.perform(post("/api/v1/auth/logout"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").value(userId))
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_LOGOUT.getHttpStatus().value()))
@@ -208,24 +205,21 @@ class AuthControllerTest {
 	@Test
 	@DisplayName("Access Token 재발급 성공")
 	void reissueToken() throws Exception {
-		// given
-		String refreshToken = "refreshToken";
 		JwtTokenResponse jwtTokenResponse = new JwtTokenResponse("newAccessToken", "newRefreshToken");
 
 		// when
-		when(tokenService.reissueToken(refreshToken)).thenReturn(jwtTokenResponse);
+		when(tokenService.reissueToken(any(HttpServletRequest.class))).thenReturn(jwtTokenResponse);
 		doNothing().when(cookieProvider).setTokenCookies(any(), anyString(), anyString());
 
 		// then
 		mockMvc.perform(post("/api/v1/auth/reissue")
-				.contentType(MediaType.APPLICATION_JSON)
-				.cookie(new Cookie("refreshToken", refreshToken)))
+				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_REISSUE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_REISSUE.getMessage()));
 
 		// verify
-		verify(tokenService).reissueToken(refreshToken);
+		verify(tokenService).reissueToken(any(HttpServletRequest.class));
 		verify(cookieProvider).setTokenCookies(any(), eq("newAccessToken"), eq("newRefreshToken"));
 	}
 
@@ -243,10 +237,7 @@ class AuthControllerTest {
 		doNothing().when(authService).withdraw(userId);
 
 		// then
-		String token = "accessToken";
-
-		mockMvc.perform(delete("/api/v1/auth/withdraw")
-				.header("Authorization", "Bearer " + token))
+		mockMvc.perform(delete("/api/v1/auth/withdraw"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_WITHDRAW.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_WITHDRAW.getMessage()));
