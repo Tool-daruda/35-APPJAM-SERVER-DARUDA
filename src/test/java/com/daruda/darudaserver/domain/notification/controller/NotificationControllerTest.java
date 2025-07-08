@@ -39,8 +39,6 @@ import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.servlet.http.Cookie;
-
 @ExtendWith(MockitoExtension.class)
 class NotificationControllerTest {
 
@@ -78,13 +76,12 @@ class NotificationControllerTest {
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 
-		String accessToken = "accessToken";
-		Cookie cookie = new Cookie(accessToken, accessToken);
-
 		// then
+		String token = "accessToken";
+
 		mockMvc.perform(get("/api/v1/notification/connect")
 				.contentType(MediaType.APPLICATION_JSON)
-				.cookie(cookie))
+				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk());
 	}
 
@@ -99,13 +96,12 @@ class NotificationControllerTest {
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 
-		String accessToken = "accessToken";
-		Cookie cookie = new Cookie(accessToken, accessToken);
-
 		// then
+		String token = "accessToken";
+
 		mockMvc.perform(patch("/api/v1/notification/read/{notification-id}", notificationId)
 				.contentType(MediaType.APPLICATION_JSON)
-				.cookie(cookie))
+				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_UPDATE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_UPDATE.getMessage()));
@@ -140,15 +136,14 @@ class NotificationControllerTest {
 			comment);
 		List<NotificationResponse> notifications = List.of(NotificationResponse.from(notification));
 
-		String accessToken = "accessToken";
-		Cookie cookie = new Cookie(accessToken, accessToken);
-
 		// when
 		when(notificationService.getNotifications(anyLong())).thenReturn(notifications);
 
 		// then
+		String token = "accessToken";
+
 		mockMvc.perform(get("/api/v1/notification")
-				.cookie(cookie))
+				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").isArray())
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
@@ -184,15 +179,14 @@ class NotificationControllerTest {
 			comment);
 		List<NotificationResponse> notifications = List.of(NotificationResponse.from(notification));
 
-		String accessToken = "accessToken";
-		Cookie cookie = new Cookie(accessToken, accessToken);
-
 		// when
 		when(notificationService.getRecentNotifications(anyLong())).thenReturn(notifications);
 
 		// then
+		String token = "accessToken";
+
 		mockMvc.perform(get("/api/v1/notification/recent")
-				.cookie(cookie))
+				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").isArray())
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
@@ -210,14 +204,13 @@ class NotificationControllerTest {
 		SecurityContextHolder.setContext(context);
 		NoticeRequest request = new NoticeRequest("공지 제목", "공지 내용");
 
-		String accessToken = "accessToken";
-		Cookie cookie = new Cookie(accessToken, accessToken);
-
 		// then
+		String token = "accessToken";
+
 		mockMvc.perform(post("/api/v1/notification/notice")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))
-				.cookie(cookie))
+				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_SEND_NOTICE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_SEND_NOTICE.getMessage()));
