@@ -35,6 +35,7 @@ import com.daruda.darudaserver.domain.user.service.SocialService;
 import com.daruda.darudaserver.global.auth.cookie.CookieProvider;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
+import com.daruda.darudaserver.global.auth.security.JwtAuthenticationFilter;
 import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,6 +68,7 @@ class AuthControllerTest {
 	void setUp() {
 		mockMvc = MockMvcBuilders.standaloneSetup(authController)
 			.setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
+			.addFilters(new JwtAuthenticationFilter(jwtTokenProvider))
 			.build();
 	}
 
