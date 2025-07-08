@@ -89,17 +89,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	private String getAccessToken(HttpServletRequest request) {
-		try {
-			return
-				Arrays.stream(request.getCookies())
-					.filter(cookie -> "accessToken".equals(cookie.getName()))
-					.map(Cookie::getValue)
-					.findFirst()
-					.orElseThrow(() -> new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN));
-		} catch (Exception e) {
-			log.warn("AccessToken 추출 실패: {}", e.getMessage());
-			return null;
+		Cookie[] cookies = request.getCookies();
+
+		if (cookies == null) {
+			throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
 		}
+
+		return Arrays.stream(cookies)
+			.filter(cookie -> "accessToken".equals(cookie.getName()))
+			.map(Cookie::getValue)
+			.findFirst()
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN));
 	}
 
 	private void doAuthentication(HttpServletRequest request, final Long userId) {

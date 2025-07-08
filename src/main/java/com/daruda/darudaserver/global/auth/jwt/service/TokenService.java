@@ -1,5 +1,7 @@
 package com.daruda.darudaserver.global.auth.jwt.service;
 
+import java.util.Arrays;
+
 import org.springframework.stereotype.Service;
 
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
@@ -15,6 +17,8 @@ import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +45,9 @@ public class TokenService {
 	}
 
 	@Transactional
-	public JwtTokenResponse reissueToken(final String refreshToken) {
+	public JwtTokenResponse reissueToken(HttpServletRequest request) {
+		String refreshToken = getRefreshToken(request);
+
 		validateRefreshToken(refreshToken);
 
 		Long userId = jwtTokenProvider.getUserIdFromJwt(refreshToken);
@@ -73,6 +79,20 @@ public class TokenService {
 		tokenRepository.save(Token.of(userId, refreshToken));
 
 		return refreshToken;
+	}
+
+	private String getRefreshToken(HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+
+		if (cookies == null) {
+			throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
+		}
+
+		return Arrays.stream(cookies)
+			.filter(cookie -> "refreshToken".equals(cookie.getName()))
+			.map(Cookie::getValue)
+			.findFirst()
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN));
 	}
 
 	private void validateRefreshToken(final String refreshToken) {
