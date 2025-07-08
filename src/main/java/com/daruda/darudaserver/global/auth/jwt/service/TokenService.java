@@ -82,17 +82,17 @@ public class TokenService {
 	}
 
 	private String getRefreshToken(HttpServletRequest request) {
-		try {
-			return
-				Arrays.stream(request.getCookies())
-					.filter(cookie -> "refreshToken".equals(cookie.getName()))
-					.map(Cookie::getValue)
-					.findFirst()
-					.orElseThrow(() -> new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN));
-		} catch (Exception e) {
-			log.warn("RefreshToken 추출 실패: {}", e.getMessage());
-			return null;
+		Cookie[] cookies = request.getCookies();
+
+		if (cookies == null) {
+			throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
 		}
+
+		return Arrays.stream(cookies)
+			.filter(cookie -> "refreshToken".equals(cookie.getName()))
+			.map(Cookie::getValue)
+			.findFirst()
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN));
 	}
 
 	private void validateRefreshToken(final String refreshToken) {
