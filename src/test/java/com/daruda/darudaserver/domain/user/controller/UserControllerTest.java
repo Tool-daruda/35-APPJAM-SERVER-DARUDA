@@ -35,7 +35,6 @@ import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
-import com.daruda.darudaserver.global.auth.security.JwtAuthenticationFilter;
 import com.daruda.darudaserver.global.auth.security.UserAuthentication;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,7 +60,6 @@ class UserControllerTest {
 	void setUp() {
 		mockMvc = MockMvcBuilders.standaloneSetup(userController)
 			.setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
-			.addFilters(new JwtAuthenticationFilter(jwtTokenProvider))
 			.build();
 	}
 
