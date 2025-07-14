@@ -12,8 +12,6 @@ import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
-import com.daruda.darudaserver.global.image.dto.request.GetPresignedUrlRequest;
-import com.daruda.darudaserver.global.image.dto.response.GetPresignedUrlListResponse;
 import com.daruda.darudaserver.global.image.entity.Image;
 import com.daruda.darudaserver.global.image.repository.ImageRepository;
 import com.daruda.darudaserver.global.s3.S3Service;
@@ -101,15 +99,6 @@ public class ImageService {
 				)
 		);
 		return presignedRequest.url().toString();
-	}
-
-	public GetPresignedUrlListResponse getUploadPresignedUrl(GetPresignedUrlRequest getPresignedUrlRequestList) {
-		List<String> urls = getPresignedUrlRequestList.keyList().stream()
-			.map(this::createUploadPresignedUrl)
-			.toList();
-
-		return GetPresignedUrlListResponse.of(urls);
-
 	}
 
 	public List<Long> createImage(List<String> imageUrlList) {
