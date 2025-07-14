@@ -72,5 +72,3 @@ sentry:
   dsn: ENC(SnVV8aytTF5eXk0jhluurJE2MmCiQxoln2R2Xs/if5L41n3m450ZcU/jAD8Kj4BIq0Z7lNABZyTmJnsmhcrjXW8tJFW9NrCQBRqT3n2IUcLsPX/LkjNoYuV9QMXqoWWOmw45DRIqVhA=)
   environment: local
   servername: Daruda-local
-
-server-uri: http://localhost:8080
