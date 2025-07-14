@@ -72,7 +72,7 @@ public class ToolService {
 	QTool qTool = QTool.tool;
 
 	public ToolDetailGetRes getToolDetail(Long userId, final Long toolId) {
-		log.info("툴 세부 정보를 조회합니다. toolId={}" + userId);
+		log.info("툴 세부 정보를 조회합니다. toolId={}, userId={}", toolId, userId);
 
 		Tool tool = getToolById(toolId);
 		List<String> images = getImageById(tool);
