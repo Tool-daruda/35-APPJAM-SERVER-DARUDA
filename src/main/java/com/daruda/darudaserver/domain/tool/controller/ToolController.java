@@ -39,13 +39,12 @@ public class ToolController {
 
 	private final ToolService toolService;
 
-	@DisableSwaggerSecurity
 	@GetMapping("/{tool-id}")
 	@Operation(summary = "tool 세부정보 조회", description = "tool의 세부정보를 조회합니다.")
-	public ResponseEntity<ApiResponse<?>> getToolDetail(@AuthenticationPrincipal Long userIdOrNull,
+	public ResponseEntity<ApiResponse<?>> getToolDetail(@AuthenticationPrincipal Long userId,
 		@Parameter(description = "tool Id", example = "1")
 		@PathVariable(name = "tool-id") final Long toolId) {
-		ToolDetailGetRes toolDetail = toolService.getToolDetail(userIdOrNull, toolId);
+		ToolDetailGetRes toolDetail = toolService.getToolDetail(userId, toolId);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolDetail, SuccessCode.SUCCESS_FETCH));
 	}
 
