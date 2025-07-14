@@ -69,5 +69,3 @@ sentry:
   dsn: ENC(sG+5gVfk4gTxxw0NRQrPhl0ak5EFfvpBGTZvgnTPjBSvotGwmgfSBC1/XkawwcgbnQEGKXwCFStH+v2FyVGO+5JMNnjRUxjCAFLlL7FcYxQBExiYBIU+gBMgnKBn7Ww5jVZ4883qUy4=)
   environment: dev
   servername: Daruda-dev
-
-server-uri: ${SEVER_URI}
