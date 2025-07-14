@@ -81,13 +81,14 @@ public class ToolService {
 		List<String> videos = getVideoById(tool);
 		tool.incrementViewCount();
 
-		Boolean isScrapped = false;
-		//AccessToken 이 들어왔을 경우
-		if (userId != null) {
-			UserEntity user = userRepository.findById(userId).orElse(null);
-			log.debug("유저 정보를 조회했습니다: {}", user.getId());
-			isScrapped = getScrapped(user, tool);
-		}
+		Boolean isScrapped = Optional.ofNullable(userId)
+			.flatMap(userRepository::findById)
+			.map(user -> {
+				log.debug("유저 정보를 조회했습니다: {}", user.getId());
+				return getScrapped(user, tool);
+			})
+			.orElse(false);
+
 		log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
 		log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
 		toolRepository.save(tool);
