@@ -71,8 +71,8 @@ public class ToolService {
 
 	QTool qTool = QTool.tool;
 
-	public ToolDetailGetRes getToolDetail(final Long userIdOrNull, final Long toolId) {
-		log.info("툴 세부 정보를 조회합니다. toolId={}" + userIdOrNull);
+	public ToolDetailGetRes getToolDetail(Long userId, final Long toolId) {
+		log.info("툴 세부 정보를 조회합니다. toolId={}" + userId);
 
 		Tool tool = getToolById(toolId);
 		List<String> images = getImageById(tool);
@@ -81,13 +81,10 @@ public class ToolService {
 		List<String> videos = getVideoById(tool);
 		tool.incrementViewCount();
 
-		UserEntity user;
 		Boolean isScrapped = false;
 		//AccessToken 이 들어왔을 경우
-		if (userIdOrNull != null) {
-			Long userId = userIdOrNull;
-			user = userRepository.findById(userId)
-				.orElse(null);
+		if (userId != null) {
+			UserEntity user = userRepository.findById(userId).orElse(null);
 			log.debug("유저 정보를 조회했습니다: {}", user.getId());
 			isScrapped = getScrapped(user, tool);
 		}
