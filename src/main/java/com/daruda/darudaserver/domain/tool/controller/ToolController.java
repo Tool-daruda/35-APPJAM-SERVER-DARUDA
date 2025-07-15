@@ -78,11 +78,10 @@ public class ToolController {
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(relatedTool, SuccessCode.SUCCESS_FETCH));
 	}
 
-	@DisableSwaggerSecurity
 	@GetMapping
 	@Operation(summary = "tool 목록 조회", description = "tool의 목록을 조회합니다.")
 	public ResponseEntity<ApiResponse<?>> getToolList(
-		@AuthenticationPrincipal Long userIdOrNull,
+		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "정렬 기준", example = "popular")
 		@RequestParam(defaultValue = "popular", value = "criteria") String criteria,
 		@Parameter(description = "카테고리(영어)", example = "ALL")
@@ -95,7 +94,7 @@ public class ToolController {
 		@RequestParam(value = "isFree") Boolean isFree
 	) {
 		ToolListRes toolListRes = toolService
-			.getToolList(userIdOrNull, criteria, category, size, lastToolId, isFree);
+			.getToolList(userId, criteria, category, size, lastToolId, isFree);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolListRes, SuccessCode.SUCCESS_FETCH));
 	}
 
