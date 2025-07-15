@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springdoc.core.customizers.OperationCustomizer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,8 +24,6 @@ import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
 public class SwaggerConfig {
-	@Value("${server-uri}")
-	String serverUri;
 
 	@Bean
 	public OpenAPI openApi() {
@@ -39,11 +36,11 @@ public class SwaggerConfig {
 			.bearerFormat("JWT")
 		);
 
-		Server server = new Server();
-		server.setUrl(serverUri);
+		Server server = new Server().url("/");
+		Server prodServer = new Server().url("https://api.daruda.site").description("prod API Server");
 
 		return new OpenAPI()
-			.servers(List.of(server))
+			.servers(List.of(server, prodServer))
 			.addSecurityItem(securityRequirement)
 			.components(components);
 	}
