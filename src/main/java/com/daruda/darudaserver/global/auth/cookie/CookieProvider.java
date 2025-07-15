@@ -31,7 +31,8 @@ public class CookieProvider {
 	private ResponseCookie createTokenCookie(String name, String value, int maxAge) {
 		return ResponseCookie.from(name, value)
 			.maxAge(maxAge)
-			.path(cookieDomain)
+			.path("/")
+			.domain(cookieDomain)
 			.secure(true)
 			.sameSite("None")
 			.httpOnly(true)
