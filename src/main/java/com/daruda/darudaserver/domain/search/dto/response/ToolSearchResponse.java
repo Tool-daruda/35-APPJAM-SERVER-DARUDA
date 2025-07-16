@@ -19,7 +19,7 @@ public record ToolSearchResponse(
 		return new ToolSearchResponse(
 			document.getId(),
 			document.getToolMainName(),
-			document.getToolLink(),
+			document.getToolLogo(),
 			document.getDescription(),
 			document.getLicense(),
 			keywords,
