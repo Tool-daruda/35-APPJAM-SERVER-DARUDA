@@ -81,7 +81,10 @@ public class BoardSearchService {
 		NativeQuery query = NativeQuery.builder()
 			.withQuery(finalQuery)
 			.withPageable(PageRequest.of(0, size + 1))  // size + 1로 hasNext 확인
-			.withSort(Sort.by(Sort.Order.desc("updatedAt")))
+			.withSort(Sort.by(
+				Sort.Order.desc("updatedAt"),
+				Sort.Order.desc("id")
+			))
 			.build();
 
 		SearchHits<BoardDocument> hits = elasticsearchTemplate.search(query, BoardDocument.class);
