@@ -65,6 +65,9 @@ public class ToolDocument {
 	@Field(type = FieldType.Integer)
 	private int popular;
 
+	@Field(type = FieldType.Keyword)
+	private String toolLogo;
+
 	public static ToolDocument from(Tool tool) {
 		return ToolDocument.builder()
 			.id(tool.getToolId().toString())
@@ -81,6 +84,7 @@ public class ToolDocument {
 			.fontColor(tool.isFontColor())
 			.viewCount(tool.getViewCount())
 			.popular(tool.getPopular())
+			.toolLogo(tool.getToolLogo())
 			.build();
 	}
 }
