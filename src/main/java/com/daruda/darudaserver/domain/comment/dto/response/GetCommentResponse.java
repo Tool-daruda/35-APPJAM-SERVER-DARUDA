@@ -2,6 +2,8 @@ package com.daruda.darudaserver.domain.comment.dto.response;
 
 import java.sql.Timestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Builder;
 
 @Builder
@@ -10,6 +12,8 @@ public record GetCommentResponse(
 	Long commentId,
 	String nickname,
 	String image,
+
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
 	Timestamp updatedAt
 ) {
 
