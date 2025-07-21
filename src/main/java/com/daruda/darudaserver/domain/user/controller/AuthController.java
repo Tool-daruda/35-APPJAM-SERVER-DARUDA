@@ -110,8 +110,11 @@ public class AuthController {
 	@PostMapping("/logout")
 	@Operation(summary = "로그아웃", description = "로그아웃을 진행합니다.")
 	public ResponseEntity<ApiResponse<Long>> logout(
-		@AuthenticationPrincipal Long userId
+		@AuthenticationPrincipal Long userId,
+		HttpServletResponse httpServletResponse
 	) {
+		cookieProvider.deleteTokenCookies(httpServletResponse);
+
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(authService.logout(userId), SuccessCode.SUCCESS_LOGOUT));
 	}
 
@@ -133,8 +136,10 @@ public class AuthController {
 	@DeleteMapping("/withdraw")
 	@Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 진행합니다.")
 	public ResponseEntity<ApiResponse<Void>> withdraw(
-		@AuthenticationPrincipal Long userId
+		@AuthenticationPrincipal Long userId,
+		HttpServletResponse httpServletResponse
 	) {
+		cookieProvider.deleteTokenCookies(httpServletResponse);
 		authService.withdraw(userId);
 		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_WITHDRAW));
 	}
