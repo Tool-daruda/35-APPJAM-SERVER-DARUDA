@@ -28,6 +28,14 @@ public class CookieProvider {
 		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 	}
 
+	public void deleteTokenCookies(HttpServletResponse response) {
+		ResponseCookie accessTokenCookie = createTokenCookie(ACCESS_TOKEN, "", 0);
+		ResponseCookie refreshTokenCookie = createTokenCookie(REFRESH_TOKEN, "", 0);
+
+		response.addHeader("Set-Cookie", accessTokenCookie.toString());
+		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+	}
+
 	private ResponseCookie createTokenCookie(String name, String value, int maxAge) {
 		return ResponseCookie.from(name, value)
 			.maxAge(maxAge)
