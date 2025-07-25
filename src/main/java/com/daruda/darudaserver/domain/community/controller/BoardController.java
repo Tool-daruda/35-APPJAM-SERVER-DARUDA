@@ -61,10 +61,10 @@ public class BoardController {
 	@GetMapping("/{board-id}")
 	@Operation(summary = "게시글 조회", description = "게시글을 조회합니다.")
 	public ResponseEntity<ApiResponse<?>> getBoard(
-		@AuthenticationPrincipal Long userIdOrNull,
+		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId) {
-		BoardRes boardRes = boardService.getBoard(userIdOrNull, boardId);
+		BoardRes boardRes = boardService.getBoard(userId, boardId);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes, SuccessCode.SUCCESS_FETCH));
 	}
 
@@ -92,7 +92,7 @@ public class BoardController {
 	@GetMapping
 	@Operation(summary = "게시글 리스트 조회", description = "게시글 리스트를 조회합니다.")
 	public ResponseEntity<ApiResponse<?>> getBoardList(
-		@AuthenticationPrincipal Long userIdOrNull,
+		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "자유 게시판 게시글 여부", example = "true")
 		@RequestParam(name = "noTopic", required = false) Boolean noTopic,
 		@Parameter(description = "tool Id", example = "1")
@@ -101,7 +101,7 @@ public class BoardController {
 		@RequestParam(value = "size", defaultValue = "10") int size,
 		@Parameter(description = "조회했을 때 마지막 board Id", example = "10")
 		@RequestParam(value = "lastBoardId", required = false) Long lastBoardId) {
-		GetBoardResponse boardResponse = boardService.getBoardList(userIdOrNull, noTopic, toolId, size, lastBoardId);
+		GetBoardResponse boardResponse = boardService.getBoardList(userId, noTopic, toolId, size, lastBoardId);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardResponse, SuccessCode.SUCCESS_FETCH));
 	}
 }
