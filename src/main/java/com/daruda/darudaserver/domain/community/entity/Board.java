@@ -48,7 +48,7 @@ public class Board extends BaseTimeEntity {
 	private String title;
 
 	@NotNull
-	@Column(length = 1_000)
+	@Column(length = 10_000)
 	private String content;
 
 	@NotNull
