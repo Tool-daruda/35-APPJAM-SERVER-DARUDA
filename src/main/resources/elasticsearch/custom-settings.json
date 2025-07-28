@@ -25,13 +25,6 @@
         "type": "custom",
         "tokenizer": "standard",
         "filter": ["lowercase"]
-      },
-      "custom_search_analyzer": {
-        "type": "custom",
-        "tokenizer": "nori_tokenizer",
-        "filter": [
-          "lowercase"
-        ]
       }
     }
   }
