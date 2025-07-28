@@ -30,16 +30,16 @@ public class BoardDocument {
 	@Field(type = FieldType.Keyword)
 	private String id;
 
-	@Field(type = FieldType.Text, analyzer = "custom_search_analyzerr")
+	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String title;
 
-	@Field(type = FieldType.Text, analyzer = "custom_search_analyzer")
+	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String content;
 
-	@Field(type = FieldType.Text, analyzer = "custom_search_analyzer")
+	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String toolMainName;
 
-	@Field(type = FieldType.Text, analyzer = "custom_search_analyzer")
+	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String toolSubName;
 
 	@Field(type = FieldType.Keyword)

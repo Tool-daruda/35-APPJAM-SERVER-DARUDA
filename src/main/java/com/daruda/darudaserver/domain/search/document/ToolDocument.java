@@ -26,10 +26,10 @@ public class ToolDocument {
 	@Field(type = FieldType.Keyword)
 	private String id;
 
-	@Field(type = FieldType.Text, analyzer = "custom_search_analyzer")
+	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String toolMainName;
 
-	@Field(type = FieldType.Text, analyzer = "custom_search_analyzer")
+	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String toolSubName;
 
 	@Field(type = FieldType.Keyword)
@@ -38,7 +38,7 @@ public class ToolDocument {
 	@Field(type = FieldType.Text)
 	private String toolLink;
 
-	@Field(type = FieldType.Text, analyzer = "custom_search_analyzer")
+	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String description;
 
 	@Field(type = FieldType.Keyword)
@@ -47,7 +47,7 @@ public class ToolDocument {
 	@Field(type = FieldType.Boolean)
 	private Boolean supportKorea;
 
-	@Field(type = FieldType.Text, analyzer = "custom_search_analyzer")
+	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String detailDescription;
 
 	@Field(type = FieldType.Text)
