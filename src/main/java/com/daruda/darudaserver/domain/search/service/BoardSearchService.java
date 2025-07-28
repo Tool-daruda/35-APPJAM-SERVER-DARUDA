@@ -40,7 +40,7 @@ public class BoardSearchService {
 		MatchQuery titleMatch = MatchQuery.of(title -> title
 			.field("title")
 			.query(keyword)
-			.minimumShouldMatch("80%")
+			.minimumShouldMatch("40%")
 			.fuzziness("AUTO")
 			.maxExpansions(10)
 		);
@@ -50,20 +50,29 @@ public class BoardSearchService {
 			.query(keyword)
 		);
 
-		MatchQuery toolMatch = MatchQuery.of(tool -> tool
-			.field("tool")
+		MatchQuery toolMainMatch = MatchQuery.of(tool -> tool
+			.field("toolMainName")
 			.query(keyword)
-			.minimumShouldMatch("80%")
+			.minimumShouldMatch("40%")
 			.fuzziness("AUTO")
 			.maxExpansions(10)
+		);
+
+		MatchQuery toolSubMatch = MatchQuery.of(tool -> tool
+				.field("toolSubName")
+				.query(keyword)
+				.minimumShouldMatch("40%")
+				.fuzziness("AUTO")
+				.maxExpansions(10)
 		);
 
 		// 기본 boolQuery
 		Query boolQuery = BoolQuery.of(bool -> bool
 			.should(titleMatch._toQuery())
 			.should(contentMatch._toQuery())
-			.should(toolMatch._toQuery())
-			.minimumShouldMatch("80%")
+			.should(toolMainMatch._toQuery())
+			.should(toolSubMatch._toQuery())
+			.minimumShouldMatch("1")
 		)._toQuery();
 
 		// nextCursor 기반 range query 추가

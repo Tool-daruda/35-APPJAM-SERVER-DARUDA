@@ -37,18 +37,21 @@ public class ToolSearchService {
 		MatchQuery mainMatch = MatchQuery.of(m -> m
 			.field("toolMainName")
 			.query(keyword)
+			.minimumShouldMatch("30%")
 			.fuzziness("AUTO")
 		);
 
 		MatchQuery subMatch = MatchQuery.of(m -> m
 			.field("toolSubName")
 			.query(keyword)
+			.minimumShouldMatch("30%")
 			.fuzziness("AUTO")
 		);
 
 		BoolQuery boolQuery = BoolQuery.of(b -> b
 			.should(mainMatch._toQuery())
 			.should(subMatch._toQuery())
+			.minimumShouldMatch("1")
 		);
 
 		NativeQuery query = NativeQuery.builder()
@@ -69,6 +72,7 @@ public class ToolSearchService {
 	}
 
 	public boolean checkIfScraped(Long userId, Long toolId) {
+		log.debug("userId={}", userId);
 		if (userId == null) {
 			return false;
 		}
