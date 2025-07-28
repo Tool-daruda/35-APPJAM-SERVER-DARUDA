@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.daruda.darudaserver.domain.search.document.BoardDocument;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record BoardSearchResponse(
 	Long boardId,
 	String toolName,
@@ -23,7 +25,7 @@ public record BoardSearchResponse(
 	public static BoardSearchResponse from(BoardDocument doc) {
 		return new BoardSearchResponse(
 			Long.valueOf(doc.getId()),
-			doc.getToolName(),
+			doc.getToolMainName(),
 			doc.getToolLogo(),
 			doc.getAuthor(),
 			doc.getTitle(),
