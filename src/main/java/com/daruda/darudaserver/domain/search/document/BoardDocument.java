@@ -30,14 +30,17 @@ public class BoardDocument {
 	@Field(type = FieldType.Keyword)
 	private String id;
 
-	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
+	@Field(type = FieldType.Text, analyzer = "custom_search_analyzerr")
 	private String title;
 
-	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
+	@Field(type = FieldType.Text, analyzer = "custom_search_analyzer")
 	private String content;
 
-	@Field(type = FieldType.Text, analyzer = "custom_analyzer", name = "tool")
-	private String toolName;
+	@Field(type = FieldType.Text, analyzer = "custom_search_analyzer")
+	private String toolMainName;
+
+	@Field(type = FieldType.Text, analyzer = "custom_search_analyzer")
+	private String toolSubName;
 
 	@Field(type = FieldType.Keyword)
 	private String createdAt;
@@ -72,7 +75,8 @@ public class BoardDocument {
 			.title(board.getTitle())
 			.author(board.getUser().getNickname())
 			.toolId(tool != null ? tool.getToolId() : null)
-			.toolName(tool != null ? tool.getToolMainName() : null)
+			.toolMainName(tool != null ? tool.getToolMainName() : null)
+			.toolSubName(tool != null ? tool.getToolSubName() : null)
 			.toolLogo(tool != null ? tool.getToolLogo() : null)
 			.createdAt(board.getCreatedAt().toString())
 			.updatedAt(board.getUpdatedAt() != null ? board.getUpdatedAt() : null)
@@ -83,7 +87,8 @@ public class BoardDocument {
 	}
 
 	public void update(final Tool tool, final String title, final String content) {
-		this.toolName = tool.getToolMainName();
+		this.toolMainName = tool.getToolMainName();
+		this.toolSubName = tool.getToolSubName();
 		this.title = title;
 		this.content = content;
 	}
