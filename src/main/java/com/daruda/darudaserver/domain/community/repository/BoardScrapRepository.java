@@ -21,7 +21,7 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap, Long> {
 	@Transactional
 	void deleteAllByUserId(@Param("userId") Long userId);
 
-	@Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.delYn = false")
+	@Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.delYn = false AND bs.delYn = false")
 	Page<BoardScrap> findAllActiveByUserId(@Param("userId") Long userId, Pageable pageable);
 
 	@Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.id = :boardId")

@@ -3,9 +3,7 @@ package com.daruda.darudaserver.domain.community.service;
 import static com.daruda.darudaserver.domain.community.entity.QBoard.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,7 +53,6 @@ import lombok.extern.slf4j.Slf4j;
 public class BoardService {
 
 	private static final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png";
-	private static final String IMAGE_URL = "https://daruda.s3.ap-northeast-2.amazonaws.com/";
 	private static final String FREE = "자유";
 
 	private final BoardRepository boardRepository;
@@ -146,7 +143,13 @@ public class BoardService {
 		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 		deleteOriginImages(boardId);
+
 		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
+		if (!commentEntityList.isEmpty()) {
+			commentRepository.deleteAll(commentEntityList);
+			log.info("삭제된 게시글과 연관된 댓글 데이터를 제거했습니다. Comment Count: {}", commentEntityList.size());
+		}
+
 		List<BoardScrap> scraps = boardScrapRepository.findAllByBoardId(boardId);
 		if (!scraps.isEmpty()) {
 			boardScrapRepository.deleteAll(scraps);
@@ -209,11 +212,11 @@ public class BoardService {
 	public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId,
 		final int size, final Long lastBoardId) {
 
-		log.info("USERID OR NULL " + userIdOrNull);
+		log.info("USERID OR NULL {}", userIdOrNull);
 		Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId + 1;
 		PageRequest pageRequest = PageRequest.of(0, size + 1);
 		UserEntity user = getUser(userIdOrNull);
-		log.info("USER : " + user);
+		log.info("USER : {}", user);
 
 		//NoTopic = null, toolId = null -> 전체 게시판 조회
 		//NoTopic = False , toolId != null -> 툴 게시판
@@ -290,12 +293,8 @@ public class BoardService {
 
 		Page<BoardScrap> boardScraps = boardScrapRepository.findAllActiveByUserId(userId, pageable);
 		List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
-			.filter(boardScrap -> !boardScrap.isDelYn()) // 스크랩 데이터의 삭제 여부 체크
 			.map(boardScrap -> {
 				Board board = boardScrap.getBoard();
-				if (board.isDelYn()) { // 삭제된 게시판인지 확인
-					return null; // 삭제된 게시판은 제외
-				}
 				return FavoriteBoardsResponse.builder()
 					.boardId(board.getId())
 					.title(board.getTitle())
@@ -306,7 +305,6 @@ public class BoardService {
 					.isScrapped(!boardScrap.isDelYn())
 					.build();
 			})
-			.filter(Objects::nonNull) // null 값 제외
 			.toList();
 
 		PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(),
@@ -330,32 +328,14 @@ public class BoardService {
 			return List.of();
 		}
 		deleteOriginImages(board.getId());
-
 		List<String> validImages = images.stream()
 			.filter(url -> url != null && !url.isBlank())
 			.toList();
-
 		if (validImages.isEmpty()) {
 			return List.of();
 		}
-
-		//기존 이미지 조회
-		List<Long> existingImageIdList = imageService.getImageIdList(validImages);
-
-		//존재하지 않는 이미지는 새로 업로드
-		List<String> missingUrlList = validImages.stream()
-			.filter(url -> !imageService.existsImageUrl(url))
-			.toList();
-
-		List<Long> newImageIdList = imageService.createImage(missingUrlList);
-
-		//기존 + 새롭게 업로드한 이미지 Id 결합
-		List<Long> allImageIdList = Stream.concat(
-			existingImageIdList.stream(),
-			newImageIdList.stream()
-		).toList();
-
-		boardImageService.saveBoardImages(board.getId(), allImageIdList);
+		List<Long> imageIds = imageService.createImage(images);
+		boardImageService.saveBoardImages(board.getId(), imageIds);
 		return boardImageService.getBoardImageUrls(board.getId());
 	}
 
@@ -419,13 +399,13 @@ public class BoardService {
 
 	public int getCommentCount(final Long boardId) {
 		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
-		log.debug("댓글 Entity리스트를 받아옵니다 : " + commentEntityList.size());
+		log.debug("댓글 Entity리스트를 받아옵니다 : {}", commentEntityList.size());
 		return commentEntityList.size();
 	}
 
 	public Boolean getBoardScrap(final UserEntity user, final Board board) {
 		if (user == null) {
-			log.info("** Board : " + board.getId() + " 스크랩 여부 : false (비로그인 사용자)");
+			log.info("** Board : {} 스크랩 여부 : false (비로그인 사용자)", board.getId());
 			return false;
 		}
 		boolean isScrapped = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId())
@@ -433,15 +413,14 @@ public class BoardService {
 			.map(delYn -> !delYn)
 			.orElse(false);
 
-		log.info("** Board : " + board.getId() + " 스크랩 여부 :" + isScrapped);
+		log.info("** Board : {} 스크랩 여부 :{}", board.getId(), isScrapped);
 		return isScrapped;
 	}
 
 	public UserEntity getUser(final Long userIdOrNull) {
 		UserEntity user = null;
 		if (userIdOrNull != null) {
-			Long userId = userIdOrNull;
-			user = userRepository.findById(userId)
+			user = userRepository.findById(userIdOrNull)
 				.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 			log.debug("유저 정보를 조회했습니다: {}", user.getId());
 		}
@@ -450,8 +429,7 @@ public class BoardService {
 
 	public Long getToolId(Long boardId) {
 		Board board = getBoardById(boardId);
-		Long toolId = board.isFree() ? null : board.getTool().getToolId();
-		return toolId;
+		return board.isFree() ? null : board.getTool().getToolId();
 	}
 
 	public String freeName(Board board) {
