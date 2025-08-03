@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
@@ -36,7 +38,11 @@ public class BoardDocument {
 	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String content;
 
-	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
+	@MultiField(mainField = @Field(type = FieldType.Text, analyzer = "custom_analyzer"),
+		otherFields = {
+			@InnerField(suffix = "en", type = FieldType.Text, analyzer = "english_analyzer")
+		}
+	)
 	private String toolMainName;
 
 	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
