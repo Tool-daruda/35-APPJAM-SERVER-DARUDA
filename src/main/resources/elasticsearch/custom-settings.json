@@ -8,7 +8,7 @@
     "filter": {
       "my_ngram_filter": {
         "type": "edge_ngram",
-        "min_gram": 1,
+        "min_gram": 2,
         "max_gram": 8
       }
     },
@@ -20,6 +20,11 @@
           "lowercase",
           "my_ngram_filter"
         ]
+      },
+      "english_analyzer": {
+        "type": "custom",
+        "tokenizer": "standard",
+        "filter": ["lowercase"]
       }
     }
   }

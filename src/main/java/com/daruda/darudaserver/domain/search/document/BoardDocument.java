@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
@@ -36,8 +38,15 @@ public class BoardDocument {
 	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
 	private String content;
 
-	@Field(type = FieldType.Text, analyzer = "custom_analyzer", name = "tool")
-	private String toolName;
+	@MultiField(mainField = @Field(type = FieldType.Text, analyzer = "custom_analyzer"),
+		otherFields = {
+			@InnerField(suffix = "en", type = FieldType.Text, analyzer = "english_analyzer")
+		}
+	)
+	private String toolMainName;
+
+	@Field(type = FieldType.Text, analyzer = "custom_analyzer")
+	private String toolSubName;
 
 	@Field(type = FieldType.Keyword)
 	private String createdAt;
@@ -72,8 +81,9 @@ public class BoardDocument {
 			.title(board.getTitle())
 			.author(board.getUser().getNickname())
 			.toolId(tool != null ? tool.getToolId() : null)
-			.toolName(tool != null ? tool.getToolMainName() : null)
-			.toolLogo(tool != null ? tool.getToolLogo() : null)
+			.toolMainName(tool != null ? tool.getToolMainName() : "자유")
+			.toolSubName(tool != null ? tool.getToolSubName() : null)
+			.toolLogo(tool != null ? tool.getToolLogo() : "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png")
 			.createdAt(board.getCreatedAt().toString())
 			.updatedAt(board.getUpdatedAt() != null ? board.getUpdatedAt() : null)
 			.imageUrl(imageUrls)
@@ -83,7 +93,8 @@ public class BoardDocument {
 	}
 
 	public void update(final Tool tool, final String title, final String content) {
-		this.toolName = tool.getToolMainName();
+		this.toolMainName = tool.getToolMainName();
+		this.toolSubName = tool.getToolSubName();
 		this.title = title;
 		this.content = content;
 	}

@@ -20,6 +20,7 @@ import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchPhraseQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
@@ -39,26 +40,38 @@ public class BoardSearchService {
 		MatchQuery titleMatch = MatchQuery.of(title -> title
 			.field("title")
 			.query(keyword)
+			.minimumShouldMatch("40%")
 			.fuzziness("AUTO")
+			.maxExpansions(10)
 		);
 
-		MatchQuery contentMatch = MatchQuery.of(content -> content
+		MatchPhraseQuery contentMatch = MatchPhraseQuery.of(content -> content
 			.field("content")
 			.query(keyword)
-			.fuzziness("AUTO")
 		);
 
-		MatchQuery toolMatch = MatchQuery.of(tool -> tool
-			.field("tool")
+		MatchQuery toolMainMatch = MatchQuery.of(tool -> tool
+			.field("toolMainName")
 			.query(keyword)
+			.minimumShouldMatch("40%")
 			.fuzziness("AUTO")
+			.maxExpansions(10)
+		);
+
+		MatchQuery toolSubMatch = MatchQuery.of(tool -> tool
+				.field("toolSubName")
+				.query(keyword)
+				.minimumShouldMatch("40%")
+				.fuzziness("AUTO")
+				.maxExpansions(10)
 		);
 
 		// 기본 boolQuery
 		Query boolQuery = BoolQuery.of(bool -> bool
 			.should(titleMatch._toQuery())
 			.should(contentMatch._toQuery())
-			.should(toolMatch._toQuery())
+			.should(toolMainMatch._toQuery())
+			.should(toolSubMatch._toQuery())
 			.minimumShouldMatch("1")
 		)._toQuery();
 

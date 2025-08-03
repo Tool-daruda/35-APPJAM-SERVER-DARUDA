@@ -2,6 +2,7 @@ package com.daruda.darudaserver.global.image.service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequ
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ImageService {
 	private final S3Service s3Service;
 	private final ImageRepository imageRepository;
@@ -77,17 +79,23 @@ public class ImageService {
 		}
 	}
 
+	public List<Long> getImageIdList(final List<String> imageUrls) {
+		return imageRepository.findAllByImageUrlIn(imageUrls).stream()
+			.map(Image::getImageId)
+			.toList();
+	}
+
 	// 이미지 조회 메서드
 	private Image getImageById(long imageId) {
 		return imageRepository.findById(imageId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FILE_NOT_FOUND));
 	}
 
-	@Transactional(readOnly = true)
 	public String getImageUrlById(final Long imageId) {
 		return getImageById(imageId).getImageUrl();
 	}
 
+	@Transactional
 	public String createUploadPresignedUrl(String key) {
 		PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(
 			req -> req.signatureDuration(Duration.ofMinutes(15)) // 유효시간 15분
@@ -101,6 +109,7 @@ public class ImageService {
 		return presignedRequest.url().toString();
 	}
 
+	@Transactional
 	public List<Long> createImage(List<String> imageUrlList) {
 		List<Long> imageIdList = imageUrlList.stream()
 			.map(
@@ -120,5 +129,9 @@ public class ImageService {
 			)
 			.toList();
 		return imageIdList;
+	}
+
+	public boolean existsImageUrl(final String imageUrl) {
+		return imageRepository.existsByImageUrl(imageUrl);
 	}
 }
