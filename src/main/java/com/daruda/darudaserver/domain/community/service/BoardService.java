@@ -5,6 +5,7 @@ import static com.daruda.darudaserver.domain.community.entity.QBoard.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -329,14 +330,32 @@ public class BoardService {
 			return List.of();
 		}
 		deleteOriginImages(board.getId());
+
 		List<String> validImages = images.stream()
 			.filter(url -> url != null && !url.isBlank())
 			.toList();
+
 		if (validImages.isEmpty()) {
 			return List.of();
 		}
-		List<Long> imageIds = imageService.createImage(images);
-		boardImageService.saveBoardImages(board.getId(), imageIds);
+
+		//기존 이미지 조회
+		List<Long> existingImageIdList = imageService.getImageIdList(validImages);
+
+		//존재하지 않는 이미지는 새로 업로드
+		List<String> missingUrlList = validImages.stream()
+			.filter(url -> !imageService.existsImageUrl(url))
+			.toList();
+
+		List<Long> newImageIdList = imageService.createImage(missingUrlList);
+
+		//기존 + 새롭게 업로드한 이미지 Id 결합
+		List<Long> allImageIdList = Stream.concat(
+			existingImageIdList.stream(),
+			newImageIdList.stream()
+		).toList();
+
+		boardImageService.saveBoardImages(board.getId(), allImageIdList);
 		return boardImageService.getBoardImageUrls(board.getId());
 	}
 

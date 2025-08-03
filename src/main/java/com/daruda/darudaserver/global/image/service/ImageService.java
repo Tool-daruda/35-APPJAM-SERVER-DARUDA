@@ -2,6 +2,7 @@ package com.daruda.darudaserver.global.image.service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -77,6 +78,12 @@ public class ImageService {
 		}
 	}
 
+	public List<Long> getImageIdList(final List<String> imageUrls) {
+		return imageRepository.findAllByImageUrlIn(imageUrls).stream()
+			.map(Image::getImageId)
+			.toList();
+	}
+
 	// 이미지 조회 메서드
 	private Image getImageById(long imageId) {
 		return imageRepository.findById(imageId)
@@ -120,5 +127,9 @@ public class ImageService {
 			)
 			.toList();
 		return imageIdList;
+	}
+
+	public boolean existsImageUrl(final String imageUrl) {
+		return imageRepository.existsByImageUrl(imageUrl);
 	}
 }
