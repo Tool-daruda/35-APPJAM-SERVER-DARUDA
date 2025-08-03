@@ -18,7 +18,7 @@ public class Image {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long imageId;
 
-	@Column(name = "image_url", nullable = false)
+	@Column(name = "image_url", nullable = false, length = 500)
 	private String imageUrl;
 
 	@Builder
