@@ -26,6 +26,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequ
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ImageService {
 	private final S3Service s3Service;
 	private final ImageRepository imageRepository;
@@ -90,11 +91,11 @@ public class ImageService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FILE_NOT_FOUND));
 	}
 
-	@Transactional(readOnly = true)
 	public String getImageUrlById(final Long imageId) {
 		return getImageById(imageId).getImageUrl();
 	}
 
+	@Transactional
 	public String createUploadPresignedUrl(String key) {
 		PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(
 			req -> req.signatureDuration(Duration.ofMinutes(15)) // 유효시간 15분
@@ -108,6 +109,7 @@ public class ImageService {
 		return presignedRequest.url().toString();
 	}
 
+	@Transactional
 	public List<Long> createImage(List<String> imageUrlList) {
 		List<Long> imageIdList = imageUrlList.stream()
 			.map(
