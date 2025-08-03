@@ -7,7 +7,6 @@ import com.daruda.darudaserver.domain.search.document.BoardDocument;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record BoardSearchResponse(
 	Long boardId,
 	String toolName,
