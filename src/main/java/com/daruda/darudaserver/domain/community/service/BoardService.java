@@ -106,7 +106,8 @@ public class BoardService {
 		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 
-		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
+		Tool tool = boardCreateAndUpdateReq.isFree() ? null : getToolById(boardCreateAndUpdateReq.toolId());
+
 		board.update(
 			tool,
 			user,

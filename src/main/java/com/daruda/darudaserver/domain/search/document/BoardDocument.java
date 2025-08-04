@@ -13,7 +13,6 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -83,7 +82,8 @@ public class BoardDocument {
 			.toolId(tool != null ? tool.getToolId() : null)
 			.toolMainName(tool != null ? tool.getToolMainName() : "자유")
 			.toolSubName(tool != null ? tool.getToolSubName() : null)
-			.toolLogo(tool != null ? tool.getToolLogo() : "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png")
+			.toolLogo(
+				tool != null ? tool.getToolLogo() : "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png")
 			.createdAt(board.getCreatedAt().toString())
 			.updatedAt(board.getUpdatedAt() != null ? board.getUpdatedAt() : null)
 			.imageUrl(imageUrls)
@@ -93,8 +93,15 @@ public class BoardDocument {
 	}
 
 	public void update(final Tool tool, final String title, final String content) {
-		this.toolMainName = tool.getToolMainName();
-		this.toolSubName = tool.getToolSubName();
+		if (tool != null) {
+			this.toolMainName = tool.getToolMainName();
+			this.toolSubName = tool.getToolSubName();
+			this.toolId = tool.getToolId();
+		} else {
+			this.toolMainName = "자유";
+			this.toolSubName = null;
+			this.toolId = null;
+		}
 		this.title = title;
 		this.content = content;
 	}
