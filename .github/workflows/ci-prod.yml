@@ -1,4 +1,4 @@
-name: Daruda CI PROD 파이프라인
+name: Daruda prod CI 파이프라인
 env:
   SECRET_CODE: ${{ secrets.SECRET_CODE}}
 
