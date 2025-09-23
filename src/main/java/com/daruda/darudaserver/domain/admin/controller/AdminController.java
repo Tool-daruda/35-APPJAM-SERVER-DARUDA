@@ -1,0 +1,41 @@
+package com.daruda.darudaserver.domain.admin.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.daruda.darudaserver.domain.admin.service.AdminService;
+import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
+import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
+import com.daruda.darudaserver.global.common.response.ApiResponse;
+import com.daruda.darudaserver.global.error.code.SuccessCode;
+import com.daruda.darudaserver.global.error.dto.SuccessResponse;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/admin")
+@Tag(name = "admin 컨트롤러", description = "어드민 관련 API를 처리합니다.")
+public class AdminController {
+	public final AdminService adminService;
+
+	@PostMapping
+	@Operation(summary = "관리자용 툴 추가", description = "관리자용 툴 추가 API입니다.")
+	public ResponseEntity<SuccessResponse<?>> createTool(
+		@AuthenticationPrincipal Long userId,
+		@Parameter(description = "추가할 툴")
+		@RequestBody @Valid BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+
+		adminService.createTool()
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_CREATE));
+	}
+
+}
