@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
 import com.daruda.darudaserver.domain.admin.service.AdminService;
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
@@ -32,9 +33,9 @@ public class AdminController {
 	public ResponseEntity<SuccessResponse<?>> createTool(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "추가할 툴")
-		@RequestBody @Valid BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+		@RequestBody @Valid CreateToolRequest createToolRequest) {
 
-		adminService.createTool()
+		adminService.createTool(createToolRequest);
 		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_CREATE));
 	}
 
