@@ -34,18 +34,12 @@ out/
 /nbdist/
 /.nb-gradle/
 
-
-##src/main/resources/application.yml
-##*.application.yml
-
 ### VS Code ###
 .vscode/
-.env
 
+### log files ###
 *.log
-
 daruda_log
 
-LOG_PATH_IS_UNDEFINED
-
-daruda_log
+### QueryDSL ###
+src/main/generated/
