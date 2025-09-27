@@ -1,5 +1,8 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
+
 import lombok.Getter;
 
 @Getter
@@ -21,6 +24,18 @@ public enum Category {
 
 	Category(String koreanName) {
 		this.koreanName = koreanName;
+	}
+
+	public static Category from(String koreanName) {
+		if (koreanName == null) {
+			throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
+		}
+		for (Category category : Category.values()) {
+			if (category.koreanName.equals(koreanName)) {
+				return category;
+			}
+		}
+		throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
 	}
 }
 
