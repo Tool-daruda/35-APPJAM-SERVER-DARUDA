@@ -8,16 +8,13 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
-
   elasticsearch:
     uris: localhost:9200
-
   data:
     redis:
       host: localhost
       port: 6379
       password: ${REDIS_PASSWORD}
-
   jpa:
     show-sql: true
     hibernate:
@@ -38,9 +35,7 @@ cloud:
     credentials:
       access-key: ENC(zUS78/F8P/qh/KpSGK/GV3vjanLZSodMm0O1b0JKuno=)
       secret-key: ENC(9o72B0yxr1Mx4LpLpqoWdgIFhCt9/zhMy0FzGKmEaxxF7cuzI/ZvxmH685+s0xd+8YbC9HRRhjU=)
-    region:
-      static: ap-northeast-2
-      auto: false
+    region: ap-northeast-2
     stack:
       auto: false
 
