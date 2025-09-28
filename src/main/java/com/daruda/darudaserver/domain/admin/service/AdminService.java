@@ -136,10 +136,10 @@ public class AdminService {
 		tool.update(
 			req.toolMainName() != null ? req.toolMainName() : tool.getToolMainName(),
 			req.toolSubName() != null ? req.toolSubName() : tool.getToolSubName(),
-			req.category() != null ? Category.valueOf(req.category()) : tool.getCategory(),
+			req.category() != null ? Category.from(req.category()) : tool.getCategory(),
 			req.toolLink() != null ? req.toolLink() : tool.getToolLink(),
 			req.description() != null ? req.description() : tool.getDescription(),
-			req.license() != null ? License.valueOf(req.license()) : tool.getLicense(),
+			req.license() != null ? License.from(req.license()) : tool.getLicense(),
 			req.supportKorea() != null ? req.supportKorea() : tool.getSupportKorea(),
 			req.detailDescription() != null ? req.detailDescription() : tool.getDetailDescription(),
 			req.planLink() != null ? req.planLink() : tool.getPlanLink(),
