@@ -145,7 +145,7 @@ public class Tool {
 		final String detailDescription,
 		final String planLink,
 		final String bgColor,
-		final boolean fontColor,
+		final Boolean fontColor,
 		final String toolLogo) {
 		this.toolMainName = toolMainName;
 		this.toolSubName = toolSubName;
@@ -157,7 +157,9 @@ public class Tool {
 		this.detailDescription = detailDescription;
 		this.planLink = planLink;
 		this.bgColor = bgColor;
-		this.fontColor = fontColor;
+		if (fontColor != null) {
+			this.fontColor = fontColor;
+		}
 		this.toolLogo = toolLogo;
 	}
 
