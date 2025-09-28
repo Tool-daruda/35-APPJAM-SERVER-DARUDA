@@ -14,14 +14,17 @@ import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.entity.ToolCore;
 import com.daruda.darudaserver.domain.tool.entity.ToolImage;
 import com.daruda.darudaserver.domain.tool.entity.ToolKeyword;
+import com.daruda.darudaserver.domain.tool.entity.ToolPlatForm;
 import com.daruda.darudaserver.domain.tool.entity.ToolVideo;
 import com.daruda.darudaserver.domain.tool.repository.PlanRepository;
 import com.daruda.darudaserver.domain.tool.repository.RelatedToolRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolCoreRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolKeywordRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolPlatFormRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolVideoRepository;
+import com.daruda.darudaserver.domain.admin.dto.request.UpdateToolRequest;
 import lombok.RequiredArgsConstructor;
 
 @Transactional(readOnly = true)
@@ -35,6 +38,8 @@ public class AdminService {
 	private final ToolImageRepository toolImageRepository;
 	private final PlanRepository planRepository;
 	private final RelatedToolRepository relatedToolRepository;
+	private final ToolPlatFormRepository toolPlatFormRepository;
+
 
 	@Transactional
 	public void createTool(CreateToolRequest createToolRequest) {
@@ -137,5 +142,119 @@ public class AdminService {
 				}
 			}
 		}
+	}
+
+	@Transactional
+	public void updateTool(final Long toolId, final UpdateToolRequest req) {
+		Tool tool = toolRepository.findById(toolId)
+			.orElseThrow(() -> new IllegalArgumentException("Tool not found: " + toolId));
+
+		// 툴 정보 수정
+		tool.update(
+			req.toolMainName() != null ? req.toolMainName() : tool.getToolMainName(),
+			req.toolSubName() != null ? req.toolSubName() : tool.getToolSubName(),
+			req.category() != null ? Category.valueOf(req.category()) : tool.getCategory(),
+			req.toolLink() != null ? req.toolLink() : tool.getToolLink(),
+			req.description() != null ? req.description() : tool.getDescription(),
+			req.license() != null ? License.valueOf(req.license()) : tool.getLicense(),
+			req.supportKorea() != null ? req.supportKorea() : tool.getSupportKorea(),
+			req.detailDescription() != null ? req.detailDescription() : tool.getDetailDescription(),
+			req.planLink() != null ? req.planLink() : tool.getPlanLink(),
+			req.bgColor() != null ? req.bgColor() : tool.getBgColor(),
+			req.fontColor() != null ? req.fontColor() : tool.isFontColor(),
+			req.toolLogo() != null ? req.toolLogo() : tool.getToolLogo()
+		);
+
+		// 툴 키워드 수정
+		if (req.keywords() != null) {
+			List<ToolKeyword> existing = toolKeywordRepository.findAllByTool(tool);
+			if (!existing.isEmpty()) toolKeywordRepository.deleteAll(existing);
+			if (!req.keywords().isEmpty()) {
+				List<ToolKeyword> toSave = req.keywords().stream()
+					.filter(k -> k != null && !k.isBlank())
+					.map(k -> ToolKeyword.builder().keywordName(k.trim()).tool(tool).build())
+					.toList();
+				if (!toSave.isEmpty()) toolKeywordRepository.saveAll(toSave);
+			}
+		}
+
+		// 툴 이미지 수정
+		if (req.images() != null) {
+			List<ToolImage> existing = toolImageRepository.findAllByTool(tool);
+			if (!existing.isEmpty()) toolImageRepository.deleteAll(existing);
+			if (!req.images().isEmpty()) {
+				List<ToolImage> toSave = req.images().stream()
+					.filter(url -> url != null && !url.isBlank())
+					.map(url -> ToolImage.builder().imageUrl(url.trim()).tool(tool).build())
+					.toList();
+				if (!toSave.isEmpty()) toolImageRepository.saveAll(toSave);
+			}
+		}
+
+		// 툴 비디오 수정
+		if (req.videos() != null) {
+			List<ToolVideo> existing = toolVideoRepository.findAllByTool(tool);
+			if (!existing.isEmpty()) toolVideoRepository.deleteAll(existing);
+			if (!req.videos().isEmpty()) {
+				List<ToolVideo> toSave = req.videos().stream()
+					.filter(url -> url != null && !url.isBlank())
+					.map(url -> ToolVideo.builder().videoUrl(url.trim()).tool(tool).build())
+					.toList();
+				if (!toSave.isEmpty()) toolVideoRepository.saveAll(toSave);
+			}
+		}
+
+		// 툴 코어 수정
+		if (req.cores() != null) {
+			List<ToolCore> existing = toolCoreRepository.findAllByTool(tool);
+			if (!existing.isEmpty()) toolCoreRepository.deleteAll(existing);
+			if (!req.cores().isEmpty()) {
+				List<ToolCore> toSave = req.cores().stream()
+					.filter(c -> c != null && c.getCoreTitle() != null && c.getCoreContent() != null)
+					.map(c -> ToolCore.builder().coreTitle(c.getCoreTitle()).coreContent(c.getCoreContent()).tool(tool)
+						.build())
+					.toList();
+				if (!toSave.isEmpty()) toolCoreRepository.saveAll(toSave);
+			}
+		}
+
+		// 툴 플랜 수정
+		if (req.plans() != null) {
+			List<Plan> existing = planRepository.findAllByTool(tool);
+			if (!existing.isEmpty()) planRepository.deleteAll(existing);
+			if (!req.plans().isEmpty()) {
+				List<Plan> toSave = req.plans().stream()
+					.filter(p -> p != null && p.getPlanName() != null && p.getPriceMonthly() != null)
+					.map(p -> Plan.builder()
+						.planName(p.getPlanName().trim())
+						.priceMonthly(p.getPriceMonthly())
+						.priceAnnual(p.getPriceAnnual())
+						.description(p.getDescription())
+						.isDollar(p.getIsDollar())
+						.tool(tool)
+						.build())
+					.toList();
+				if (!toSave.isEmpty()) planRepository.saveAll(toSave);
+			}
+		}
+
+		// 툴 관련 툴 수정
+		if (req.relatedToolIds() != null) {
+			List<RelatedTool> existing = relatedToolRepository.findAllByTool(tool);
+			if (!existing.isEmpty()) relatedToolRepository.deleteAll(existing);
+			if (!req.relatedToolIds().isEmpty()) {
+				List<Long> altIds = req.relatedToolIds().stream().map(Integer::longValue).toList();
+				List<Tool> alternatives = toolRepository.findAllById(altIds);
+				if (!alternatives.isEmpty()) {
+					List<RelatedTool> relations = alternatives.stream()
+						.map(alt -> RelatedTool.builder().alternativeTool(alt).tool(tool).build())
+						.toList();
+					relatedToolRepository.saveAll(relations);
+				}
+			}
+		}
+
+		// 갱신된 엔터티 저장
+		toolRepository.save(tool);
 	}
 }
