@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/admin")
 @Tag(name = "admin 컨트롤러", description = "어드민 관련 API를 처리합니다.")
 public class AdminController {
-	public final AdminService adminService;
+	private final AdminService adminService;
 
 	@PostMapping
 	@Operation(summary = "관리자용 툴 추가", description = "관리자용 툴 추가 API입니다.")

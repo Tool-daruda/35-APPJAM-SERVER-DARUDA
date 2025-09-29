@@ -31,36 +31,4 @@ public record CreateToolRequest(
 	List<String> images,
 	List<String> videos,
 	List<Integer> relatedToolIds
-) {
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public record ToolPlatform(
-		boolean web,
-		boolean windows,
-		boolean mac
-	) {}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public record ToolCore(
-		String coreTitle,
-		String coreContent
-	) {}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public record ToolPlan(
-		String planName,
-		int monthlyPrice,
-		int annualPrice,
-		String description,
-		boolean isDollar
-	) {}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public record Image(
-		String imageUrl
-	) {}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public record Video(
-		String videoUrl
-	) {}
-}
+){}
