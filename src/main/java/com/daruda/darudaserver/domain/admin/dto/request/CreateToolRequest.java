@@ -29,4 +29,5 @@ public record CreateToolRequest(
 	List<String> images,
 	List<String> videos,
 	List<Integer> relatedToolIds
-){}
+) {
+}
