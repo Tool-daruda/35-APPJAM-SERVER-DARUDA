@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.admin.dto.request;
 
 import com.daruda.darudaserver.domain.tool.entity.Plan;
+import com.daruda.darudaserver.domain.tool.entity.ToolCore;
 import com.daruda.darudaserver.domain.tool.entity.ToolPlatForm;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
