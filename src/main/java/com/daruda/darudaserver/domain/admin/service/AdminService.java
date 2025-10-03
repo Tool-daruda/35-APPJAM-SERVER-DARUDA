@@ -40,6 +40,7 @@ public class AdminService {
 			.license(License.from(createToolRequest.license()))
 			.fontColor(createToolRequest.fontColor())
 			.planLink(createToolRequest.planLink())
+			.supportKorea(createToolRequest.supportKorea())
 			.build();
 
 		Tool savedTool = toolRepository.save(tool);
@@ -96,8 +97,8 @@ public class AdminService {
 		List<ToolCore> coreList = createToolRequest.cores().stream()
 			.map(core -> {
 				return ToolCore.builder()
-					.coreTitle(core.coreTitle())
-					.coreContent(core.coreContent())
+					.coreTitle(core.getCoreTitle())
+					.coreContent(core.getCoreContent())
 					.tool(savedTool)
 					.build();
 			})

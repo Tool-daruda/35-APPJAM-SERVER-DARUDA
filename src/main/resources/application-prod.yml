@@ -8,24 +8,22 @@ spring:
     url: ENC(+M0lXgQmFPI+PIMA5yUr0T94RPWdBqI3k8PY5vYllTIMIX+3oi4xR4uSYbqfcoLzZ7xqaBrWji+D+lm/l5kZWnQ/917OXpYtZWC3WcO/Lt1gPQw1RkQHoWpJ8Thwuaa0)
     username: ENC(nJZfcHF+It0X4f8rxo8Glg==)
     password: ENC(Hs1X8mIXeW4ZEhEMsaKAkITnB9KQUA1kuryXHSgO4fc=)
-
   elasticsearch:
     uris: ENC(FpLrPai/YvcQTPM/M0aJb5MQBC0OYy2CR5OK2K+frmY=)
-
   data:
     redis:
       host: ENC(A+kwW2rkFaibUEBP1hchbA==)
-      port: 6379
+      port: ${REDIS_PORT}
       password: ENC(xCySc7GekCOPVUEN6QG+L71ROBSch6oc)
-  
   jpa:
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         format_sql: true
         use_sql_comments: true
+    open-in-view: false
 
 cloud:
   aws:
@@ -38,9 +36,7 @@ cloud:
     credentials:
       access-key: ENC(legTRlHg2eQ8A19FX7paqiS3xzZt+UekSmmVVbCDA2w=)
       secret-key: ENC(pB33J4FIwn6S6bSYlYeGusMeoNJVx0PgQdcppWrdWYU9adxYA+VOY7pkmc6oDeL3ACpQAZss2pw=)
-    region:
-      static: ap-northeast-2
-      auto: false
+    region: ap-northeast-2
     stack:
       auto: false
 
@@ -63,7 +59,7 @@ jwt:
   refresh-token-expire-time: 604800000
 
 cookie:
-  domain: ${COOKIE_DOMAIN}
+  domain: ENC(9VZsfFJbFIMAnLwWJbLV4wRYgDK89y62)
 
 sentry:
   dsn: ENC(L2Qt718YntVoAPXadfDDd7k5itveS5NfMBwjAE/BL1Blzz6LS+FzNQ1GHXnpXHWRCDk0o0ITmNL9M9ZeVDohhACWv24G7EcbSD10tyz5fC+cPHLJkxT1YG6b4PrPblsXvXuDpH5sJy8=)
