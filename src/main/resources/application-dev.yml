@@ -5,19 +5,16 @@ spring:
       max-request-size: 10MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-
+    url: ENC(x/kKcAyeS+aMtsAM9rdO5zZwOOwkiOpGDHnpEDyQIsm5K+vkzBzBSBFtw/jpLH/QxNV+4g3bnWR0jhIIzH0xHvK5Qzqe6NUoH4BxmLuQNLJYnsGPmYKjh4cVSjd68YeIB05hz1vKQMA=)
+    username: ENC(9CfN0UX4lMQ02BEMkG022A==)
+    password: ENC(oYUwuas15PIV42nIXSIzNAnBNny8itI/)
   elasticsearch:
-    uris: ${ELASTICSEARCH_URIS}
-
+    uris: ENC(ada9m4mD7ta62j6wtiY3b3rzF/h7Lnck/gagfMzTo7k=)
   data:
     redis:
-      host: ${REDIS_HOST}
+      host: ENC(oj+RdtNwLMK1Szhwnyuz5Q==)
       port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
-
+      password: ENC(Bp+5y/mBcWJ9pHYBCm67h7FCnyJuXvgL)
   jpa:
     show-sql: true
     hibernate:
@@ -38,9 +35,7 @@ cloud:
     credentials:
       access-key: ENC(snr4At20t/yQs2mqS0QtmVJn5yORis6pzdm9tPzZbx4=)
       secret-key: ENC(Y70HFDrbcoTY8kTt0YZ8de0py4Dj5Cu1uCZ7h5w+NeDnymjOOpUuxGGAd+qdaEJc93jbeE37DiE=)
-    region:
-      static: ap-northeast-2
-      auto: false
+    region: ap-northeast-2
     stack:
       auto: false
 
@@ -63,7 +58,7 @@ jwt:
   refresh-token-expire-time: 604800000
 
 cookie:
-  domain: ${COOKIE_DOMAIN}
+  domain: ENC(VE9qiI0hHnNbk0KEJS7VmM12as+NE9XR)
 
 sentry:
   dsn: ENC(sG+5gVfk4gTxxw0NRQrPhl0ak5EFfvpBGTZvgnTPjBSvotGwmgfSBC1/XkawwcgbnQEGKXwCFStH+v2FyVGO+5JMNnjRUxjCAFLlL7FcYxQBExiYBIU+gBMgnKBn7Ww5jVZ4883qUy4=)
