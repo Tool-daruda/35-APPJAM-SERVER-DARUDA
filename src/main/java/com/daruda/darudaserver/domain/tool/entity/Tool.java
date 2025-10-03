@@ -135,4 +135,32 @@ public class Tool {
 		return uppdatedName;
 	}
 
+	public void update(final String toolMainName,
+		final String toolSubName,
+		final Category category,
+		final String toolLink,
+		final String description,
+		final License license,
+		final Boolean supportKorea,
+		final String detailDescription,
+		final String planLink,
+		final String bgColor,
+		final Boolean fontColor,
+		final String toolLogo) {
+		this.toolMainName = toolMainName;
+		this.toolSubName = toolSubName;
+		this.category = category;
+		this.toolLink = toolLink;
+		this.description = description;
+		this.license = license;
+		this.supportKorea = supportKorea;
+		this.detailDescription = detailDescription;
+		this.planLink = planLink;
+		this.bgColor = bgColor;
+		if (fontColor != null) {
+			this.fontColor = fontColor;
+		}
+		this.toolLogo = toolLogo;
+	}
+
 }
