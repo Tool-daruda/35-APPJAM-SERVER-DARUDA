@@ -1,5 +1,8 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
+
 import lombok.Getter;
 
 @Getter
@@ -18,5 +21,17 @@ public enum License {
 	// Getter 메서드
 	public String getKoreanName() {
 		return koreanName;
+	}
+
+	public static License from(String koreanName) {
+		if (koreanName == null) {
+			throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
+		}
+		for (License license : values()) {
+			if (license.koreanName.equals(koreanName)) {
+				return license;
+			}
+		}
+		throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
 	}
 }
