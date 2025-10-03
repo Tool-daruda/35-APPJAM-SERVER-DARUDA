@@ -1,21 +1,26 @@
 package com.daruda.darudaserver.domain.user.dto.response;
 
+import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import lombok.Builder;
+
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record LoginResponse(
-        String email,
-        boolean isUser,
-        String nickname,
-        JwtTokenResponse jwtTokenResponse
+	Long userId,
+	String email,
+	boolean isUser,
+	String nickname,
+	Positions positions
 ) {
-    //등록된 회원이 아닌 경우
-    public static LoginResponse of(boolean isUser, String email, String nickname){
-        return new LoginResponse(email,  false,nickname, null);
-    }
-
-    //등록된 회원인 경우
-    public static LoginResponse of(boolean isUser, JwtTokenResponse jwtTokenResponse ,String nickname){
-        return new LoginResponse(null, true, nickname, jwtTokenResponse);
-    }
+	public static LoginResponse from(LoginSuccessResponse loginSuccessResponse) {
+		return LoginResponse.builder()
+			.userId(loginSuccessResponse.userId())
+			.email(loginSuccessResponse.email())
+			.isUser(loginSuccessResponse.isUser())
+			.nickname(loginSuccessResponse.nickname())
+			.positions(loginSuccessResponse.positions())
+			.build();
+	}
 }

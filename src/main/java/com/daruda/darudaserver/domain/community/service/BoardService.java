@@ -1,8 +1,18 @@
 package com.daruda.darudaserver.domain.community.service;
 
+import static com.daruda.darudaserver.domain.community.entity.QBoard.*;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
-import com.daruda.darudaserver.domain.community.util.ValidateBoard;
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
@@ -13,6 +23,9 @@ import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
+import com.daruda.darudaserver.domain.community.util.ValidateBoard;
+import com.daruda.darudaserver.domain.search.document.BoardDocument;
+import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
@@ -23,25 +36,15 @@ import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.ForbiddenException;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.service.ImageService;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import static com.daruda.darudaserver.domain.community.entity.QBoard.board;
 
 @Service
 @Transactional
@@ -49,336 +52,392 @@ import static com.daruda.darudaserver.domain.community.entity.QBoard.board;
 @Slf4j
 public class BoardService {
 
-    private final BoardRepository boardRepository;
-    private final BoardImageService boardImageService;
-    private final BoardImageRepository boardImageRepository;
-    private final ImageService imageService;
-    private final UserRepository userRepository;
-    private final BoardScrapRepository boardScrapRepository;
-    private final ToolRepository toolRepository;
-    private final CommentRepository commentRepository;
-    private final ValidateBoard validateBoard;
+	private static final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png";
+	private static final String FREE = "자유";
 
-    private final String TOOL_LOGO = "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png";
-    private final String IMAGE_URL = "https://daruda.s3.ap-northeast-2.amazonaws.com/";
-    private final String FREE = "자유";
+	private final BoardRepository boardRepository;
+	private final BoardImageService boardImageService;
+	private final BoardImageRepository boardImageRepository;
+	private final ImageService imageService;
+	private final UserRepository userRepository;
+	private final BoardScrapRepository boardScrapRepository;
+	private final ToolRepository toolRepository;
+	private final CommentRepository commentRepository;
+	private final ValidateBoard validateBoard;
+	private final JPAQueryFactory jpaQueryFactory;
+	private final BoardSearchRepository boardSearchRepository;
 
-    private final JPAQueryFactory jpaQueryFactory;
-    // 게시판 생성
-    public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
-        UserEntity user = getUserById(userId);
-        Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
-        Board board = boardCreateAndUpdateReq.isFree() ?
-                createFreeBoard(user, boardCreateAndUpdateReq) :
-                createToolBoard(tool, boardCreateAndUpdateReq, user);
+	// 게시판 생성
+	public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+		log.info("유저아이디: {}", userId);
+		UserEntity user = getUserById(userId);
 
-        // 이미지 처리
-        List<String> imageUrls = processImages(board, images);
-        List<String> boardImageUrls = imageUrls.stream()
-                .map(url -> IMAGE_URL + url)
-                .toList();
+		// 제재 상태 확인
+		if (user.isSuspended()) {
+			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
+		}
 
-        // Tool 정보 설정
-        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
-        String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
+		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
+		Board board = boardCreateAndUpdateReq.isFree()
+			? createFreeBoard(user, boardCreateAndUpdateReq) :
+			createToolBoard(tool, boardCreateAndUpdateReq, user);
 
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), boardImageUrls,tool.getToolId());
-    }
+		// 이미지 처리
+		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());
 
-    // 게시판 업데이트
-    public BoardRes updateBoard(final Long userId, final Long boardId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq, final List<MultipartFile> images) {
-        Board board = validateBoardAndUser(userId, boardId);
-        Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
-        UserEntity user = getUser(userId);
-        board.update(
-                tool,
-                board.getUser(),
-                boardCreateAndUpdateReq.title(),
-                boardCreateAndUpdateReq.content(),
-                boardCreateAndUpdateReq.isFree()
-        );
+		// Tool 정보 설정
+		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
+		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-        List<String> imageUrls = processImages(board, images);
+		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, tool.getToolId());
+	}
 
-        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
-        String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
+	// 게시판 업데이트
+	public BoardRes updateBoard(final Long userId, final Long boardId,
+		final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+		Board board = validateBoardAndUser(userId, boardId);
+		UserEntity user = board.getUser();
 
-        boolean isScrapped=false;
-        BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId())
-                .orElse(null);
+		// 제재 상태 확인
+		if (user.isSuspended()) {
+			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
+		}
 
-        if(boardScrap!=null){
-            isScrapped = !boardScrap.isDelYn();
-        }
+		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, isScrapped);
-    }
+		Tool tool = boardCreateAndUpdateReq.isFree() ? null : getToolById(boardCreateAndUpdateReq.toolId());
 
-    // 게시판 삭제
-    public void deleteBoard(final Long userId, final Long boardId) {
-        Board board = validateBoardAndUser(userId, boardId);
-        deleteOriginImages(boardId);
-        List<CommentEntity> commentEntityList = commentRepository.findAllByBoardId(boardId);
-        List<BoardScrap> scraps = boardScrapRepository.findAllByBoardId(boardId);
-        if (!scraps.isEmpty()) {
-            boardScrapRepository.deleteAll(scraps);
-            log.info("삭제된 게시글과 연관된 스크랩 데이터를 제거했습니다. Scrap Count: {}", scraps.size());
-        }
-        board.delete();
-    }
+		board.update(
+			tool,
+			user,
+			boardCreateAndUpdateReq.title(),
+			boardCreateAndUpdateReq.content(),
+			boardCreateAndUpdateReq.isFree()
+		);
 
-    // 스크랩 처리
-    public BoardScrapRes postScrap(final Long userId, final Long boardId) {
-        UserEntity user = getUserById(userId);
-        Board board = getBoardById(boardId);
+		boardDocument.update(
+			tool,
+			boardCreateAndUpdateReq.title(),
+			boardCreateAndUpdateReq.content()
+		);
 
-        BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId()).orElse(null);
+		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());
 
-        if (boardScrap == null) {
-            boardScrap = BoardScrap.builder().user(user).board(board).build();
-            boardScrapRepository.save(boardScrap);
-        } else {
-            boardScrap.update();
-        }
-        return BoardScrapRes.of(boardId, !boardScrap.isDelYn());
-    }
+		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
+		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-    // 게시판 조회
-    public BoardRes getBoard(final Long userIdOrNull, final Long boardId) {
-        UserEntity user = getUser(userIdOrNull);
-        Board board = getBoardById(boardId);
-        Long toolId = getToolId(boardId);
-        List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
+		boolean isScrapped = false;
+		BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId())
+			.orElse(null);
 
-        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
-        String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
-        Boolean isScraped = getBoardScrap(user, board);
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped, toolId);
-    }
+		if (boardScrap != null) {
+			isScrapped = !boardScrap.isDelYn();
+		}
 
-    // 내가 쓴  게시판 조회
-    public BoardRes getMyBoard(final UserEntity user,final  Long boardId) {
-        Board board = getBoardById(boardId);
-        List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
-        String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
-        String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
+		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, isScrapped);
+	}
 
-        Boolean isScraped = getBoardScrap(user, board);
-        return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped);
-    }
+	// 게시판 삭제
+	public void deleteBoard(final Long userId, final Long boardId) {
+		Board board = validateBoardAndUser(userId, boardId);
+		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+		deleteOriginImages(boardId);
 
-    public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId, final int size, final Long lastBoardId) {
+		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
+		if (!commentEntityList.isEmpty()) {
+			commentRepository.deleteAll(commentEntityList);
+			log.info("삭제된 게시글과 연관된 댓글 데이터를 제거했습니다. Comment Count: {}", commentEntityList.size());
+		}
 
-        log.info("USERID OR NULL " + userIdOrNull);
-        Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId+1;
-        PageRequest pageRequest = PageRequest.of(0, size + 1);
-        UserEntity user = getUser(userIdOrNull);
-        log.info("USER : " + user);
+		List<BoardScrap> scraps = boardScrapRepository.findAllByBoardId(boardId);
+		if (!scraps.isEmpty()) {
+			boardScrapRepository.deleteAll(scraps);
+			log.info("삭제된 게시글과 연관된 스크랩 데이터를 제거했습니다. Scrap Count: {}", scraps.size());
+		}
+		board.delete();
+		boardSearchRepository.delete(boardDocument);
+	}
 
-        //NoTopic = null, toolId = null -> 전체 게시판 조회
-        //NoTopic = False , toolId != null -> 툴 게시판
-        //NoTopic = True , toolId == null -> 자유게시판
-        if(noTopic != null) {
-            if ((noTopic.equals(Boolean.TRUE) && toolId != null) || (noTopic.equals(Boolean.FALSE) && toolId == null)) {
-                throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
-            }
-        }
+	// 스크랩 처리
+	public BoardScrapRes postScrap(final Long userId, final Long boardId) {
+		UserEntity user = getUserById(userId);
+		Board board = getBoardById(boardId);
 
-        // 전체 데이터 개수를 가져옴 (cursor 조건 없음)
-        long totalElements = Optional.ofNullable(jpaQueryFactory
-                .select(board.count())
-                .from(board)
-                .where(
-                        board.delYn.eq(false),
-                        noTopic != null ? board.isFree.eq(noTopic) : null,
-                        toolId != null ? board.tool.toolId.eq(toolId) : null
-                )
-                .fetchFirst()).orElse(0L);
+		BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId()).orElse(null);
 
-        // Cursor 기반 페이징을 적용한 게시글 목록 가져오기
-        List<Board> boards = jpaQueryFactory
-                .selectFrom(board)
-                .where(
-                        noTopic != null ? board.isFree.eq(noTopic) : null,
-                        toolId != null ? board.tool.toolId.eq(toolId) : null,
-                        board.delYn.eq(Boolean.FALSE),
-                        board.id.lt(cursor)
-                )
-                .orderBy(board.id.desc())
-                .limit(size + 1)
-                .fetch();
+		boolean isScrapped;
 
-        // 다음 페이지 여부 확인
-        boolean hasNextPage = boards.size() > size;
-        List<Board> paginatedBoards = hasNextPage ? boards.subList(0, size) : boards;
+		if (boardScrap == null) {
+			boardScrap = BoardScrap.builder().user(user).board(board).build();
+			boardScrapRepository.save(boardScrap);
+			isScrapped = true;
+		} else {
+			boardScrap.update();
+			isScrapped = !boardScrap.isDelYn();
+		}
+		//ElasticSearch 색인 데이터 업데이트
+		boardSearchRepository.findById(boardId.toString()).ifPresent(boardDocument -> {
+			boardDocument.updateScraped(isScrapped);
+			boardSearchRepository.save(boardDocument);
+		});
 
-        // nextCursor
-        long nextCursor = hasNextPage ? boards.get(size).getId() : -1L;
+		return BoardScrapRes.of(boardId, !boardScrap.isDelYn());
+	}
 
-        // 응답 데이터
-        List<BoardRes> boardResList = paginatedBoards.stream()
-                .map(board -> {
-                    String toolName;
-                    String toolLogo;
-                    Long savedToolid = null;
-                    if (Boolean.FALSE.equals(noTopic) && toolId != null) {  // 툴 게시판
-                        toolName = board.getTool().getToolMainName();
-                        toolLogo = board.getTool().getToolLogo();
-                        savedToolid = board.getTool().getToolId();
-                    } else if (Boolean.TRUE.equals(noTopic) && toolId == null) { // 자유 게시판
-                        toolName = FREE;
-                        toolLogo = TOOL_LOGO;
-                    } else { // 전체 게시판 (툴이 있는 경우만 가져옴)
-                        toolName = (board.getTool() != null) ? board.getTool().getToolMainName() : FREE;
-                        toolLogo = (board.getTool() != null) ? board.getTool().getToolLogo() : TOOL_LOGO;
-                        savedToolid = (board.getTool() != null) ? board.getTool().getToolId() : null;
-                    }
+	// 게시판 조회
+	public BoardRes getBoard(final Long userIdOrNull, final Long boardId) {
+		UserEntity user = getUser(userIdOrNull);
+		Board board = getBoardById(boardId);
+		Long toolId = getToolId(boardId);
+		List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
 
-                    int commentCount = getCommentCount(board.getId());
-                    List<String> boardImages = boardImageService.getBoardImageUrls(board.getId());
-                    boolean isScrapped = getBoardScrap(user, board);
-                    return BoardRes.of(board, toolName, toolLogo, commentCount, boardImages, isScrapped,savedToolid);
-                })
-                .toList();
+		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
+		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
+		Boolean isScraped = getBoardScrap(user, board);
+		return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped, toolId);
+	}
 
-        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
-        return new GetBoardResponse(boardResList, scrollPaginationDto);
-    }
+	// 내가 쓴  게시판 조회
+	public BoardRes getMyBoard(final UserEntity user, final Long boardId) {
+		Board board = getBoardById(boardId);
+		List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
+		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
+		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
+		Boolean isScraped = getBoardScrap(user, board);
+		return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped);
+	}
 
+	public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId,
+		final int size, final Long lastBoardId) {
 
-    public FavoriteBoardsRetrieveResponse getFavoriteBoards(final Long userId, final Pageable pageable){
-        validateBoard.validateUser(userId);
+		log.info("USERID OR NULL {}", userIdOrNull);
+		Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId + 1;
+		PageRequest pageRequest = PageRequest.of(0, size + 1);
+		UserEntity user = getUser(userIdOrNull);
+		log.info("USER : {}", user);
 
-        Page<BoardScrap> boardScraps = boardScrapRepository.findAllActiveByUserId(userId, pageable);
-        List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
-                .filter(boardScrap -> !boardScrap.isDelYn()) // 스크랩 데이터의 삭제 여부 체크
-                .map(boardScrap -> {
-                    Board board = boardScrap.getBoard();
-                    if (board.isDelYn()) { // 삭제된 게시판인지 확인
-                        return null; // 삭제된 게시판은 제외
-                    }
-                    return FavoriteBoardsResponse.builder()
-                            .boardId(board.getId())
-                            .title(board.getTitle())
-                            .content(board.getContent())
-                            .updatedAt(board.getUpdatedAt())
-                            .toolName(freeName(board))
-                            .toolLogo(freeLogo(board))
-                            .isScrapped(!boardScrap.isDelYn())
-                            .build();
-                })
-                .filter(Objects::nonNull) // null 값 제외
-                .toList();
+		//NoTopic = null, toolId = null -> 전체 게시판 조회
+		//NoTopic = False , toolId != null -> 툴 게시판
+		//NoTopic = True , toolId == null -> 자유게시판
+		if (noTopic != null) {
+			if ((noTopic.equals(Boolean.TRUE) && toolId != null) || (noTopic.equals(Boolean.FALSE) && toolId == null)) {
+				throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
+			}
+		}
 
-        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boardScraps.getTotalPages());
-        return  new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
+		// 전체 데이터 개수를 가져옴 (cursor 조건 없음)
+		long totalElements = Optional.ofNullable(jpaQueryFactory
+			.select(board.count())
+			.from(board)
+			.where(
+				board.delYn.eq(false),
+				noTopic != null ? board.isFree.eq(noTopic) : null,
+				toolId != null ? board.tool.toolId.eq(toolId) : null
+			)
+			.fetchFirst()).orElse(0L);
 
-    }
+		// Cursor 기반 페이징을 적용한 게시글 목록 가져오기
+		List<Board> boards = jpaQueryFactory
+			.selectFrom(board)
+			.where(
+				noTopic != null ? board.isFree.eq(noTopic) : null,
+				toolId != null ? board.tool.toolId.eq(toolId) : null,
+				board.delYn.eq(Boolean.FALSE),
+				board.id.lt(cursor)
+			)
+			.orderBy(board.id.desc())
+			.limit(size + 1)
+			.fetch();
 
-    private Board validateBoardAndUser(final Long userId, final Long boardId) {
-        Board board = getBoardById(boardId);
-        if (!board.getUser().getId().equals(userId)) {
-            log.debug("게시판 작성자와, 유저가 다릅니다.");
-            throw new UnauthorizedException(ErrorCode.BOARD_FORBIDDEN);
-        }
-        return board;
-    }
+		// 다음 페이지 여부 확인
+		boolean hasNextPage = boards.size() > size;
+		List<Board> paginatedBoards = hasNextPage ? boards.subList(0, size) : boards;
 
-    private List<String> processImages(final Board board, final List<MultipartFile> images) {
-        if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
-            deleteOriginImages(board.getId());
-            return List.of();
-        }
-        deleteOriginImages(board.getId());
-        List<Long> imageIds = imageService.uploadImages(images);
-        boardImageService.saveBoardImages(board.getId(), imageIds);
-        return boardImageService.getBoardImageUrls(board.getId());
-    }
+		// nextCursor
+		long nextCursor = hasNextPage ? boards.get(size).getId() : -1L;
 
-    private Board createToolBoard(final Tool tool,final BoardCreateAndUpdateReq req, final UserEntity user) {
-        return boardRepository.save(Board.create( tool, user, req.title(), req.content()));
-    }
+		// 응답 데이터
+		List<BoardRes> boardResList = paginatedBoards.stream()
+			.map(board -> {
+				String toolName;
+				String toolLogo;
+				Long savedToolid = null;
+				if (Boolean.FALSE.equals(noTopic) && toolId != null) {  // 툴 게시판
+					toolName = board.getTool().getToolMainName();
+					toolLogo = board.getTool().getToolLogo();
+					savedToolid = board.getTool().getToolId();
+				} else if (Boolean.TRUE.equals(noTopic) && toolId == null) { // 자유 게시판
+					toolName = FREE;
+					toolLogo = TOOL_LOGO;
+				} else { // 전체 게시판 (툴이 있는 경우만 가져옴)
+					toolName = (board.getTool() != null) ? board.getTool().getToolMainName() : FREE;
+					toolLogo = (board.getTool() != null) ? board.getTool().getToolLogo() : TOOL_LOGO;
+					savedToolid = (board.getTool() != null) ? board.getTool().getToolId() : null;
+				}
 
-    private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
-        return boardRepository.save(Board.createFree(user, req.title(), req.content()));
-    }
+				int commentCount = getCommentCount(board.getId());
+				List<String> boardImages = boardImageService.getBoardImageUrls(board.getId());
+				boolean isScrapped = getBoardScrap(user, board);
+				return BoardRes.of(board, toolName, toolLogo, commentCount, boardImages, isScrapped, savedToolid);
+			})
+			.toList();
 
-    private Board getBoardById(final Long boardId) {
-        return boardRepository.findByIdAndDelYn(boardId, false)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
-    }
+		ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
+		return new GetBoardResponse(boardResList, scrollPaginationDto);
+	}
 
-    private Tool getToolById(final Long toolId) {
-        return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
-    }
+	public FavoriteBoardsRetrieveResponse getFavoriteBoards(final Long userId, final Pageable pageable) {
+		validateBoard.validateUser(userId);
 
-    private UserEntity getUserById(final Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-    }
+		Page<BoardScrap> boardScraps = boardScrapRepository.findAllActiveByUserId(userId, pageable);
+		List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
+			.map(boardScrap -> {
+				Board board = boardScrap.getBoard();
+				return FavoriteBoardsResponse.builder()
+					.boardId(board.getId())
+					.title(board.getTitle())
+					.content(board.getContent())
+					.updatedAt(board.getUpdatedAt())
+					.toolName(freeName(board))
+					.toolLogo(freeLogo(board))
+					.isScrapped(!boardScrap.isDelYn())
+					.build();
+			})
+			.toList();
 
-    private void deleteOriginImages(final Long boardId) {
-        List<BoardImage> boardImages = boardImageRepository.findAllByBoardId(boardId);
-        List<Long> imageIds = boardImages.stream().map(BoardImage::getImageId).toList();
-        boardImageRepository.deleteAll(boardImages);
-        imageService.deleteImages(imageIds);
-    }
+		PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(),
+			boardScraps.getTotalPages());
+		return new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
 
-    public BoardListResponse getMyBoards(Long userIdOrNull, Pageable pageable){
-        validateBoard.validateUser(userIdOrNull);
-        log.debug("사용자를 조회합니다, {}", userIdOrNull);
-        Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userIdOrNull, pageable);
-        UserEntity user = getUser(userIdOrNull);
-        List<BoardRes> boardResList = boards.getContent().stream()
-                .map(board -> getMyBoard( user, board.getId()))
-                .toList();
+	}
 
-        PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(), boards.getTotalPages());
+	private Board validateBoardAndUser(final Long userId, final Long boardId) {
+		Board board = getBoardById(boardId);
+		if (!board.getUser().getId().equals(userId)) {
+			log.debug("게시판 작성자와, 유저가 다릅니다.");
+			throw new UnauthorizedException(ErrorCode.BOARD_FORBIDDEN);
+		}
+		return board;
+	}
 
-        return new BoardListResponse(boardResList, userIdOrNull, pageInfo);
-    }
+	public List<String> processImages(final Board board, final List<String> images) {
+		if (images == null || images.isEmpty()) {
+			deleteOriginImages(board.getId());
+			return List.of();
+		}
+		deleteOriginImages(board.getId());
+		List<String> validImages = images.stream()
+			.filter(url -> url != null && !url.isBlank())
+			.toList();
+		if (validImages.isEmpty()) {
+			return List.of();
+		}
+		List<Long> imageIds = imageService.createImage(images);
+		boardImageService.saveBoardImages(board.getId(), imageIds);
+		return boardImageService.getBoardImageUrls(board.getId());
+	}
 
-    public int getCommentCount(final Long boardId){
-        List<CommentEntity> commentEntityList = commentRepository.findAllByBoardId(boardId);
-        log.debug("댓글 Entity리스트를 받아옵니다 : " + commentEntityList.size());
-        return commentEntityList.size();
-    }
+	private Board createToolBoard(final Tool tool, final BoardCreateAndUpdateReq req, final UserEntity user) {
+		Board board = Board.create(tool, user, req.title(), req.content());
+		board = boardRepository.save(board);
 
-    public Boolean getBoardScrap(final UserEntity user, final Board board){
-        if (user == null) {
-            log.info("** Board : " + board.getId() + " 스크랩 여부 : false (비로그인 사용자)");
-            return false;
-        }
-        boolean isScrapped = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId())
-                .map(BoardScrap::isDelYn)
-                .map(delYn -> !delYn)
-                .orElse(false);
+		BoardDocument boardDocument =
+			BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()),
+				getCommentCount(board.getId()), getBoardScrap(user, board));
 
-        log.info("** Board : " + board.getId() + " 스크랩 여부 :"+isScrapped);
-        return isScrapped;
-    }
+		boardSearchRepository.save(boardDocument);
 
-    public UserEntity getUser(final Long userIdOrNull) {
-        UserEntity user = null;
-        if (userIdOrNull != null) {
-            Long userId = userIdOrNull;
-            user = userRepository.findById(userId)
-                    .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-            log.debug("유저 정보를 조회했습니다: {}", user.getId());
-        }
-        return user;
-    }
+		return board;
+	}
 
-    public Long getToolId(Long boardId){
-        Board board = getBoardById(boardId);
-        Long toolId = board.isFree() ? null : board.getTool().getToolId();
-        return toolId;
-    }
+	private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
+		Board board = Board.createFree(user, req.title(), req.content());
+		board = boardRepository.save(board);
+		BoardDocument boardDocument = BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()),
+			getCommentCount(board.getId()), getBoardScrap(user, board));
+		boardSearchRepository.save(boardDocument);
 
-    public String freeName(Board board) {
-        return board.getTool() != null ? board.getTool().getToolMainName() : FREE;
-    }
-    public String freeLogo(Board board){
-        return board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
-    }
+		return board;
+	}
+
+	private Board getBoardById(final Long boardId) {
+		return boardRepository.findByIdAndDelYn(boardId, false)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+	}
+
+	public Tool getToolById(final Long toolId) {
+		return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
+	}
+
+	public UserEntity getUserById(final Long userId) {
+		return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+	}
+
+	private void deleteOriginImages(final Long boardId) {
+		List<BoardImage> boardImages = boardImageRepository.findAllByBoardId(boardId);
+		List<Long> imageIds = boardImages.stream().map(BoardImage::getImageId).toList();
+		boardImageRepository.deleteAll(boardImages);
+		imageService.deleteImages(imageIds);
+	}
+
+	public BoardListResponse getUserBoards(Long userIdOrNull, Pageable pageable) {
+		validateBoard.validateUser(userIdOrNull);
+		log.debug("사용자를 조회합니다, {}", userIdOrNull);
+		Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userIdOrNull, pageable);
+		UserEntity user = getUser(userIdOrNull);
+		List<BoardRes> boardResList = boards.getContent().stream()
+			.map(board -> getMyBoard(user, board.getId()))
+			.toList();
+
+		PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(),
+			boards.getTotalPages());
+
+		return new BoardListResponse(boardResList, userIdOrNull, pageInfo);
+	}
+
+	public int getCommentCount(final Long boardId) {
+		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
+		log.debug("댓글 Entity리스트를 받아옵니다 : {}", commentEntityList.size());
+		return commentEntityList.size();
+	}
+
+	public Boolean getBoardScrap(final UserEntity user, final Board board) {
+		if (user == null) {
+			log.info("** Board : {} 스크랩 여부 : false (비로그인 사용자)", board.getId());
+			return false;
+		}
+		boolean isScrapped = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId())
+			.map(BoardScrap::isDelYn)
+			.map(delYn -> !delYn)
+			.orElse(false);
+
+		log.info("** Board : {} 스크랩 여부 :{}", board.getId(), isScrapped);
+		return isScrapped;
+	}
+
+	public UserEntity getUser(final Long userIdOrNull) {
+		UserEntity user = null;
+		if (userIdOrNull != null) {
+			user = userRepository.findById(userIdOrNull)
+				.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+			log.debug("유저 정보를 조회했습니다: {}", user.getId());
+		}
+		return user;
+	}
+
+	public Long getToolId(Long boardId) {
+		Board board = getBoardById(boardId);
+		return board.isFree() ? null : board.getTool().getToolId();
+	}
+
+	public String freeName(Board board) {
+		return board.getTool() != null ? board.getTool().getToolMainName() : FREE;
+	}
+
+	public String freeLogo(Board board) {
+		return board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
+	}
 }

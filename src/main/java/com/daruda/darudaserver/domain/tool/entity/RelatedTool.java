@@ -1,6 +1,14 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,18 +18,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 @Getter
-@Table(name="related_tool")
+@Table(name = "related_tool")
 public class RelatedTool {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long relatedToolId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long relatedToolId;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
-    @JoinColumn(name="tool_id",nullable = false)
-    private Tool tool;
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@JoinColumn(name = "tool_id", nullable = false)
+	private Tool tool;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "alternative_tool", nullable = false)
-    private Tool alternativeTool;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "alternative_tool", nullable = false)
+	private Tool alternativeTool;
 }

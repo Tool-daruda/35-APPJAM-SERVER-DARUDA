@@ -1,48 +1,96 @@
 package com.daruda.darudaserver.domain.user.entity;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
 @Entity
 @Getter
+@SQLDelete(sql = "UPDATE user SET is_deleted = true, deleted_at = NOW() WHERE user_id = ?")
+@SQLRestriction("is_deleted = false")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user")
-public class UserEntity extends BaseTimeEntity{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long id;
+public class UserEntity extends BaseTimeEntity {
 
-    @Column(nullable = false)
-    private String email;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "user_id")
+	private Long id;
 
-    @Column(name = "nickname", nullable = false)
-    private String nickname;
+	@Column(nullable = false)
+	private String email;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Positions positions;
+	@Column(name = "nickname", nullable = false)
+	private String nickname;
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Positions positions;
 
-    @Builder
-    private UserEntity(String email, String nickname, Positions positions){
-        this.email = email;
-        this.nickname = nickname;
-        this.positions = positions;
-    }
+	@Column(name = "is_deleted", nullable = false)
+	private boolean isDeleted;
 
-    public void updatePositions(Positions positions){
-        this.positions = positions;
-    }
+	@Column(name = "deleted_at")
+	private LocalDateTime deletedAt;
 
-    public void updateNickname(String nickname){
-        this.nickname=nickname;
-    }
+	@Column(name = "suspended_until")
+	private LocalDateTime suspendedUntil;
 
+	@Column(name = "suspension_reason", length = 500)
+	private String suspensionReason;
+
+	@Builder
+	private UserEntity(String email, String nickname, Positions positions) {
+		this.email = email;
+		this.nickname = nickname;
+		this.positions = positions;
+		this.isDeleted = false;
+	}
+
+	public static UserEntity of(String email, String nickname, Positions positions) {
+		return UserEntity.builder()
+			.email(email)
+			.nickname(nickname)
+			.positions(positions)
+			.build();
+	}
+
+	public void updatePositions(Positions positions) {
+		this.positions = positions;
+	}
+
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public void suspend(LocalDateTime until, String reason) {
+		this.suspendedUntil = until;
+		this.suspensionReason = reason;
+	}
+
+	public void releaseSuspension() {
+		this.suspendedUntil = null;
+		this.suspensionReason = null;
+	}
+
+	public boolean isSuspended() {
+		return suspendedUntil != null && LocalDateTime.now().isBefore(suspendedUntil);
+	}
 }

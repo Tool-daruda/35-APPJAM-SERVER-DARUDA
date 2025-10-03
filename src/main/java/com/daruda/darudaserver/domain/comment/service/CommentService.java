@@ -1,5 +1,10 @@
 package com.daruda.darudaserver.domain.comment.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
 import com.daruda.darudaserver.domain.comment.dto.request.CreateCommentRequest;
 import com.daruda.darudaserver.domain.comment.dto.response.CreateCommentResponse;
 import com.daruda.darudaserver.domain.comment.dto.response.GetCommentResponse;
@@ -8,109 +13,121 @@ import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
+import com.daruda.darudaserver.domain.notification.repository.NotificationRepository;
+import com.daruda.darudaserver.domain.notification.service.NotificationService;
+import com.daruda.darudaserver.domain.search.document.BoardDocument;
+import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationCollection;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.ForbiddenException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
-import com.daruda.darudaserver.global.infra.S3.S3Service;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
 public class CommentService {
-    private final CommentRepository commentRepository;
-    private final BoardRepository boardRepository;
-    private final UserRepository userRepository;
-    private final S3Service s3Service;
 
-    public CreateCommentResponse postComment(Long userId, Long boardId, CreateCommentRequest createCommentRequest, MultipartFile image) throws IOException {
-        //게시글과 사용자 존재 여부 검사
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
-        log.debug("게시글을 성공적으로 조회하였습니다. {}", boardId);
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        log.debug("사용자를 성공적으로 조회하였습니다. {}", userId);
+	private final CommentRepository commentRepository;
+	private final BoardRepository boardRepository;
+	private final UserRepository userRepository;
+	private final NotificationService notificationService;
+	private final NotificationRepository notificationRepository;
+	private final BoardSearchRepository boardSearchRepository;
 
-        String photoUrl = null;
+	public CreateCommentResponse postComment(
+		Long userId, Long boardId, CreateCommentRequest request
+	) {
+		// 사용자 및 게시글 유효성 검사
+		UserEntity user = userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
-        if(!(image == null || image.isEmpty())){
-            //S3에 이미지 저장
-            String imageName = s3Service.uploadImage(image);
-            photoUrl = s3Service.getImageUrl(imageName);
-        }
-        //댓글 entity 생성
-        CommentEntity commentEntity = CommentEntity.builder()
-                .user(userEntity)
-                .board(board)
-                .photoUrl(photoUrl)
-                .content(createCommentRequest.content())
-                .build();
+		// 제재 상태 확인
+		if (user.isSuspended()) {
+			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
+		}
 
-        //댓글 entity 생성 및 댓글 ID 추출
-        Long commentId = commentRepository.save(commentEntity).getId();
-        log.debug("댓글을 정상적으로 생성하였습니다. {}",commentId);
+		Board board = boardRepository.findById(boardId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 
-        //ResponseDto 변환
-        CreateCommentResponse createCommentResponse = CreateCommentResponse.of(commentId, commentEntity.getContent(), commentEntity.getUpdatedAt(),commentEntity.getPhotoUrl(),userEntity.getNickname());
+		// 엔티티 생성 및 저장
+		CommentEntity comment = CommentEntity.of(
+			request.content(),
+			request.photoUrl(),
+			user,
+			board
+		);
 
-        return createCommentResponse;
-    }
+		commentRepository.save(comment);
+		notificationService.sendCommentNotification(comment);
 
-    public void deleteComment(Long userId, Long commentId){
-        //사용자 존재 여부 검사
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        log.debug("사용자를 성공적으로 조회하였습니다. {}", userId);
-        //댓글 존재 여부 검사 및 entity 반환
-        CommentEntity commentEntity = commentRepository.findById(commentId)
-                .orElseThrow(()-> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
-        log.debug("댓글을 성공적으로 조회하였습니다. {}", commentId);
-        //댓글 삭제
-        commentRepository.delete(commentEntity);
-    }
+		//BoardDocument commentCount 업데이트 및 색인
+		int commentCount = commentRepository.countByBoardId(boardId);
+		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 
-    public GetCommentRetrieveResponse getComments(Long boardId, int size, Long lastCommentId) {
-        List<CommentEntity> commentList;
-        Long cursor = (lastCommentId == null) ? Long.MAX_VALUE : lastCommentId;
-        PageRequest pageRequest = PageRequest.of(0, size + 1);
+		boardDocument.updateCommentCount(commentCount);
+		boardSearchRepository.save(boardDocument);
 
-        List<CommentEntity> commentEntityList = commentRepository.findAllByBoardId(boardId, cursor, pageRequest);
+		// 응답 DTO 반환
+		return CreateCommentResponse.of(
+			comment.getId(),
+			comment.getContent(),
+			comment.getCreatedAt(),
+			comment.getPhotoUrl(),
+			user.getNickname()
+		);
+	}
 
-        ScrollPaginationCollection<CommentEntity> commentCursor= ScrollPaginationCollection.of(commentEntityList,size);
+	public GetCommentRetrieveResponse getComments(Long boardId, int size, Long lastCommentId) {
+		// 커서 계산 및 댓글 조회
+		Long cursor = (lastCommentId == null) ? Long.MAX_VALUE : lastCommentId;
+		PageRequest pageRequest = PageRequest.of(0, size + 1);
 
-        List<GetCommentResponse> commentResponse = commentCursor.getCurrentScrollItems().stream()
-                .map(commentEntity -> GetCommentResponse.builder()
-                        .content(commentEntity.getContent())
-                        .image(commentEntity.getPhotoUrl())
-                        .commentId(commentEntity.getId())
-                        .nickname(commentEntity.getUser().getNickname())
-                        .updatedAt(commentEntity.getUpdatedAt())
-                        .build())
-                .toList();
+		List<CommentEntity> rows = commentRepository.findCommentsByBoardId(boardId, cursor, pageRequest);
 
-        // ScrollPaginationCollection을 이용한 페이지네이션 처리
-        // 다음 페이지를 위한 커서 계산
-        long nextCursor = commentCursor.isLastScroll() ? -1L : commentCursor.getNextCursor().getId();
+		ScrollPaginationCollection<CommentEntity> scroll = ScrollPaginationCollection.of(rows, size);
 
-        // ScrollPaginationDto 생성
-        ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(commentCursor.getTotalElements(), nextCursor);
+		List<CommentEntity> currentRows = scroll.getCurrentScrollItems();
 
-        // 최종 결과 반환
-        return new GetCommentRetrieveResponse(commentResponse, scrollPaginationDto);
-    }
+		// DTO 매핑 및 페이지 정보 생성
+		List<GetCommentResponse> items = currentRows.stream()
+			.map(c -> GetCommentResponse.builder()
+				.commentId(c.getId())
+				.content(c.getContent())
+				.image(c.getPhotoUrl())
+				.nickname(c.getUser().getNickname())
+				.updatedAt(c.getUpdatedAt())
+				.build())
+			.toList();
 
+		long nextCursor = scroll.isLastScroll()   // 마지막 페이지 여부
+			? -1L
+			: scroll.getNextCursor().getId();    // 다음 페이지 커서
 
+		ScrollPaginationDto pageInfo = ScrollPaginationDto.of(items.size(), nextCursor);  // 현재 페이지 건수만 전달
+
+		return new GetCommentRetrieveResponse(items, pageInfo);
+	}
+
+	public void deleteComment(Long userId, Long commentId) {
+		// 댓글 유효성 검사
+		CommentEntity comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
+
+		// 댓글을 작성한 사용자와 요청한 사용자가 일치하는지 확인
+		if (!comment.getUser().getId().equals(userId)) {
+			throw new ForbiddenException(ErrorCode.NO_PERMISSION_TO_DELETE);
+		}
+
+		notificationRepository.deleteAllByComment(comment);
+		commentRepository.delete(comment);
+	}
 }
