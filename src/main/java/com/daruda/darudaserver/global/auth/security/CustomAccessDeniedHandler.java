@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 	@Override
@@ -17,6 +19,8 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 		AccessDeniedException accessDeniedException) throws IOException, ServletException {
 		String path = request.getRequestURI();
 		String method = request.getMethod();
+		log.warn("접근 거부: Method: {}, Path: {}, Message: {}", method, path, accessDeniedException.getMessage());
+
 		setResponse(response);
 	}
 
