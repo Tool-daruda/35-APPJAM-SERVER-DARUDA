@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
+import com.daruda.darudaserver.global.auth.security.CustomAccessDeniedHandler;
 import com.daruda.darudaserver.global.auth.security.ExceptionHandlerFilter;
 import com.daruda.darudaserver.global.auth.security.JwtAuthenticationEntryPoint;
 import com.daruda.darudaserver.global.auth.security.JwtAuthenticationFilter;
@@ -41,7 +42,10 @@ public class SecurityConfig {
 		"/api/v1/board/{board-id}",
 		"/api/v1/image/presigned-url",
 		"/api/v1/search/**",
+		"/error"
 	};
+
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final JwtTokenProvider jwtTokenProvider;
 
@@ -56,7 +60,8 @@ public class SecurityConfig {
 					.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.exceptionHandling(exceptionHandlingConfigurer ->
 				exceptionHandlingConfigurer
-					.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+					.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+					.accessDeniedHandler(customAccessDeniedHandler))
 			.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
 				authorizationManagerRequestMatcherRegistry
 					.requestMatchers(HttpMethod.OPTIONS, "/**")
