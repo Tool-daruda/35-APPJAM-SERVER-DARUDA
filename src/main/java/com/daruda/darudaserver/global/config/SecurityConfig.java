@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
+import com.daruda.darudaserver.global.auth.security.CustomAccessDeniedHandler;
 import com.daruda.darudaserver.global.auth.security.ExceptionHandlerFilter;
 import com.daruda.darudaserver.global.auth.security.JwtAuthenticationEntryPoint;
 import com.daruda.darudaserver.global.auth.security.JwtAuthenticationFilter;
@@ -44,6 +45,7 @@ public class SecurityConfig {
 	};
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -56,7 +58,8 @@ public class SecurityConfig {
 					.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.exceptionHandling(exceptionHandlingConfigurer ->
 				exceptionHandlingConfigurer
-					.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+					.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+					.accessDeniedHandler(customAccessDeniedHandler))
 			.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
 				authorizationManagerRequestMatcherRegistry
 					.requestMatchers(HttpMethod.OPTIONS, "/**")
