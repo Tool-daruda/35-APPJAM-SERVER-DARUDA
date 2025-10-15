@@ -40,4 +40,9 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 	Page<Board> findAllByUserIdAndDelYnFalse(Long userId, Pageable pageable);
 
 	Optional<Board> findByIdAndDelYn(Long boardId, boolean delYn);
+
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Transactional
+	@Query(value = "UPDATE board SET tool_id = 0 WHERE tool_id = :#{#tool.toolId}", nativeQuery = true)
+	void clearTool(Tool tool);
 }
