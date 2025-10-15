@@ -1,6 +1,5 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -27,7 +26,7 @@ public class RelatedTool {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long relatedToolId;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tool_id", nullable = false)
 	private Tool tool;
 
