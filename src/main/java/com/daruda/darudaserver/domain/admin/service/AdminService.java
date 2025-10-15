@@ -116,13 +116,11 @@ public class AdminService {
 		planRepository.saveAll(mapped);
 
 		List<ToolCore> coreList = createToolRequest.cores().stream()
-			.map(core -> {
-				return ToolCore.builder()
-					.coreTitle(core.getCoreTitle())
-					.coreContent(core.getCoreContent())
-					.tool(savedTool)
-					.build();
-			})
+			.map(core -> ToolCore.builder()
+				.coreTitle(core.getCoreTitle())
+				.coreContent(core.getCoreContent())
+				.tool(savedTool)
+				.build())
 			.toList();
 		toolCoreRepository.saveAll(coreList);
 
@@ -172,69 +170,78 @@ public class AdminService {
 		// 툴 키워드 수정
 		if (req.keywords() != null) {
 			List<ToolKeyword> existing = toolKeywordRepository.findAllByTool(tool);
-			if (!existing.isEmpty())
+			if (!existing.isEmpty()) {
 				toolKeywordRepository.deleteAll(existing);
+			}
 			if (!req.keywords().isEmpty()) {
 				List<ToolKeyword> toSave = req.keywords().stream()
 					.filter(k -> k != null && !k.isBlank())
 					.map(k -> ToolKeyword.builder().keywordName(k.trim()).tool(tool).build())
 					.toList();
-				if (!toSave.isEmpty())
+				if (!toSave.isEmpty()) {
 					toolKeywordRepository.saveAll(toSave);
+				}
 			}
 		}
 
 		// 툴 이미지 수정
 		if (req.images() != null) {
 			List<ToolImage> existing = toolImageRepository.findAllByTool(tool);
-			if (!existing.isEmpty())
+			if (!existing.isEmpty()) {
 				toolImageRepository.deleteAll(existing);
+			}
 			if (!req.images().isEmpty()) {
 				List<ToolImage> toSave = req.images().stream()
 					.filter(url -> url != null && !url.isBlank())
 					.map(url -> ToolImage.builder().imageUrl(url.trim()).tool(tool).build())
 					.toList();
-				if (!toSave.isEmpty())
+				if (!toSave.isEmpty()) {
 					toolImageRepository.saveAll(toSave);
+				}
 			}
 		}
 
 		// 툴 비디오 수정
 		if (req.videos() != null) {
 			List<ToolVideo> existing = toolVideoRepository.findAllByTool(tool);
-			if (!existing.isEmpty())
+			if (!existing.isEmpty()) {
 				toolVideoRepository.deleteAll(existing);
+			}
 			if (!req.videos().isEmpty()) {
 				List<ToolVideo> toSave = req.videos().stream()
 					.filter(url -> url != null && !url.isBlank())
 					.map(url -> ToolVideo.builder().videoUrl(url.trim()).tool(tool).build())
 					.toList();
-				if (!toSave.isEmpty())
+				if (!toSave.isEmpty()) {
 					toolVideoRepository.saveAll(toSave);
+				}
 			}
 		}
 
 		// 툴 코어 수정
 		if (req.cores() != null) {
 			List<ToolCore> existing = toolCoreRepository.findAllByTool(tool);
-			if (!existing.isEmpty())
+			if (!existing.isEmpty()) {
 				toolCoreRepository.deleteAll(existing);
+			}
 			if (!req.cores().isEmpty()) {
 				List<ToolCore> toSave = req.cores().stream()
 					.filter(c -> c != null && c.getCoreTitle() != null && c.getCoreContent() != null)
 					.map(c -> ToolCore.builder().coreTitle(c.getCoreTitle()).coreContent(c.getCoreContent()).tool(tool)
 						.build())
 					.toList();
-				if (!toSave.isEmpty())
+				if (!toSave.isEmpty()) {
 					toolCoreRepository.saveAll(toSave);
+				}
 			}
 		}
 
 		// 툴 플랜 수정
 		if (req.plans() != null) {
 			List<Plan> existing = planRepository.findAllByTool(tool);
-			if (!existing.isEmpty())
+			if (!existing.isEmpty()) {
 				planRepository.deleteAll(existing);
+			}
 			if (!req.plans().isEmpty()) {
 				List<Plan> toSave = req.plans().stream()
 					.filter(p -> p != null && p.getPlanName() != null && p.getPriceMonthly() != null)
@@ -247,16 +254,18 @@ public class AdminService {
 						.tool(tool)
 						.build())
 					.toList();
-				if (!toSave.isEmpty())
+				if (!toSave.isEmpty()) {
 					planRepository.saveAll(toSave);
+				}
 			}
 		}
 
 		// 툴 관련 툴 수정
 		if (req.relatedToolIds() != null) {
 			List<RelatedTool> existing = relatedToolRepository.findAllByTool(tool);
-			if (!existing.isEmpty())
+			if (!existing.isEmpty()) {
 				relatedToolRepository.deleteAll(existing);
+			}
 			if (!req.relatedToolIds().isEmpty()) {
 				List<Long> altIds = req.relatedToolIds().stream().map(Integer::longValue).toList();
 				List<Tool> alternatives = toolRepository.findAllById(altIds);
