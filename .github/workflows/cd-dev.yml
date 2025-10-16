@@ -16,12 +16,12 @@ jobs:
       contents: read
 
     steps:
-      - name: Docker 이미지 Prod 서버 배포
+      - name: Docker 이미지 Dev 서버 배포
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.EC2_DEV_HOST }}
           username: ${{ secrets.DOCKER_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_DEV_SSH_KEY }}
           script: |
             LOG_DIR="/home/ubuntu/daruda_log"
             if [ ! -d "$LOG_DIR" ]; then
