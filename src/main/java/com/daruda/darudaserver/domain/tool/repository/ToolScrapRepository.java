@@ -34,4 +34,7 @@ public interface ToolScrapRepository extends JpaRepository<ToolScrap, Long> {
 
 	boolean existsByUserAndTool(UserEntity user, Tool tool);
 
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Transactional
+	void deleteByTool(Tool tool);
 }

@@ -1,16 +1,37 @@
 package com.daruda.darudaserver.domain.admin.service;
 
-import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
-import com.daruda.darudaserver.domain.admin.dto.request.UpdateToolRequest;
-import com.daruda.darudaserver.domain.tool.entity.*;
-import com.daruda.darudaserver.domain.tool.repository.*;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
+import com.daruda.darudaserver.domain.admin.dto.request.UpdateToolRequest;
+import com.daruda.darudaserver.domain.community.repository.BoardRepository;
+import com.daruda.darudaserver.domain.tool.entity.Category;
+import com.daruda.darudaserver.domain.tool.entity.License;
+import com.daruda.darudaserver.domain.tool.entity.Plan;
+import com.daruda.darudaserver.domain.tool.entity.RelatedTool;
+import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolCore;
+import com.daruda.darudaserver.domain.tool.entity.ToolImage;
+import com.daruda.darudaserver.domain.tool.entity.ToolKeyword;
+import com.daruda.darudaserver.domain.tool.entity.ToolVideo;
+import com.daruda.darudaserver.domain.tool.repository.PlanRepository;
+import com.daruda.darudaserver.domain.tool.repository.RelatedToolRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolCoreRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolKeywordRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolPlatFormRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolVideoRepository;
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
-@Transactional(readOnly = true)
+import lombok.RequiredArgsConstructor;
+
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class AdminService {
@@ -22,9 +43,9 @@ public class AdminService {
 	private final PlanRepository planRepository;
 	private final RelatedToolRepository relatedToolRepository;
 	private final ToolPlatFormRepository toolPlatFormRepository;
+	private final BoardRepository boardRepository;
+	private final ToolScrapRepository toolScrapRepository;
 
-
-	@Transactional
 	public void createTool(CreateToolRequest createToolRequest) {
 
 		//Tool entity 가공
@@ -95,13 +116,11 @@ public class AdminService {
 		planRepository.saveAll(mapped);
 
 		List<ToolCore> coreList = createToolRequest.cores().stream()
-			.map(core -> {
-				return ToolCore.builder()
-					.coreTitle(core.getCoreTitle())
-					.coreContent(core.getCoreContent())
-					.tool(savedTool)
-					.build();
-			})
+			.map(core -> ToolCore.builder()
+				.coreTitle(core.getCoreTitle())
+				.coreContent(core.getCoreContent())
+				.tool(savedTool)
+				.build())
 			.toList();
 		toolCoreRepository.saveAll(coreList);
 
@@ -128,7 +147,6 @@ public class AdminService {
 		}
 	}
 
-	@Transactional
 	public void updateTool(final Long toolId, final UpdateToolRequest req) {
 		Tool tool = toolRepository.findById(toolId)
 			.orElseThrow(() -> new IllegalArgumentException("Tool not found: " + toolId));
@@ -152,60 +170,78 @@ public class AdminService {
 		// 툴 키워드 수정
 		if (req.keywords() != null) {
 			List<ToolKeyword> existing = toolKeywordRepository.findAllByTool(tool);
-			if (!existing.isEmpty()) toolKeywordRepository.deleteAll(existing);
+			if (!existing.isEmpty()) {
+				toolKeywordRepository.deleteAll(existing);
+			}
 			if (!req.keywords().isEmpty()) {
 				List<ToolKeyword> toSave = req.keywords().stream()
 					.filter(k -> k != null && !k.isBlank())
 					.map(k -> ToolKeyword.builder().keywordName(k.trim()).tool(tool).build())
 					.toList();
-				if (!toSave.isEmpty()) toolKeywordRepository.saveAll(toSave);
+				if (!toSave.isEmpty()) {
+					toolKeywordRepository.saveAll(toSave);
+				}
 			}
 		}
 
 		// 툴 이미지 수정
 		if (req.images() != null) {
 			List<ToolImage> existing = toolImageRepository.findAllByTool(tool);
-			if (!existing.isEmpty()) toolImageRepository.deleteAll(existing);
+			if (!existing.isEmpty()) {
+				toolImageRepository.deleteAll(existing);
+			}
 			if (!req.images().isEmpty()) {
 				List<ToolImage> toSave = req.images().stream()
 					.filter(url -> url != null && !url.isBlank())
 					.map(url -> ToolImage.builder().imageUrl(url.trim()).tool(tool).build())
 					.toList();
-				if (!toSave.isEmpty()) toolImageRepository.saveAll(toSave);
+				if (!toSave.isEmpty()) {
+					toolImageRepository.saveAll(toSave);
+				}
 			}
 		}
 
 		// 툴 비디오 수정
 		if (req.videos() != null) {
 			List<ToolVideo> existing = toolVideoRepository.findAllByTool(tool);
-			if (!existing.isEmpty()) toolVideoRepository.deleteAll(existing);
+			if (!existing.isEmpty()) {
+				toolVideoRepository.deleteAll(existing);
+			}
 			if (!req.videos().isEmpty()) {
 				List<ToolVideo> toSave = req.videos().stream()
 					.filter(url -> url != null && !url.isBlank())
 					.map(url -> ToolVideo.builder().videoUrl(url.trim()).tool(tool).build())
 					.toList();
-				if (!toSave.isEmpty()) toolVideoRepository.saveAll(toSave);
+				if (!toSave.isEmpty()) {
+					toolVideoRepository.saveAll(toSave);
+				}
 			}
 		}
 
 		// 툴 코어 수정
 		if (req.cores() != null) {
 			List<ToolCore> existing = toolCoreRepository.findAllByTool(tool);
-			if (!existing.isEmpty()) toolCoreRepository.deleteAll(existing);
+			if (!existing.isEmpty()) {
+				toolCoreRepository.deleteAll(existing);
+			}
 			if (!req.cores().isEmpty()) {
 				List<ToolCore> toSave = req.cores().stream()
 					.filter(c -> c != null && c.getCoreTitle() != null && c.getCoreContent() != null)
 					.map(c -> ToolCore.builder().coreTitle(c.getCoreTitle()).coreContent(c.getCoreContent()).tool(tool)
 						.build())
 					.toList();
-				if (!toSave.isEmpty()) toolCoreRepository.saveAll(toSave);
+				if (!toSave.isEmpty()) {
+					toolCoreRepository.saveAll(toSave);
+				}
 			}
 		}
 
 		// 툴 플랜 수정
 		if (req.plans() != null) {
 			List<Plan> existing = planRepository.findAllByTool(tool);
-			if (!existing.isEmpty()) planRepository.deleteAll(existing);
+			if (!existing.isEmpty()) {
+				planRepository.deleteAll(existing);
+			}
 			if (!req.plans().isEmpty()) {
 				List<Plan> toSave = req.plans().stream()
 					.filter(p -> p != null && p.getPlanName() != null && p.getPriceMonthly() != null)
@@ -218,14 +254,18 @@ public class AdminService {
 						.tool(tool)
 						.build())
 					.toList();
-				if (!toSave.isEmpty()) planRepository.saveAll(toSave);
+				if (!toSave.isEmpty()) {
+					planRepository.saveAll(toSave);
+				}
 			}
 		}
 
 		// 툴 관련 툴 수정
 		if (req.relatedToolIds() != null) {
 			List<RelatedTool> existing = relatedToolRepository.findAllByTool(tool);
-			if (!existing.isEmpty()) relatedToolRepository.deleteAll(existing);
+			if (!existing.isEmpty()) {
+				relatedToolRepository.deleteAll(existing);
+			}
 			if (!req.relatedToolIds().isEmpty()) {
 				List<Long> altIds = req.relatedToolIds().stream().map(Integer::longValue).toList();
 				List<Tool> alternatives = toolRepository.findAllById(altIds);
@@ -240,5 +280,30 @@ public class AdminService {
 
 		// 갱신된 엔터티 저장
 		toolRepository.save(tool);
+	}
+
+	public void deleteTool(final Long toolId) {
+		Tool tool = toolRepository.findById(toolId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
+
+		// 관련된 엔터티들 삭제 (자식 → 부모 순서)
+		// 1) 연관 테이블들 선삭제
+		toolKeywordRepository.deleteByTool(tool);
+		toolImageRepository.deleteByTool(tool);
+		toolVideoRepository.deleteByTool(tool);
+		toolCoreRepository.deleteByTool(tool);
+		planRepository.deleteByTool(tool);
+		toolPlatFormRepository.deleteByTool(tool);
+		toolScrapRepository.deleteByTool(tool);
+
+		// 2) 연관 툴(양방향 FK) 모두 제거
+		relatedToolRepository.deleteByTool(tool);
+		relatedToolRepository.deleteByAlternativeTool(tool);
+
+		// 3) 커뮤니티 글에서 FK 해제
+		boardRepository.clearTool(tool);
+
+		// 4) 마지막에 툴 삭제
+		toolRepository.delete(tool);
 	}
 }

@@ -1,18 +1,26 @@
 package com.daruda.darudaserver.domain.admin.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
 import com.daruda.darudaserver.domain.admin.dto.request.UpdateToolRequest;
 import com.daruda.darudaserver.domain.admin.service.AdminService;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.daruda.darudaserver.global.error.dto.SuccessResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,4 +51,11 @@ public class AdminController {
 		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_UPDATE));
 	}
 
+	@DeleteMapping("/tools/{toolId}")
+	@Operation(summary = "관리자용 툴 삭제", description = "관리자용 툴 삭제 API입니다.")
+	public ResponseEntity<SuccessResponse<?>> deleteTool(
+		@Parameter(description = "삭제 할 툴 ID") @PathVariable Long toolId) {
+		adminService.deleteTool(toolId);
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_DELETE));
+	}
 }
