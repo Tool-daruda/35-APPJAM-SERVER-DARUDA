@@ -41,7 +41,7 @@ public class ToolController {
 
 	@GetMapping("/{tool-id}")
 	@Operation(summary = "tool 세부정보 조회", description = "tool의 세부정보를 조회합니다.")
-	public ResponseEntity<ApiResponse<?>> getToolDetail(@AuthenticationPrincipal Long userId,
+	public ResponseEntity<ApiResponse<ToolDetailGetRes>> getToolDetail(@AuthenticationPrincipal Long userId,
 		@Parameter(description = "tool Id", example = "1")
 		@PathVariable(name = "tool-id") final Long toolId) {
 		ToolDetailGetRes toolDetail = toolService.getToolDetail(userId, toolId);
@@ -51,7 +51,7 @@ public class ToolController {
 	@DisableSwaggerSecurity
 	@GetMapping("/{tool-id}/core-features")
 	@Operation(summary = "tool 핵심 기능 조회", description = "tool의 핵심 기능을 조회합니다.")
-	public ResponseEntity<ApiResponse<?>> getToolCoreFeature(
+	public ResponseEntity<ApiResponse<ToolCoreListRes>> getToolCoreFeature(
 		@Parameter(description = "tool Id", example = "1")
 		@PathVariable(name = "tool-id") final Long toolId) {
 		ToolCoreListRes toolCore = toolService.getToolCore(toolId);
@@ -61,7 +61,7 @@ public class ToolController {
 	@DisableSwaggerSecurity
 	@Operation(summary = "tool 플랜 조회", description = "tool의 가격 플랜을 조회합니다.")
 	@GetMapping("/{tool-id}/plans")
-	public ResponseEntity<ApiResponse<?>> getToolPlans(
+	public ResponseEntity<ApiResponse<PlanListRes>> getToolPlans(
 		@Parameter(description = "tool Id", example = "1")
 		@PathVariable(name = "tool-id") final Long toolId) {
 		PlanListRes plan = toolService.getPlan(toolId);
@@ -71,7 +71,7 @@ public class ToolController {
 	@DisableSwaggerSecurity
 	@GetMapping("/{tool-id}/alternatives")
 	@Operation(summary = "대안 tool 조회", description = "해당 tool의 대안이 되는 tool을 조회합니다.")
-	public ResponseEntity<ApiResponse<?>> getRelatedTool(
+	public ResponseEntity<ApiResponse<RelatedToolListRes>> getRelatedTool(
 		@Parameter(description = "tool Id", example = "1")
 		@PathVariable(name = "tool-id") final Long toolId) {
 		RelatedToolListRes relatedTool = toolService.getRelatedTool(toolId);
@@ -80,7 +80,7 @@ public class ToolController {
 
 	@GetMapping
 	@Operation(summary = "tool 목록 조회", description = "tool의 목록을 조회합니다.")
-	public ResponseEntity<ApiResponse<?>> getToolList(
+	public ResponseEntity<ApiResponse<ToolListRes>> getToolList(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "정렬 기준", example = "popular")
 		@RequestParam(defaultValue = "popular", value = "criteria") String criteria,
@@ -110,7 +110,7 @@ public class ToolController {
 
 	@PostMapping("/{tool-id}/scrap")
 	@Operation(summary = "tool 찜하기", description = "tool을 찜하거나, 찜을 해제합니다.")
-	public ResponseEntity<ApiResponse<?>> postToolScrap(@AuthenticationPrincipal Long userId,
+	public ResponseEntity<ApiResponse<ToolScrapRes>> postToolScrap(@AuthenticationPrincipal Long userId,
 		@Parameter(description = "tool Id", example = "1")
 		@PathVariable(name = "tool-id") final Long toolId) {
 		ToolScrapRes toolScrapRes = toolService.postToolScrap(userId, toolId);

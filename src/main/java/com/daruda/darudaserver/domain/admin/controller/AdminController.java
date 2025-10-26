@@ -46,7 +46,7 @@ public class AdminController {
 
 	@PostMapping
 	@Operation(summary = "관리자용 툴 추가", description = "관리자용 툴 추가 API입니다.")
-	public ResponseEntity<SuccessResponse<?>> createTool(
+	public ResponseEntity<SuccessResponse<Void>> createTool(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "추가할 툴")
 		@RequestBody @Valid CreateToolRequest createToolRequest) {
@@ -57,7 +57,7 @@ public class AdminController {
 
 	@PatchMapping("/tools/{toolId}")
 	@Operation(summary = "관리자용 툴 수정", description = "관리자용 툴 수정 API입니다.")
-	public ResponseEntity<SuccessResponse<?>> updateTool(
+	public ResponseEntity<SuccessResponse<Void>> updateTool(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "수정할 툴 ID") @PathVariable Long toolId,
 		@Parameter(description = "수정 요청 DTO") @RequestBody @Valid UpdateToolRequest request
@@ -68,7 +68,7 @@ public class AdminController {
 
 	@DeleteMapping("/tools/{toolId}")
 	@Operation(summary = "관리자용 툴 삭제", description = "관리자용 툴 삭제 API입니다.")
-	public ResponseEntity<SuccessResponse<?>> deleteTool(
+	public ResponseEntity<SuccessResponse<Void>> deleteTool(
 		@Parameter(description = "삭제 할 툴 ID") @PathVariable Long toolId) {
 		adminService.deleteTool(toolId);
 		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_DELETE));

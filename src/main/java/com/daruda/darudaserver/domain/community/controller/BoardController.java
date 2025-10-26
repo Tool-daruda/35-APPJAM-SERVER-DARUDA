@@ -36,7 +36,7 @@ public class BoardController {
 
 	@PostMapping
 	@Operation(summary = "게시글 작성", description = "게시글을 작성합니다.")
-	public ResponseEntity<ApiResponse<?>> createBoard(
+	public ResponseEntity<ApiResponse<BoardRes>> createBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "작성할 게시글")
 		@RequestBody @Valid BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
@@ -47,7 +47,7 @@ public class BoardController {
 
 	@PatchMapping("/{board-id}")
 	@Operation(summary = "게시글 수정", description = "게시글을 수정합니다.")
-	public ResponseEntity<ApiResponse<?>> updateBoard(
+	public ResponseEntity<ApiResponse<BoardRes>> updateBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId,
@@ -60,7 +60,7 @@ public class BoardController {
 	@DisableSwaggerSecurity
 	@GetMapping("/{board-id}")
 	@Operation(summary = "게시글 조회", description = "게시글을 조회합니다.")
-	public ResponseEntity<ApiResponse<?>> getBoard(
+	public ResponseEntity<ApiResponse<BoardRes>> getBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId) {
@@ -70,7 +70,7 @@ public class BoardController {
 
 	@DeleteMapping("/{board-id}")
 	@Operation(summary = "게시글 삭제", description = "게시글을 삭제합니다.")
-	public ResponseEntity<ApiResponse<?>> deleteBoard(
+	public ResponseEntity<ApiResponse<Void>> deleteBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId) {
@@ -80,7 +80,7 @@ public class BoardController {
 
 	@PostMapping("/{board-id}/scrap")
 	@Operation(summary = "게시글 스크랩", description = "게시글을 스크랩합니다.")
-	public ResponseEntity<ApiResponse<?>> scrapBoard(
+	public ResponseEntity<ApiResponse<BoardScrapRes>> scrapBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId) {
@@ -91,7 +91,7 @@ public class BoardController {
 	@DisableSwaggerSecurity
 	@GetMapping
 	@Operation(summary = "게시글 리스트 조회", description = "게시글 리스트를 조회합니다.")
-	public ResponseEntity<ApiResponse<?>> getBoardList(
+	public ResponseEntity<ApiResponse<GetBoardResponse>> getBoardList(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "자유 게시판 게시글 여부", example = "true")
 		@RequestParam(name = "noTopic", required = false) Boolean noTopic,
