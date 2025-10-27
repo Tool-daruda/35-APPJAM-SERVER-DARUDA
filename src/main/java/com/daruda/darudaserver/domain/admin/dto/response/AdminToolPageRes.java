@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 
 import com.daruda.darudaserver.domain.tool.entity.Category;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public record AdminToolPageRes(
 	List<ToolRes> tools,
@@ -40,6 +41,7 @@ public record AdminToolPageRes(
 		String toolName,
 		String description,
 		Category category,
+		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
 		Timestamp createdAt
 	) {
 	}
