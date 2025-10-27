@@ -23,6 +23,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -35,8 +37,10 @@ public class AdminController {
 	@GetMapping("/tool")
 	@Operation(summary = "관리자용 툴 조회", description = "관리자용 전체 툴 조회 API입니다.")
 	public ResponseEntity<SuccessResponse<AdminToolPageRes>> fetchAllTool(
-		@Parameter(description = "페이지 인덱스 (0 기반)", example = "0")
+		@Min(0)
+		@Parameter(description = "페이지 인덱스", example = "0")
 		@RequestParam(value = "page", defaultValue = "0") int page,
+		@Min(1) @Max(100)
 		@Parameter(description = "페이지 크기", example = "20")
 		@RequestParam(value = "size", defaultValue = "20") int size
 	) {
