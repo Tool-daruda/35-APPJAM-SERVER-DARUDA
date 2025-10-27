@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.global.auth.security;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +17,6 @@ public class UserAuthentication extends UsernamePasswordAuthenticationToken {
 
 	public static UserAuthentication createUserAuthentication(Long userId) {
 		log.debug("createUserAuthentication - userId" + userId);
-		return new UserAuthentication(userId, null, null);
+		return new UserAuthentication(userId, null, Collections.emptyList());
 	}
 }

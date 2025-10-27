@@ -2,11 +2,15 @@ package com.daruda.darudaserver.domain.admin.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
 import com.daruda.darudaserver.domain.admin.dto.request.UpdateToolRequest;
+import com.daruda.darudaserver.domain.admin.dto.response.AdminToolPageRes;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.tool.entity.Category;
 import com.daruda.darudaserver.domain.tool.entity.License;
@@ -305,5 +309,12 @@ public class AdminService {
 
 		// 4) 마지막에 툴 삭제
 		toolRepository.delete(tool);
+	}
+
+	public AdminToolPageRes fetchAllTool(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		Page<Tool> toolPage = toolRepository.findAll(pageable);
+
+		return AdminToolPageRes.of(toolPage);
 	}
 }
