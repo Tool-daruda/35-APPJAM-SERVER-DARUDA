@@ -33,6 +33,9 @@ public class TokenService {
 
 	@Transactional
 	public JwtTokenResponse createToken(final Long userId, final String role) {
+		if (role == null || role.isBlank()) {
+			throw new BadRequestException(ErrorCode.INVALID_FIELD_ERROR);
+		}
 		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId, role);
 
 		String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
