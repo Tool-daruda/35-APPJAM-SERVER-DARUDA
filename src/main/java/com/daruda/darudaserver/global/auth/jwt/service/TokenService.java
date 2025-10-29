@@ -32,8 +32,8 @@ public class TokenService {
 	private final JwtTokenProvider jwtTokenProvider;
 
 	@Transactional
-	public JwtTokenResponse createToken(final Long userId) {
-		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
+	public JwtTokenResponse createToken(final Long userId, final String role) {
+		UserAuthentication userAuthentication = UserAuthentication.createUserAuthenticationWithRole(userId, role);
 
 		String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
 		log.debug("AccessToken 생성 완료 (length={} / masked)", accessToken.length());
@@ -54,7 +54,9 @@ public class TokenService {
 
 		verifyUserIdWithStoredToken(userId, refreshToken);
 
-		return createToken(userId);
+		String role = jwtTokenProvider.getRoleFromJwt(refreshToken);
+
+		return createToken(userId, role);
 	}
 
 	@Transactional

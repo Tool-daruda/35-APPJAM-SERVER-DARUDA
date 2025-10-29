@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,5 +19,12 @@ public class UserAuthentication extends UsernamePasswordAuthenticationToken {
 	public static UserAuthentication createUserAuthentication(Long userId) {
 		log.debug("createUserAuthentication - userId" + userId);
 		return new UserAuthentication(userId, null, Collections.emptyList());
+	}
+
+	public static UserAuthentication createUserAuthenticationWithRole(Long userId, String role) {
+		log.debug("createUserAuthenticationWithRole - userId: {} role: {}", userId, role);
+
+		SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
+		return new UserAuthentication(userId, null, Collections.singletonList(authority));
 	}
 }

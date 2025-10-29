@@ -62,8 +62,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			if (StringUtils.hasText(accessToken)
 				&& jwtTokenProvider.validateToken(accessToken) == JwtValidationType.VALID_JWT) {
 				Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
-				doAuthentication(request, userId);
-				log.info("JWT 인증 성공 - 사용자 ID: {}", userId);
+				String role = jwtTokenProvider.getRoleFromJwt(accessToken);
+				doAuthentication(request, userId, role);
+				log.info("JWT 인증 성공 - 사용자 ID: {} 역할: {}", userId, role);
 			}
 		} catch (Exception e) {
 			log.error("JWT 인증 실패: {}", e.getMessage(), e);
@@ -98,12 +99,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 	}
 
-	private void doAuthentication(HttpServletRequest request, final Long userId) {
+	private void doAuthentication(HttpServletRequest request, final Long userId, final String role) {
 		if (userId == null) {
 			throw new BadRequestException(ErrorCode.USER_NOT_FOUND);
 		}
 		log.debug("SecurityContextHolder : {}", userId);
-		UserAuthentication authentication = UserAuthentication.createUserAuthentication(userId);
+		UserAuthentication authentication = UserAuthentication.createUserAuthenticationWithRole(userId, role);
 		createAndSetWebAuthenticationDetails(request, authentication);
 
 		SecurityContext securityContext = SecurityContextHolder.getContext();
