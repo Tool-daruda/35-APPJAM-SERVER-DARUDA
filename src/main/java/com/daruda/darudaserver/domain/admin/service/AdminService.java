@@ -17,12 +17,14 @@ import com.daruda.darudaserver.domain.tool.entity.License;
 import com.daruda.darudaserver.domain.tool.entity.Plan;
 import com.daruda.darudaserver.domain.tool.entity.RelatedTool;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolBlog;
 import com.daruda.darudaserver.domain.tool.entity.ToolCore;
 import com.daruda.darudaserver.domain.tool.entity.ToolImage;
 import com.daruda.darudaserver.domain.tool.entity.ToolKeyword;
 import com.daruda.darudaserver.domain.tool.entity.ToolVideo;
 import com.daruda.darudaserver.domain.tool.repository.PlanRepository;
 import com.daruda.darudaserver.domain.tool.repository.RelatedToolRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolBlogRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolCoreRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolKeywordRepository;
@@ -49,6 +51,7 @@ public class AdminService {
 	private final ToolPlatFormRepository toolPlatFormRepository;
 	private final BoardRepository boardRepository;
 	private final ToolScrapRepository toolScrapRepository;
+	private final ToolBlogRepository toolBlogRepository;
 
 	public void createTool(CreateToolRequest createToolRequest) {
 
@@ -107,24 +110,21 @@ public class AdminService {
 
 		//ToolPlan 가공
 		List<Plan> mapped = createToolRequest.plans().stream()
-			.map(plan -> Plan.builder()
-				.planName(plan.getPlanName().trim())
-				.priceMonthly(plan.getPriceMonthly())
-				.priceAnnual(plan.getPriceAnnual())
-				.description(plan.getDescription())
-				.isDollar(plan.getIsDollar())
-				.tool(savedTool)
-				.build())
+			.map(planRequest -> Plan.create(planRequest, savedTool))
 			.toList();
 
 		planRepository.saveAll(mapped);
 
+		//ToolBlog 가공
+		List<ToolBlog> blogLinks = createToolRequest.blogLinks().stream()
+			.map(link -> ToolBlog.create(link, savedTool))
+			.toList();
+
+		toolBlogRepository.saveAll(blogLinks);
+
+		//ToolCore 가공
 		List<ToolCore> coreList = createToolRequest.cores().stream()
-			.map(core -> ToolCore.builder()
-				.coreTitle(core.getCoreTitle())
-				.coreContent(core.getCoreContent())
-				.tool(savedTool)
-				.build())
+			.map(core -> ToolCore.create(core, savedTool))
 			.toList();
 		toolCoreRepository.saveAll(coreList);
 
@@ -230,8 +230,11 @@ public class AdminService {
 			}
 			if (!req.cores().isEmpty()) {
 				List<ToolCore> toSave = req.cores().stream()
-					.filter(c -> c != null && c.getCoreTitle() != null && c.getCoreContent() != null)
-					.map(c -> ToolCore.builder().coreTitle(c.getCoreTitle()).coreContent(c.getCoreContent()).tool(tool)
+					.filter(c -> c != null && c.coreName() != null && c.coreContent() != null)
+					.map(c -> ToolCore.builder()
+						.coreTitle(c.coreName().trim())
+						.coreContent(c.coreContent())
+						.tool(tool)
 						.build())
 					.toList();
 				if (!toSave.isEmpty()) {
@@ -248,18 +251,33 @@ public class AdminService {
 			}
 			if (!req.plans().isEmpty()) {
 				List<Plan> toSave = req.plans().stream()
-					.filter(p -> p != null && p.getPlanName() != null && p.getPriceMonthly() != null)
+					.filter(p -> p != null && p.planName() != null && p.planPrice() != null)
 					.map(p -> Plan.builder()
-						.planName(p.getPlanName().trim())
-						.priceMonthly(p.getPriceMonthly())
-						.priceAnnual(p.getPriceAnnual())
-						.description(p.getDescription())
-						.isDollar(p.getIsDollar())
+						.planName(p.planName().trim())
+						.priceMonthly(p.planPrice())
+						.description(p.planDescription())
 						.tool(tool)
 						.build())
 					.toList();
 				if (!toSave.isEmpty()) {
 					planRepository.saveAll(toSave);
+				}
+			}
+		}
+
+		// 툴 블로그 수정
+		if (req.blogLinks() != null) {
+			List<ToolBlog> existing = toolBlogRepository.findAllByTool(tool);
+			if (!existing.isEmpty()) {
+				toolBlogRepository.deleteAll(existing);
+			}
+			if (!req.blogLinks().isEmpty()) {
+				List<ToolBlog> toSave = req.blogLinks().stream()
+					.filter(link -> link != null && !link.isBlank())
+					.map(link -> ToolBlog.create(link.trim(), tool))
+					.toList();
+				if (!toSave.isEmpty()) {
+					toolBlogRepository.saveAll(toSave);
 				}
 			}
 		}
@@ -299,6 +317,7 @@ public class AdminService {
 		planRepository.deleteByTool(tool);
 		toolPlatFormRepository.deleteByTool(tool);
 		toolScrapRepository.deleteByTool(tool);
+		toolBlogRepository.deleteByTool(tool);
 
 		// 2) 연관 툴(양방향 FK) 모두 제거
 		relatedToolRepository.deleteByTool(tool);
