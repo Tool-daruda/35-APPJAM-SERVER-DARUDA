@@ -1,13 +1,13 @@
 package com.daruda.darudaserver.domain.admin.dto.request;
 
-import org.springframework.context.annotation.Description;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public record CreateToolPlatFormRequest(
-	@Description("웹 지원 여부")
+	@Schema(description = "웹 지원 여부")
 	Boolean supportWeb,
-	@Description("Windows 지원 여부")
+	@Schema(description = "Windows 지원 여부")
 	Boolean supportWindows,
-	@Description("Mac OS 지원 여부")
+	@Schema(description = "Mac OS 지원 여부")
 	Boolean supportMac
 ) {
 }
