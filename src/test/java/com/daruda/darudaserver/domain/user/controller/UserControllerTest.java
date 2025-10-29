@@ -77,7 +77,8 @@ class UserControllerTest {
 		Long userId = 1L;
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = positions.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
@@ -106,7 +107,8 @@ class UserControllerTest {
 	void getFavoriteTools_success() throws Exception {
 		// given
 		Long userId = 1L;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
@@ -131,7 +133,8 @@ class UserControllerTest {
 	void getUserBoards_success() throws Exception {
 		// given
 		Long userId = 1L;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
@@ -160,6 +163,7 @@ class UserControllerTest {
 		Long userId = 1L;
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
+		String positionEngName = positions.getEngName();
 
 		UserEntity user = UserEntity.builder()
 			.nickname(nickname)
@@ -167,8 +171,9 @@ class UserControllerTest {
 			.build();
 
 		ReflectionTestUtils.setField(user, "id", userId);
+		ReflectionTestUtils.setField(user, "positions", positions);
 
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
@@ -196,7 +201,8 @@ class UserControllerTest {
 		// given
 		Long userId = 1L;
 		String nickname = "tester";
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
@@ -222,7 +228,8 @@ class UserControllerTest {
 	void getFavoriteBoards_success() throws Exception {
 		// given
 		Long userId = 1L;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);

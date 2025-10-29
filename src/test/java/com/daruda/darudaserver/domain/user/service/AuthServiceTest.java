@@ -69,14 +69,15 @@ public class AuthServiceTest {
 		// given
 		String email = "test@example.com";
 		String nickname = "tester";
-		String positionStr = Positions.STUDENT.getName();
+		Positions position = Positions.STUDENT;
+		String positionStr = position.getName();
 		UserEntity mockUser = UserEntity.of(email, nickname, Positions.fromString(positionStr));
 		ReflectionTestUtils.setField(mockUser, "id", 1L);
 		JwtTokenResponse mockTokenResponse = new JwtTokenResponse("accessToken", "refreshToken");
 
 		when(userRepository.existsByEmail(email)).thenReturn(false);
 		when(userRepository.save(any(UserEntity.class))).thenReturn(mockUser);
-		when(tokenService.createToken(1L)).thenReturn(mockTokenResponse);
+		when(tokenService.createToken(1L, position.getEngName())).thenReturn(mockTokenResponse);
 
 		// when
 		SignUpSuccessResponse response = authService.register(email, nickname, positionStr);
@@ -89,7 +90,7 @@ public class AuthServiceTest {
 
 		verify(userRepository).existsByEmail(email);
 		verify(userRepository).save(any(UserEntity.class));
-		verify(tokenService).createToken(1L);
+		verify(tokenService).createToken(1L, position.getEngName());
 	}
 
 	@Test
@@ -111,7 +112,7 @@ public class AuthServiceTest {
 
 		verify(userRepository).existsByEmail(email);
 		verify(userRepository, never()).save(any(UserEntity.class));
-		verify(tokenService, never()).createToken(anyLong());
+		verify(tokenService, never()).createToken(anyLong(), anyString());
 	}
 
 	@Test
@@ -121,13 +122,15 @@ public class AuthServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Long userId = 1L;
+		Positions position = Positions.STUDENT;
 		UserEntity mockUser = mock(UserEntity.class);
 		JwtTokenResponse mockTokenResponse = JwtTokenResponse.of("accessToken", "refreshToken");
 
 		when(userRepository.findByEmail(email)).thenReturn(Optional.of(mockUser));
 		when(mockUser.getId()).thenReturn(userId);
 		when(mockUser.getNickname()).thenReturn(nickname);
-		when(tokenService.createToken(userId)).thenReturn(mockTokenResponse);
+		when(mockUser.getPositions()).thenReturn(position);
+		when(tokenService.createToken(userId, position.getEngName())).thenReturn(mockTokenResponse);
 
 		UserInformationResponse userInformationResponse = UserInformationResponse.of(userId, email, nickname);
 
@@ -142,7 +145,7 @@ public class AuthServiceTest {
 		assertThat(response.jwtTokenResponse()).isEqualTo(mockTokenResponse);
 
 		verify(userRepository).findByEmail(email);
-		verify(tokenService).createToken(userId);
+		verify(tokenService).createToken(userId, position.getEngName());
 	}
 
 	@Test
@@ -168,7 +171,7 @@ public class AuthServiceTest {
 		assertThat(response.jwtTokenResponse()).isEqualTo(null);
 
 		verify(userRepository).findByEmail(email);
-		verify(tokenService, never()).createToken(anyLong());
+		verify(tokenService, never()).createToken(anyLong(), anyString());
 	}
 
 	@Test

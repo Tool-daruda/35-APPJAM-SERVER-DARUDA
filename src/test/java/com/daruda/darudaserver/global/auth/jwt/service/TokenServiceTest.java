@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
+import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.global.auth.jwt.entity.Token;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtValidationType;
@@ -44,7 +45,8 @@ class TokenServiceTest {
 	void createToken_success() {
 		// given
 		Long userId = 1L;
-		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		String accessToken = "accessToken";
 		String refreshToken = "refreshToken";
 
@@ -52,7 +54,7 @@ class TokenServiceTest {
 		when(jwtTokenProvider.generateRefreshToken(userAuthentication)).thenReturn(refreshToken);
 
 		// when
-		JwtTokenResponse response = tokenService.createToken(userId);
+		JwtTokenResponse response = tokenService.createToken(userId, positionEngName);
 
 		// then
 		assertNotNull(response);
@@ -69,7 +71,8 @@ class TokenServiceTest {
 		String refreshToken = "validRefreshToken";
 		Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
 		Long userId = 1L;
-		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		String newAccessToken = "newAccessToken";
 		String newRefreshToken = "newRefreshToken";
 
@@ -77,6 +80,7 @@ class TokenServiceTest {
 		when(request.getCookies()).thenReturn(new Cookie[] {refreshCookie});
 		when(jwtTokenProvider.validateToken(refreshToken)).thenReturn(JwtValidationType.VALID_JWT);
 		when(jwtTokenProvider.getUserIdFromJwt(refreshToken)).thenReturn(userId);
+		when(jwtTokenProvider.getRoleFromJwt(refreshToken)).thenReturn(positionEngName);
 		when(tokenRepository.findByRefreshToken(refreshToken)).thenReturn(Optional.of(Token.of(userId, refreshToken)));
 		when(jwtTokenProvider.generateAccessToken(userAuthentication)).thenReturn(newAccessToken);
 		when(jwtTokenProvider.generateRefreshToken(userAuthentication)).thenReturn(newRefreshToken);
