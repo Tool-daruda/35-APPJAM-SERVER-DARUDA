@@ -16,13 +16,8 @@ public class UserAuthentication extends UsernamePasswordAuthenticationToken {
 		super(principal, credentials, authorities);
 	}
 
-	public static UserAuthentication createUserAuthentication(Long userId) {
-		log.debug("createUserAuthentication - userId" + userId);
-		return new UserAuthentication(userId, null, Collections.emptyList());
-	}
-
-	public static UserAuthentication createUserAuthenticationWithRole(Long userId, String role) {
-		log.debug("createUserAuthenticationWithRole - userId: {} role: {}", userId, role);
+	public static UserAuthentication createUserAuthentication(Long userId, String role) {
+		log.debug("createUserAuthentication - userId: {} role: {}", userId, role);
 
 		SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
 		return new UserAuthentication(userId, null, Collections.singletonList(authority));

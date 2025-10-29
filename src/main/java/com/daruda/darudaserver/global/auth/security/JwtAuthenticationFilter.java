@@ -104,7 +104,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			throw new BadRequestException(ErrorCode.USER_NOT_FOUND);
 		}
 		log.debug("SecurityContextHolder : {}", userId);
-		UserAuthentication authentication = UserAuthentication.createUserAuthenticationWithRole(userId, role);
+		UserAuthentication authentication = UserAuthentication.createUserAuthentication(userId, role);
 		createAndSetWebAuthenticationDetails(request, authentication);
 
 		SecurityContext securityContext = SecurityContextHolder.getContext();

@@ -33,7 +33,7 @@ public class TokenService {
 
 	@Transactional
 	public JwtTokenResponse createToken(final Long userId, final String role) {
-		UserAuthentication userAuthentication = UserAuthentication.createUserAuthenticationWithRole(userId, role);
+		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId, role);
 
 		String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
 		log.debug("AccessToken 생성 완료 (length={} / masked)", accessToken.length());
