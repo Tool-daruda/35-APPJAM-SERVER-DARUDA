@@ -2,6 +2,7 @@ package com.daruda.darudaserver.global.auth.security;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Locale;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,8 +19,12 @@ public class UserAuthentication extends UsernamePasswordAuthenticationToken {
 
 	public static UserAuthentication createUserAuthentication(Long userId, String role) {
 		log.debug("createUserAuthentication - userId: {} role: {}", userId, role);
-
-		SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
+		if (role == null || role.isBlank()) {
+			throw new IllegalArgumentException("role must not be null/blank");
+		}
+		String normalized = role.startsWith("ROLE_") ? role.substring(5) : role;
+		SimpleGrantedAuthority authority =
+			new SimpleGrantedAuthority("ROLE_" + normalized.toUpperCase(Locale.ROOT));
 		return new UserAuthentication(userId, null, Collections.singletonList(authority));
 	}
 }
