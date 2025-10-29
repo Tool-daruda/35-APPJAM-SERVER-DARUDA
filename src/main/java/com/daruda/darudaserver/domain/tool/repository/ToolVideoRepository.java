@@ -13,7 +13,7 @@ import jakarta.transaction.Transactional;
 
 @Repository
 public interface ToolVideoRepository extends JpaRepository<ToolVideo, Long> {
-	List<ToolVideo> findAllByTool(final Tool toolId);
+	List<ToolVideo> findAllByTool(final Tool tool);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Transactional

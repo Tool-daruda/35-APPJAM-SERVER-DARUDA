@@ -8,6 +8,6 @@ public record CreateToolPlatFormRequest(
 	@Description("Windows 지원 여부")
 	Boolean supportWindows,
 	@Description("Mac OS 지원 여부")
-	Boolean SupportMac
+	Boolean supportMac
 ) {
 }

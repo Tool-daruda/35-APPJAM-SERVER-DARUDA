@@ -13,7 +13,7 @@ import jakarta.transaction.Transactional;
 
 @Repository
 public interface ToolPlatFormRepository extends JpaRepository<ToolPlatForm, Long> {
-	List<ToolPlatForm> findAllByTool(final Tool toolId);
+	List<ToolPlatForm> findAllByTool(final Tool tool);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Transactional
