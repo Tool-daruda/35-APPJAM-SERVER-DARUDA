@@ -1,7 +1,5 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
-import com.daruda.darudaserver.domain.admin.dto.request.CreateToolCoreRequest;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,27 +20,23 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Builder
-@Table(name = "core_feature")
-public class ToolCore {
-
+@Table(name = "tool_blog")
+public class ToolBlog {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long coreId;
+	@Column(name = "tool_blog_id")
+	private Long blogId;
 
-	@Column(name = "core_title", nullable = false)
-	private String coreTitle;
-
-	@Column(name = "core_content", nullable = false, length = 500)
-	private String coreContent;
+	@Column(name = "blog_url", nullable = false, length = 50000)
+	private String blogUrl;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tool_id", nullable = false)
 	private Tool tool;
 
-	public static ToolCore create(CreateToolCoreRequest toolCoreRequest, Tool tool) {
-		return ToolCore.builder()
-			.coreTitle(toolCoreRequest.coreName())
-			.coreContent(toolCoreRequest.coreContent())
+	public static ToolBlog create(String blogUrl, Tool tool) {
+		return ToolBlog.builder()
+			.blogUrl(blogUrl)
 			.tool(tool)
 			.build();
 	}
