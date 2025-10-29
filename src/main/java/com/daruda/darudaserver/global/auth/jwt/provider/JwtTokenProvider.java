@@ -55,7 +55,8 @@ public class JwtTokenProvider {
 
 	public String getRoleFromJwt(String token) {
 		Claims claims = getBody(token);
-		return claims.get(ROLE).toString();
+		Object roleObj = claims.get(ROLE);
+		return roleObj != null ? roleObj.toString() : null;
 	}
 
 	private Claims getBody(final String token) {
