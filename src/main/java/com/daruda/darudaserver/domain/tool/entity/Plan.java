@@ -25,7 +25,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "tool_plan")
 public class Plan {
 
-	// TODO: 재구조화 필요 (연간, 월간, isDollar 정책 확립)
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long planId;
@@ -33,17 +32,11 @@ public class Plan {
 	@Column(name = "plan_name", nullable = false)
 	private String planName;
 
-	@Column(name = "price_monthly", nullable = false)
-	private Long priceMonthly;
-
-	@Column(name = "price_annual")
-	private Long priceAnnual;
+	@Column(name = "price", nullable = false)
+	private Long price;
 
 	@Column(name = "description", nullable = false, length = 500)
 	private String description;
-
-	@Column(name = "is_dollar", nullable = false)
-	private Boolean isDollar;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tool_id", nullable = false)
@@ -52,9 +45,8 @@ public class Plan {
 	public static Plan create(CreateToolPlanRequest toolPlanRequest, Tool tool) {
 		return Plan.builder()
 			.planName(toolPlanRequest.planName())
-			.priceMonthly(toolPlanRequest.planPrice())
+			.price(toolPlanRequest.planPrice())
 			.description(toolPlanRequest.planDescription())
-			.isDollar(false)
 			.tool(tool)
 			.build();
 	}
