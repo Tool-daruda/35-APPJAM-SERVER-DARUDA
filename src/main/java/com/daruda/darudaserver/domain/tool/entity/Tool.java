@@ -140,7 +140,8 @@ public class Tool {
 		final String planLink,
 		final String bgColor,
 		final Boolean fontColor,
-		final String toolLogo) {
+		final String toolLogo,
+		final PlanType planType) {
 		this.toolMainName = toolMainName;
 		this.toolSubName = toolSubName;
 		this.category = category;
@@ -155,6 +156,7 @@ public class Tool {
 			this.fontColor = fontColor;
 		}
 		this.toolLogo = toolLogo;
+		this.planType = planType;
 	}
 
 }

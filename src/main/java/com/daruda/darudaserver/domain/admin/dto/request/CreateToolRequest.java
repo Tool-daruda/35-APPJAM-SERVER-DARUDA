@@ -43,6 +43,8 @@ public record CreateToolRequest(
 	List<String> keywords,
 	@Schema(description = "핵심 기능 목록")
 	List<CreateToolCoreRequest> cores,
+	@Schema(description = "플랜 유형")
+	String planType,
 	@Schema(description = "플랜 목록")
 	List<CreateToolPlanRequest> plans,
 	@Schema(description = "블로그 링크 목록")

@@ -15,6 +15,7 @@ import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.tool.entity.Category;
 import com.daruda.darudaserver.domain.tool.entity.License;
 import com.daruda.darudaserver.domain.tool.entity.Plan;
+import com.daruda.darudaserver.domain.tool.entity.PlanType;
 import com.daruda.darudaserver.domain.tool.entity.RelatedTool;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.entity.ToolBlog;
@@ -69,6 +70,7 @@ public class AdminService {
 			.fontColor(createToolRequest.fontColor())
 			.planLink(createToolRequest.planLink())
 			.supportKorea(createToolRequest.supportKorea())
+			.planType(PlanType.formString(createToolRequest.planType()))
 			.build();
 
 		Tool savedTool = toolRepository.save(tool);
@@ -168,7 +170,8 @@ public class AdminService {
 			req.planLink() != null ? req.planLink() : tool.getPlanLink(),
 			req.bgColor() != null ? req.bgColor() : tool.getBgColor(),
 			req.fontColor() != null ? req.fontColor() : tool.isFontColor(),
-			req.toolLogo() != null ? req.toolLogo() : tool.getToolLogo()
+			req.toolLogo() != null ? req.toolLogo() : tool.getToolLogo(),
+			req.planType() != null ? PlanType.formString(req.planType()) : tool.getPlanType()
 		);
 
 		// 툴 키워드 수정
@@ -254,7 +257,7 @@ public class AdminService {
 					.filter(p -> p != null && p.planName() != null && p.planPrice() != null)
 					.map(p -> Plan.builder()
 						.planName(p.planName().trim())
-						.priceMonthly(p.planPrice())
+						.price(p.planPrice())
 						.description(p.planDescription())
 						.tool(tool)
 						.build())
