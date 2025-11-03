@@ -2,8 +2,13 @@ package com.daruda.darudaserver.domain.tool.entity;
 
 import java.sql.Timestamp;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -18,63 +23,53 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "tool")
+@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
 public class Tool {
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "plan_type")
+	PlanType planType;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long toolId;
-
 	@Column(name = "tool_main_name", nullable = false)
 	private String toolMainName;
-
 	@Column(name = "tool_sub_name", nullable = false)
 	private String toolSubName;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "category", nullable = false)
 	private Category category;
-
 	@Column(name = "tool_link", nullable = false, length = 5000)
 	private String toolLink;
-
-	@Column(name = "description", nullable = false)
+	@Column(name = "description", nullable = false, length = 500)
 	private String description;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "license", nullable = false)
 	private License license;
-
 	@Column(name = "support_korea", nullable = false)
 	private Boolean supportKorea;
-
-	@Column(name = "detail_description", nullable = false)
+	@Column(name = "detail_description", nullable = false, length = 500)
 	private String detailDescription;
-
 	@Column(name = "plan_link", length = 5000)
 	private String planLink;
-
 	@Column(name = "bg_color", nullable = false)
 	private String bgColor;
-
 	@Column(name = "font_color")
 	private boolean fontColor;
-
 	@Column(name = "tool_logo", nullable = false)
 	private String toolLogo;
-
+	@CreatedDate
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Timestamp createdAt;
-
+	@LastModifiedDate
 	@Column(name = "updated_at")
 	private Timestamp updatedAt;
-
 	@Column(columnDefinition = "integer default 0", nullable = false)
 	private int viewCount;
-
 	@Column(name = "popular", columnDefinition = "integer default 0")
 	private int popular;
 
@@ -146,7 +141,8 @@ public class Tool {
 		final String planLink,
 		final String bgColor,
 		final Boolean fontColor,
-		final String toolLogo) {
+		final String toolLogo,
+		final PlanType planType) {
 		this.toolMainName = toolMainName;
 		this.toolSubName = toolSubName;
 		this.category = category;
@@ -161,6 +157,7 @@ public class Tool {
 			this.fontColor = fontColor;
 		}
 		this.toolLogo = toolLogo;
+		this.planType = planType;
 	}
 
 }

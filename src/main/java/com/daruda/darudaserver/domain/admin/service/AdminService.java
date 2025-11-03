@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.admin.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.daruda.darudaserver.domain.admin.dto.request.CreateToolCoreRequest;
+import com.daruda.darudaserver.domain.admin.dto.request.CreateToolPlanRequest;
 import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
 import com.daruda.darudaserver.domain.admin.dto.request.UpdateToolRequest;
 import com.daruda.darudaserver.domain.admin.dto.response.AdminToolPageRes;
@@ -15,14 +18,17 @@ import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.tool.entity.Category;
 import com.daruda.darudaserver.domain.tool.entity.License;
 import com.daruda.darudaserver.domain.tool.entity.Plan;
+import com.daruda.darudaserver.domain.tool.entity.PlanType;
 import com.daruda.darudaserver.domain.tool.entity.RelatedTool;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolBlog;
 import com.daruda.darudaserver.domain.tool.entity.ToolCore;
 import com.daruda.darudaserver.domain.tool.entity.ToolImage;
 import com.daruda.darudaserver.domain.tool.entity.ToolKeyword;
 import com.daruda.darudaserver.domain.tool.entity.ToolVideo;
 import com.daruda.darudaserver.domain.tool.repository.PlanRepository;
 import com.daruda.darudaserver.domain.tool.repository.RelatedToolRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolBlogRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolCoreRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolKeywordRepository;
@@ -49,6 +55,7 @@ public class AdminService {
 	private final ToolPlatFormRepository toolPlatFormRepository;
 	private final BoardRepository boardRepository;
 	private final ToolScrapRepository toolScrapRepository;
+	private final ToolBlogRepository toolBlogRepository;
 
 	public void createTool(CreateToolRequest createToolRequest) {
 
@@ -66,6 +73,7 @@ public class AdminService {
 			.fontColor(createToolRequest.fontColor())
 			.planLink(createToolRequest.planLink())
 			.supportKorea(createToolRequest.supportKorea())
+			.planType(PlanType.formString(createToolRequest.planType()))
 			.build();
 
 		Tool savedTool = toolRepository.save(tool);
@@ -106,27 +114,40 @@ public class AdminService {
 		}
 
 		//ToolPlan 가공
-		List<Plan> mapped = createToolRequest.plans().stream()
-			.map(plan -> Plan.builder()
-				.planName(plan.getPlanName().trim())
-				.priceMonthly(plan.getPriceMonthly())
-				.priceAnnual(plan.getPriceAnnual())
-				.description(plan.getDescription())
-				.isDollar(plan.getIsDollar())
-				.tool(savedTool)
-				.build())
-			.toList();
+		List<CreateToolPlanRequest> planRequests = createToolRequest.plans();
+		if (planRequests != null && !planRequests.isEmpty()) {
+			List<Plan> planEntities = planRequests.stream()
+				.filter(Objects::nonNull)
+				.map(planRequest -> Plan.create(planRequest, savedTool))
+				.toList();
+			if (!planEntities.isEmpty()) {
+				planRepository.saveAll(planEntities);
+			}
+		}
 
-		planRepository.saveAll(mapped);
+		//ToolBlog 가공
+		List<String> blogLinks = createToolRequest.blogLinks();
+		if (blogLinks != null && !blogLinks.isEmpty()) {
+			List<ToolBlog> blogEntities = blogLinks.stream()
+				.filter(link -> link != null && !link.isBlank())
+				.map(link -> ToolBlog.create(link.trim(), savedTool))
+				.toList();
+			if (!blogEntities.isEmpty()) {
+				toolBlogRepository.saveAll(blogEntities);
+			}
+		}
 
-		List<ToolCore> coreList = createToolRequest.cores().stream()
-			.map(core -> ToolCore.builder()
-				.coreTitle(core.getCoreTitle())
-				.coreContent(core.getCoreContent())
-				.tool(savedTool)
-				.build())
-			.toList();
-		toolCoreRepository.saveAll(coreList);
+		//ToolCore 가공
+		List<CreateToolCoreRequest> coreList = createToolRequest.cores();
+		if (coreList != null && !coreList.isEmpty()) {
+			List<ToolCore> coreEntities = coreList.stream()
+				.filter(Objects::nonNull)
+				.map(core -> ToolCore.create(core, savedTool))
+				.toList();
+			if (!coreEntities.isEmpty()) {
+				toolCoreRepository.saveAll(coreEntities);
+			}
+		}
 
 		// RelatedTool 가공
 		List<Integer> relatedIds = createToolRequest.relatedToolIds();
@@ -168,7 +189,8 @@ public class AdminService {
 			req.planLink() != null ? req.planLink() : tool.getPlanLink(),
 			req.bgColor() != null ? req.bgColor() : tool.getBgColor(),
 			req.fontColor() != null ? req.fontColor() : tool.isFontColor(),
-			req.toolLogo() != null ? req.toolLogo() : tool.getToolLogo()
+			req.toolLogo() != null ? req.toolLogo() : tool.getToolLogo(),
+			req.planType() != null ? PlanType.formString(req.planType()) : tool.getPlanType()
 		);
 
 		// 툴 키워드 수정
@@ -230,8 +252,11 @@ public class AdminService {
 			}
 			if (!req.cores().isEmpty()) {
 				List<ToolCore> toSave = req.cores().stream()
-					.filter(c -> c != null && c.getCoreTitle() != null && c.getCoreContent() != null)
-					.map(c -> ToolCore.builder().coreTitle(c.getCoreTitle()).coreContent(c.getCoreContent()).tool(tool)
+					.filter(c -> c != null && c.coreName() != null && c.coreContent() != null)
+					.map(c -> ToolCore.builder()
+						.coreTitle(c.coreName().trim())
+						.coreContent(c.coreContent())
+						.tool(tool)
 						.build())
 					.toList();
 				if (!toSave.isEmpty()) {
@@ -248,18 +273,33 @@ public class AdminService {
 			}
 			if (!req.plans().isEmpty()) {
 				List<Plan> toSave = req.plans().stream()
-					.filter(p -> p != null && p.getPlanName() != null && p.getPriceMonthly() != null)
+					.filter(p -> p != null && p.planName() != null && p.planPrice() != null)
 					.map(p -> Plan.builder()
-						.planName(p.getPlanName().trim())
-						.priceMonthly(p.getPriceMonthly())
-						.priceAnnual(p.getPriceAnnual())
-						.description(p.getDescription())
-						.isDollar(p.getIsDollar())
+						.planName(p.planName().trim())
+						.price(p.planPrice())
+						.description(p.planDescription())
 						.tool(tool)
 						.build())
 					.toList();
 				if (!toSave.isEmpty()) {
 					planRepository.saveAll(toSave);
+				}
+			}
+		}
+
+		// 툴 블로그 수정
+		if (req.blogLinks() != null) {
+			List<ToolBlog> existing = toolBlogRepository.findAllByTool(tool);
+			if (!existing.isEmpty()) {
+				toolBlogRepository.deleteAll(existing);
+			}
+			if (!req.blogLinks().isEmpty()) {
+				List<ToolBlog> toSave = req.blogLinks().stream()
+					.filter(link -> link != null && !link.isBlank())
+					.map(link -> ToolBlog.create(link.trim(), tool))
+					.toList();
+				if (!toSave.isEmpty()) {
+					toolBlogRepository.saveAll(toSave);
 				}
 			}
 		}
@@ -271,7 +311,7 @@ public class AdminService {
 				relatedToolRepository.deleteAll(existing);
 			}
 			if (!req.relatedToolIds().isEmpty()) {
-				List<Long> altIds = req.relatedToolIds().stream().map(Integer::longValue).toList();
+				List<Long> altIds = req.relatedToolIds();
 				List<Tool> alternatives = toolRepository.findAllById(altIds);
 				if (!alternatives.isEmpty()) {
 					List<RelatedTool> relations = alternatives.stream()
@@ -299,6 +339,7 @@ public class AdminService {
 		planRepository.deleteByTool(tool);
 		toolPlatFormRepository.deleteByTool(tool);
 		toolScrapRepository.deleteByTool(tool);
+		toolBlogRepository.deleteByTool(tool);
 
 		// 2) 연관 툴(양방향 FK) 모두 제거
 		relatedToolRepository.deleteByTool(tool);

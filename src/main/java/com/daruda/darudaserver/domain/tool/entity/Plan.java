@@ -1,5 +1,7 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
+import com.daruda.darudaserver.domain.admin.dto.request.CreateToolPlanRequest;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -30,19 +32,22 @@ public class Plan {
 	@Column(name = "plan_name", nullable = false)
 	private String planName;
 
-	@Column(name = "price_monthly", nullable = false)
-	private Long priceMonthly;
+	@Column(name = "price", nullable = false)
+	private Long price;
 
-	@Column(name = "price_annual")
-	private Long priceAnnual;
-
-	@Column(name = "description", nullable = false, length = 50000)
+	@Column(name = "description", nullable = false, length = 500)
 	private String description;
-
-	@Column(name = "is_dollar", nullable = false)
-	private Boolean isDollar;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tool_id", nullable = false)
 	private Tool tool;
+
+	public static Plan create(CreateToolPlanRequest toolPlanRequest, Tool tool) {
+		return Plan.builder()
+			.planName(toolPlanRequest.planName())
+			.price(toolPlanRequest.planPrice())
+			.description(toolPlanRequest.planDescription())
+			.tool(tool)
+			.build();
+	}
 }

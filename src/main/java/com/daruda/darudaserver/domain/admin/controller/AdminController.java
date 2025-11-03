@@ -1,7 +1,6 @@
 package com.daruda.darudaserver.domain.admin.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -51,7 +50,6 @@ public class AdminController {
 	@PostMapping
 	@Operation(summary = "관리자용 툴 추가", description = "관리자용 툴 추가 API입니다.")
 	public ResponseEntity<SuccessResponse<Void>> createTool(
-		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "추가할 툴")
 		@RequestBody @Valid CreateToolRequest createToolRequest) {
 
@@ -62,7 +60,6 @@ public class AdminController {
 	@PatchMapping("/tools/{toolId}")
 	@Operation(summary = "관리자용 툴 수정", description = "관리자용 툴 수정 API입니다.")
 	public ResponseEntity<SuccessResponse<Void>> updateTool(
-		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "수정할 툴 ID") @PathVariable Long toolId,
 		@Parameter(description = "수정 요청 DTO") @RequestBody @Valid UpdateToolRequest request
 	) {

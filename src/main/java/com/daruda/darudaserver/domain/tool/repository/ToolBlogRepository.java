@@ -7,13 +7,13 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import com.daruda.darudaserver.domain.tool.entity.Tool;
-import com.daruda.darudaserver.domain.tool.entity.ToolImage;
+import com.daruda.darudaserver.domain.tool.entity.ToolBlog;
 
 import jakarta.transaction.Transactional;
 
 @Repository
-public interface ToolImageRepository extends JpaRepository<ToolImage, Long> {
-	List<ToolImage> findAllByTool(final Tool tool);
+public interface ToolBlogRepository extends JpaRepository<ToolBlog, Long> {
+	List<ToolBlog> findAllByTool(final Tool tool);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Transactional

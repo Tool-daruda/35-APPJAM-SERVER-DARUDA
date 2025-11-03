@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.springframework.stereotype.Service;
 
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
+import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.auth.jwt.entity.Token;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtValidationType;
@@ -29,11 +30,15 @@ import lombok.extern.slf4j.Slf4j;
 public class TokenService {
 
 	private final TokenRepository tokenRepository;
+	private final UserRepository userRepository;
 	private final JwtTokenProvider jwtTokenProvider;
 
 	@Transactional
-	public JwtTokenResponse createToken(final Long userId) {
-		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId);
+	public JwtTokenResponse createToken(final Long userId, final String role) {
+		if (role == null || role.isBlank()) {
+			throw new BadRequestException(ErrorCode.INVALID_FIELD_ERROR);
+		}
+		UserAuthentication userAuthentication = UserAuthentication.createUserAuthentication(userId, role);
 
 		String accessToken = jwtTokenProvider.generateAccessToken(userAuthentication);
 		log.debug("AccessToken 생성 완료 (length={} / masked)", accessToken.length());
@@ -54,7 +59,15 @@ public class TokenService {
 
 		verifyUserIdWithStoredToken(userId, refreshToken);
 
-		return createToken(userId);
+		String role = jwtTokenProvider.getRoleFromJwt(refreshToken);
+
+		if (role == null || role.isBlank()) {
+			role = userRepository.findById(userId)
+				.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND))
+				.getPositions().getEngName();
+		}
+		
+		return createToken(userId, role);
 	}
 
 	@Transactional
