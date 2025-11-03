@@ -30,6 +30,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Tool {
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "plan_type")
 	PlanType planType;
 	@Id

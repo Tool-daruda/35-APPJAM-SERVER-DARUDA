@@ -118,11 +118,16 @@ public class AdminService {
 		planRepository.saveAll(mapped);
 
 		//ToolBlog 가공
-		List<ToolBlog> blogLinks = createToolRequest.blogLinks().stream()
-			.map(link -> ToolBlog.create(link, savedTool))
-			.toList();
-
-		toolBlogRepository.saveAll(blogLinks);
+		List<String> blogLinks = createToolRequest.blogLinks();
+		if (blogLinks != null && !blogLinks.isEmpty()) {
+			List<ToolBlog> blogEntities = blogLinks.stream()
+				.filter(link -> link != null && !link.isBlank())
+				.map(link -> ToolBlog.create(link.trim(), savedTool))
+				.toList();
+			if (!blogEntities.isEmpty()) {
+				toolBlogRepository.saveAll(blogEntities);
+			}
+		}
 
 		//ToolCore 가공
 		List<ToolCore> coreList = createToolRequest.cores().stream()
@@ -292,7 +297,7 @@ public class AdminService {
 				relatedToolRepository.deleteAll(existing);
 			}
 			if (!req.relatedToolIds().isEmpty()) {
-				List<Long> altIds = req.relatedToolIds().stream().map(Integer::longValue).toList();
+				List<Long> altIds = req.relatedToolIds();
 				List<Tool> alternatives = toolRepository.findAllById(altIds);
 				if (!alternatives.isEmpty()) {
 					List<RelatedTool> relations = alternatives.stream()

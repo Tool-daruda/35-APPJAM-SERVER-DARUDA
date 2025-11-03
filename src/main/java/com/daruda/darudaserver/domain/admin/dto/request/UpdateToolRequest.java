@@ -55,6 +55,6 @@ public record UpdateToolRequest(
 	@Schema(description = "참고하면 좋은 영상 링크 목록")
 	List<String> videos,
 	@Schema(description = "관련 툴 ID 목록")
-	List<Integer> relatedToolIds
+	List<Long> relatedToolIds
 ) {
 }
