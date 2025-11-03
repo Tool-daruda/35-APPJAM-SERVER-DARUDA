@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.admin.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.daruda.darudaserver.domain.admin.dto.request.CreateToolCoreRequest;
+import com.daruda.darudaserver.domain.admin.dto.request.CreateToolPlanRequest;
 import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
 import com.daruda.darudaserver.domain.admin.dto.request.UpdateToolRequest;
 import com.daruda.darudaserver.domain.admin.dto.response.AdminToolPageRes;
@@ -111,11 +114,16 @@ public class AdminService {
 		}
 
 		//ToolPlan 가공
-		List<Plan> mapped = createToolRequest.plans().stream()
-			.map(planRequest -> Plan.create(planRequest, savedTool))
-			.toList();
-
-		planRepository.saveAll(mapped);
+		List<CreateToolPlanRequest> planRequests = createToolRequest.plans();
+		if (planRequests != null && !planRequests.isEmpty()) {
+			List<Plan> planEntities = planRequests.stream()
+				.filter(Objects::nonNull)
+				.map(planRequest -> Plan.create(planRequest, savedTool))
+				.toList();
+			if (!planEntities.isEmpty()) {
+				planRepository.saveAll(planEntities);
+			}
+		}
 
 		//ToolBlog 가공
 		List<String> blogLinks = createToolRequest.blogLinks();
@@ -130,10 +138,16 @@ public class AdminService {
 		}
 
 		//ToolCore 가공
-		List<ToolCore> coreList = createToolRequest.cores().stream()
-			.map(core -> ToolCore.create(core, savedTool))
-			.toList();
-		toolCoreRepository.saveAll(coreList);
+		List<CreateToolCoreRequest> coreList = createToolRequest.cores();
+		if (coreList != null && !coreList.isEmpty()) {
+			List<ToolCore> coreEntities = coreList.stream()
+				.filter(Objects::nonNull)
+				.map(core -> ToolCore.create(core, savedTool))
+				.toList();
+			if (!coreEntities.isEmpty()) {
+				toolCoreRepository.saveAll(coreEntities);
+			}
+		}
 
 		// RelatedTool 가공
 		List<Integer> relatedIds = createToolRequest.relatedToolIds();
