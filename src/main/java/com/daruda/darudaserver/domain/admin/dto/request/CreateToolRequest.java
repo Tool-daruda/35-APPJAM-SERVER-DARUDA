@@ -34,7 +34,7 @@ public record CreateToolRequest(
 	@Schema(description = "배경 색상", nullable = true)
 	String bgColor,
 	@Schema(description = "글자 색상", nullable = true)
-	boolean fontColor,
+	Boolean fontColor,
 	@Schema(description = "로고 이미지 링크")
 	String toolLogo,
 	@Schema(description = "플랫폼 지원 정보")
