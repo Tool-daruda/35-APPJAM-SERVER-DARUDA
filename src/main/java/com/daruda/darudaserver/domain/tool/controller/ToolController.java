@@ -80,7 +80,7 @@ public class ToolController {
 	}
 
 	@DisableSwaggerSecurity
-	@GetMapping("/{tool-id}/blogs)")
+	@GetMapping("/{tool-id}/blogs")
 	@Operation(summary = "tool 블로그 조회", description = "tool 관련 블로그를 조회합니다.")
 	public ResponseEntity<ApiResponse<ToolBlogListRes>> getToolBlogs(
 		@Parameter(description = "tool Id", example = "1")
