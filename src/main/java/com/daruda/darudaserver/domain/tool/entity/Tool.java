@@ -30,9 +30,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Tool {
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "plan_type")
-	PlanType planType;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long toolId;
@@ -56,7 +53,7 @@ public class Tool {
 	private String detailDescription;
 	@Column(name = "plan_link", length = 5000)
 	private String planLink;
-	@Column(name = "bg_color", nullable = false)
+	@Column(name = "bg_color")
 	private String bgColor;
 	@Column(name = "font_color")
 	private boolean fontColor;
@@ -72,24 +69,9 @@ public class Tool {
 	private int viewCount;
 	@Column(name = "popular", columnDefinition = "integer default 0")
 	private int popular;
-
-	@Builder
-	private Tool(String toolMainName, String toolSubName, Category category, String toolLink, String description,
-		License license, Boolean supportKorea, String detailDescription, String planLink, String bgColor,
-		boolean fontColor, String toolLogo) {
-		this.toolMainName = toolMainName;
-		this.toolSubName = toolSubName;
-		this.category = category;
-		this.toolLink = toolLink;
-		this.description = description;
-		this.license = license;
-		this.supportKorea = supportKorea;
-		this.detailDescription = detailDescription;
-		this.planLink = planLink;
-		this.bgColor = bgColor;
-		this.fontColor = fontColor;
-		this.toolLogo = toolLogo;
-	}
+	@Enumerated(EnumType.STRING)
+	@Column(name = "plan_type")
+	private PlanType planType;
 
 	public static Tool of(String toolMainName, String toolSubName, Category category, String toolLink,
 		String description,
