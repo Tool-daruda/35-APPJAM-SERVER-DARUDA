@@ -32,9 +32,9 @@ public record UpdateToolRequest(
 	String detailDescription,
 	@Schema(description = "가격정책 링크")
 	String planLink,
-	@Schema(description = "배경 색상")
+	@Schema(description = "배경 색상", nullable = true)
 	String bgColor,
-	@Schema(description = "글자 색상")
+	@Schema(description = "글자 색상", nullable = true)
 	Boolean fontColor,
 	@Schema(description = "로고 이미지 링크")
 	String toolLogo,
