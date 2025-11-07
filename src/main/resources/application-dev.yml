@@ -50,7 +50,7 @@ logging:
 
 kakao:
   client_id: 65b8edb9273b17a701f937868170f95e
-  redirect_uri: http://localhost:5173/api/v1/users/kakao/login-url
+  redirect_uri: https://www.daruda.shop/api/v1/users/kakao/login-url
 
 jwt:
   secret: ENC(Mzng6SahiZBXTfKCB6pdKIcdPTDMcAhJyyBjbwuSkNbbd9ysylQonYe7u4f3FYfQXYUXZJiC+k/fmUMYNzykCrFke+EloN7/1kt5PJiNPz8IFNDlm9j2BBr6q9wRU5pvxHj/oNOIVZg=)

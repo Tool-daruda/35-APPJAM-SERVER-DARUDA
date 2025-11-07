@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.daruda.darudaserver.domain.tool.dto.res.CategoryRes;
 import com.daruda.darudaserver.domain.tool.dto.res.PlanListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.RelatedToolListRes;
+import com.daruda.darudaserver.domain.tool.dto.res.ToolBlogListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolCoreListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDetailGetRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolListRes;
@@ -76,6 +77,17 @@ public class ToolController {
 		@PathVariable(name = "tool-id") final Long toolId) {
 		RelatedToolListRes relatedTool = toolService.getRelatedTool(toolId);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(relatedTool, SuccessCode.SUCCESS_FETCH));
+	}
+
+	@DisableSwaggerSecurity
+	@GetMapping("/{tool-id}/blogs")
+	@Operation(summary = "tool 블로그 조회", description = "tool 관련 블로그를 조회합니다.")
+	public ResponseEntity<ApiResponse<ToolBlogListRes>> getToolBlogs(
+		@Parameter(description = "tool Id", example = "1")
+		@PathVariable(name = "tool-id") final Long toolId
+	) {
+		ToolBlogListRes toolBlogRes = toolService.getBlog(toolId);
+		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolBlogRes, SuccessCode.SUCCESS_FETCH));
 	}
 
 	@GetMapping
