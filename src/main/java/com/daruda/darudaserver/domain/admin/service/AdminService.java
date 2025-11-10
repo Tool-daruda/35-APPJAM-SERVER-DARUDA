@@ -65,12 +65,10 @@ public class AdminService {
 			.toolLink(createToolRequest.toolLink())
 			.toolMainName(createToolRequest.toolMainName())
 			.toolSubName(createToolRequest.toolSubName())
-			.bgColor(createToolRequest.bgColor())
 			.category(Category.from(createToolRequest.category()))
 			.description(createToolRequest.description())
 			.detailDescription(createToolRequest.detailDescription())
 			.license(License.from(createToolRequest.license()))
-			.fontColor(createToolRequest.fontColor())
 			.planLink(createToolRequest.planLink())
 			.supportKorea(createToolRequest.supportKorea())
 			.planType(PlanType.formString(createToolRequest.planType()))
@@ -187,8 +185,6 @@ public class AdminService {
 			req.supportKorea() != null ? req.supportKorea() : tool.getSupportKorea(),
 			req.detailDescription() != null ? req.detailDescription() : tool.getDetailDescription(),
 			req.planLink() != null ? req.planLink() : tool.getPlanLink(),
-			req.bgColor() != null ? req.bgColor() : tool.getBgColor(),
-			req.fontColor() != null ? req.fontColor() : tool.isFontColor(),
 			req.toolLogo() != null ? req.toolLogo() : tool.getToolLogo(),
 			req.planType() != null ? PlanType.formString(req.planType()) : tool.getPlanType()
 		);

@@ -35,6 +35,7 @@ public class SecurityConfig {
 		"/api/v1/tool",
 		"/api/v1/tool/{tool-id}",
 		"/api/v1/tool/{tool-id}/plans",
+		"/api/v1/tool/{tool-id}/blogs",
 		"/api/v1/tool/{tool-id}/core-features",
 		"/api/v1/tool/{tool-id}/alternatives",
 		"/api/v1/tool/category",

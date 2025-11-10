@@ -121,8 +121,6 @@ public class Tool {
 		final Boolean supportKorea,
 		final String detailDescription,
 		final String planLink,
-		final String bgColor,
-		final Boolean fontColor,
 		final String toolLogo,
 		final PlanType planType) {
 		this.toolMainName = toolMainName;
@@ -134,10 +132,6 @@ public class Tool {
 		this.supportKorea = supportKorea;
 		this.detailDescription = detailDescription;
 		this.planLink = planLink;
-		this.bgColor = bgColor;
-		if (fontColor != null) {
-			this.fontColor = fontColor;
-		}
 		this.toolLogo = toolLogo;
 		this.planType = planType;
 	}
