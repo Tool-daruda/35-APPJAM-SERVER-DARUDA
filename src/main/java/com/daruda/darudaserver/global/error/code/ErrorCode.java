@@ -54,6 +54,7 @@ public enum ErrorCode {
 	SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND, "E404007", "스크랩이 존재하지 않습니다"),
 	NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "E404008", "알림이 존재하지 않습니다"),
 	REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "E404009", "신고가 존재하지 않습니다"),
+	TOOL_PLATFORM_NOT_FOUND(HttpStatus.NOT_FOUND, "E404010", "툴 플랫폼 정보가 존재하지 않습니다"),
 
 	/* 409 CONFLICT */
 

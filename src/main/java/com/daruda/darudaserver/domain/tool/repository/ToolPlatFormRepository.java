@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.tool.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,6 +15,8 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface ToolPlatFormRepository extends JpaRepository<ToolPlatForm, Long> {
 	List<ToolPlatForm> findAllByTool(final Tool tool);
+
+	Optional<ToolPlatForm> findByTool(final Tool tool);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Transactional
