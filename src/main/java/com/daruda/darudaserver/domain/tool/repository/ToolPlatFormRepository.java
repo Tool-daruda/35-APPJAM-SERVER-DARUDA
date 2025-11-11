@@ -16,7 +16,7 @@ import jakarta.transaction.Transactional;
 public interface ToolPlatFormRepository extends JpaRepository<ToolPlatForm, Long> {
 	List<ToolPlatForm> findAllByTool(final Tool tool);
 
-	Optional<ToolPlatForm> findByTool(final Tool tool);
+	Optional<ToolPlatForm> findFirstByTool(final Tool tool);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Transactional

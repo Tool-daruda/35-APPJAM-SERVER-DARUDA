@@ -38,6 +38,7 @@ public class ToolPlatForm {
 	@Column(name = "mac", nullable = false)
 	private Boolean mac;
 
+	// TODO: 연관 관계 수정 필요
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tool_id", nullable = false)
 	private Tool tool;
