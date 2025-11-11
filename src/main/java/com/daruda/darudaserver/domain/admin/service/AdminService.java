@@ -25,6 +25,7 @@ import com.daruda.darudaserver.domain.tool.entity.ToolBlog;
 import com.daruda.darudaserver.domain.tool.entity.ToolCore;
 import com.daruda.darudaserver.domain.tool.entity.ToolImage;
 import com.daruda.darudaserver.domain.tool.entity.ToolKeyword;
+import com.daruda.darudaserver.domain.tool.entity.ToolPlatForm;
 import com.daruda.darudaserver.domain.tool.entity.ToolVideo;
 import com.daruda.darudaserver.domain.tool.repository.PlanRepository;
 import com.daruda.darudaserver.domain.tool.repository.RelatedToolRepository;
@@ -167,6 +168,12 @@ public class AdminService {
 					}
 				}
 			}
+		}
+
+		// ToolPlatForm 가공
+		if (createToolRequest.toolPlatForm() != null) {
+			ToolPlatForm toolPlatForm = ToolPlatForm.of(createToolRequest.toolPlatForm(), tool);
+			toolPlatFormRepository.save(toolPlatForm);
 		}
 	}
 
@@ -316,6 +323,14 @@ public class AdminService {
 					relatedToolRepository.saveAll(relations);
 				}
 			}
+		}
+
+		// 툴 플랫폼 수정
+		if (req.toolPlatForm() != null) {
+			toolPlatFormRepository.findFirstByTool(tool).ifPresent(toolPlatFormRepository::delete);
+
+			ToolPlatForm newPlatForm = ToolPlatForm.of(req.toolPlatForm(), tool);
+			toolPlatFormRepository.save(newPlatForm);
 		}
 
 		// 갱신된 엔터티 저장
