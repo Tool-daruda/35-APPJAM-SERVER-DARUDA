@@ -171,8 +171,10 @@ public class AdminService {
 		}
 
 		// ToolPlatForm 가공
-		ToolPlatForm toolPlatForm = ToolPlatForm.of(createToolRequest.toolPlatForm(), tool);
-		toolPlatFormRepository.save(toolPlatForm);
+		if (createToolRequest.toolPlatForm() != null) {
+			ToolPlatForm toolPlatForm = ToolPlatForm.of(createToolRequest.toolPlatForm(), tool);
+			toolPlatFormRepository.save(toolPlatForm);
+		}
 	}
 
 	public void updateTool(final Long toolId, final UpdateToolRequest req) {
@@ -325,7 +327,7 @@ public class AdminService {
 
 		// 툴 플랫폼 수정
 		if (req.toolPlatForm() != null) {
-			toolPlatFormRepository.findByTool(tool).ifPresent(toolPlatFormRepository::delete);
+			toolPlatFormRepository.findFirstByTool(tool).ifPresent(toolPlatFormRepository::delete);
 
 			ToolPlatForm newPlatForm = ToolPlatForm.of(req.toolPlatForm(), tool);
 			toolPlatFormRepository.save(newPlatForm);
