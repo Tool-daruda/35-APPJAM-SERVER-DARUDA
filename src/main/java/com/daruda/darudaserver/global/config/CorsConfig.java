@@ -3,20 +3,23 @@ package com.daruda.darudaserver.global.config;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Configuration
+@RequiredArgsConstructor
 public class CorsConfig {
 
 	@Value("${admin.page.origin}")
-	private static String adminPageOrigin;
+	private String adminPageOrigin;
 
-	public static CorsConfigurationSource configurationSource() {
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
 		List<String> allowedOriginPatterns = List.of(
