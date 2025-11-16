@@ -50,6 +50,7 @@ public class SecurityConfig {
 	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final CorsConfig corsConfig;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -82,7 +83,7 @@ public class SecurityConfig {
 			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class);
 
-		http.cors(cors -> cors.configurationSource(CorsConfig.configurationSource()));
+		http.cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()));
 
 		return http.build();
 	}
