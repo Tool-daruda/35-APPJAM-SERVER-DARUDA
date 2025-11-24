@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -69,6 +70,7 @@ public record UpdateToolRequest(
 			""",
 		requiredMode = Schema.RequiredMode.NOT_REQUIRED
 	)
+	@Valid
 	List<CreateToolPlanRequest> plans,
 	@Schema(description = "블로그 링크 목록")
 	List<String> blogLinks,
