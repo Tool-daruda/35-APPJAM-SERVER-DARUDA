@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -40,9 +41,36 @@ public record UpdateToolRequest(
 	List<String> keywords,
 	@Schema(description = "핵심 기능 목록")
 	List<CreateToolCoreRequest> cores,
-	@Schema(description = "플랜 유형")
+	@Schema(
+		description = "플랜 유형",
+		example = "월간",
+		allowableValues = {"무료", "월간", "구매", "월간 & 연간"},
+		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+	)
 	String planType,
-	@Schema(description = "플랜 목록")
+	@Schema(
+		description = """
+			플랜 목록 (배열)
+			
+			**수정 동작:**
+			- 이 필드를 전송하면 기존 플랜들이 모두 삭제되고 새로운 플랜들로 교체됩니다
+			- null로 보내면 플랜 정보는 변경되지 않습니다
+			- 빈 배열([])로 보내면 모든 플랜이 삭제됩니다
+			
+			**주의사항:**
+			- 플랜을 수정할 때는 유지할 플랜도 포함하여 전체 플랜 목록을 다시 전송해야 합니다
+			- planName, planPrice, planDescription이 null인 플랜은 저장되지 않습니다 (모두 필수)
+			- planDescription은 최대 500자까지 입력 가능합니다
+			
+			**예시:**
+			- 플랜 추가: [{"planName":"New Plan", "planPrice":20000, "planDescription":"새로운 플랜"}]
+			- 플랜 삭제: [] (모든 플랜 삭제)
+			- 플랜 유지: null (기존 플랜 그대로 유지)
+			- 플랜 수정: [수정된 전체 플랜 목록]
+			""",
+		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+	)
+	@Valid
 	List<CreateToolPlanRequest> plans,
 	@Schema(description = "블로그 링크 목록")
 	List<String> blogLinks,
