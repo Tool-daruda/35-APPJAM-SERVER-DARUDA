@@ -53,10 +53,6 @@ public class Tool {
 	private String detailDescription;
 	@Column(name = "plan_link", length = 5000)
 	private String planLink;
-	@Column(name = "bg_color")
-	private String bgColor;
-	@Column(name = "font_color")
-	private boolean fontColor;
 	@Column(name = "tool_logo", nullable = false)
 	private String toolLogo;
 	@CreatedDate
@@ -74,9 +70,8 @@ public class Tool {
 	private PlanType planType;
 
 	public static Tool of(String toolMainName, String toolSubName, Category category, String toolLink,
-		String description,
-		License license, Boolean supportKorea, String detailDescription, String planLink, String bgColor,
-		boolean fontColor, String toolLogo) {
+		String description, License license, Boolean supportKorea, String detailDescription, String planLink,
+		String toolLogo) {
 		return Tool.builder()
 			.toolMainName(toolMainName)
 			.toolSubName(toolSubName)
@@ -87,8 +82,6 @@ public class Tool {
 			.supportKorea(supportKorea)
 			.detailDescription(detailDescription)
 			.planLink(planLink)
-			.bgColor(bgColor)
-			.fontColor(fontColor)
 			.toolLogo(toolLogo)
 			.build();
 	}
@@ -107,9 +100,7 @@ public class Tool {
 			return toolMainName;
 		}
 		//첫 글자가 대문자가 아닌 경우에만 대문자로 변경
-		String uppdatedName = toolMainName.substring(0, 1).toUpperCase() + toolMainName.substring(1);
-
-		return uppdatedName;
+		return toolMainName.substring(0, 1).toUpperCase() + toolMainName.substring(1);
 	}
 
 	public void update(final String toolMainName,

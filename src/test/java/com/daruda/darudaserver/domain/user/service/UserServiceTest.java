@@ -105,7 +105,7 @@ class UserServiceTest {
 		Positions positions = Positions.STUDENT;
 		UserEntity userEntity = UserEntity.of(email, nickname, positions);
 		Tool tool = Tool.of("ToolName", "toolSubName", Category.ALL, "toolLink", "toolDescription", License.FREE, true,
-			"toolDetailDescription", "toolPlanLink", "toolBgColor", true, "toolLogo");
+			"toolDetailDescription", "toolPlanLink", "toolLogo");
 		ToolScrap toolScrap = ToolScrap.of(userEntity, tool);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));

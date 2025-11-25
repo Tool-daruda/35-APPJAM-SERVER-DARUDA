@@ -11,9 +11,7 @@ public record ToolSearchResponse(
 	String description,
 	String license,
 	List<String> keywords,
-	boolean isScraped,
-	String bgColor,
-	boolean fontColor
+	boolean isScraped
 ) {
 	public static ToolSearchResponse from(ToolDocument document, List<String> keywords, boolean isScrapped) {
 		return new ToolSearchResponse(
@@ -23,9 +21,7 @@ public record ToolSearchResponse(
 			document.getDescription(),
 			document.getLicense(),
 			keywords,
-			isScrapped,
-			document.getBgColor(),
-			document.isFontColor()
+			isScrapped
 		);
 	}
 }
