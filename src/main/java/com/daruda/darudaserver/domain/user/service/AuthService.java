@@ -115,7 +115,7 @@ public class AuthService {
 		log.info("boardScrap을 성공적으로 삭제하였습니다");
 
 		//FK로 묶여있는 board 삭제
-		boardRepository.deleteAllByUserId(userId);
+		boardRepository.clearUser(userEntity);
 		log.info("board를 성공적으로 삭제하였습니다");
 
 		// 알림 삭제

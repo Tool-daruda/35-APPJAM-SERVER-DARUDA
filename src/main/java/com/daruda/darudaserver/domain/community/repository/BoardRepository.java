@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.user.entity.UserEntity;
 
 import jakarta.transaction.Transactional;
 
@@ -45,4 +46,9 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 	@Transactional
 	@Query(value = "UPDATE board SET tool_id = 0 WHERE tool_id = :#{#tool.toolId}", nativeQuery = true)
 	void clearTool(Tool tool);
+
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Transactional
+	@Query(value = "UPDATE board SET user_id = 0 WHERE user_id = :#{#userEntity.id}", nativeQuery = true)
+	void clearUser(UserEntity userEntity);
 }
