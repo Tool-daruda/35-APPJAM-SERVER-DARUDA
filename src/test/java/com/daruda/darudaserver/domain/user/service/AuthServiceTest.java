@@ -210,7 +210,7 @@ public class AuthServiceTest {
 		verify(boardRepository).findAllByUserId(userId);
 		verify(commentRepository, times(mockBoardList.size())).deleteCommentsByBoardId(anyLong());
 		verify(boardScrapRepository).deleteAllByUserId(userId);
-		verify(boardRepository).deleteAllByUserId(userId);
+		verify(boardRepository).clearUser(mockUser);
 		verify(tokenService).deleteRefreshToken(userId);
 		verify(userRepository).delete(mockUser);
 		verify(notificationService).delete(userId);
