@@ -36,14 +36,18 @@ public class AdminController {
 	@GetMapping("/tool")
 	@Operation(summary = "관리자용 툴 조회", description = "관리자용 전체 툴 조회 API입니다.")
 	public ResponseEntity<SuccessResponse<AdminToolPageRes>> fetchAllTool(
+		@Parameter(description = "정렬 기준", example = "createdAt")
+		@RequestParam(defaultValue = "createdAt", value = "criteria") String criteria,
+		@Parameter(description = "정렬 순서 (ASC/DESC)", example = "DESC")
+		@RequestParam(defaultValue = "DESC", value = "direction") String direction,
 		@Min(0)
 		@Parameter(description = "페이지 인덱스", example = "0")
 		@RequestParam(value = "page", defaultValue = "0") int page,
 		@Min(1) @Max(100)
-		@Parameter(description = "페이지 크기", example = "20")
-		@RequestParam(value = "size", defaultValue = "20") int size
+		@Parameter(description = "페이지 크기", example = "10")
+		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
-		AdminToolPageRes res = adminService.fetchAllTool(page, size);
+		AdminToolPageRes res = adminService.fetchAllTool(criteria, direction, page, size);
 		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, res));
 	}
 

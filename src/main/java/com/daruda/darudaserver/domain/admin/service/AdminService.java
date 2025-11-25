@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -363,8 +364,9 @@ public class AdminService {
 		toolRepository.delete(tool);
 	}
 
-	public AdminToolPageRes fetchAllTool(int page, int size) {
-		Pageable pageable = PageRequest.of(page, size);
+	public AdminToolPageRes fetchAllTool(String criteria, String direction, int page, int size) {
+		Sort.Direction dir = Sort.Direction.fromString(direction);
+		Pageable pageable = PageRequest.of(page, size, Sort.by(dir, criteria));
 		Page<Tool> toolPage = toolRepository.findAll(pageable);
 
 		return AdminToolPageRes.of(toolPage);
