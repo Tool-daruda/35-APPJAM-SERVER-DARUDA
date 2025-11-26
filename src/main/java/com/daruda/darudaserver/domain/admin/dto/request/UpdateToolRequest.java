@@ -51,17 +51,17 @@ public record UpdateToolRequest(
 	@Schema(
 		description = """
 			플랜 목록 (배열)
-			
+
 			**수정 동작:**
 			- 이 필드를 전송하면 기존 플랜들이 모두 삭제되고 새로운 플랜들로 교체됩니다
 			- null로 보내면 플랜 정보는 변경되지 않습니다
 			- 빈 배열([])로 보내면 모든 플랜이 삭제됩니다
-			
+
 			**주의사항:**
 			- 플랜을 수정할 때는 유지할 플랜도 포함하여 전체 플랜 목록을 다시 전송해야 합니다
 			- planName, planPrice, planDescription이 null인 플랜은 저장되지 않습니다 (모두 필수)
 			- planDescription은 최대 500자까지 입력 가능합니다
-			
+
 			**예시:**
 			- 플랜 추가: [{"planName":"New Plan", "planPrice":20000, "planDescription":"새로운 플랜"}]
 			- 플랜 삭제: [] (모든 플랜 삭제)
