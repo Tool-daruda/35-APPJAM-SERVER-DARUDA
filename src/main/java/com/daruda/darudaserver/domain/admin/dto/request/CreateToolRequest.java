@@ -49,23 +49,20 @@ public record CreateToolRequest(
 	String planType,
 	@Schema(
 		description = """
-			플랜 목록 (배열)
-
-			**사용 가이드:**
-			- planType에 따라 플랜 구조가 달라집니다
-			- 무료: 빈 배열 또는 무료 플랜 1개
-			- 월간: 여러 월간 구독 플랜 (예: Basic, Pro, Enterprise)
-			- 구매: 여러 일회성 구매 플랜 (예: Starter, Professional)
-			- 월간 & 연간: 월간과 연간 플랜 혼합
-
-			**예시:**
+				플랜 목록 (배열)
+				**사용 가이드:**
+				- planType에 따라 플랜 구조가 달라집니다
+				- 무료: 빈 배열 또는 무료 플랜 1개
+				- 월간: 여러 월간 구독 플랜 (예: Basic, Pro, Enterprise)
+				- 구매: 여러 일회성 구매 플랜 (예: Starter, Professional)
+				- 월간 & 연간: 월간과 연간 플랜 혼합
+				**예시:**
 			- 무료: [] 또는 [{"planName":"무료", "planPrice":0, "planDescription":"기본 기능 제공"}]
 			- 월간: [{"planName":"Basic", "planPrice":10000, "planDescription":"기본 기능"},
-			  {"planName":"Pro", "planPrice":30000, "planDescription":"고급 기능}]
+				{"planName":"Pro", "planPrice":30000, "planDescription":"고급 기능}]
 			- 구매: [{"planName":"Starter", "planPrice":50000, "planDescription":"시작 패키지"},
-			  {"planName":"Professional", "planPrice":150000, "planDescription":"전문가 패키지"}]
-
-			**주의:** 각 플랜의 planName, planPrice, planDescription은 모두 필수입니다.
+				{"planName":"Professional", "planPrice":150000, "planDescription":"전문가 패키지"}]
+				**주의:** 각 플랜의 planName, planPrice, planDescription은 모두 필수입니다.
 			""",
 		requiredMode = Schema.RequiredMode.NOT_REQUIRED
 	)
