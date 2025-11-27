@@ -66,7 +66,7 @@ public class Tool {
 	@Column(name = "popular", columnDefinition = "integer default 0")
 	private int popular;
 	@Enumerated(EnumType.STRING)
-	@Column(name = "plan_type")
+	@Column(name = "plan_type", nullable = false)
 	private PlanType planType;
 
 	public static Tool of(String toolMainName, String toolSubName, Category category, String toolLink,

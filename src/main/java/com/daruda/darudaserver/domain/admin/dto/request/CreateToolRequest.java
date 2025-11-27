@@ -44,7 +44,7 @@ public record CreateToolRequest(
 		description = "플랜 유형",
 		example = "무료",
 		allowableValues = {"무료", "월간", "구매", "월간 & 연간"},
-		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+		requiredMode = Schema.RequiredMode.REQUIRED
 	)
 	String planType,
 	@Schema(
