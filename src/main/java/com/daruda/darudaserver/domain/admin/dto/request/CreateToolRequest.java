@@ -61,7 +61,7 @@ public record CreateToolRequest(
 				**예시:**
 			- 무료: [] 또는 [{"planName":"무료", "planPrice":0, "planDescription":"기본 기능 제공"}]
 			- 월간: [{"planName":"Basic", "planPrice":10000, "planDescription":"기본 기능"},
-				{"planName":"Pro", "planPrice":30000, "planDescription":"고급 기능}]
+				{"planName":"Pro", "planPrice":30000, "planDescription":"고급 기능"}]
 			- 구매: [{"planName":"Starter", "planPrice":50000, "planDescription":"시작 패키지"},
 				{"planName":"Professional", "planPrice":150000, "planDescription":"전문가 패키지"}]
 				**주의:** 각 플랜의 planName, planPrice, planDescription은 모두 필수입니다.
