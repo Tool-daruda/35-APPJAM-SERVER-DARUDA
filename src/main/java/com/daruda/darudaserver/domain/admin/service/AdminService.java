@@ -62,19 +62,7 @@ public class AdminService {
 	public void createTool(CreateToolRequest createToolRequest) {
 
 		//Tool entity 가공
-		Tool tool = Tool.builder()
-			.toolLogo(createToolRequest.toolLogo())
-			.toolLink(createToolRequest.toolLink())
-			.toolMainName(createToolRequest.toolMainName())
-			.toolSubName(createToolRequest.toolSubName())
-			.category(Category.from(createToolRequest.category()))
-			.description(createToolRequest.description())
-			.detailDescription(createToolRequest.detailDescription())
-			.license(License.from(createToolRequest.license()))
-			.planLink(createToolRequest.planLink())
-			.supportKorea(createToolRequest.supportKorea())
-			.planType(PlanType.formString(createToolRequest.planType()))
-			.build();
+		Tool tool = Tool.from(createToolRequest);
 
 		Tool savedTool = toolRepository.save(tool);
 

@@ -6,6 +6,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -68,6 +70,22 @@ public class Tool {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "plan_type", nullable = false)
 	private PlanType planType;
+
+	public static Tool from(CreateToolRequest createToolRequest) {
+		return Tool.builder()
+			.toolLogo(createToolRequest.toolLogo())
+			.toolLink(createToolRequest.toolLink())
+			.toolMainName(createToolRequest.toolMainName())
+			.toolSubName(createToolRequest.toolSubName())
+			.category(Category.from(createToolRequest.category()))
+			.description(createToolRequest.description())
+			.detailDescription(createToolRequest.detailDescription())
+			.license(License.from(createToolRequest.license()))
+			.planLink(createToolRequest.planLink())
+			.supportKorea(createToolRequest.supportKorea())
+			.planType(PlanType.formString(createToolRequest.planType()))
+			.build();
+	}
 
 	public void incrementViewCount() {
 		this.viewCount++;
