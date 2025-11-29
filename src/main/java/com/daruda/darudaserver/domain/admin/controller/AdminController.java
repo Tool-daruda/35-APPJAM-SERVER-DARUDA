@@ -55,11 +55,11 @@ public class AdminController {
 	@Operation(
 		summary = "관리자용 툴 추가",
 		description = """
-				관리자용 툴 추가 API입니다.
+			관리자용 툴 추가 API입니다.
 
-				**플랜(plans) 필드 사용 가이드:**
-				- 플랜은 여러 개를 추가할 수 있습니다 (배열 형태)
-				- 각 플랜은 planName(플랜명), planPrice(가격), planDescription(설명)을 포함합니다
+			**플랜(plans) 필드 사용 가이드:**
+			- 플랜은 여러 개를 추가할 수 있습니다 (배열 형태)
+			- 각 플랜은 planName(플랜명), planPrice(가격), planDescription(설명)을 포함합니다
 			- planType과 plans는 함께 사용됩니다:
 				* FREE: 무료 플랜인 경우 plans는 빈 배열이거나 무료 플랜 1개만 포함
 				* MONTHLY: 월간 구독 플랜들 (예: Basic, Pro, Enterprise 등)
@@ -78,11 +78,11 @@ public class AdminController {
 				plans=[{planName:"Basic 월간", planPrice:10000, ...},
 				{planName:"Basic 연간", planPrice:100000, ...}]
 
-				**주의사항:**
-				- planPrice는 원화 단위로 입력합니다 (예: 10000 = 1만원)
-				- planName, planPrice, planDescription은 모두 필수입니다
-				- planDescription은 최대 500자까지 입력 가능합니다
-				- plans가 null이거나 빈 배열일 수 있지만, planType이 설정된 경우 적절한 플랜 정보를 제공하는 것을 권장합니다
+			**주의사항:**
+			- planPrice는 원화 단위로 입력합니다 (예: 10000 = 1만원)
+			- planName, planPrice, planDescription은 모두 필수입니다
+			- planDescription은 최대 500자까지 입력 가능합니다
+			- plans가 null이거나 빈 배열일 수 있지만, planType이 설정된 경우 적절한 플랜 정보를 제공하는 것을 권장합니다
 			"""
 	)
 	public ResponseEntity<SuccessResponse<Void>> createTool(
