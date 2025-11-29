@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,19 +62,7 @@ public class AdminService {
 	public void createTool(CreateToolRequest createToolRequest) {
 
 		//Tool entity 가공
-		Tool tool = Tool.builder()
-			.toolLogo(createToolRequest.toolLogo())
-			.toolLink(createToolRequest.toolLink())
-			.toolMainName(createToolRequest.toolMainName())
-			.toolSubName(createToolRequest.toolSubName())
-			.category(Category.from(createToolRequest.category()))
-			.description(createToolRequest.description())
-			.detailDescription(createToolRequest.detailDescription())
-			.license(License.from(createToolRequest.license()))
-			.planLink(createToolRequest.planLink())
-			.supportKorea(createToolRequest.supportKorea())
-			.planType(PlanType.formString(createToolRequest.planType()))
-			.build();
+		Tool tool = Tool.from(createToolRequest);
 
 		Tool savedTool = toolRepository.save(tool);
 
@@ -363,8 +352,9 @@ public class AdminService {
 		toolRepository.delete(tool);
 	}
 
-	public AdminToolPageRes fetchAllTool(int page, int size) {
-		Pageable pageable = PageRequest.of(page, size);
+	public AdminToolPageRes fetchAllTool(String criteria, String direction, int page, int size) {
+		Sort.Direction dir = Sort.Direction.fromString(direction);
+		Pageable pageable = PageRequest.of(page, size, Sort.by(dir, criteria));
 		Page<Tool> toolPage = toolRepository.findAll(pageable);
 
 		return AdminToolPageRes.of(toolPage);

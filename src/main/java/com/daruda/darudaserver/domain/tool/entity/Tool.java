@@ -6,6 +6,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -53,10 +55,6 @@ public class Tool {
 	private String detailDescription;
 	@Column(name = "plan_link", length = 5000)
 	private String planLink;
-	@Column(name = "bg_color")
-	private String bgColor;
-	@Column(name = "font_color")
-	private boolean fontColor;
 	@Column(name = "tool_logo", nullable = false)
 	private String toolLogo;
 	@CreatedDate
@@ -70,26 +68,22 @@ public class Tool {
 	@Column(name = "popular", columnDefinition = "integer default 0")
 	private int popular;
 	@Enumerated(EnumType.STRING)
-	@Column(name = "plan_type")
+	@Column(name = "plan_type", nullable = false)
 	private PlanType planType;
 
-	public static Tool of(String toolMainName, String toolSubName, Category category, String toolLink,
-		String description,
-		License license, Boolean supportKorea, String detailDescription, String planLink, String bgColor,
-		boolean fontColor, String toolLogo) {
+	public static Tool from(CreateToolRequest createToolRequest) {
 		return Tool.builder()
-			.toolMainName(toolMainName)
-			.toolSubName(toolSubName)
-			.category(category)
-			.toolLink(toolLink)
-			.description(description)
-			.license(license)
-			.supportKorea(supportKorea)
-			.detailDescription(detailDescription)
-			.planLink(planLink)
-			.bgColor(bgColor)
-			.fontColor(fontColor)
-			.toolLogo(toolLogo)
+			.toolLogo(createToolRequest.toolLogo())
+			.toolLink(createToolRequest.toolLink())
+			.toolMainName(createToolRequest.toolMainName())
+			.toolSubName(createToolRequest.toolSubName())
+			.category(Category.from(createToolRequest.category()))
+			.description(createToolRequest.description())
+			.detailDescription(createToolRequest.detailDescription())
+			.license(License.from(createToolRequest.license()))
+			.planLink(createToolRequest.planLink())
+			.supportKorea(createToolRequest.supportKorea())
+			.planType(PlanType.formString(createToolRequest.planType()))
 			.build();
 	}
 
@@ -107,9 +101,7 @@ public class Tool {
 			return toolMainName;
 		}
 		//첫 글자가 대문자가 아닌 경우에만 대문자로 변경
-		String uppdatedName = toolMainName.substring(0, 1).toUpperCase() + toolMainName.substring(1);
-
-		return uppdatedName;
+		return toolMainName.substring(0, 1).toUpperCase() + toolMainName.substring(1);
 	}
 
 	public void update(final String toolMainName,
