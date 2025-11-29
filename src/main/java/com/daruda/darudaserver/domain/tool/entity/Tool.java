@@ -69,23 +69,6 @@ public class Tool {
 	@Column(name = "plan_type", nullable = false)
 	private PlanType planType;
 
-	public static Tool of(String toolMainName, String toolSubName, Category category, String toolLink,
-		String description, License license, Boolean supportKorea, String detailDescription, String planLink,
-		String toolLogo) {
-		return Tool.builder()
-			.toolMainName(toolMainName)
-			.toolSubName(toolSubName)
-			.category(category)
-			.toolLink(toolLink)
-			.description(description)
-			.license(license)
-			.supportKorea(supportKorea)
-			.detailDescription(detailDescription)
-			.planLink(planLink)
-			.toolLogo(toolLogo)
-			.build();
-	}
-
 	public void incrementViewCount() {
 		this.viewCount++;
 	}

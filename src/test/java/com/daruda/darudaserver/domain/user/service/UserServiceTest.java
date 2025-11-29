@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.daruda.darudaserver.domain.tool.entity.Category;
 import com.daruda.darudaserver.domain.tool.entity.License;
+import com.daruda.darudaserver.domain.tool.entity.PlanType;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
@@ -103,9 +104,21 @@ class UserServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
+		PlanType planType = PlanType.FREE;
 		UserEntity userEntity = UserEntity.of(email, nickname, positions);
-		Tool tool = Tool.of("ToolName", "toolSubName", Category.ALL, "toolLink", "toolDescription", License.FREE, true,
-			"toolDetailDescription", "toolPlanLink", "toolLogo");
+		Tool tool = Tool.builder()
+			.toolMainName("toolName")
+			.toolSubName("toolSubName")
+			.category(Category.ALL)
+			.toolLink("toolLink")
+			.description("toolDescription")
+			.license(License.FREE)
+			.supportKorea(true)
+			.detailDescription("toolDetailDescription")
+			.planLink("toolPlanLink")
+			.toolLogo("toolLogo")
+			.planType(planType)
+			.build();
 		ToolScrap toolScrap = ToolScrap.of(userEntity, tool);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
