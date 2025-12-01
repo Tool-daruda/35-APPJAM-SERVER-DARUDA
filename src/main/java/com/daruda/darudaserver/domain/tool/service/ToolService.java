@@ -94,9 +94,9 @@ public class ToolService {
 	public PlanListRes getPlan(final Long toolId) {
 		log.info("플랜 정보를 조회합니다. toolId={}", toolId);
 		Tool tool = getToolById(toolId);
-		List<PlanRes> plan = getPlanByTool(tool);
+		List<PlanRes> toolPlans = getPlanByTool(tool);
 		log.info("플랜 정보를 성공적으로 조회했습니다. toolId={}", toolId);
-		return PlanListRes.of(plan);
+		return PlanListRes.of(tool.getPlanLink(), toolPlans);
 	}
 
 	public ToolBlogListRes getBlog(final Long toolId) {
