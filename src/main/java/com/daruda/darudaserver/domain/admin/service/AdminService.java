@@ -265,10 +265,11 @@ public class AdminService {
 			}
 			if (!req.plans().isEmpty()) {
 				List<Plan> toSave = req.plans().stream()
-					.filter(p -> p != null && p.planName() != null && p.planPrice() != null)
+					.filter(p -> p != null && p.planName() != null && p.priceMonthly() != null)
 					.map(p -> Plan.builder()
 						.planName(p.planName().trim())
-						.price(p.planPrice())
+						.priceAnnual(p.priceAnnual())
+						.priceMonthly(p.priceMonthly())
 						.description(p.planDescription())
 						.tool(tool)
 						.build())
