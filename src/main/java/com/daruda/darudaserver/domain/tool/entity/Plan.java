@@ -32,8 +32,11 @@ public class Plan {
 	@Column(name = "plan_name", nullable = false)
 	private String planName;
 
-	@Column(name = "price", nullable = false)
-	private Long price;
+	@Column(name = "price_monthly", nullable = false)
+	private Long priceMonthly;
+
+	@Column(name = "price_annual")
+	private Long priceAnnual;
 
 	@Column(name = "description", nullable = false, length = 500)
 	private String description;
@@ -45,7 +48,8 @@ public class Plan {
 	public static Plan create(CreateToolPlanRequest toolPlanRequest, Tool tool) {
 		return Plan.builder()
 			.planName(toolPlanRequest.planName())
-			.price(toolPlanRequest.planPrice())
+			.priceMonthly(toolPlanRequest.priceMonthly())
+			.priceAnnual(toolPlanRequest.priceAnnual())
 			.description(toolPlanRequest.planDescription())
 			.tool(tool)
 			.build();
