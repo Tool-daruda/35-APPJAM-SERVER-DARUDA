@@ -19,6 +19,7 @@ public record CreateToolPlanRequest(
 		example = "10000",
 		requiredMode = Schema.RequiredMode.REQUIRED
 	)
+	@NotNull(message = "월간 플랜 가격은 필수입니다.")
 	@PositiveOrZero(message = "플랜 가격은 0 이상이어야 합니다.")
 	Long priceMonthly,
 	@Schema(
@@ -26,7 +27,6 @@ public record CreateToolPlanRequest(
 		example = "10000",
 		requiredMode = Schema.RequiredMode.NOT_REQUIRED
 	)
-	@NotNull(message = "플랜 가격은 필수입니다.")
 	@PositiveOrZero(message = "플랜 가격은 0 이상이어야 합니다.")
 	Long priceAnnual,
 	@Schema(
