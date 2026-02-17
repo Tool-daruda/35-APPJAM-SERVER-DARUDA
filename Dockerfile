@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk
+FROM eclipse-temurin:17-jdk-alpine-3.22
 
 RUN ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
