@@ -5,7 +5,7 @@ spring:
       max-request-size: 10MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ENC(EsI3I93ZlhtYrYapS5oCJ4qYAEEZJu5U)
+    url: ENC(ugqXzeZrRV5CPiqPdmK/MLaHvE5L4u8U5JtGEnl8lRtorlF7UUiI7RkNMulxDGEB)
     username: ENC(nJZfcHF+It0X4f8rxo8Glg==)
     password: ENC(VhEaaBYxeXqSjYZZX+eq55lmU8vLdf4V)
   elasticsearch:
