@@ -66,7 +66,7 @@ public class TokenService {
 				.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND))
 				.getPositions().getEngName();
 		}
-		
+
 		return createToken(userId, role);
 	}
 

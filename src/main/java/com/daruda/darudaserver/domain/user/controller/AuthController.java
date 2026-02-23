@@ -80,7 +80,8 @@ public class AuthController {
 		if (jwtTokenResponse != null) {
 			cookieProvider.setTokenCookies(httpServletResponse,
 				jwtTokenResponse.accessToken(),
-				jwtTokenResponse.refreshToken());
+				jwtTokenResponse.refreshToken()
+			);
 		}
 
 		LoginResponse loginResponse = LoginResponse.from(loginSuccessResponse);
@@ -98,9 +99,14 @@ public class AuthController {
 		SignUpSuccessResponse signUpSuccessResponse = authService.register(signUpRequest.email(),
 			signUpRequest.nickname(), signUpRequest.positions());
 
-		cookieProvider.setTokenCookies(httpServletResponse,
-			signUpSuccessResponse.jwtTokenResponse().accessToken(),
-			signUpSuccessResponse.jwtTokenResponse().refreshToken());
+		JwtTokenResponse jwtTokenResponse = signUpSuccessResponse.jwtTokenResponse();
+
+		if (jwtTokenResponse != null) {
+			cookieProvider.setTokenCookies(httpServletResponse,
+				jwtTokenResponse.accessToken(),
+				jwtTokenResponse.refreshToken()
+			);
+		}
 
 		SignUpResponse signUpResponse = SignUpResponse.from(signUpSuccessResponse);
 
@@ -128,7 +134,8 @@ public class AuthController {
 
 		cookieProvider.setTokenCookies(httpServletResponse,
 			tokenResponse.accessToken(),
-			tokenResponse.refreshToken());
+			tokenResponse.refreshToken()
+		);
 
 		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_REISSUE));
 	}
