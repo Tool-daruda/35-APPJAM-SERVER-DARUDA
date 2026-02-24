@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.dto.ErrorResponse;
@@ -47,8 +49,9 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(ConstraintDeclarationException.class)
 	public ResponseEntity<ErrorResponse> handleConstraintDeclarationException(ConstraintDeclarationException ex) {
-		log.debug("ConstraintDeclarationException 발생", ex);
-		return buildErrorResponse(ErrorCode.INVALID_FIELD_ERROR, ex.getMessage());
+		log.error("ConstraintDeclarationException 발생", ex);
+		return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
+			.body(ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR));
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
@@ -97,6 +100,13 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(IOException.class)
 	public ResponseEntity<ErrorResponse> handleIoException(IOException ex) {
 		log.error("IOException 발생", ex);
+		return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
+			.body(ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR));
+	}
+
+	@ExceptionHandler({MultipartException.class, MaxUploadSizeExceededException.class})
+	public ResponseEntity<ErrorResponse> handleMultipartException(Exception ex) {
+		log.error("파일 업로드 예외 발생", ex);
 		return ResponseEntity.status(ErrorCode.FILE_UPLOAD_FAIL.getHttpStatus())
 			.body(ErrorResponse.of(ErrorCode.FILE_UPLOAD_FAIL));
 	}
