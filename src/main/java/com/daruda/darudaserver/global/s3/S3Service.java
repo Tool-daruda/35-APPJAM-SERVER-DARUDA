@@ -33,22 +33,23 @@ public class S3Service {
 		this.s3Config = s3Config;
 	}
 
-	public String uploadImage(MultipartFile image) throws IOException {
+	public String uploadImage(MultipartFile image) {
 		final String imageName = generateImageFileName(image);
 		final S3Client s3Client = s3Config.getS3Client();
 		validateExtension(image);
 		validateFileSize(image);
-		PutObjectRequest request = PutObjectRequest.builder()
-			.bucket(bucketName)
-			.key(imageName) //이미지 이름만 키로 사용
-			.contentType(image.getContentType())
-			.contentDisposition("inline")
-			.build();
-		RequestBody requestBody = RequestBody.fromBytes(image.getBytes()); //파일 바이트로 변환
+		
 		try {
+			PutObjectRequest request = PutObjectRequest.builder()
+				.bucket(bucketName)
+				.key(imageName) //이미지 이름만 키로 사용
+				.contentType(image.getContentType())
+				.contentDisposition("inline")
+				.build();
+			RequestBody requestBody = RequestBody.fromBytes(image.getBytes()); //파일 바이트로 변환
 			s3Client.putObject(request, requestBody);
-		} catch (S3Exception e) {
-			throw new IOException("이미지 업로둥 중 오류가 발생했습니다.", e);
+		} catch (S3Exception | IOException e) {
+			throw new InvalidValueException(ErrorCode.FILE_UPLOAD_FAIL);
 		}
 		return imageName; //S3 에 저장된 경로 이미지 반환
 	}
