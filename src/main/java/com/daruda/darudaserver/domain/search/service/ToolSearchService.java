@@ -42,7 +42,6 @@ public class ToolSearchService {
 		List<Long> toolIds = hits.getSearchHits().stream()
 			.map(hit -> Long.valueOf(hit.getContent().getId()))
 			.toList();
-		// 🔥 한 번에 조회
 		Map<Long, List<String>> keywordMap =
 			toolService.getKeywordsBatch(toolIds);
 
