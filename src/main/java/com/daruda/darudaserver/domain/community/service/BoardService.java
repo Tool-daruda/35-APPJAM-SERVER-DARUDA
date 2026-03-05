@@ -5,6 +5,7 @@ import static com.daruda.darudaserver.domain.community.entity.QBoard.*;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,8 @@ import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardImage;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
+import com.daruda.darudaserver.domain.community.event.BoardCreatedEvent;
+import com.daruda.darudaserver.domain.community.event.BoardUpdatedEvent;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
@@ -66,6 +69,7 @@ public class BoardService {
 	private final ValidateBoard validateBoard;
 	private final JPAQueryFactory jpaQueryFactory;
 	private final BoardSearchRepository boardSearchRepository;
+	private final ApplicationEventPublisher eventPublisher;
 
 	// 게시판 생성
 	public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
@@ -84,6 +88,10 @@ public class BoardService {
 
 		// 이미지 처리
 		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());
+
+		eventPublisher.publishEvent(
+			new BoardCreatedEvent(board.getId())
+		);
 
 		// Tool 정보 설정
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
@@ -116,10 +124,8 @@ public class BoardService {
 			boardCreateAndUpdateReq.isFree()
 		);
 
-		boardDocument.update(
-			tool,
-			boardCreateAndUpdateReq.title(),
-			boardCreateAndUpdateReq.content()
+		eventPublisher.publishEvent(
+			new BoardUpdatedEvent(board.getId())
 		);
 
 		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());

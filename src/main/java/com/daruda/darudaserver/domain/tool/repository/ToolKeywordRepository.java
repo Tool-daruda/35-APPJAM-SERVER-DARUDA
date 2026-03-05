@@ -18,4 +18,6 @@ public interface ToolKeywordRepository extends JpaRepository<ToolKeyword, Long> 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Transactional
 	void deleteByTool(final Tool tool);
+
+	List<ToolKeyword> findByTool_ToolIdIn(List<Long> toolIds);
 }

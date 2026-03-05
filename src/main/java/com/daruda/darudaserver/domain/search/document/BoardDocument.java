@@ -113,4 +113,8 @@ public class BoardDocument {
 	public void updateScraped(boolean scraped) {
 		this.isScraped = scraped;
 	}
+
+	public void increaseCommentCount() {
+		this.commentCount += 1;
+	}
 }
