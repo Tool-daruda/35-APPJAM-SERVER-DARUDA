@@ -92,6 +92,8 @@ dependencies {
     implementation 'org.springframework.data:spring-data-elasticsearch:5.2.0'
     implementation 'co.elastic.clients:elasticsearch-java:8.11.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 
     // Test
     testImplementation 'org.mockito:mockito-core:5.5.0'

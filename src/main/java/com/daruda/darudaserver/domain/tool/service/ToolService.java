@@ -1,7 +1,9 @@
 package com.daruda.darudaserver.domain.tool.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -342,5 +344,24 @@ public class ToolService {
 	public List<String> getKeywords(final Long toolId) {
 		Tool tool = getToolById(toolId);
 		return convertToKeywordRes(tool);
+	}
+
+	public Map<Long, List<String>> getKeywordsBatch(List<Long> toolIds) {
+
+		if (toolIds.isEmpty()) {
+			return Map.of();
+		}
+
+		List<ToolKeyword> keywords =
+			toolKeywordRepository.findByTool_ToolIdIn(toolIds);
+
+		return keywords.stream()
+			.collect(Collectors.groupingBy(
+				k -> k.getTool().getToolId(),
+				Collectors.mapping(
+					ToolKeyword::getKeywordName,
+					Collectors.toList()
+				)
+			));
 	}
 }
