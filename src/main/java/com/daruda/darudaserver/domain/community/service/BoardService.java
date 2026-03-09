@@ -350,21 +350,12 @@ public class BoardService {
 		Board board = Board.create(tool, user, req.title(), req.content());
 		board = boardRepository.save(board);
 
-		BoardDocument boardDocument =
-			BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()),
-				getCommentCount(board.getId()), getBoardScrap(user, board));
-
-		boardSearchRepository.save(boardDocument);
-
 		return board;
 	}
 
 	private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
 		Board board = Board.createFree(user, req.title(), req.content());
 		board = boardRepository.save(board);
-		BoardDocument boardDocument = BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()),
-			getCommentCount(board.getId()), getBoardScrap(user, board));
-		boardSearchRepository.save(boardDocument);
 
 		return board;
 	}

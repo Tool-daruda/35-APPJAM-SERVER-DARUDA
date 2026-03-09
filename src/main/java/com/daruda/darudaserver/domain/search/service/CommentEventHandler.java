@@ -32,10 +32,11 @@ public class CommentEventHandler {
 		backoff = @Backoff(delay = 1000)
 	)
 	public void handle(CommentCreatedEvent event) {
+		int commentCount = (int) commentRepository.countByBoardId(event.boardId());
 
 		boardSearchRepository.findById(event.boardId().toString())
 			.ifPresent(boardDoc -> {
-				boardDoc.increaseCommentCount();
+				boardDoc.updateCommentCount(commentCount);
 				boardSearchRepository.save(boardDoc);
 			});
 	}
