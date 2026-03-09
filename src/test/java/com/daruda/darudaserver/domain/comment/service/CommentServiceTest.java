@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -40,6 +41,9 @@ import jakarta.validation.Validator;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
+
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
 
 	private final Validator validator =
 		Validation.buildDefaultValidatorFactory().getValidator();
