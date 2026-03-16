@@ -111,7 +111,6 @@ class CommentServiceTest {
 			// given
 			given(userRepository.findById(author.getId())).willReturn(Optional.of(author));
 			given(boardRepository.findById(board.getId())).willReturn(Optional.of(board));
-			given(boardSearchRepository.findById(board.getId().toString())).willReturn(Optional.of(boardDocument));
 			given(commentRepository.save(any(CommentEntity.class)))
 				.willAnswer(inv -> {
 					CommentEntity commentEntity = inv.getArgument(0);
