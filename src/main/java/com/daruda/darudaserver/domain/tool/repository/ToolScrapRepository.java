@@ -43,6 +43,7 @@ public interface ToolScrapRepository extends JpaRepository<ToolScrap, Long> {
     select ts.tool.toolId
     from ToolScrap ts
     where ts.user.id = :userId
+    and ts.delYn = false
     and ts.tool.toolId in :toolIds
 """)
 	Set<Long> findScrappedToolIds(
