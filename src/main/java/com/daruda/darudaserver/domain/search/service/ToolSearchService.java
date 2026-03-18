@@ -1,6 +1,8 @@
 package com.daruda.darudaserver.domain.search.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
@@ -32,8 +34,38 @@ public class ToolSearchService {
 	private final ToolRepository toolRepository;
 
 	public List<ToolSearchResponse> searchByName(String keyword, Long userId) {
-		log.debug("userId={}", userId);
-		// toolMainName 또는 toolSubName에 하나라도 포함되면 검색되도록 OR 조건 구성
+
+		NativeQuery query = buildQuery(keyword);
+		SearchHits<ToolDocument> hits =
+			elasticsearchTemplate.search(query, ToolDocument.class);
+
+		List<Long> toolIds = hits.getSearchHits().stream()
+			.map(hit -> Long.valueOf(hit.getContent().getId()))
+			.toList();
+		Map<Long, List<String>> keywordMap =
+			toolService.getKeywordsBatch(toolIds);
+
+		Set<Long> scrappedToolIds =
+			userId != null
+				? toolScrapRepository.findScrappedToolIds(userId, toolIds)
+				: Set.of();
+
+		return hits.getSearchHits().stream()
+			.map(hit -> {
+				ToolDocument doc = hit.getContent();
+				Long toolId = Long.valueOf(doc.getId());
+
+				return ToolSearchResponse.from(
+					doc,
+					keywordMap.getOrDefault(toolId, List.of()),
+					scrappedToolIds.contains(toolId)
+				);
+			})
+			.toList();
+	}
+
+	private NativeQuery buildQuery(String keyword) {
+
 		MatchQuery mainMatch = MatchQuery.of(m -> m
 			.field("toolMainName")
 			.query(keyword)
@@ -54,21 +86,9 @@ public class ToolSearchService {
 			.minimumShouldMatch("1")
 		);
 
-		NativeQuery query = NativeQuery.builder()
+		return NativeQuery.builder()
 			.withQuery(boolQuery._toQuery())
 			.build();
-
-		SearchHits<ToolDocument> hits = elasticsearchTemplate.search(query, ToolDocument.class);
-
-		return hits.getSearchHits().stream()
-			.map(hit -> {
-				ToolDocument doc = hit.getContent();
-				List<String> keywordList = toolService.getKeywords(Long.valueOf(doc.getId()));
-				log.debug("keywordList={}", keywordList);
-				boolean isScrapped = checkIfScraped(userId, Long.valueOf(doc.getId()));
-				return ToolSearchResponse.from(doc, keywordList, isScrapped);
-			})
-			.toList();
 	}
 
 	public boolean checkIfScraped(Long userId, Long toolId) {
