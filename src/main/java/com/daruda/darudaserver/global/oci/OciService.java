@@ -1,5 +1,7 @@
 package com.daruda.darudaserver.global.oci;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -86,9 +88,24 @@ public class OciService {
 	}
 
 	private String extractObjectName(String imageUrl) {
-		if (imageUrl.contains("/o/")) {
-			return imageUrl.substring(imageUrl.lastIndexOf("/o/") + 3);
+		if (imageUrl == null || imageUrl.isBlank()) {
+			throw new InvalidValueException(ErrorCode.BAD_REQUEST_DATA);
 		}
-		return imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+
+		String objectName;
+		if (imageUrl.contains("/o/")) {
+			objectName = imageUrl.substring(imageUrl.lastIndexOf("/o/") + 3);
+		} else if (imageUrl.contains("/")) {
+			objectName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+		} else {
+			objectName = imageUrl;
+		}
+
+		try {
+			return URLDecoder.decode(objectName, StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			log.error("Failed to decode object name from URL: {}", imageUrl, e);
+			return objectName;
+		}
 	}
 }

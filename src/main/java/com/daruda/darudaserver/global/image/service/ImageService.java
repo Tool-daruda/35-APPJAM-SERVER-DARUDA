@@ -37,15 +37,15 @@ public class ImageService {
 			throw new NotFoundException(ErrorCode.FILE_NOT_FOUND);
 		}
 
-		imageRepository.deleteAllInBatch(images);
-
-		images.parallelStream().forEach(image -> {
+		for (Image image : images) {
 			try {
 				ociService.deleteImage(image.getImageUrl());
 			} catch (Exception e) {
 				log.error("Failed to delete image from OCI: {}", image.getImageUrl(), e);
 			}
-		});
+		}
+
+		imageRepository.deleteAllInBatch(images);
 	}
 
 	// 이미지 조회 메서드
