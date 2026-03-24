@@ -5,9 +5,9 @@ spring:
       max-request-size: 10MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ENC(+M0lXgQmFPI+PIMA5yUr0T94RPWdBqI3k8PY5vYllTIMIX+3oi4xR4uSYbqfcoLzZ7xqaBrWji+D+lm/l5kZWnQ/917OXpYtZWC3WcO/Lt1gPQw1RkQHoWpJ8Thwuaa0)
-    username: ENC(nJZfcHF+It0X4f8rxo8Glg==)
-    password: ENC(Hs1X8mIXeW4ZEhEMsaKAkITnB9KQUA1kuryXHSgO4fc=)
+    url: ENC(vLQJNEzWZsOeSFFupoIKKzHmVstzel9AmROUVJO1tI1Bs37cB6EY5MxPPjcpJ9a7)
+    username: ENC(4x2KvZ1Uumvqw1DZXxq9JA==)
+    password: ENC(hxpzR9+GyKiILYMCBkfvWn7/+h2EXm9k)
   elasticsearch:
     uris: ENC(FpLrPai/YvcQTPM/M0aJb5MQBC0OYy2CR5OK2K+frmY=)
   data:
@@ -18,12 +18,22 @@ spring:
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
         use_sql_comments: true
     open-in-view: false
+
+oci:
+  tenant-id: ENC(q6OPDI/RK9U+IWbOxW3rog2eTVdhJ/lE4+w9J/FKJby6oAh91gKudhznxduaiPzhVMKeTxaEiQf6SWZlRsdmnGGPl1PJQKFhLFc2yvThZ7p2b62tIgjdBA==)
+  user-id: ENC(eRQ4l5ORXvTmw4MKXIwjmanYZ5wsGey+j29WT8OnK6Ro4qyzjJkUiAWUKpL2iy9rkfd/GuYXEFaehFPQJexaMWiH/RLt9TmMa28dgTFmSuoGC3O83hlutQ==)
+  fingerprint: ENC(cKTRwfmU6V8JFCvH/bngZpAoGOINi/i0qfNONj35j5snVQ7yd79vuJLLNk/Sb7Bpz4jeA1Fgp2w=)
+  private-key-path: ENC(Igwl0a3/pejd/9z876wqss7yOCN5YF/y)
+  region: ENC(ItvPh91tOHaZw7Q0ThzmlN0wj+6LEQYr)
+  bucket:
+    name: ENC(RcisaxIDfA4DuuyzJ+s89g==)
+    namespace: ENC(n8qPsxDtdpgihEG0Z1QnDmxTz3PCAuJf)
 
 cloud:
   aws:
