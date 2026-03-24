@@ -18,6 +18,7 @@ import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 import com.daruda.darudaserver.global.image.service.ImageService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -45,6 +46,7 @@ public class ImageController {
 	@GetMapping("/presigned-url")
 	@Operation(summary = "이미지 업로드 용 presigned-url발급", description = "이미지 업로드를 위한 presignedUrl을 발급합니다")
 	public ResponseEntity<SuccessResponse<String>> getPresignedUrl(
+		@Parameter(description = "버킷에 업로드할 파일 이름 및 경로, ex) profile/{username}.jpg, icon/{toolName}.svg, post/{uuid}.png")
 		@RequestParam String imageName) {
 		String presignedUrl = imageService.createUploadPresignedUrl(imageName);
 
