@@ -14,7 +14,7 @@ import com.oracle.bmc.objectstorage.ObjectStorage;
 import com.oracle.bmc.objectstorage.ObjectStorageClient;
 
 @Configuration
-public class OCIConfig {
+public class OciConfig {
 
 	@Value("${oci.tenant-id}")
 	private String tenantId;

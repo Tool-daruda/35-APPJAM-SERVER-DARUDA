@@ -4,14 +4,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import com.daruda.darudaserver.global.image.dto.response.PresignedUrlResponse;
 import com.daruda.darudaserver.global.image.entity.Image;
 import com.daruda.darudaserver.global.image.repository.ImageRepository;
-import com.daruda.darudaserver.global.oci.OCIService;
+import com.daruda.darudaserver.global.oci.OciService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,37 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 public class ImageService {
 
-	private final OCIService ociService;
+	private static final List<String> ALLOWED_EXTENSIONS = List.of(
+		".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg", ".heic", ".heif"
+	);
+	private final OciService ociService;
 	private final ImageRepository imageRepository;
 
-	// 1. 이미지 업로드
-	public List<Long> uploadImages(final List<MultipartFile> images) {
-		List<String> imageUrls = images.stream()
-			.map(ociService::uploadImage)
-			.toList();
-
-		try {
-			List<Image> imageEntities = imageUrls.stream()
-				.map(url -> Image.builder().imageUrl(url).build())
-				.toList();
-
-			return imageRepository.saveAll(imageEntities).stream()
-				.map(Image::getImageId)
-				.toList();
-		} catch (Exception e) {
-			log.error("DB Save failed after OCI upload. Reverting uploads...", e);
-			imageUrls.forEach(url -> {
-				try {
-					ociService.deleteImage(url);
-				} catch (Exception ex) {
-					log.error("Failed to revert image upload: {}", url, ex);
-				}
-			});
-			throw new BusinessException(ErrorCode.FILE_UPLOAD_FAIL);
-		}
-	}
-
 	// 2. 이미지 삭제
+	@Transactional
 	public void deleteImages(final List<Long> imageIds) {
 		List<Image> images = imageRepository.findAllById(imageIds);
 
@@ -81,18 +58,39 @@ public class ImageService {
 		return getImageById(imageId).getImageUrl();
 	}
 
-	public String createUploadPresignedUrl(String key) {
-		return ociService.createUploadPresignedUrl(key);
+	public PresignedUrlResponse createUploadPresignedUrl(String prefix, String extension) {
+		validateExtensionString(extension);
+		return ociService.createUploadPresignedUrl(prefix, extension);
 	}
 
 	@Transactional
 	public List<Long> createImage(List<String> imageUrlList) {
 		List<Image> images = imageUrlList.stream()
-			.map(url -> Image.builder().imageUrl(url).build())
+			.map(url -> {
+				validateUrlExtension(url);
+				return Image.builder().imageUrl(url).build();
+			})
 			.toList();
 
 		return imageRepository.saveAll(images).stream()
 			.map(Image::getImageId)
 			.toList();
+	}
+
+	private void validateExtensionString(String extension) {
+		if (extension == null || !ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
+			throw new BusinessException(ErrorCode.INVALID_IMAGE_TYPE);
+		}
+	}
+
+	private void validateUrlExtension(String url) {
+		if (url == null) {
+			throw new BusinessException(ErrorCode.INVALID_IMAGE_TYPE);
+		}
+		String lowerUrl = url.toLowerCase();
+		boolean isValid = ALLOWED_EXTENSIONS.stream().anyMatch(lowerUrl::endsWith);
+		if (!isValid) {
+			throw new BusinessException(ErrorCode.INVALID_IMAGE_TYPE);
+		}
 	}
 }
