@@ -10,7 +10,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.daruda.darudaserver.domain.comment.event.CommentCreatedEvent;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
-import com.daruda.darudaserver.domain.notification.service.NotificationService;
 import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ public class CommentEventHandler {
 		backoff = @Backoff(delay = 1000)
 	)
 	public void handle(CommentCreatedEvent event) {
-		int commentCount = (int) commentRepository.countByBoardId(event.boardId());
+		int commentCount = commentRepository.countByBoardId(event.boardId());
 
 		boardSearchRepository.findById(event.boardId().toString())
 			.ifPresent(boardDoc -> {
@@ -42,7 +41,7 @@ public class CommentEventHandler {
 	}
 
 	@Recover
-	public void recover(Exception e, CommentCreatedEvent event) {
-		log.error("댓글 이벤트 최종 실패 - boardId={}", event.boardId(), e);
+	public void recover(Exception exception, CommentCreatedEvent event) {
+		log.error("댓글 이벤트 최종 실패 - boardId={}", event.boardId(), exception);
 	}
 }

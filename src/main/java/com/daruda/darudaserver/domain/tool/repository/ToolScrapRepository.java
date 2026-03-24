@@ -40,12 +40,12 @@ public interface ToolScrapRepository extends JpaRepository<ToolScrap, Long> {
 	void deleteByTool(Tool tool);
 
 	@Query("""
-    select ts.tool.toolId
-    from ToolScrap ts
-    where ts.user.id = :userId
-    and ts.delYn = false
-    and ts.tool.toolId in :toolIds
-""")
+			select ts.tool.toolId
+			from ToolScrap ts
+			where ts.user.id = :userId
+			and ts.delYn = false
+			and ts.tool.toolId in :toolIds
+		""")
 	Set<Long> findScrappedToolIds(
 		@Param("userId") Long userId,
 		@Param("toolIds") List<Long> toolIds

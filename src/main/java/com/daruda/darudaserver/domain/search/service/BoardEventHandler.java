@@ -87,8 +87,8 @@ public class BoardEventHandler {
 	}
 
 	@Recover
-	public void recover(Exception e, BoardCreatedEvent event) {
+	public void recover(Exception exception, BoardCreatedEvent event) {
 		log.error("Board ES 색인 최종 실패 - boardId={}",
-			event.boardId(), e);
+			event.boardId(), exception);
 	}
 }
