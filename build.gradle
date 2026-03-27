@@ -72,6 +72,10 @@ dependencies {
     implementation 'software.amazon.awssdk:s3:2.20.45'
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.0.2'
 
+    // Oracle
+    implementation 'com.oracle.oci.sdk:oci-java-sdk-objectstorage:3.77.2'
+    implementation 'com.oracle.oci.sdk:oci-java-sdk-common-httpclient-jersey3:3.77.2'
+
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"

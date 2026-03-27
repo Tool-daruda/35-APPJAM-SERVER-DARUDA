@@ -24,6 +24,16 @@ spring:
         format_sql: true
         use_sql_comments: true
 
+oci:
+  tenant-id: ${OCI_TENANT_ID}
+  user-id: ${OCI_USER_ID}
+  fingerprint: ${OCI_FINGERPRINT}
+  private-key-path: ${OCI_PRIVATE_KEY_PATH}
+  region: ${OCI_REGION}
+  bucket:
+    name: ${OCI_BUCKET_NAME}
+    namespace: ${OCI_NAMESPACE}
+
 cloud:
   aws:
     s3:

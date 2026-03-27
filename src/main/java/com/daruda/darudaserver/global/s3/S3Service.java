@@ -19,14 +19,15 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
+@Deprecated
 @Component
 public class S3Service {
 
-	private final String bucketName;
-	private final S3Config s3Config;
 	private static final List<String> IMAGE_EXTENSIONS = Arrays.asList("image/jpeg", "image/png", "image/jpg",
 		"image/webp", "image/heic", "image/heif");
 	private static final Long MAX_FILE_SIZE = 7 * 1024 * 1024L;
+	private final String bucketName;
+	private final S3Config s3Config;
 
 	public S3Service(@Value("${cloud.aws.s3.bucket}") String bucketName, S3Config s3Config) {
 		this.bucketName = bucketName;
@@ -38,7 +39,7 @@ public class S3Service {
 		final S3Client s3Client = s3Config.getS3Client();
 		validateExtension(image);
 		validateFileSize(image);
-		
+
 		try {
 			PutObjectRequest request = PutObjectRequest.builder()
 				.bucket(bucketName)

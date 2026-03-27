@@ -43,3 +43,6 @@ daruda_log
 
 ### QueryDSL ###
 src/main/generated/
+
+### OCI ###
+private.pem
