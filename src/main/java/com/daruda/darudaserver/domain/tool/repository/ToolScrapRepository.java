@@ -2,6 +2,7 @@ package com.daruda.darudaserver.domain.tool.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -34,4 +35,19 @@ public interface ToolScrapRepository extends JpaRepository<ToolScrap, Long> {
 
 	boolean existsByUserAndTool(UserEntity user, Tool tool);
 
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Transactional
+	void deleteByTool(Tool tool);
+
+	@Query("""
+			select ts.tool.toolId
+			from ToolScrap ts
+			where ts.user.id = :userId
+			and ts.delYn = false
+			and ts.tool.toolId in :toolIds
+		""")
+	Set<Long> findScrappedToolIds(
+		@Param("userId") Long userId,
+		@Param("toolIds") List<Long> toolIds
+	);
 }

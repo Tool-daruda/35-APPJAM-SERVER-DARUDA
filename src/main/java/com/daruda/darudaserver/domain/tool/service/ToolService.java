@@ -1,7 +1,9 @@
 package com.daruda.darudaserver.domain.tool.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,8 @@ import com.daruda.darudaserver.domain.tool.dto.res.PlanRes;
 import com.daruda.darudaserver.domain.tool.dto.res.PlatformRes;
 import com.daruda.darudaserver.domain.tool.dto.res.RelatedToolListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.RelatedToolRes;
+import com.daruda.darudaserver.domain.tool.dto.res.ToolBlogListRes;
+import com.daruda.darudaserver.domain.tool.dto.res.ToolBlogRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolCoreListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolCoreRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDetailGetRes;
@@ -21,6 +25,7 @@ import com.daruda.darudaserver.domain.tool.entity.License;
 import com.daruda.darudaserver.domain.tool.entity.Plan;
 import com.daruda.darudaserver.domain.tool.entity.RelatedTool;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolBlog;
 import com.daruda.darudaserver.domain.tool.entity.ToolCore;
 import com.daruda.darudaserver.domain.tool.entity.ToolImage;
 import com.daruda.darudaserver.domain.tool.entity.ToolKeyword;
@@ -29,6 +34,7 @@ import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
 import com.daruda.darudaserver.domain.tool.entity.ToolVideo;
 import com.daruda.darudaserver.domain.tool.repository.PlanRepository;
 import com.daruda.darudaserver.domain.tool.repository.RelatedToolRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolBlogRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolCoreRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolKeywordRepository;
@@ -61,6 +67,7 @@ public class ToolService {
 	private final RelatedToolRepository relatedToolRepository;
 	private final ToolScrapRepository toolScrapRepository;
 	private final UserRepository userRepository;
+	private final ToolBlogRepository toolBlogRepository;
 
 	public ToolDetailGetRes getToolDetail(Long userId, final Long toolId) {
 		log.info("툴 세부 정보를 조회합니다. toolId={}, userId={}", toolId, userId);
@@ -83,15 +90,23 @@ public class ToolService {
 		log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
 		log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
 		toolRepository.save(tool);
-		return ToolDetailGetRes.of(tool, platformRes, tool.getToolLogo(), keywordRes, images, videos, isScrapped);
+		return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos, isScrapped);
 	}
 
 	public PlanListRes getPlan(final Long toolId) {
 		log.info("플랜 정보를 조회합니다. toolId={}", toolId);
 		Tool tool = getToolById(toolId);
-		List<PlanRes> plan = getPlanByTool(tool);
+		List<PlanRes> toolPlans = getPlanByTool(tool);
 		log.info("플랜 정보를 성공적으로 조회했습니다. toolId={}", toolId);
-		return PlanListRes.of(plan);
+		return PlanListRes.of(tool.getPlanLink(), toolPlans);
+	}
+
+	public ToolBlogListRes getBlog(final Long toolId) {
+		log.info("블로그 정보를 조회합니다. toolId={}", toolId);
+		Tool tool = getToolById(toolId);
+		List<ToolBlogRes> toolBlogs = getBlogByTool(tool);
+		log.info("블로그 정보를 성공적으로 조회했습니다. toolId={}", toolId);
+		return ToolBlogListRes.of(toolBlogs);
 	}
 
 	public ToolCoreListRes getToolCore(final Long toolId) {
@@ -248,6 +263,15 @@ public class ToolService {
 
 	}
 
+	private List<ToolBlogRes> getBlogByTool(final Tool tool) {
+		log.debug("툴에 연결된 블로그 정보를 조회합니다. toolId={}", tool.getToolId());
+		List<ToolBlog> blogList = toolBlogRepository.findAllByTool(tool);
+		validateList(blogList);
+		return blogList.stream()
+			.map(ToolBlogRes::from)
+			.toList();
+	}
+
 	private List<ToolCoreRes> getToolCoreByTool(final Tool tool) {
 		log.debug("툴에 연결된 핵심 정보를 조회합니다. toolId={}", tool.getToolId());
 		List<ToolCore> toolCoreList = toolCoreRepository.findAllByTool(tool);
@@ -320,5 +344,24 @@ public class ToolService {
 	public List<String> getKeywords(final Long toolId) {
 		Tool tool = getToolById(toolId);
 		return convertToKeywordRes(tool);
+	}
+
+	public Map<Long, List<String>> getKeywordsBatch(List<Long> toolIds) {
+
+		if (toolIds.isEmpty()) {
+			return Map.of();
+		}
+
+		List<ToolKeyword> keywords =
+			toolKeywordRepository.findByTool_ToolIdIn(toolIds);
+
+		return keywords.stream()
+			.collect(Collectors.groupingBy(
+				k -> k.getTool().getToolId(),
+				Collectors.mapping(
+					ToolKeyword::getKeywordName,
+					Collectors.toList()
+				)
+			));
 	}
 }

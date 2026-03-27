@@ -58,12 +58,6 @@ public class ToolDocument {
 	@Field(type = FieldType.Text)
 	private String planLink;
 
-	@Field(type = FieldType.Keyword)
-	private String bgColor;
-
-	@Field(type = FieldType.Boolean)
-	private boolean fontColor;
-
 	@Field(type = FieldType.Integer)
 	private int viewCount;
 
@@ -85,8 +79,6 @@ public class ToolDocument {
 			.supportKorea(tool.getSupportKorea())
 			.detailDescription(tool.getDetailDescription())
 			.planLink(tool.getPlanLink())
-			.bgColor(tool.getBgColor())
-			.fontColor(tool.isFontColor())
 			.viewCount(tool.getViewCount())
 			.popular(tool.getPopular())
 			.toolLogo(tool.getToolLogo())

@@ -7,6 +7,7 @@ import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -30,21 +31,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
+	private static final String USER_ID = "userId";
+	private static final String ROLE = "role";
 	@Value("${jwt.secret}")
 	private String jwtSecret;
-
 	@Value("${jwt.access-token-expire-time}")
 	private long accessTokenExpireTime;
-
 	@Value("${jwt.refresh-token-expire-time}")
 	private long refreshTokenExpireTime;
-
-	private static final String USER_ID = "userId";
-
-	//    @PostConstruct
-	//    protected void init(){
-	//        jwtSecret = Base64.getEncoder().encodeToString(jwtSecret.getBytes(StandardCharsets.UTF_8));
-	//    }
 
 	public String generateAccessToken(final Authentication authentication) {
 		return generateToken(authentication, accessTokenExpireTime);
@@ -55,11 +49,14 @@ public class JwtTokenProvider {
 	}
 
 	public Long getUserIdFromJwt(String token) {
-		log.debug("JWT 파싱 시작: {}", token);
 		Claims claims = getBody(token);
-		Long userId = Long.valueOf(claims.get(USER_ID).toString());
-		log.debug("JWT 파싱 성공 - UserID: {}", userId);
-		return userId;
+		return Long.valueOf(claims.get(USER_ID).toString());
+	}
+
+	public String getRoleFromJwt(String token) {
+		Claims claims = getBody(token);
+		Object roleObj = claims.get(ROLE);
+		return roleObj != null ? roleObj.toString() : null;
 	}
 
 	private Claims getBody(final String token) {
@@ -90,6 +87,20 @@ public class JwtTokenProvider {
 
 		//userId claim에 저장
 		claims.put(USER_ID, authentication.getPrincipal());
+
+		// authorities에서 role 정보를 추출
+		try {
+			String role = authentication.getAuthorities().stream()
+				.map(GrantedAuthority::getAuthority)
+				.findFirst()
+				.map(a -> a.substring(5))
+				.orElse(null);
+			if (role != null && !role.isBlank()) {
+				claims.put(ROLE, role);
+			}
+		} catch (Exception ex) {
+			// authorities가 null이거나 예외가 발생하면 role을 추가하지 않음
+		}
 
 		return Jwts.builder()
 			.setHeaderParam(Header.TYPE, Header.JWT_TYPE)

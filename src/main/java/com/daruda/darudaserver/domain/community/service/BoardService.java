@@ -5,8 +5,8 @@ import static com.daruda.darudaserver.domain.community.entity.QBoard.*;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +20,8 @@ import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardImage;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
+import com.daruda.darudaserver.domain.community.event.BoardCreatedEvent;
+import com.daruda.darudaserver.domain.community.event.BoardUpdatedEvent;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
@@ -40,6 +42,7 @@ import com.daruda.darudaserver.global.error.exception.ForbiddenException;
 import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
+import com.daruda.darudaserver.global.image.repository.ImageRepository;
 import com.daruda.darudaserver.global.image.service.ImageService;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -59,6 +62,7 @@ public class BoardService {
 	private final BoardImageService boardImageService;
 	private final BoardImageRepository boardImageRepository;
 	private final ImageService imageService;
+	private final ImageRepository imageRepository;
 	private final UserRepository userRepository;
 	private final BoardScrapRepository boardScrapRepository;
 	private final ToolRepository toolRepository;
@@ -66,6 +70,7 @@ public class BoardService {
 	private final ValidateBoard validateBoard;
 	private final JPAQueryFactory jpaQueryFactory;
 	private final BoardSearchRepository boardSearchRepository;
+	private final ApplicationEventPublisher eventPublisher;
 
 	// 게시판 생성
 	public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
@@ -85,6 +90,10 @@ public class BoardService {
 		// 이미지 처리
 		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());
 
+		eventPublisher.publishEvent(
+			new BoardCreatedEvent(board.getId())
+		);
+
 		// Tool 정보 설정
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
@@ -103,7 +112,7 @@ public class BoardService {
 			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
 		}
 
-		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
+		boardSearchRepository.findById(boardId.toString())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 
 		Tool tool = boardCreateAndUpdateReq.isFree() ? null : getToolById(boardCreateAndUpdateReq.toolId());
@@ -116,10 +125,8 @@ public class BoardService {
 			boardCreateAndUpdateReq.isFree()
 		);
 
-		boardDocument.update(
-			tool,
-			boardCreateAndUpdateReq.title(),
-			boardCreateAndUpdateReq.content()
+		eventPublisher.publishEvent(
+			new BoardUpdatedEvent(board.getId())
 		);
 
 		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());
@@ -215,7 +222,6 @@ public class BoardService {
 
 		log.info("USERID OR NULL {}", userIdOrNull);
 		Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId + 1;
-		PageRequest pageRequest = PageRequest.of(0, size + 1);
 		UserEntity user = getUser(userIdOrNull);
 		log.info("USER : {}", user);
 
@@ -323,20 +329,52 @@ public class BoardService {
 		return board;
 	}
 
-	public List<String> processImages(final Board board, final List<String> images) {
-		if (images == null || images.isEmpty()) {
-			deleteOriginImages(board.getId());
+	public List<String> processImages(final Board board, final List<String> newImageUrls) {
+		List<BoardImage> existingBoardImages = boardImageRepository.findAllByBoardId(board.getId());
+
+		if (existingBoardImages.isEmpty() && (newImageUrls == null || newImageUrls.isEmpty())) {
 			return List.of();
 		}
-		deleteOriginImages(board.getId());
-		List<String> validImages = images.stream()
+
+		List<Long> existingImageIds = existingBoardImages.stream()
+			.map(BoardImage::getImageId)
+			.toList();
+
+		List<com.daruda.darudaserver.global.image.entity.Image> existingImages = existingImageIds.isEmpty()
+			? List.of() : imageRepository.findAllById(existingImageIds);
+
+		List<String> validNewUrls = newImageUrls == null ? List.of() : newImageUrls.stream()
 			.filter(url -> url != null && !url.isBlank())
 			.toList();
-		if (validImages.isEmpty()) {
-			return List.of();
+
+		// 삭제 대상 식별 (기존에 있었지만 새로 전달받지 않은 URL)
+		List<Long> imageIdsToDelete = existingImages.stream()
+			.filter(img -> !validNewUrls.contains(img.getImageUrl()))
+			.map(com.daruda.darudaserver.global.image.entity.Image::getImageId)
+			.toList();
+
+		if (!imageIdsToDelete.isEmpty()) {
+			List<BoardImage> boardImagesToDelete = existingBoardImages.stream()
+				.filter(bi -> imageIdsToDelete.contains(bi.getImageId()))
+				.toList();
+			boardImageRepository.deleteAll(boardImagesToDelete);
+			imageService.deleteImages(imageIdsToDelete);
 		}
-		List<Long> imageIds = imageService.createImage(images);
-		boardImageService.saveBoardImages(board.getId(), imageIds);
+
+		// 추가 대상 식별 (새로 전달받았지만 기존에 없던 URL)
+		List<String> existingUrls = existingImages.stream()
+			.map(com.daruda.darudaserver.global.image.entity.Image::getImageUrl)
+			.toList();
+
+		List<String> urlsToAdd = validNewUrls.stream()
+			.filter(url -> !existingUrls.contains(url))
+			.toList();
+
+		if (!urlsToAdd.isEmpty()) {
+			List<Long> newImageIds = imageService.createImage(urlsToAdd);
+			boardImageService.saveBoardImages(board.getId(), newImageIds);
+		}
+
 		return boardImageService.getBoardImageUrls(board.getId());
 	}
 
@@ -344,21 +382,12 @@ public class BoardService {
 		Board board = Board.create(tool, user, req.title(), req.content());
 		board = boardRepository.save(board);
 
-		BoardDocument boardDocument =
-			BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()),
-				getCommentCount(board.getId()), getBoardScrap(user, board));
-
-		boardSearchRepository.save(boardDocument);
-
 		return board;
 	}
 
 	private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
 		Board board = Board.createFree(user, req.title(), req.content());
 		board = boardRepository.save(board);
-		BoardDocument boardDocument = BoardDocument.from(board, boardImageService.getBoardImageUrls(board.getId()),
-			getCommentCount(board.getId()), getBoardScrap(user, board));
-		boardSearchRepository.save(boardDocument);
 
 		return board;
 	}

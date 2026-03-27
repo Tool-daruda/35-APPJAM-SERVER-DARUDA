@@ -184,7 +184,8 @@ class AuthControllerTest {
 	void logout() throws Exception {
 		// given
 		Long userId = 1L;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
@@ -228,7 +229,8 @@ class AuthControllerTest {
 	void withdraw() throws Exception {
 		// given
 		Long userId = 1L;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);

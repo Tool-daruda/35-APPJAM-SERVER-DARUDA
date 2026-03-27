@@ -8,19 +8,17 @@ import lombok.Builder;
 public record PlanRes(
 	Long planId,
 	String planName,
-	Long monthlyPrice,
-	Long annualPrice,
-	String description,
-	Boolean isDollar
+	Long priceAnnual,
+	Long priceMonthly,
+	String description
 ) {
 	public static PlanRes of(final Plan plan) {
 		return PlanRes.builder()
 			.planId(plan.getPlanId())
 			.planName(plan.getPlanName())
-			.monthlyPrice(plan.getPriceMonthly())
-			.annualPrice(plan.getPriceAnnual())
+			.priceAnnual(plan.getPriceAnnual())
+			.priceMonthly(plan.getPriceMonthly())
 			.description(plan.getDescription())
-			.isDollar(plan.getIsDollar())
 			.build();
 	}
 }

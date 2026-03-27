@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.auth.security.CustomAccessDeniedHandler;
 import com.daruda.darudaserver.global.auth.security.ExceptionHandlerFilter;
@@ -34,6 +35,7 @@ public class SecurityConfig {
 		"/api/v1/tool",
 		"/api/v1/tool/{tool-id}",
 		"/api/v1/tool/{tool-id}/plans",
+		"/api/v1/tool/{tool-id}/blogs",
 		"/api/v1/tool/{tool-id}/core-features",
 		"/api/v1/tool/{tool-id}/alternatives",
 		"/api/v1/tool/category",
@@ -44,9 +46,11 @@ public class SecurityConfig {
 		"/api/v1/search/**",
 		"/error"
 	};
+
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final JwtTokenProvider jwtTokenProvider;
-	private final CustomAccessDeniedHandler customAccessDeniedHandler;
+	private final CorsConfig corsConfig;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -66,6 +70,9 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.OPTIONS, "/**")
 					.permitAll() //OPTION 추가
 
+					.requestMatchers("/api/v1/admin/**")
+					.hasRole(Positions.ADMIN.getEngName())
+
 					.requestMatchers(HttpMethod.POST, "/api/v1/comment", "/api/v1/board", "/api/v1/board/{board-id}")
 					.authenticated()
 
@@ -76,7 +83,7 @@ public class SecurityConfig {
 			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class);
 
-		http.cors(cors -> cors.configurationSource(CorsConfig.configurationSource()));
+		http.cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()));
 
 		return http.build();
 	}

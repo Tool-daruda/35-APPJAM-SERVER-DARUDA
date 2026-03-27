@@ -50,12 +50,21 @@ public class AuthService {
 
 		Positions positions = Positions.fromString(positionStr);
 
+		// 관리자로 회원 가입 불가
+		if (Positions.ADMIN.equals(positions)) {
+			throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
+		}
+
 		UserEntity userEntity = UserEntity.of(email, nickname, positions);
 
-		Long userId = userRepository.save(userEntity).getId();
+		UserEntity savedUser = userRepository.save(userEntity);
+
+		Long userId = savedUser.getId();
 		log.debug("유저 아이디를 성공적으로 조회했습니다. userId : {}", userId);
 
-		JwtTokenResponse jwtTokenResponse = tokenService.createToken(userId);
+		String role = savedUser.getPositions().getEngName();
+
+		JwtTokenResponse jwtTokenResponse = tokenService.createToken(userId, role);
 
 		notificationService.sendRegisterNotice(userEntity);
 
@@ -72,7 +81,9 @@ public class AuthService {
 			Long userId = userEntity.get().getId();
 			log.debug("유저 아이디를 성공적으로 조회했습니다. userId : {}", userId);
 
-			JwtTokenResponse jwtTokenResponse = tokenService.createToken(userId);
+			String role = userEntity.get().getPositions().getEngName();
+
+			JwtTokenResponse jwtTokenResponse = tokenService.createToken(userId, role);
 
 			return LoginSuccessResponse.ofRegisteredUser(jwtTokenResponse, userEntity.get());
 		}
@@ -104,8 +115,8 @@ public class AuthService {
 		log.info("boardScrap을 성공적으로 삭제하였습니다");
 
 		//FK로 묶여있는 board 삭제
-		boardRepository.deleteAllByUserId(userId);
-		log.info("board를 성공적으로 삭제하였습니다");
+		boardRepository.clearUser(userEntity);
+		log.info("board의 사용자 연결을 성공적으로 해제하였습니다");
 
 		// 알림 삭제
 		notificationService.delete(userId);

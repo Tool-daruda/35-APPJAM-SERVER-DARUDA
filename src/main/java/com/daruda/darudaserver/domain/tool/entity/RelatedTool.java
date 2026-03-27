@@ -1,6 +1,5 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 @Getter
+@Builder
 @Table(name = "related_tool")
 public class RelatedTool {
 
@@ -25,7 +26,7 @@ public class RelatedTool {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long relatedToolId;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tool_id", nullable = false)
 	private Tool tool;
 

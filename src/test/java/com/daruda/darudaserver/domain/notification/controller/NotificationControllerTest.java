@@ -71,7 +71,8 @@ class NotificationControllerTest {
 	void subscribe_ShouldReturnSseEmitter() throws Exception {
 		// given
 		Long userId = 1L;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
@@ -91,7 +92,8 @@ class NotificationControllerTest {
 		// given
 		Long userId = 1L;
 		Long notificationId = 1L;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
@@ -112,7 +114,8 @@ class NotificationControllerTest {
 	void getNotifications_ShouldReturnNotificationList() throws Exception {
 		// given
 		Long userId = 1L;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
@@ -155,7 +158,8 @@ class NotificationControllerTest {
 	void getRecentNotifications_ShouldReturnRecentNotificationList() throws Exception {
 		// given
 		Long userId = 1L;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
@@ -198,7 +202,8 @@ class NotificationControllerTest {
 	void notice_ShouldSendNotice() throws Exception {
 		// given
 		Long userId = 1L;
-		Authentication authentication = UserAuthentication.createUserAuthentication(userId);
+		String positionEngName = Positions.STUDENT.getEngName();
+		Authentication authentication = UserAuthentication.createUserAuthentication(userId, positionEngName);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);

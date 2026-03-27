@@ -44,7 +44,7 @@ public class NotificationController {
 
 	@PatchMapping("/read/{notification-id}")
 	@Operation(summary = "알림 읽음", description = "알림을 읽음 처리 합니다.")
-	public ResponseEntity<ApiResponse<?>> readNotification(
+	public ResponseEntity<ApiResponse<Void>> readNotification(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "notification Id", example = "1")
 		@PathVariable(name = "notification-id") Long notificationId) {
@@ -71,14 +71,14 @@ public class NotificationController {
 
 	@PostMapping("/notice")
 	@Operation(summary = "공지 발송(관리자)", description = "모든 사용자에게 공지를 발송합니다.")
-	public ResponseEntity<ApiResponse<?>> notice(@RequestBody NoticeRequest noticeRequest) {
+	public ResponseEntity<ApiResponse<Void>> notice(@RequestBody NoticeRequest noticeRequest) {
 		notificationService.sendNotice(noticeRequest);
 		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_SEND_NOTICE));
 	}
 
 	@PostMapping("/block-notice")
 	@Operation(summary = "커뮤니티 제한 공지 발송(관리자)", description = "커뮤니티가 제한된 사용자에게 공지를 발송합니다.")
-	public ResponseEntity<ApiResponse<?>> blockNotice(
+	public ResponseEntity<ApiResponse<Void>> blockNotice(
 		@RequestBody CommunityBlockNoticeRequest communityBlockNoticeRequest) {
 		notificationService.sendBlockNotice(communityBlockNoticeRequest);
 		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_SEND_COMMUNITY_BLOCK_NOTICE));

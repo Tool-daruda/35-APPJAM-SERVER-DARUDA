@@ -5,19 +5,18 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.daruda.darudaserver.global.error.dto.SuccessResponse;
+import com.daruda.darudaserver.global.image.dto.response.PresignedUrlResponse;
 import com.daruda.darudaserver.global.image.service.ImageService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -28,13 +27,6 @@ import lombok.RequiredArgsConstructor;
 public class ImageController {
 	private final ImageService imageService;
 
-	@PostMapping
-	@Operation(summary = "이미지 업로드", description = "이미지를 S3 버킷에 업로드 합니다.")
-	public ResponseEntity<List<Long>> uploadImages(@RequestPart("files") List<MultipartFile> files) {
-		List<Long> imageUrls = imageService.uploadImages(files);
-		return ResponseEntity.ok(imageUrls);
-	}
-
 	@DeleteMapping
 	@Operation(summary = "이미지 삭제", description = "S3 버킷에 업로드된 이미지를 삭제 합니다.")
 	public ResponseEntity<List<Long>> deleteImages(@RequestBody List<Long> imageIds) {
@@ -43,12 +35,15 @@ public class ImageController {
 	}
 
 	@GetMapping("/presigned-url")
-	@Operation(summary = "이미지 업로드 용 presigned-url발급", description = "이미지 업로드를 위한 presignedUrl을 발급합니다")
-	public ResponseEntity<SuccessResponse<String>> getPresignedUrl(
-		@RequestParam String imageName) {
-		String presignedUrl = imageService.createUploadPresignedUrl(imageName);
+	@Operation(summary = "이미지 업로드 용 presigned-url 발급", description = "이미지 업로드를 위한 presignedUrl을 발급합니다")
+	public ResponseEntity<SuccessResponse<PresignedUrlResponse>> getPresignedUrl(
+		@Parameter(description = "이미지가 저장될 디렉토리(prefix) (예: profile, board)", example = "board")
+		@RequestParam(defaultValue = "temp") String prefix,
+		@Parameter(description = "파일 확장자 (예: .jpg, .png)", example = ".png")
+		@RequestParam String extension) {
+		PresignedUrlResponse response = imageService.createUploadPresignedUrl(prefix, extension);
 
-		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_CREATE, presignedUrl));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_CREATE, response));
 	}
 
 }

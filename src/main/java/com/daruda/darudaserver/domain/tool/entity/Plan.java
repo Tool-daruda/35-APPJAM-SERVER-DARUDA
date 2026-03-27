@@ -1,5 +1,7 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
+import com.daruda.darudaserver.domain.admin.dto.request.CreateToolPlanRequest;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +21,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Getter
+@Builder
 @Table(name = "tool_plan")
 public class Plan {
 
@@ -34,13 +38,20 @@ public class Plan {
 	@Column(name = "price_annual")
 	private Long priceAnnual;
 
-	@Column(name = "description", nullable = false, length = 50000)
+	@Column(name = "description", nullable = false, length = 500)
 	private String description;
-
-	@Column(name = "is_dollar", nullable = false)
-	private Boolean isDollar;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tool_id", nullable = false)
 	private Tool tool;
+
+	public static Plan create(CreateToolPlanRequest toolPlanRequest, Tool tool) {
+		return Plan.builder()
+			.planName(toolPlanRequest.planName())
+			.priceMonthly(toolPlanRequest.priceMonthly())
+			.priceAnnual(toolPlanRequest.priceAnnual())
+			.description(toolPlanRequest.planDescription())
+			.tool(tool)
+			.build();
+	}
 }

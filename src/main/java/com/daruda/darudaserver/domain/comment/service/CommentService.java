@@ -2,6 +2,7 @@ package com.daruda.darudaserver.domain.comment.service;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import com.daruda.darudaserver.domain.comment.dto.response.CreateCommentResponse
 import com.daruda.darudaserver.domain.comment.dto.response.GetCommentResponse;
 import com.daruda.darudaserver.domain.comment.dto.response.GetCommentRetrieveResponse;
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.event.CommentCreatedEvent;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
@@ -40,7 +42,7 @@ public class CommentService {
 	private final UserRepository userRepository;
 	private final NotificationService notificationService;
 	private final NotificationRepository notificationRepository;
-	private final BoardSearchRepository boardSearchRepository;
+	private final ApplicationEventPublisher eventPublisher;
 
 	public CreateCommentResponse postComment(
 		Long userId, Long boardId, CreateCommentRequest request
@@ -69,12 +71,9 @@ public class CommentService {
 		notificationService.sendCommentNotification(comment);
 
 		//BoardDocument commentCount 업데이트 및 색인
-		int commentCount = commentRepository.countByBoardId(boardId);
-		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
-
-		boardDocument.updateCommentCount(commentCount);
-		boardSearchRepository.save(boardDocument);
+		eventPublisher.publishEvent(
+			new CommentCreatedEvent(comment.getId(), boardId)
+		);
 
 		// 응답 DTO 반환
 		return CreateCommentResponse.of(
