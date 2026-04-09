@@ -207,7 +207,7 @@ class NotificationControllerTest {
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
-		NoticeRequest request = new NoticeRequest("공지 제목", "공지 내용");
+		NoticeRequest request = new NoticeRequest("공지 제목", "https://notion.so/test");
 
 		// then
 		String token = "accessToken";
