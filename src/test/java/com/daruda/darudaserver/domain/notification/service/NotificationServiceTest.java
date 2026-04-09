@@ -1,6 +1,5 @@
 package com.daruda.darudaserver.domain.notification.service;
 
-import static com.daruda.darudaserver.domain.notification.entity.enums.NotificationFormat.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
