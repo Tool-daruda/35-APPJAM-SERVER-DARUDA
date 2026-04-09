@@ -53,15 +53,19 @@ public class NotificationEntity extends BaseTimeEntity {
 	@Column(nullable = false)
 	private boolean isRead;
 
+	@Column
+	private String url;
+
 	@Builder
-	private NotificationEntity(String title, String content, CommentEntity comment, UserEntity receiver,
-		NotificationType type, boolean isRead) {
+	public NotificationEntity(String title, String content, CommentEntity comment, UserEntity receiver,
+		NotificationType type, boolean isRead, String url) {
 		this.title = title;
 		this.content = content;
 		this.comment = comment;
 		this.receiver = receiver;
 		this.type = type;
 		this.isRead = isRead;
+		this.url = url;
 	}
 
 	public static NotificationEntity of(UserEntity receiver, NotificationType type, String title, String content,
