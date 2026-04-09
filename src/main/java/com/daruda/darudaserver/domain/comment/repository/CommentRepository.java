@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.user.entity.UserEntity;
 
 import jakarta.transaction.Transactional;
 
@@ -38,4 +39,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
 
 	@Query("SELECT COUNT(c) FROM CommentEntity c WHERE c.board.id = :boardId AND c.isDeleted = false")
 	int countByBoardId(@Param("boardId") Long boardId);
+
+	@Query("SELECT DISTINCT c.user FROM CommentEntity c WHERE c.board.id = :boardId")
+	List<UserEntity> findDistinctUserByBoardId(@Param("boardId") Long boardId);
 }
