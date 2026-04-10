@@ -39,18 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		try {
-			final String accessToken = getAccessToken(request);
-			log.debug("추출된 AccessToken: {}", accessToken);
+		final String accessToken = getAccessToken(request);
+		log.debug("추출된 AccessToken: {}", accessToken);
 
-			if (StringUtils.hasText(accessToken)
-				&& jwtTokenProvider.validateToken(accessToken) == JwtValidationType.VALID_JWT) {
-				Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
-				String role = jwtTokenProvider.getRoleFromJwt(accessToken);
-				doAuthentication(request, userId, role);
-			}
-		} catch (Exception e) {
-			log.error("JWT 인증 에러: {}", e.getMessage());
+		if (StringUtils.hasText(accessToken)
+			&& jwtTokenProvider.validateToken(accessToken) == JwtValidationType.VALID_JWT) {
+			Long userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
+			String role = jwtTokenProvider.getRoleFromJwt(accessToken);
+			doAuthentication(request, userId, role);
 		}
 
 		filterChain.doFilter(request, response);

@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.notification.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record NoticeRequest(
@@ -9,6 +10,7 @@ public record NoticeRequest(
 	String title,
 
 	@NotBlank(message = "URL은 필수 입력값입니다")
+	@Pattern(regexp = "^(http|https)://.*$", message = "올바른 URL 형식이 아닙니다")
 	String url
 ) {
 }

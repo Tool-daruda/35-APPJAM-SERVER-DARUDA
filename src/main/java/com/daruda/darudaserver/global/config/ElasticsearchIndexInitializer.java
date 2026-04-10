@@ -28,18 +28,19 @@ public class ElasticsearchIndexInitializer {
 	}
 
 	private void initializeIndex(Class<?> clazz) {
-		IndexOperations indexOps = elasticsearchOperations.indexOps(clazz);
-		if (!indexOps.exists()) {
-			log.info("{} 인덱스가 존재하지 않아 생성을 시도합니다.", clazz.getSimpleName());
-			try {
+		try {
+			IndexOperations indexOps = elasticsearchOperations.indexOps(clazz);
+			if (!indexOps.exists()) {
+				log.info("{} 인덱스가 존재하지 않아 생성을 시도합니다.", clazz.getSimpleName());
 				indexOps.create();
 				indexOps.putMapping(indexOps.createMapping());
 				log.info("{} 인덱스 생성 성공.", clazz.getSimpleName());
-			} catch (Exception e) {
-				log.error("{} 인덱스 생성 중 오류 발생: {}", clazz.getSimpleName(), e.getMessage());
+			} else {
+				log.info("{} 인덱스가 이미 존재합니다.", clazz.getSimpleName());
 			}
-		} else {
-			log.info("{} 인덱스가 이미 존재합니다.", clazz.getSimpleName());
+		} catch (Exception e) {
+			log.error("{} 인덱스 초기화 실패", clazz.getSimpleName(), e);
+			throw new IllegalStateException(clazz.getSimpleName() + " 인덱스 초기화 실패", e);
 		}
 	}
 }

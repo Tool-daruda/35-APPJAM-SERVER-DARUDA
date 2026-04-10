@@ -107,16 +107,18 @@ public class NotificationService {
 	}
 
 	private String createCommentNotificationTitle(CommentEntity commentEntity) {
-		boolean hasPhoto = commentEntity.getPhotoUrl() != null && !commentEntity.getPhotoUrl().isEmpty();
-		boolean hasText = commentEntity.getContent() != null && !commentEntity.getContent().isEmpty();
+		boolean hasPhoto = commentEntity.getPhotoUrl() != null && !commentEntity.getPhotoUrl().isBlank();
+		boolean hasText = commentEntity.getContent() != null && !commentEntity.getContent().isBlank();
 
 		if (hasPhoto && hasText) {
-			return COMMENT_TITLE_IMAGE_WITH_TEXT.format(commentEntity.getContent());
+			return COMMENT_TITLE_IMAGE_WITH_TEXT.format(commentEntity.getContent().trim());
 		}
 		if (hasPhoto) {
 			return COMMENT_TITLE_IMAGE_ONLY.getMessageFormat();
 		}
-		return COMMENT_TITLE_TEXT_ONLY.format(commentEntity.getContent());
+		return hasText
+			? COMMENT_TITLE_TEXT_ONLY.format(commentEntity.getContent().trim())
+			: COMMENT_TITLE_TEXT_ONLY.format("(내용 없음)");
 	}
 
 	@Transactional
