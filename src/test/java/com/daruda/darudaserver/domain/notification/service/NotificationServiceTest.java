@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
@@ -59,6 +63,23 @@ class NotificationServiceTest {
 
 	@InjectMocks
 	private NotificationService notificationService;
+
+	@BeforeEach
+	void setUp() {
+		TransactionSynchronizationManager.initSynchronization();
+	}
+
+	@AfterEach
+	void tearDown() {
+		TransactionSynchronizationManager.clear();
+	}
+
+	private void triggerAfterCommit() {
+		List<TransactionSynchronization> syncs = TransactionSynchronizationManager.getSynchronizations();
+		for (TransactionSynchronization sync : syncs) {
+			sync.afterCommit();
+		}
+	}
 
 	@Test
 	@DisplayName("SSE 연결 성공 - 신규")
@@ -167,6 +188,7 @@ class NotificationServiceTest {
 		when(emitterRepository.findAllEmitterStartWithByUserId(anyString())).thenReturn(Map.of());
 
 		notificationService.sendCommentNotification(comment);
+		triggerAfterCommit();
 
 		// then
 		// author should be notified, otherCommenter should be notified, commenter should NOT.
@@ -194,6 +216,7 @@ class NotificationServiceTest {
 
 		NoticeRequest noticeRequest = new NoticeRequest(title, url);
 		notificationService.sendNotice(noticeRequest);
+		triggerAfterCommit();
 
 		// then
 		verify(userRepository).findAll(any(Pageable.class));
@@ -239,6 +262,7 @@ class NotificationServiceTest {
 		when(notificationRepository.save(any(NotificationEntity.class))).thenReturn(expectedNotification);
 
 		notificationService.sendBlockNotice(communityBlockNoticeRequest);
+		triggerAfterCommit();
 
 		// then
 		ArgumentCaptor<NotificationEntity> notificationCaptor = ArgumentCaptor.forClass(NotificationEntity.class);
