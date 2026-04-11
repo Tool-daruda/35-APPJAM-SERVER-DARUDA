@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
@@ -213,13 +215,20 @@ public class NotificationService {
 
 		notificationRepository.save(notificationEntity);
 
-		String userId = String.valueOf(receiver.getId());
-		Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByUserId(userId);
-		sseEmitters.forEach(
-			(key, emitter) -> {
-				emitterRepository.saveEventCache(key, notificationEntity);
-				if (isSendFailedToClient(emitter, key, NotificationResponse.from(notificationEntity))) {
-					log.warn("알림 전송 실패 - emitterId: {}, 수신자: {}", key, receiver.getEmail());
+		TransactionSynchronizationManager.registerSynchronization(
+			new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					String userId = String.valueOf(receiver.getId());
+					Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByUserId(userId);
+					sseEmitters.forEach(
+						(key, emitter) -> {
+							emitterRepository.saveEventCache(key, notificationEntity);
+							if (isSendFailedToClient(emitter, key, NotificationResponse.from(notificationEntity))) {
+								log.warn("알림 전송 실패 - emitterId: {}, 수신자: {}", key, receiver.getEmail());
+							}
+						}
+					);
 				}
 			}
 		);
