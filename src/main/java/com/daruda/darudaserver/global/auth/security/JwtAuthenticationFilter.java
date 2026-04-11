@@ -40,7 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		final String accessToken = getAccessToken(request);
-		log.debug("추출된 AccessToken: {}", accessToken);
 
 		if (StringUtils.hasText(accessToken)
 			&& jwtTokenProvider.validateToken(accessToken) == JwtValidationType.VALID_JWT) {
