@@ -1,7 +1,7 @@
 package com.daruda.darudaserver.global.config;
 
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.stereotype.Component;
@@ -15,12 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ElasticsearchIndexInitializer {
+public class ElasticsearchIndexInitializer implements ApplicationRunner {
 
 	private final ElasticsearchOperations elasticsearchOperations;
 
-	@EventListener(ApplicationReadyEvent.class)
-	public void initializeIndices() {
+	@Override
+	public void run(ApplicationArguments args) {
 		log.info("Elasticsearch 인덱스 초기화 시작...");
 		initializeIndex(BoardDocument.class);
 		initializeIndex(ToolDocument.class);
