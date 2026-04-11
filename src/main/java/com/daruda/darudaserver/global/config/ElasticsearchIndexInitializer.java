@@ -32,7 +32,8 @@ public class ElasticsearchIndexInitializer {
 			IndexOperations indexOps = elasticsearchOperations.indexOps(clazz);
 			if (!indexOps.exists()) {
 				log.info("{} 인덱스가 존재하지 않아 생성을 시도합니다.", clazz.getSimpleName());
-				if (!indexOps.create()) {
+				boolean created = indexOps.create();
+				if (!created && !indexOps.exists()) {
 					throw new IllegalStateException(clazz.getSimpleName() + " 인덱스 생성 실패");
 				}
 
