@@ -32,9 +32,15 @@ public class ElasticsearchIndexInitializer {
 			IndexOperations indexOps = elasticsearchOperations.indexOps(clazz);
 			if (!indexOps.exists()) {
 				log.info("{} 인덱스가 존재하지 않아 생성을 시도합니다.", clazz.getSimpleName());
-				indexOps.create();
-				indexOps.putMapping(indexOps.createMapping());
-				log.info("{} 인덱스 생성 성공.", clazz.getSimpleName());
+				if (!indexOps.create()) {
+					throw new IllegalStateException(clazz.getSimpleName() + " 인덱스 생성 실패");
+				}
+
+				if (!indexOps.putMapping(indexOps.createMapping())) {
+					throw new IllegalStateException(clazz.getSimpleName() + " 인덱스 매핑 적용 실패");
+				}
+
+				log.info("{} 인덱스 생성/매핑 성공.", clazz.getSimpleName());
 			} else {
 				log.info("{} 인덱스가 이미 존재합니다.", clazz.getSimpleName());
 			}
