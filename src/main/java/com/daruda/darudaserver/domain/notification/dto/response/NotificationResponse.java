@@ -15,7 +15,8 @@ public record NotificationResponse(
 	NotificationType type,
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
 	Timestamp createdAt,
-	boolean isRead
+	boolean isRead,
+	String url
 ) {
 	public static NotificationResponse from(NotificationEntity notificationEntity) {
 		return new NotificationResponse(
@@ -25,7 +26,8 @@ public record NotificationResponse(
 			getBoardId(notificationEntity.getComment()),
 			notificationEntity.getType(),
 			notificationEntity.getCreatedAt(),
-			notificationEntity.isRead()
+			notificationEntity.isRead(),
+			notificationEntity.getUrl()
 		);
 	}
 

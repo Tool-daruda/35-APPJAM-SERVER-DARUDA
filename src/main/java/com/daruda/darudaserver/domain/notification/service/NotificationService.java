@@ -12,9 +12,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.notification.dto.request.CommunityBlockNoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.request.NoticeRequest;
@@ -45,6 +48,7 @@ public class NotificationService {
 	private final UserRepository userRepository;
 	private final EmitterRepository emitterRepository;
 	private final NotificationRepository notificationRepository;
+	private final CommentRepository commentRepository;
 
 	public SseEmitter subscribe(Long userId, String lastEventId) {
 		String emitterId = userId + "_" + System.currentTimeMillis();
@@ -84,11 +88,39 @@ public class NotificationService {
 	@Transactional
 	public void sendCommentNotification(CommentEntity commentEntity) {
 		Board board = commentEntity.getBoard();
+		UserEntity commenter = commentEntity.getUser();
 
-		String title = String.format(COMMENT_NOTIFICATION_TITLE.getMessageFormat(), commentEntity.getContent());
-		String content = String.format(COMMENT_NOTIFICATION_CONTENT.getMessageFormat(), board.getTitle());
+		String title = createCommentNotificationTitle(commentEntity);
+		String content = COMMENT_CONTENT_BOARD_TITLE.format(board.getTitle());
 
-		send(board.getUser(), NotificationType.COMMENT, title, content, commentEntity);
+		// 1. 게시글 작성자에게 알림 (내가 쓴 글에 내가 댓글 다는 것 제외)
+		if (!board.getUser().getId().equals(commenter.getId())) {
+			send(board.getUser(), NotificationType.COMMENT, title, content, commentEntity, null);
+		}
+
+		// 2. 다른 댓글 작성자들에게 알림
+		List<UserEntity> otherCommenters = commentRepository.findDistinctUserByBoardId(board.getId());
+		for (UserEntity receiver : otherCommenters) {
+			// 알림 받을 사람이 댓글 작성자 본인이 아니고, 게시글 작성자도 아닐 경우 (게시글 작성자는 위에서 보냄)
+			if (!receiver.getId().equals(commenter.getId()) && !receiver.getId().equals(board.getUser().getId())) {
+				send(receiver, NotificationType.COMMENT, title, content, commentEntity, null);
+			}
+		}
+	}
+
+	private String createCommentNotificationTitle(CommentEntity commentEntity) {
+		boolean hasPhoto = commentEntity.getPhotoUrl() != null && !commentEntity.getPhotoUrl().isBlank();
+		boolean hasText = commentEntity.getContent() != null && !commentEntity.getContent().isBlank();
+
+		if (hasPhoto && hasText) {
+			return COMMENT_TITLE_IMAGE_WITH_TEXT.format(commentEntity.getContent().trim());
+		}
+		if (hasPhoto) {
+			return COMMENT_TITLE_IMAGE_ONLY.getMessageFormat();
+		}
+		return hasText
+			? COMMENT_TITLE_TEXT_ONLY.format(commentEntity.getContent().trim())
+			: COMMENT_TITLE_TEXT_ONLY.format("(내용 없음)");
 	}
 
 	@Transactional
@@ -103,9 +135,10 @@ public class NotificationService {
 			for (UserEntity userEntity : users.getContent()) {
 				send(userEntity,
 					NotificationType.NOTICE,
-					noticeRequest.title(),
-					noticeRequest.content(),
-					null);
+					NOTICE_TITLE.format(noticeRequest.title()),
+					NOTICE_CONTENT.getMessageFormat(),
+					null,
+					noticeRequest.url());
 			}
 			page++;
 		} while (users.hasNext());
@@ -122,16 +155,10 @@ public class NotificationService {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일");
 		String formattedDate = now.format(formatter);
 
-		String title = String.format(COMMUNITY_BLOCK_NOTICE_TITLE.getMessageFormat(), receiver.getNickname());
-		String content = String.format(COMMUNITY_BLOCK_NOTICE_CONTENT.getMessageFormat(), formattedDate,
-			blockDurationInDay.getDays());
+		String title = COMMUNITY_BLOCK_NOTICE_TITLE.format(receiver.getNickname());
+		String content = COMMUNITY_BLOCK_NOTICE_CONTENT.format(formattedDate, blockDurationInDay.getDays());
 
-		send(receiver, NotificationType.NOTICE, title, content, null);
-	}
-
-	public void sendRegisterNotice(UserEntity userEntity) {
-		send(userEntity, NotificationType.NOTICE, REGISTER_NOTICE_TITLE.getMessageFormat(),
-			REGISTER_NOTICE_CONTENT.getMessageFormat(), null);
+		send(receiver, NotificationType.NOTICE, title, content, null, null);
 	}
 
 	@Transactional
@@ -175,19 +202,33 @@ public class NotificationService {
 	}
 
 	private void send(UserEntity receiver, NotificationType notificationType, String title, String content,
-		CommentEntity commentEntity) {
-		NotificationEntity notificationEntity = NotificationEntity.of(receiver, notificationType, title, content,
-			commentEntity);
-		String userId = String.valueOf(receiver.getId());
+		CommentEntity commentEntity, String url) {
+		NotificationEntity notificationEntity = NotificationEntity.builder()
+			.receiver(receiver)
+			.type(notificationType)
+			.title(title)
+			.content(content)
+			.comment(commentEntity)
+			.url(url)
+			.isRead(false)
+			.build();
 
-		Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByUserId(userId);
-		sseEmitters.forEach(
-			(key, emitter) -> {
-				emitterRepository.saveEventCache(key, notificationEntity);
-				if (isSendFailedToClient(emitter, key, NotificationResponse.from(notificationEntity))) {
-					log.warn("알림 전송 실패 - emitterId: {}, 수신자: {}", key, receiver.getEmail());
-				} else {
-					notificationRepository.save(notificationEntity);
+		notificationRepository.save(notificationEntity);
+
+		TransactionSynchronizationManager.registerSynchronization(
+			new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					String userId = String.valueOf(receiver.getId());
+					Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByUserId(userId);
+					sseEmitters.forEach(
+						(key, emitter) -> {
+							emitterRepository.saveEventCache(key, notificationEntity);
+							if (isSendFailedToClient(emitter, key, NotificationResponse.from(notificationEntity))) {
+								log.warn("알림 전송 실패 - emitterId: {}, 수신자: {}", key, receiver.getEmail());
+							}
+						}
+					);
 				}
 			}
 		);

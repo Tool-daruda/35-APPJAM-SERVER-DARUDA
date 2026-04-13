@@ -6,13 +6,11 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import io.awspring.cloud.autoconfigure.s3.S3AutoConfiguration;
 
 @EnableJpaAuditing
 @EnableFeignClients
-@EnableWebMvc
 @EnableAsync
 @EnableRetry
 @SpringBootApplication(exclude = {S3AutoConfiguration.class})
