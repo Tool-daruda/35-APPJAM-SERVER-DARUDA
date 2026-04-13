@@ -24,42 +24,46 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 public class SecurityConfig {
 	private static final String[] WHITE_LIST = {
-		// Swagger & Docs
-		"/swagger-ui/**",
-		"/v3/api-docs/**",
-		"/swagger-resources/**",
-		"/webjars/**",
-
 		// Auth
 		"/api/v1/auth/login-url",
-		"/api/v1/auth/login",
-		"/api/v1/auth/sign-up",
-		"/api/v1/auth/reissue",
 
-		// Tool (Public 정보)
+		// Board
+		"/api/v1/board",
+		"/api/v1/board/{board-id}",
+
+		// Comment
+		"/api/v1/comment",
+
+		// Search
+		"/api/v1/search/board",
+		"/api/v1/search/tool",
+
+		// Tool
+		"/api/v1/tool",
 		"/api/v1/tool/category",
+		"/api/v1/tool/{tool-id}",
 		"/api/v1/tool/{tool-id}/core-features",
 		"/api/v1/tool/{tool-id}/plans",
 		"/api/v1/tool/{tool-id}/alternatives",
 		"/api/v1/tool/{tool-id}/blogs",
 
-		// Search
-		"/api/v1/search/**",
-
-		// User (Public 정보)
+		// User
 		"/api/v1/user/nickname",
-		"/api/v1/user/boards",
-		"/api/v1/user/scrap-boards",
 
-		// Board & Comment (조회는 기본적으로 허용)
-		"/api/v1/board",
-		"/api/v1/board/{board-id}",
-		"/api/v1/comment",
+		// Swagger
+		"/swagger-ui/**",
+		"/v3/api-docs/**",
 
 		// System
 		"/error",
 		"/favicon.ico",
 		"/"
+	};
+
+	private static final String[] AUTH_WHITE_LIST = {
+		"/api/v1/auth/login",
+		"/api/v1/auth/sign-up",
+		"/api/v1/auth/reissue"
 	};
 
 	private final CustomAccessDeniedHandler customAccessDeniedHandler;
@@ -84,24 +88,66 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.OPTIONS, "/**")
 				.permitAll()
 
-				// 관리자 API
+				// Admin
 				.requestMatchers("/api/v1/admin/**")
 				.hasRole(Positions.ADMIN.getEngName())
 
-				// 인증이 필수인 상태 변경/개인화 API (POST, PATCH, DELETE 등)
-				.requestMatchers(HttpMethod.POST, "/api/v1/comment/**", "/api/v1/board/**", "/api/v1/notification/**",
-					"/api/v1/tool/*/scrap", "/api/v1/reports")
+				// Auth
+				.requestMatchers(HttpMethod.POST, "/api/v1/auth/logout")
 				.authenticated()
-				.requestMatchers(HttpMethod.PATCH, "/api/v1/notification/**", "/api/v1/user/**", "/api/v1/board/**")
-				.authenticated()
-				.requestMatchers(HttpMethod.DELETE, "/api/v1/comment/**", "/api/v1/board/**", "/api/v1/auth/withdraw")
-				.authenticated()
-				.requestMatchers("/api/v1/auth/logout", "/api/v1/user/profile", "/api/v1/user/scrap-tools",
-					"/api/v1/notification/connect")
+				.requestMatchers(HttpMethod.DELETE, "/api/v1/auth/withdraw")
 				.authenticated()
 
-				// 나머지는 WHITE_LIST 허용
-				.requestMatchers(WHITE_LIST)
+				// Board
+				.requestMatchers(HttpMethod.POST, "/api/v1/board", "/api/v1/board/{board-id}/scrap")
+				.authenticated()
+				.requestMatchers(HttpMethod.PATCH, "/api/v1/board/{board-id}")
+				.authenticated()
+				.requestMatchers(HttpMethod.DELETE, "/api/v1/board/{board-id}")
+				.authenticated()
+
+				// Comment
+				.requestMatchers(HttpMethod.POST, "/api/v1/comment")
+				.authenticated()
+				.requestMatchers(HttpMethod.DELETE, "/api/v1/comment/{comment-id}")
+				.authenticated()
+
+				// Image
+				.requestMatchers(HttpMethod.GET, "/api/v1/image/presigned-url")
+				.authenticated()
+				.requestMatchers(HttpMethod.DELETE, "/api/v1/image")
+				.authenticated()
+
+				// Notification
+				.requestMatchers(HttpMethod.GET, "/api/v1/notification", "/api/v1/notification/connect",
+					"/api/v1/notification/recent")
+				.authenticated()
+				.requestMatchers(HttpMethod.PATCH, "/api/v1/notification/read/{notification-id}")
+				.authenticated()
+				.requestMatchers(HttpMethod.POST, "/api/v1/notification/notice", "/api/v1/notification/block-notice")
+				.authenticated()
+
+				// Report
+				.requestMatchers(HttpMethod.POST, "/api/v1/reports")
+				.authenticated()
+				.requestMatchers(HttpMethod.PATCH, "/api/v1/reports/{reportId}")
+				.authenticated()
+
+				// Tool
+				.requestMatchers(HttpMethod.POST, "/api/v1/tool/{tool-id}/scrap")
+				.authenticated()
+
+				// User
+				.requestMatchers(HttpMethod.GET, "/api/v1/user/scrap-tools", "/api/v1/user/boards",
+					"/api/v1/user/profile", "/api/v1/user/scrap-boards")
+				.authenticated()
+				.requestMatchers(HttpMethod.PATCH, "/api/v1/user/profile")
+				.authenticated()
+
+				// White List
+				.requestMatchers(HttpMethod.GET, WHITE_LIST)
+				.permitAll()
+				.requestMatchers(HttpMethod.POST, AUTH_WHITE_LIST)
 				.permitAll()
 
 				// 그 외 정의되지 않은 모든 요청은 무시

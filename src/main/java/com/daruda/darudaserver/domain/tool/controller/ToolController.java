@@ -40,6 +40,7 @@ public class ToolController {
 
 	private final ToolService toolService;
 
+	@DisableSwaggerSecurity
 	@GetMapping("/{tool-id}")
 	@Operation(summary = "tool 세부정보 조회", description = "tool의 세부정보를 조회합니다.")
 	public ResponseEntity<ApiResponse<ToolDetailGetRes>> getToolDetail(@AuthenticationPrincipal Long userId,

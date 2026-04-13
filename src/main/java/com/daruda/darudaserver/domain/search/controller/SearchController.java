@@ -13,6 +13,7 @@ import com.daruda.darudaserver.domain.search.dto.response.GetBoardDocumentRespon
 import com.daruda.darudaserver.domain.search.dto.response.ToolSearchResponse;
 import com.daruda.darudaserver.domain.search.service.BoardSearchService;
 import com.daruda.darudaserver.domain.search.service.ToolSearchService;
+import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 
@@ -27,6 +28,7 @@ public class SearchController {
 	private final BoardSearchService boardSearchService;
 	private final ToolSearchService toolSearchService;
 
+	@DisableSwaggerSecurity
 	@GetMapping("/board")
 	@Operation(summary = "게시글 검색", description = "게시글 검색을 합니다")
 	public ResponseEntity<SuccessResponse<?>> searchBoard(
@@ -40,6 +42,7 @@ public class SearchController {
 		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, getBoardDocumentResponse));
 	}
 
+	@DisableSwaggerSecurity
 	@GetMapping("/tool")
 	@Operation(summary = "툴을 검색합니다", description = "툴 검색을 합니다")
 	public ResponseEntity<SuccessResponse<?>> searchTool(
