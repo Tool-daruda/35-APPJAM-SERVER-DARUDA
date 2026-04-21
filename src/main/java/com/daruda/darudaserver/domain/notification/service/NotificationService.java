@@ -60,6 +60,7 @@ public class NotificationService {
 			emitterRepository.deleteAllEventCacheStartWithId(emitterId);
 		});
 		emitter.onTimeout(() -> {
+			emitter.complete();
 			emitterRepository.deleteById(emitterId);
 			emitterRepository.deleteAllEventCacheStartWithId(emitterId);
 		});
