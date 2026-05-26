@@ -26,10 +26,12 @@ public record ToolDetailGetRes(
 	List<String> images,
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
 	Timestamp updatedAt,
-	Boolean isScrapped
+	Boolean isScrapped,
+	Boolean isLiked,
+	int likeCount
 ) {
 	public static ToolDetailGetRes of(Tool tool, List<PlatformRes> platform, List<String> keywords,
-		List<String> images, List<String> videos, Boolean isScrapped) {
+		List<String> images, List<String> videos, Boolean isScrapped, Boolean isLiked, int likeCount) {
 
 		return ToolDetailGetRes.builder()
 			.toolId(tool.getToolId())
@@ -48,6 +50,8 @@ public record ToolDetailGetRes(
 			.images(images)
 			.videos(videos)
 			.isScrapped(isScrapped)
+			.isLiked(isLiked)
+			.likeCount(likeCount)
 			.build();
 	}
 }

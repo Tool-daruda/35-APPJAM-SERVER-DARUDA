@@ -10,6 +10,7 @@ import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.notification.service.NotificationService;
+import com.daruda.darudaserver.domain.tool.repository.ToolLikeRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginSuccessResponse;
@@ -40,6 +41,7 @@ public class AuthService {
 	private final BoardScrapRepository boardScrapRepository;
 	private final CommentRepository commentRepository;
 	private final ToolScrapRepository toolScrapRepository;
+	private final ToolLikeRepository toolLikeRepository;
 	private final NotificationService notificationService;
 
 	@Transactional
@@ -101,6 +103,10 @@ public class AuthService {
 		//FK로 묶여있는 toolScrap삭제
 		toolScrapRepository.deleteAllByUserId(userId);
 		log.info("toolScrap을 성공적으로 삭제하였습니다");
+
+		//FK로 묶여있는 toolLike 삭제
+		toolLikeRepository.deleteAllByUserId(userId);
+		log.info("toolLike을 성공적으로 삭제하였습니다");
 
 		commentRepository.deleteCommentsByUserId(userId);
 
