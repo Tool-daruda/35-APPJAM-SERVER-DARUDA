@@ -19,6 +19,7 @@ import com.daruda.darudaserver.domain.tool.dto.res.RelatedToolListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolBlogListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolCoreListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDetailGetRes;
+import com.daruda.darudaserver.domain.tool.dto.res.ToolLikeRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolScrapRes;
 import com.daruda.darudaserver.domain.tool.entity.Category;
@@ -128,5 +129,14 @@ public class ToolController {
 		@PathVariable(name = "tool-id") final Long toolId) {
 		ToolScrapRes toolScrapRes = toolService.postToolScrap(userId, toolId);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolScrapRes, SuccessCode.SUCCESS_CREATE));
+	}
+
+	@PostMapping("/{tool-id}/like")
+	@Operation(summary = "tool 좋아요", description = "tool에 좋아요를 누르거나, 좋아요를 취소합니다.")
+	public ResponseEntity<ApiResponse<ToolLikeRes>> postToolLike(@AuthenticationPrincipal Long userId,
+		@Parameter(description = "tool Id", example = "1")
+		@PathVariable(name = "tool-id") final Long toolId) {
+		ToolLikeRes toolLikeRes = toolService.postToolLike(userId, toolId);
+		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(toolLikeRes, SuccessCode.SUCCESS_CREATE));
 	}
 }
