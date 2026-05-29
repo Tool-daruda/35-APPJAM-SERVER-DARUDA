@@ -26,6 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.daruda.darudaserver.domain.community.service.BoardScrapService;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
@@ -48,6 +49,9 @@ class UserControllerTest {
 
 	@Mock
 	private BoardService boardService;
+
+	@Mock
+	private BoardScrapService boardScrapService;
 
 	@Mock
 	private JwtTokenProvider jwtTokenProvider;
@@ -225,7 +229,7 @@ class UserControllerTest {
 
 	@Test
 	@DisplayName("스크랩 글 목록 조회 성공")
-	void getFavoriteBoards_success() throws Exception {
+	void getScrapBoards_success() throws Exception {
 		// given
 		Long userId = 1L;
 		String positionEngName = Positions.STUDENT.getEngName();
