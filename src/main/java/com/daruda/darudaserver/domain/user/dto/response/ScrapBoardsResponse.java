@@ -15,10 +15,11 @@ public record ScrapBoardsResponse(
 	Timestamp updatedAt,
 	String toolName,
 	String toolLogo,
-	Boolean isScrapped
+	Boolean isScrapped,
+	Long scrapCount
 ) {
 	public static ScrapBoardsResponse of(Long boardId, String title, String content, Timestamp updatedAt,
-		String toolName, String toolLogo, Boolean isScrapped) {
+		String toolName, String toolLogo, Boolean isScrapped, Long scrapCount) {
 		return ScrapBoardsResponse.builder()
 			.boardId(boardId)
 			.title(title)
@@ -27,6 +28,7 @@ public record ScrapBoardsResponse(
 			.toolName(toolName)
 			.toolLogo(toolLogo)
 			.isScrapped(isScrapped)
+			.scrapCount(scrapCount)
 			.build();
 	}
 }

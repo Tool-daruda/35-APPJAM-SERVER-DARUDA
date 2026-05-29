@@ -30,4 +30,6 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap, Long> {
 	void deleteByUserIdAndBoardId(@Param("userId") Long userId, @Param("boardId") Long boardId);
 
 	List<BoardScrap> findAllByBoardId(Long boardId);
+
+	Long countByBoardId(Long boardId);
 }

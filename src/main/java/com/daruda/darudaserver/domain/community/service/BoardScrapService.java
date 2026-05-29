@@ -87,6 +87,7 @@ public class BoardScrapService {
 		List<ScrapBoardsResponse> scrapBoardsResponses = boardScraps.getContent().stream()
 			.map(boardScrap -> {
 				Board board = boardScrap.getBoard();
+				Long scrapCount = boardScrapRepository.countByBoardId(board.getId());
 				return ScrapBoardsResponse.of(
 					board.getId(),
 					board.getTitle(),
@@ -94,7 +95,8 @@ public class BoardScrapService {
 					board.getUpdatedAt(),
 					board.getTool() != null ? board.getTool().getToolMainName() : FREE,
 					board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO,
-					true
+					true,
+					scrapCount
 				);
 			})
 			.toList();
