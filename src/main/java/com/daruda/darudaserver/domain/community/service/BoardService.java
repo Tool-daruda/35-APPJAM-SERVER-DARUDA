@@ -15,7 +15,6 @@ import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
-import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
 import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardImage;
@@ -31,8 +30,6 @@ import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
-import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsResponse;
-import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
@@ -65,6 +62,7 @@ public class BoardService {
 	private final ImageRepository imageRepository;
 	private final UserRepository userRepository;
 	private final BoardScrapRepository boardScrapRepository;
+	private final BoardScrapService boardScrapService;
 	private final ToolRepository toolRepository;
 	private final CommentRepository commentRepository;
 	private final ValidateBoard validateBoard;
@@ -134,13 +132,7 @@ public class BoardService {
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-		boolean isScrapped = false;
-		BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId())
-			.orElse(null);
-
-		if (boardScrap != null) {
-			isScrapped = !boardScrap.isDelYn();
-		}
+		boolean isScrapped = boardScrapService.isScraped(user, board);
 
 		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, isScrapped);
 	}
@@ -167,32 +159,6 @@ public class BoardService {
 		boardSearchRepository.delete(boardDocument);
 	}
 
-	// 스크랩 처리
-	public BoardScrapRes postScrap(final Long userId, final Long boardId) {
-		UserEntity user = getUserById(userId);
-		Board board = getBoardById(boardId);
-
-		BoardScrap boardScrap = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId()).orElse(null);
-
-		boolean isScrapped;
-
-		if (boardScrap == null) {
-			boardScrap = BoardScrap.builder().user(user).board(board).build();
-			boardScrapRepository.save(boardScrap);
-			isScrapped = true;
-		} else {
-			boardScrap.update();
-			isScrapped = !boardScrap.isDelYn();
-		}
-		//ElasticSearch 색인 데이터 업데이트
-		boardSearchRepository.findById(boardId.toString()).ifPresent(boardDocument -> {
-			boardDocument.updateScraped(isScrapped);
-			boardSearchRepository.save(boardDocument);
-		});
-
-		return BoardScrapRes.of(boardId, !boardScrap.isDelYn());
-	}
-
 	// 게시판 조회
 	public BoardRes getBoard(final Long userIdOrNull, final Long boardId) {
 		UserEntity user = getUser(userIdOrNull);
@@ -202,7 +168,7 @@ public class BoardService {
 
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
-		Boolean isScraped = getBoardScrap(user, board);
+		Boolean isScraped = boardScrapService.isScraped(user, board);
 		return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped, toolId);
 	}
 
@@ -213,7 +179,7 @@ public class BoardService {
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-		Boolean isScraped = getBoardScrap(user, board);
+		Boolean isScraped = boardScrapService.isScraped(user, board);
 		return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped);
 	}
 
@@ -286,38 +252,13 @@ public class BoardService {
 
 				int commentCount = getCommentCount(board.getId());
 				List<String> boardImages = boardImageService.getBoardImageUrls(board.getId());
-				boolean isScrapped = getBoardScrap(user, board);
+				boolean isScrapped = boardScrapService.isScraped(user, board);
 				return BoardRes.of(board, toolName, toolLogo, commentCount, boardImages, isScrapped, savedToolid);
 			})
 			.toList();
 
 		ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
 		return new GetBoardResponse(boardResList, scrollPaginationDto);
-	}
-
-	public FavoriteBoardsRetrieveResponse getFavoriteBoards(final Long userId, final Pageable pageable) {
-		validateBoard.validateUser(userId);
-
-		Page<BoardScrap> boardScraps = boardScrapRepository.findAllActiveByUserId(userId, pageable);
-		List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
-			.map(boardScrap -> {
-				Board board = boardScrap.getBoard();
-				return FavoriteBoardsResponse.builder()
-					.boardId(board.getId())
-					.title(board.getTitle())
-					.content(board.getContent())
-					.updatedAt(board.getUpdatedAt())
-					.toolName(freeName(board))
-					.toolLogo(freeLogo(board))
-					.isScrapped(!boardScrap.isDelYn())
-					.build();
-			})
-			.toList();
-
-		PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(),
-			boardScraps.getTotalPages());
-		return new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
-
 	}
 
 	private Board validateBoardAndUser(final Long userId, final Long boardId) {
@@ -433,20 +374,6 @@ public class BoardService {
 		return commentEntityList.size();
 	}
 
-	public Boolean getBoardScrap(final UserEntity user, final Board board) {
-		if (user == null) {
-			log.info("** Board : {} 스크랩 여부 : false (비로그인 사용자)", board.getId());
-			return false;
-		}
-		boolean isScrapped = boardScrapRepository.findByUserAndBoard(user.getId(), board.getId())
-			.map(BoardScrap::isDelYn)
-			.map(delYn -> !delYn)
-			.orElse(false);
-
-		log.info("** Board : {} 스크랩 여부 :{}", board.getId(), isScrapped);
-		return isScrapped;
-	}
-
 	public UserEntity getUser(final Long userIdOrNull) {
 		UserEntity user = null;
 		if (userIdOrNull != null) {
@@ -460,13 +387,5 @@ public class BoardService {
 	public Long getToolId(Long boardId) {
 		Board board = getBoardById(boardId);
 		return board.isFree() ? null : board.getTool().getToolId();
-	}
-
-	public String freeName(Board board) {
-		return board.getTool() != null ? board.getTool().getToolMainName() : FREE;
-	}
-
-	public String freeLogo(Board board) {
-		return board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 	}
 }

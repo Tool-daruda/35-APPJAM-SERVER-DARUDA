@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.daruda.darudaserver.domain.community.service.BoardScrapService;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
@@ -40,6 +41,7 @@ public class UserController {
 
 	private final UserService userService;
 	private final BoardService boardService;
+	private final BoardScrapService boardScrapService;
 
 	@PatchMapping("/profile")
 	@Operation(summary = "프로필 수정", description = "사용자의 프로필을 수정합니다.")
@@ -99,7 +101,7 @@ public class UserController {
 		@Parameter(description = "정렬 기준", example = "createdAt")
 		@RequestParam(value = "criteria", defaultValue = "createdAt") String criteria) {
 		Pageable pageable = PageRequest.of(pageNo - 1, size, Sort.by(Sort.Direction.DESC, criteria));
-		FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = boardService.getFavoriteBoards(userIdOrNull,
+		FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = boardScrapService.getFavoriteBoards(userIdOrNull,
 			pageable);
 
 		return ResponseEntity.ok(

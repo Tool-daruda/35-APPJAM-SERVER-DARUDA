@@ -6,12 +6,12 @@ import lombok.Builder;
 @Builder(access = AccessLevel.PRIVATE)
 public record BoardScrapRes(
 	Long boardId,
-	Boolean scarp
+	Boolean scrap
 ) {
-	public static BoardScrapRes of(final Long boardId, final Boolean scarp) {
+	public static BoardScrapRes of(final Long boardId, final Boolean scrap) {
 		return BoardScrapRes.builder()
 			.boardId(boardId)
-			.scarp(scarp)
+			.scrap(scrap)
 			.build();
 	}
 }

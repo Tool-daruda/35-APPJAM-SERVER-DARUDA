@@ -1,7 +1,6 @@
 package com.daruda.darudaserver.domain.community.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +20,14 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap, Long> {
 	@Transactional
 	void deleteAllByUserId(@Param("userId") Long userId);
 
-	@Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.delYn = false AND bs.delYn = false")
+	@Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.delYn = false")
 	Page<BoardScrap> findAllActiveByUserId(@Param("userId") Long userId, Pageable pageable);
 
-	@Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.id = :boardId")
-	Optional<BoardScrap> findByUserAndBoard(@Param("userId") Long userId, @Param("boardId") Long boardId);
+	boolean existsByUserIdAndBoardId(@Param("userId") Long userId, @Param("boardId") Long boardId);
+
+	@Modifying
+	@Transactional
+	void deleteByUserIdAndBoardId(@Param("userId") Long userId, @Param("boardId") Long boardId);
 
 	List<BoardScrap> findAllByBoardId(Long boardId);
 }
