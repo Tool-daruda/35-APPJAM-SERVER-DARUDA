@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 
 @Builder
-public record FavoriteBoardsResponse(
+public record ScrapBoardsResponse(
 	Long boardId,
 	String title,
 	String content,
@@ -17,9 +17,9 @@ public record FavoriteBoardsResponse(
 	String toolLogo,
 	Boolean isScrapped
 ) {
-	public static FavoriteBoardsResponse of(Long boardId, String title, String content, Timestamp updatedAt,
+	public static ScrapBoardsResponse of(Long boardId, String title, String content, Timestamp updatedAt,
 		String toolName, String toolLogo, Boolean isScrapped) {
-		return FavoriteBoardsResponse.builder()
+		return ScrapBoardsResponse.builder()
 			.boardId(boardId)
 			.title(title)
 			.content(content)

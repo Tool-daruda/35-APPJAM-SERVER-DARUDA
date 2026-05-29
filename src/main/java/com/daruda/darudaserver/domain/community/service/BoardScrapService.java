@@ -15,9 +15,9 @@ import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.community.util.ValidateBoard;
 import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
-import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsResponse;
-import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
+import com.daruda.darudaserver.domain.user.dto.response.ScrapBoardsResponse;
+import com.daruda.darudaserver.domain.user.dto.response.ScrapBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -80,14 +80,14 @@ public class BoardScrapService {
 
 	// 즐겨찾기 게시글 목록 조회
 	@Transactional(readOnly = true)
-	public FavoriteBoardsRetrieveResponse getFavoriteBoards(final Long userId, final Pageable pageable) {
+	public ScrapBoardsRetrieveResponse getScrapBoards(final Long userId, final Pageable pageable) {
 		validateBoard.validateUser(userId);
 
 		Page<BoardScrap> boardScraps = boardScrapRepository.findAllActiveByUserId(userId, pageable);
-		List<FavoriteBoardsResponse> favoriteBoardsResponses = boardScraps.getContent().stream()
+		List<ScrapBoardsResponse> scrapBoardsResponses = boardScraps.getContent().stream()
 			.map(boardScrap -> {
 				Board board = boardScrap.getBoard();
-				return FavoriteBoardsResponse.of(
+				return ScrapBoardsResponse.of(
 					board.getId(),
 					board.getTitle(),
 					board.getContent(),
@@ -101,7 +101,7 @@ public class BoardScrapService {
 
 		PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(),
 			boardScraps.getTotalPages());
-		return new FavoriteBoardsRetrieveResponse(userId, favoriteBoardsResponses, pageInfo);
+		return new ScrapBoardsRetrieveResponse(userId, scrapBoardsResponses, pageInfo);
 	}
 
 	private void updateSearchIndex(final Long boardId, final boolean isScrapped) {
