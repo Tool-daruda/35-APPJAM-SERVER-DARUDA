@@ -55,8 +55,7 @@ public class SecurityConfig {
 		"/v3/api-docs/**",
 
 		// System
-		"/error",
-		"/favicon.ico"
+		"/error"
 	};
 
 	private static final String[] AUTH_WHITE_LIST = {
