@@ -2,6 +2,9 @@ package com.daruda.darudaserver.domain.user.dto.response;
 
 import java.util.List;
 
+import lombok.Builder;
+
+@Builder
 public record ScrapBoardsRetrieveResponse(
 	Long userId,
 	List<ScrapBoardsResponse> boardList,
@@ -9,6 +12,11 @@ public record ScrapBoardsRetrieveResponse(
 ) {
 	public static ScrapBoardsRetrieveResponse of(Long userId, List<ScrapBoardsResponse> boardList,
 		PagenationDto pageInfo) {
-		return new ScrapBoardsRetrieveResponse(userId, boardList, pageInfo);
+
+		return ScrapBoardsRetrieveResponse.builder()
+			.userId(userId)
+			.boardList(List.copyOf(boardList))
+			.pageInfo(pageInfo)
+			.build();
 	}
 }
