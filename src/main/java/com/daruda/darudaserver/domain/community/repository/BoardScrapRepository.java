@@ -20,9 +20,6 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap, Long> {
 	@Transactional
 	void deleteAllByUserId(@Param("userId") Long userId);
 
-	@Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.delYn = false")
-	Page<BoardScrap> findAllActiveByUserId(@Param("userId") Long userId, Pageable pageable);
-
 	boolean existsByUserIdAndBoardId(@Param("userId") Long userId, @Param("boardId") Long boardId);
 
 	@Modifying
@@ -31,5 +28,11 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap, Long> {
 
 	List<BoardScrap> findAllByBoardId(Long boardId);
 
-	Long countByBoardId(Long boardId);
+	@Query(value = "SELECT b.id as boardId, b.title as title, b.content as content, b.updatedAt as updatedAt, "
+		+ "t.toolMainName as toolName, t.toolLogo as toolLogo, "
+		+ "(SELECT COUNT(s) FROM BoardScrap s WHERE s.board.id = b.id) as scrapCount "
+		+ "FROM BoardScrap bs JOIN bs.board b LEFT JOIN b.tool t "
+		+ "WHERE bs.user.id = :userId AND b.delYn = false",
+		countQuery = "SELECT COUNT(bs) FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.delYn = false")
+	Page<ScrapBoardProjection> findScrapBoardsWithCount(@Param("userId") Long userId, Pageable pageable);
 }

@@ -2,7 +2,6 @@ package com.daruda.darudaserver.domain.community.service;
 
 import java.util.List;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
+import com.daruda.darudaserver.domain.community.repository.ScrapBoardProjection;
 import com.daruda.darudaserver.domain.community.util.ValidateBoard;
 import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
@@ -40,6 +40,7 @@ public class BoardScrapService {
 	private final UserRepository userRepository;
 	private final BoardSearchRepository boardSearchRepository;
 	private final ValidateBoard validateBoard;
+	private final BoardScrapInternalService boardScrapInternalService;
 
 	// 스크랩 토글 (존재하면 삭제, 없으면 생성)
 	public BoardScrapRes toggleScrap(final Long userId, final Long boardId) {
@@ -53,16 +54,10 @@ public class BoardScrapService {
 			updateSearchIndex(boardId, false);
 			return BoardScrapRes.of(boardId, false);
 		} else {
-			try {
-				BoardScrap boardScrap = BoardScrap.builder().user(user).board(board).build();
-				boardScrapRepository.save(boardScrap);
-				updateSearchIndex(boardId, true);
-				return BoardScrapRes.of(boardId, true);
-			} catch (DataIntegrityViolationException e) {
-				// 동시성 이슈로 중복 삽입 시도된 경우 — 이미 스크랩된 상태로 처리
-				log.warn("스크랩 중복 삽입 시도 감지 (userId={}, boardId={})", userId, boardId);
-				return BoardScrapRes.of(boardId, true);
-			}
+			BoardScrap boardScrap = BoardScrap.builder().user(user).board(board).build();
+			boardScrapInternalService.saveIfAbsent(boardScrap); // 별도 트랜잭션에서 처리
+			updateSearchIndex(boardId, true);
+			return BoardScrapRes.of(boardId, true);
 		}
 	}
 
@@ -83,27 +78,23 @@ public class BoardScrapService {
 	public ScrapBoardsRetrieveResponse getScrapBoards(final Long userId, final Pageable pageable) {
 		validateBoard.validateUser(userId);
 
-		Page<BoardScrap> boardScraps = boardScrapRepository.findAllActiveByUserId(userId, pageable);
+		Page<ScrapBoardProjection> boardScraps = boardScrapRepository.findScrapBoardsWithCount(userId, pageable);
 		List<ScrapBoardsResponse> scrapBoardsResponses = boardScraps.getContent().stream()
-			.map(boardScrap -> {
-				Board board = boardScrap.getBoard();
-				Long scrapCount = boardScrapRepository.countByBoardId(board.getId());
-				return ScrapBoardsResponse.of(
-					board.getId(),
-					board.getTitle(),
-					board.getContent(),
-					board.getUpdatedAt(),
-					board.getTool() != null ? board.getTool().getToolMainName() : FREE,
-					board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO,
-					true,
-					scrapCount
-				);
-			})
+			.map(projection -> ScrapBoardsResponse.of(
+				projection.getBoardId(),
+				projection.getTitle(),
+				projection.getContent(),
+				projection.getUpdatedAt(),
+				projection.getToolName() != null ? projection.getToolName() : FREE,
+				projection.getToolLogo() != null ? projection.getToolLogo() : TOOL_LOGO,
+				true,
+				projection.getScrapCount()
+			))
 			.toList();
 
 		PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(),
 			boardScraps.getTotalPages());
-		return new ScrapBoardsRetrieveResponse(userId, scrapBoardsResponses, pageInfo);
+		return ScrapBoardsRetrieveResponse.of(userId, scrapBoardsResponses, pageInfo);
 	}
 
 	private void updateSearchIndex(final Long boardId, final boolean isScrapped) {
