@@ -24,9 +24,9 @@ import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
+import com.daruda.darudaserver.domain.community.repository.ScrapBoardProjection;
 import com.daruda.darudaserver.domain.community.util.ValidateBoard;
 import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
-import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.user.dto.response.ScrapBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
@@ -52,6 +52,9 @@ class BoardScrapServiceTest {
 	@Mock
 	private ValidateBoard validateBoard;
 
+	@Mock
+	private BoardScrapInternalService boardScrapInternalService;
+
 	@Test
 	@DisplayName("게시글 스크랩 토글 - 새로운 스크랩 생성 성공")
 	void toggleScrap_Create_Success() {
@@ -65,7 +68,7 @@ class BoardScrapServiceTest {
 		given(userRepository.findById(userId)).willReturn(Optional.of(user));
 		given(boardRepository.findByIdAndDelYn(boardId, false)).willReturn(Optional.of(board));
 		given(boardScrapRepository.existsByUserIdAndBoardId(userId, boardId)).willReturn(false);
-		given(boardScrapRepository.save(any(BoardScrap.class))).willReturn(boardScrap);
+		given(boardScrapInternalService.saveIfAbsent(any(BoardScrap.class))).willReturn(true);
 		given(boardSearchRepository.findById(boardId.toString())).willReturn(Optional.empty());
 
 		// when
@@ -73,7 +76,7 @@ class BoardScrapServiceTest {
 
 		// then
 		assertThat(result.scrap()).isTrue();
-		verify(boardScrapRepository).save(any(BoardScrap.class));
+		verify(boardScrapInternalService).saveIfAbsent(any(BoardScrap.class));
 		verify(boardSearchRepository).findById(boardId.toString());
 	}
 
@@ -139,24 +142,19 @@ class BoardScrapServiceTest {
 		Long userId = 1L;
 		Pageable pageable = PageRequest.of(0, 10);
 
-		Board board = mock(Board.class);
-		given(board.getId()).willReturn(1L);
-		given(board.getTitle()).willReturn("Test Title");
-		given(board.getContent()).willReturn("Test Content");
-		given(board.getUpdatedAt()).willReturn(new Timestamp(System.currentTimeMillis()));
-		Tool tool = mock(Tool.class);
-		given(board.getTool()).willReturn(tool);
-		given(tool.getToolMainName()).willReturn("ToolName");
-		given(tool.getToolLogo()).willReturn("ToolLogo");
+		ScrapBoardProjection projection = mock(ScrapBoardProjection.class);
+		given(projection.getBoardId()).willReturn(1L);
+		given(projection.getTitle()).willReturn("Test Title");
+		given(projection.getContent()).willReturn("Test Content");
+		given(projection.getUpdatedAt()).willReturn(new Timestamp(System.currentTimeMillis()));
+		given(projection.getToolName()).willReturn("ToolName");
+		given(projection.getToolLogo()).willReturn("ToolLogo");
+		given(projection.getScrapCount()).willReturn(5L);
 
-		BoardScrap boardScrap = mock(BoardScrap.class);
-		given(boardScrap.getBoard()).willReturn(board);
-
-		Page<BoardScrap> boardScrapPage = new PageImpl<>(List.of(boardScrap), pageable, 1);
+		Page<ScrapBoardProjection> projectionPage = new PageImpl<>(List.of(projection), pageable, 1);
 
 		doNothing().when(validateBoard).validateUser(userId);
-		given(boardScrapRepository.findAllActiveByUserId(userId, pageable)).willReturn(boardScrapPage);
-		given(boardScrapRepository.countByBoardId(1L)).willReturn(5L);
+		given(boardScrapRepository.findScrapBoardsWithCount(userId, pageable)).willReturn(projectionPage);
 
 		// when
 		ScrapBoardsRetrieveResponse result = boardScrapService.getScrapBoards(userId, pageable);
@@ -166,6 +164,7 @@ class BoardScrapServiceTest {
 		assertThat(result.boardList()).hasSize(1);
 		assertThat(result.boardList().get(0).boardId()).isEqualTo(1L);
 		assertThat(result.boardList().get(0).title()).isEqualTo("Test Title");
+		assertThat(result.boardList().get(0).scrapCount()).isEqualTo(5L);
 		assertThat(result.pageInfo().totalPages()).isEqualTo(1);
 	}
 }
