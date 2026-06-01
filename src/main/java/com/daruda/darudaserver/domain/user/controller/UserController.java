@@ -93,7 +93,8 @@ public class UserController {
 
 	@GetMapping("/scrap-boards")
 	@Operation(summary = "스크랩 글 목록 조회", description = "스크랩 글 목록을 조회합니다.")
-	public ResponseEntity<?> getScrapBoards(@AuthenticationPrincipal Long userIdOrNull,
+	public ResponseEntity<ApiResponse<ScrapBoardsRetrieveResponse>> getScrapBoards(
+		@AuthenticationPrincipal Long userIdOrNull,
 		@Parameter(description = "조회할 페이지", example = "1")
 		@RequestParam(value = "page", defaultValue = "1") @Positive int pageNo,
 		@Parameter(description = "조회할 게시글 개수", example = "5")
