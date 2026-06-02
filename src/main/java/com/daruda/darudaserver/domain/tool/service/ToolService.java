@@ -261,7 +261,7 @@ public class ToolService {
 			toolLikeRepository.save(toolLike);
 			log.debug("툴 좋아요가 생성되었습니다");
 		} else {
-			toolLike.update();
+			toolLike.toggleLike();
 			log.debug("툴 좋아요가 업데이트 되었습니다");
 		}
 		int likeCount = toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId);
@@ -370,7 +370,7 @@ public class ToolService {
 		return !toolScrap.isDelYn();
 	}
 
-	public Boolean getLiked(final UserEntity user, final Tool tool) {
+	Boolean getLiked(final UserEntity user, final Tool tool) {
 		ToolLike toolLike = toolLikeRepository.findByUserAndTool(user, tool)
 			.orElse(null);
 		if (toolLike == null) {
