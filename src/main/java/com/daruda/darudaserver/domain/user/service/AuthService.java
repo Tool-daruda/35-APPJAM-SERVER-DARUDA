@@ -104,7 +104,7 @@ public class AuthService {
 		toolScrapRepository.deleteAllByUserId(userId);
 		log.info("toolScrap을 성공적으로 삭제하였습니다");
 
-		//FK로 묶여있는 toolLike 삭제
+		// 회원 탈퇴 시 User를 물리 삭제하므로, FK로 묶인 toolLike도 의도적으로 Hard Delete (delYn 기반 Soft Delete 아님)
 		toolLikeRepository.deleteAllByUserId(userId);
 		log.info("toolLike을 성공적으로 삭제하였습니다");
 

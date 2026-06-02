@@ -14,13 +14,10 @@ import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.entity.ToolLike;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 
-import jakarta.transaction.Transactional;
-
 @Repository
 public interface ToolLikeRepository extends JpaRepository<ToolLike, Long> {
 
-	@Modifying
-	@Transactional
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	void deleteAllByUserId(@Param("userId") Long userId);
 
 	List<ToolLike> findAllByUserId(@Param("userId") final Long userId);
@@ -31,7 +28,6 @@ public interface ToolLikeRepository extends JpaRepository<ToolLike, Long> {
 	int countByTool_ToolIdAndDelYnFalse(final Long toolId);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
-	@Transactional
 	void deleteByTool(Tool tool);
 
 	@Query("""
