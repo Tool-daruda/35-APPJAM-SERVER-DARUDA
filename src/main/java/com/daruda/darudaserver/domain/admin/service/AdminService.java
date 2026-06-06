@@ -34,6 +34,7 @@ import com.daruda.darudaserver.domain.tool.repository.ToolBlogRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolCoreRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolKeywordRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolLikeRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolPlatFormRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
@@ -57,6 +58,7 @@ public class AdminService {
 	private final ToolPlatFormRepository toolPlatFormRepository;
 	private final BoardRepository boardRepository;
 	private final ToolScrapRepository toolScrapRepository;
+	private final ToolLikeRepository toolLikeRepository;
 	private final ToolBlogRepository toolBlogRepository;
 
 	public void createTool(CreateToolRequest createToolRequest) {
@@ -340,6 +342,7 @@ public class AdminService {
 		planRepository.deleteByTool(tool);
 		toolPlatFormRepository.deleteByTool(tool);
 		toolScrapRepository.deleteByTool(tool);
+		toolLikeRepository.deleteByTool(tool);
 		toolBlogRepository.deleteByTool(tool);
 
 		// 2) 연관 툴(양방향 FK) 모두 제거

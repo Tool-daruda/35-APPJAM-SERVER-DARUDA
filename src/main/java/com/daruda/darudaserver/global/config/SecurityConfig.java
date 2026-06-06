@@ -133,7 +133,7 @@ public class SecurityConfig {
 				.authenticated()
 
 				// Tool
-				.requestMatchers(HttpMethod.POST, "/api/v1/tool/{tool-id}/scrap")
+				.requestMatchers(HttpMethod.POST, "/api/v1/tool/{tool-id}/scrap", "/api/v1/tool/{tool-id}/like")
 				.authenticated()
 
 				// User

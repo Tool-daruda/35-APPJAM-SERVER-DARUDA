@@ -12,6 +12,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.daruda.darudaserver.domain.tool.dto.res.ToolLikeRes;
+import com.daruda.darudaserver.domain.tool.entity.Tool;
+import com.daruda.darudaserver.domain.tool.entity.ToolLike;
+import com.daruda.darudaserver.domain.tool.repository.ToolLikeRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -22,6 +27,12 @@ class ToolServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private ToolRepository toolRepository;
+
+	@Mock
+	private ToolLikeRepository toolLikeRepository;
 
 	@InjectMocks
 	private ToolService toolService;
@@ -59,5 +70,81 @@ class ToolServiceTest {
 		assertThatThrownBy(() -> toolService.getUserById(userId))
 			.isInstanceOf(NotFoundException.class)
 			.hasMessage(ErrorCode.DATA_NOT_FOUND.getMessage());
+	}
+
+	@DisplayName("좋아요가 없던 툴에 좋아요를 누르면 좋아요가 활성화된다")
+	@Test
+	void postToolLike_Create() {
+		// given
+		Long userId = 1L;
+		Long toolId = 10L;
+		UserEntity user = UserEntity.builder()
+			.email("test@example.com")
+			.nickname("tester")
+			.positions(null)
+			.build();
+		Tool tool = Tool.builder().toolId(toolId).build();
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
+		when(toolLikeRepository.findByUserAndTool(user, tool)).thenReturn(Optional.empty());
+		when(toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId)).thenReturn(1);
+
+		// when
+		ToolLikeRes result = toolService.postToolLike(userId, toolId);
+
+		// then
+		assertThat(result.toolId()).isEqualTo(toolId);
+		assertThat(result.liked()).isTrue();
+		assertThat(result.likeCount()).isEqualTo(1);
+		verify(toolLikeRepository).save(any(ToolLike.class));
+	}
+
+	@DisplayName("이미 좋아요한 툴에 다시 좋아요를 누르면 좋아요가 취소된다")
+	@Test
+	void postToolLike_Toggle_Off() {
+		// given
+		Long userId = 1L;
+		Long toolId = 10L;
+		UserEntity user = UserEntity.builder()
+			.email("test@example.com")
+			.nickname("tester")
+			.positions(null)
+			.build();
+		Tool tool = Tool.builder().toolId(toolId).build();
+		ToolLike existingLike = ToolLike.of(user, tool);
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
+		when(toolLikeRepository.findByUserAndTool(user, tool)).thenReturn(Optional.of(existingLike));
+		when(toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId)).thenReturn(0);
+
+		// when
+		ToolLikeRes result = toolService.postToolLike(userId, toolId);
+
+		// then
+		assertThat(result.liked()).isFalse();
+		assertThat(result.likeCount()).isEqualTo(0);
+		verify(toolLikeRepository, never()).save(any(ToolLike.class));
+	}
+
+	@DisplayName("좋아요 기록이 없으면 getLiked는 false를 반환한다")
+	@Test
+	void getLiked_False_WhenNoRecord() {
+		// given
+		UserEntity user = UserEntity.builder()
+			.email("test@example.com")
+			.nickname("tester")
+			.positions(null)
+			.build();
+		Tool tool = Tool.builder().toolId(10L).build();
+
+		when(toolLikeRepository.findByUserAndTool(user, tool)).thenReturn(Optional.empty());
+
+		// when
+		Boolean result = toolService.getLiked(user, tool);
+
+		// then
+		assertThat(result).isFalse();
 	}
 }

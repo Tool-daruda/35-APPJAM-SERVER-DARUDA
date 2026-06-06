@@ -20,6 +20,7 @@ import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.notification.service.NotificationService;
+import com.daruda.darudaserver.domain.tool.repository.ToolLikeRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginSuccessResponse;
@@ -50,6 +51,9 @@ public class AuthServiceTest {
 
 	@Mock
 	private ToolScrapRepository toolScrapRepository;
+
+	@Mock
+	private ToolLikeRepository toolLikeRepository;
 
 	@Mock
 	private TokenService tokenService;
@@ -206,6 +210,7 @@ public class AuthServiceTest {
 		// then
 		verify(userRepository).findById(userId);
 		verify(toolScrapRepository).deleteAllByUserId(userId);
+		verify(toolLikeRepository).deleteAllByUserId(userId);
 		verify(commentRepository).deleteCommentsByUserId(userId);
 		verify(boardRepository).findAllByUserId(userId);
 		verify(commentRepository, times(mockBoardList.size())).deleteCommentsByBoardId(anyLong());

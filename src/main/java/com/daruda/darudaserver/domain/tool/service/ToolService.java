@@ -18,6 +18,7 @@ import com.daruda.darudaserver.domain.tool.dto.res.ToolBlogRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolCoreListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolCoreRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolDetailGetRes;
+import com.daruda.darudaserver.domain.tool.dto.res.ToolLikeRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolListRes;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolResponse;
 import com.daruda.darudaserver.domain.tool.dto.res.ToolScrapRes;
@@ -29,6 +30,7 @@ import com.daruda.darudaserver.domain.tool.entity.ToolBlog;
 import com.daruda.darudaserver.domain.tool.entity.ToolCore;
 import com.daruda.darudaserver.domain.tool.entity.ToolImage;
 import com.daruda.darudaserver.domain.tool.entity.ToolKeyword;
+import com.daruda.darudaserver.domain.tool.entity.ToolLike;
 import com.daruda.darudaserver.domain.tool.entity.ToolPlatForm;
 import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
 import com.daruda.darudaserver.domain.tool.entity.ToolVideo;
@@ -38,6 +40,7 @@ import com.daruda.darudaserver.domain.tool.repository.ToolBlogRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolCoreRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolImageRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolKeywordRepository;
+import com.daruda.darudaserver.domain.tool.repository.ToolLikeRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolPlatFormRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
@@ -66,6 +69,7 @@ public class ToolService {
 	private final ToolCoreRepository toolCoreRepository;
 	private final RelatedToolRepository relatedToolRepository;
 	private final ToolScrapRepository toolScrapRepository;
+	private final ToolLikeRepository toolLikeRepository;
 	private final UserRepository userRepository;
 	private final ToolBlogRepository toolBlogRepository;
 
@@ -79,18 +83,26 @@ public class ToolService {
 		List<String> videos = getVideoById(tool);
 		tool.incrementViewCount();
 
-		Boolean isScrapped = Optional.ofNullable(userId)
-			.flatMap(userRepository::findById)
+		Optional<UserEntity> userOptional = Optional.ofNullable(userId)
+			.flatMap(userRepository::findById);
+
+		Boolean isScrapped = userOptional
 			.map(user -> {
 				log.debug("유저 정보를 조회했습니다: {}", user.getId());
 				return getScrapped(user, tool);
 			})
 			.orElse(false);
 
+		Boolean isLiked = userOptional
+			.map(user -> getLiked(user, tool))
+			.orElse(false);
+
+		int likeCount = toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId);
+
 		log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
 		log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
 		toolRepository.save(tool);
-		return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos, isScrapped);
+		return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos, isScrapped, isLiked, likeCount);
 	}
 
 	public PlanListRes getPlan(final Long toolId) {
@@ -239,6 +251,23 @@ public class ToolService {
 		return ToolScrapRes.of(toolId, !toolScrap.isDelYn());
 	}
 
+	public ToolLikeRes postToolLike(final Long userId, final Long toolId) {
+		UserEntity user = getUserById(userId);
+		Tool tool = getToolById(toolId);
+		ToolLike toolLike = toolLikeRepository.findByUserAndTool(user, tool).orElse(null);
+
+		if (toolLike == null) {
+			toolLike = ToolLike.of(user, tool);
+			toolLikeRepository.save(toolLike);
+			log.debug("툴 좋아요가 생성되었습니다");
+		} else {
+			toolLike.toggleLike();
+			log.debug("툴 좋아요가 업데이트 되었습니다");
+		}
+		int likeCount = toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId);
+		return ToolLikeRes.of(toolId, !toolLike.isDelYn(), likeCount);
+	}
+
 	private List<RelatedTool> relatedTool(final Tool tool) {
 		log.info("툴의 관련 툴 데이터를 조회합니다. toolId={}", tool.getToolId());
 		return relatedToolRepository.findAllByTool(tool);
@@ -339,6 +368,15 @@ public class ToolService {
 			return false;
 		}
 		return !toolScrap.isDelYn();
+	}
+
+	Boolean getLiked(final UserEntity user, final Tool tool) {
+		ToolLike toolLike = toolLikeRepository.findByUserAndTool(user, tool)
+			.orElse(null);
+		if (toolLike == null) {
+			return false;
+		}
+		return !toolLike.isDelYn();
 	}
 
 	public List<String> getKeywords(final Long toolId) {
