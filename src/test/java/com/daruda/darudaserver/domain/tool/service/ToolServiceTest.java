@@ -131,4 +131,31 @@ class ToolServiceTest {
 		verify(toolLikeRepository).deleteByUserAndTool(user, tool);
 		verify(toolLikeInternalService, never()).saveIfAbsent(any(ToolLike.class));
 	}
+
+	@DisplayName("동시성 문제로 좋아요 중복 삽입 시 false를 반환한다")
+	@Test
+	void postToolLike_ConcurrentInsert() {
+		// given
+		Long userId = 1L;
+		Long toolId = 10L;
+		UserEntity user = UserEntity.builder()
+			.email("test@example.com")
+			.nickname("tester")
+			.positions(null)
+			.build();
+		Tool tool = Tool.builder().toolId(toolId).build();
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
+		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(false);
+		when(toolLikeInternalService.saveIfAbsent(any(ToolLike.class))).thenReturn(false);
+		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(1);
+
+		// when
+		ToolLikeRes result = toolService.postToolLike(userId, toolId);
+
+		// then
+		assertThat(result.liked()).isFalse();
+		verify(toolLikeInternalService).saveIfAbsent(any(ToolLike.class));
+	}
 }

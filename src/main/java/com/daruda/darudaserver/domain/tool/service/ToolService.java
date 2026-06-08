@@ -265,9 +265,12 @@ public class ToolService {
 			liked = false;
 		} else {
 			ToolLike toolLike = ToolLike.of(user, tool);
-			toolLikeInternalService.saveIfAbsent(toolLike); // 별도 트랜잭션에서 처리
-			log.debug("툴 좋아요가 생성되었습니다");
-			liked = true;
+			liked = toolLikeInternalService.saveIfAbsent(toolLike); // 별도 트랜잭션에서 처리
+			if (liked) {
+				log.debug("툴 좋아요가 생성되었습니다");
+			} else {
+				log.warn("툴 좋아요 중복 삽입 감지 (userId={}, toolId={})", userId, toolId);
+			}
 		}
 		int likeCount = toolLikeRepository.countByTool_ToolId(toolId);
 		return ToolLikeRes.of(toolId, liked, likeCount);
