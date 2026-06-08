@@ -72,6 +72,7 @@ public class ToolService {
 	private final ToolLikeRepository toolLikeRepository;
 	private final UserRepository userRepository;
 	private final ToolBlogRepository toolBlogRepository;
+	private final ToolLikeInternalService toolLikeInternalService;
 
 	public ToolDetailGetRes getToolDetail(Long userId, final Long toolId) {
 		log.info("툴 세부 정보를 조회합니다. toolId={}, userId={}", toolId, userId);
@@ -264,7 +265,7 @@ public class ToolService {
 			liked = false;
 		} else {
 			ToolLike toolLike = ToolLike.of(user, tool);
-			toolLikeRepository.save(toolLike);
+			toolLikeInternalService.saveIfAbsent(toolLike); // 별도 트랜잭션에서 처리
 			log.debug("툴 좋아요가 생성되었습니다");
 			liked = true;
 		}

@@ -34,6 +34,9 @@ class ToolServiceTest {
 	@Mock
 	private ToolLikeRepository toolLikeRepository;
 
+	@Mock
+	private ToolLikeInternalService toolLikeInternalService;
+
 	@InjectMocks
 	private ToolService toolService;
 
@@ -88,6 +91,7 @@ class ToolServiceTest {
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
 		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(false);
+		when(toolLikeInternalService.saveIfAbsent(any(ToolLike.class))).thenReturn(true);
 		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(1);
 
 		// when
@@ -97,7 +101,7 @@ class ToolServiceTest {
 		assertThat(result.toolId()).isEqualTo(toolId);
 		assertThat(result.liked()).isTrue();
 		assertThat(result.likeCount()).isEqualTo(1);
-		verify(toolLikeRepository).save(any(ToolLike.class));
+		verify(toolLikeInternalService).saveIfAbsent(any(ToolLike.class));
 	}
 
 	@DisplayName("이미 좋아요한 툴에 다시 좋아요를 누르면 좋아요가 취소된다")
@@ -125,7 +129,7 @@ class ToolServiceTest {
 		assertThat(result.liked()).isFalse();
 		assertThat(result.likeCount()).isEqualTo(0);
 		verify(toolLikeRepository).deleteByUserAndTool(user, tool);
-		verify(toolLikeRepository, never()).save(any(ToolLike.class));
+		verify(toolLikeInternalService, never()).saveIfAbsent(any(ToolLike.class));
 	}
 
 	@DisplayName("좋아요 기록이 없으면 getLiked는 false를 반환한다")
