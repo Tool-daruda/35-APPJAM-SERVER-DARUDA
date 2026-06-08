@@ -3,6 +3,7 @@ package com.daruda.darudaserver.domain.tool.entity;
 import com.daruda.darudaserver.domain.user.entity.UserEntity;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -37,6 +38,9 @@ public class ToolLike extends BaseTimeEntity {
 	@JoinColumn(name = "tool_id", nullable = false)
 	private Tool tool;
 
+	@Column(nullable = false)
+	private boolean delYn = false;
+
 	@Builder
 	private ToolLike(final Long toolLikeId, final UserEntity user, final Tool tool) {
 		this.toolLikeId = toolLikeId;
@@ -49,5 +53,9 @@ public class ToolLike extends BaseTimeEntity {
 			.user(user)
 			.tool(tool)
 			.build();
+	}
+
+	public void toggleLike() {
+		this.delYn = !this.delYn;
 	}
 }
