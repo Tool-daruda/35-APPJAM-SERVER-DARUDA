@@ -375,7 +375,7 @@ public class ToolService {
 		return !toolScrap.isDelYn();
 	}
 
-	Boolean getLiked(final UserEntity user, final Tool tool) {
+	private boolean getLiked(final UserEntity user, final Tool tool) {
 		return toolLikeRepository.existsByUserAndTool(user, tool);
 	}
 

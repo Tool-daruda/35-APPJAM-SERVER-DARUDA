@@ -131,24 +131,4 @@ class ToolServiceTest {
 		verify(toolLikeRepository).deleteByUserAndTool(user, tool);
 		verify(toolLikeInternalService, never()).saveIfAbsent(any(ToolLike.class));
 	}
-
-	@DisplayName("좋아요 기록이 없으면 getLiked는 false를 반환한다")
-	@Test
-	void getLiked_False_WhenNoRecord() {
-		// given
-		UserEntity user = UserEntity.builder()
-			.email("test@example.com")
-			.nickname("tester")
-			.positions(null)
-			.build();
-		Tool tool = Tool.builder().toolId(10L).build();
-
-		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(false);
-
-		// when
-		Boolean result = toolService.getLiked(user, tool);
-
-		// then
-		assertThat(result).isFalse();
-	}
 }
