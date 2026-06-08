@@ -2,7 +2,6 @@ package com.daruda.darudaserver.domain.tool.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.daruda.darudaserver.domain.tool.entity.Tool;
@@ -13,7 +12,7 @@ import com.daruda.darudaserver.domain.user.entity.UserEntity;
 public interface ToolLikeRepository extends JpaRepository<ToolLike, Long> {
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
-	void deleteAllByUserId(@Param("userId") Long userId);
+	void deleteAllByUserId(Long userId);
 
 	boolean existsByUserAndTool(final UserEntity user, final Tool tool);
 
