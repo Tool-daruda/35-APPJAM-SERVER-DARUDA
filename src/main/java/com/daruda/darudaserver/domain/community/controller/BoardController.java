@@ -16,6 +16,7 @@ import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
 import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
+import com.daruda.darudaserver.domain.community.service.BoardScrapService;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
 import com.daruda.darudaserver.global.common.response.ApiResponse;
@@ -33,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "board 컨트롤러", description = "게시판과 관련된 API를 처리합니다.")
 public class BoardController {
 	private final BoardService boardService;
+	private final BoardScrapService boardScrapService;
 
 	@PostMapping
 	@Operation(summary = "게시글 작성", description = "게시글을 작성합니다.")
@@ -84,7 +86,7 @@ public class BoardController {
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId) {
-		BoardScrapRes boardScrapRes = boardService.postScrap(userId, boardId);
+		BoardScrapRes boardScrapRes = boardScrapService.toggleScrap(userId, boardId);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardScrapRes, SuccessCode.SUCCESS_SCRAP));
 	}
 

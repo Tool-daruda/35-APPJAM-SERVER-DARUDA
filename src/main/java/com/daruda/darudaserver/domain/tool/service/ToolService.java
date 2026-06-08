@@ -72,6 +72,7 @@ public class ToolService {
 	private final ToolLikeRepository toolLikeRepository;
 	private final UserRepository userRepository;
 	private final ToolBlogRepository toolBlogRepository;
+	private final ToolLikeInternalService toolLikeInternalService;
 
 	public ToolDetailGetRes getToolDetail(Long userId, final Long toolId) {
 		log.info("툴 세부 정보를 조회합니다. toolId={}, userId={}", toolId, userId);
@@ -97,7 +98,7 @@ public class ToolService {
 			.map(user -> getLiked(user, tool))
 			.orElse(false);
 
-		int likeCount = toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId);
+		int likeCount = toolLikeRepository.countByTool_ToolId(toolId);
 
 		log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
 		log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
@@ -254,18 +255,25 @@ public class ToolService {
 	public ToolLikeRes postToolLike(final Long userId, final Long toolId) {
 		UserEntity user = getUserById(userId);
 		Tool tool = getToolById(toolId);
-		ToolLike toolLike = toolLikeRepository.findByUserAndTool(user, tool).orElse(null);
 
-		if (toolLike == null) {
-			toolLike = ToolLike.of(user, tool);
-			toolLikeRepository.save(toolLike);
-			log.debug("툴 좋아요가 생성되었습니다");
+		boolean exists = toolLikeRepository.existsByUserAndTool(user, tool);
+		boolean liked;
+
+		if (exists) {
+			toolLikeRepository.deleteByUserAndTool(user, tool);
+			log.debug("툴 좋아요가 삭제되었습니다");
+			liked = false;
 		} else {
-			toolLike.toggleLike();
-			log.debug("툴 좋아요가 업데이트 되었습니다");
+			ToolLike toolLike = ToolLike.of(user, tool);
+			liked = toolLikeInternalService.saveIfAbsent(toolLike); // 별도 트랜잭션에서 처리
+			if (liked) {
+				log.debug("툴 좋아요가 생성되었습니다");
+			} else {
+				log.warn("툴 좋아요 중복 삽입 감지 (userId={}, toolId={})", userId, toolId);
+			}
 		}
-		int likeCount = toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId);
-		return ToolLikeRes.of(toolId, !toolLike.isDelYn(), likeCount);
+		int likeCount = toolLikeRepository.countByTool_ToolId(toolId);
+		return ToolLikeRes.of(toolId, liked, likeCount);
 	}
 
 	private List<RelatedTool> relatedTool(final Tool tool) {
@@ -370,18 +378,8 @@ public class ToolService {
 		return !toolScrap.isDelYn();
 	}
 
-	Boolean getLiked(final UserEntity user, final Tool tool) {
-		ToolLike toolLike = toolLikeRepository.findByUserAndTool(user, tool)
-			.orElse(null);
-		if (toolLike == null) {
-			return false;
-		}
-		return !toolLike.isDelYn();
-	}
-
-	public List<String> getKeywords(final Long toolId) {
-		Tool tool = getToolById(toolId);
-		return convertToKeywordRes(tool);
+	private boolean getLiked(final UserEntity user, final Tool tool) {
+		return toolLikeRepository.existsByUserAndTool(user, tool);
 	}
 
 	public Map<Long, List<String>> getKeywordsBatch(List<Long> toolIds) {

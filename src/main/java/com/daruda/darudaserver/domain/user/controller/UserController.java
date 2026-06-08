@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.daruda.darudaserver.domain.community.service.BoardScrapService;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
-import com.daruda.darudaserver.domain.user.dto.response.FavoriteBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
 import com.daruda.darudaserver.domain.user.dto.response.MyProfileResponse;
+import com.daruda.darudaserver.domain.user.dto.response.ScrapBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
@@ -40,6 +41,7 @@ public class UserController {
 
 	private final UserService userService;
 	private final BoardService boardService;
+	private final BoardScrapService boardScrapService;
 
 	@PatchMapping("/profile")
 	@Operation(summary = "프로필 수정", description = "사용자의 프로필을 수정합니다.")
@@ -91,7 +93,8 @@ public class UserController {
 
 	@GetMapping("/scrap-boards")
 	@Operation(summary = "스크랩 글 목록 조회", description = "스크랩 글 목록을 조회합니다.")
-	public ResponseEntity<?> getFavoriteBoards(@AuthenticationPrincipal Long userIdOrNull,
+	public ResponseEntity<ApiResponse<ScrapBoardsRetrieveResponse>> getScrapBoards(
+		@AuthenticationPrincipal Long userIdOrNull,
 		@Parameter(description = "조회할 페이지", example = "1")
 		@RequestParam(value = "page", defaultValue = "1") @Positive int pageNo,
 		@Parameter(description = "조회할 게시글 개수", example = "5")
@@ -99,10 +102,10 @@ public class UserController {
 		@Parameter(description = "정렬 기준", example = "createdAt")
 		@RequestParam(value = "criteria", defaultValue = "createdAt") String criteria) {
 		Pageable pageable = PageRequest.of(pageNo - 1, size, Sort.by(Sort.Direction.DESC, criteria));
-		FavoriteBoardsRetrieveResponse favoriteBoardsRetrieveResponse = boardService.getFavoriteBoards(userIdOrNull,
+		ScrapBoardsRetrieveResponse scrapBoardsRetrieveResponse = boardScrapService.getScrapBoards(userIdOrNull,
 			pageable);
 
 		return ResponseEntity.ok(
-			ApiResponse.ofSuccessWithData(favoriteBoardsRetrieveResponse, SuccessCode.SUCCESS_FETCH));
+			ApiResponse.ofSuccessWithData(scrapBoardsRetrieveResponse, SuccessCode.SUCCESS_FETCH));
 	}
 }

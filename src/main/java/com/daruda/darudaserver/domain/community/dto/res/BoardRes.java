@@ -62,7 +62,6 @@ public class BoardRes {
 		final int commentCount, final List<String> images, final Boolean isScraped) {
 		return BoardRes.builder()
 			.boardId(board.getId())
-			.boardId(board.getId())
 			.toolName(toolName)
 			.toolLogo(toolLogo)
 			.author(board.getUser().getNickname())
@@ -78,7 +77,6 @@ public class BoardRes {
 	public static BoardRes getBoardResWithToolId(final Board board, final String toolName, final String toolLogo,
 		final int commentCount, final List<String> images, final Boolean isScraped, final Long toolId) {
 		return BoardRes.builder()
-			.boardId(board.getId())
 			.boardId(board.getId())
 			.toolName(toolName)
 			.toolLogo(toolLogo)

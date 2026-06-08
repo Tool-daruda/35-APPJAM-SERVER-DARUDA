@@ -34,6 +34,9 @@ class ToolServiceTest {
 	@Mock
 	private ToolLikeRepository toolLikeRepository;
 
+	@Mock
+	private ToolLikeInternalService toolLikeInternalService;
+
 	@InjectMocks
 	private ToolService toolService;
 
@@ -87,8 +90,9 @@ class ToolServiceTest {
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
-		when(toolLikeRepository.findByUserAndTool(user, tool)).thenReturn(Optional.empty());
-		when(toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId)).thenReturn(1);
+		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(false);
+		when(toolLikeInternalService.saveIfAbsent(any(ToolLike.class))).thenReturn(true);
+		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(1);
 
 		// when
 		ToolLikeRes result = toolService.postToolLike(userId, toolId);
@@ -97,7 +101,7 @@ class ToolServiceTest {
 		assertThat(result.toolId()).isEqualTo(toolId);
 		assertThat(result.liked()).isTrue();
 		assertThat(result.likeCount()).isEqualTo(1);
-		verify(toolLikeRepository).save(any(ToolLike.class));
+		verify(toolLikeInternalService).saveIfAbsent(any(ToolLike.class));
 	}
 
 	@DisplayName("이미 좋아요한 툴에 다시 좋아요를 누르면 좋아요가 취소된다")
@@ -112,12 +116,11 @@ class ToolServiceTest {
 			.positions(null)
 			.build();
 		Tool tool = Tool.builder().toolId(toolId).build();
-		ToolLike existingLike = ToolLike.of(user, tool);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
-		when(toolLikeRepository.findByUserAndTool(user, tool)).thenReturn(Optional.of(existingLike));
-		when(toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId)).thenReturn(0);
+		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(true);
+		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(0);
 
 		// when
 		ToolLikeRes result = toolService.postToolLike(userId, toolId);
@@ -125,26 +128,34 @@ class ToolServiceTest {
 		// then
 		assertThat(result.liked()).isFalse();
 		assertThat(result.likeCount()).isEqualTo(0);
-		verify(toolLikeRepository, never()).save(any(ToolLike.class));
+		verify(toolLikeRepository).deleteByUserAndTool(user, tool);
+		verify(toolLikeInternalService, never()).saveIfAbsent(any(ToolLike.class));
 	}
 
-	@DisplayName("좋아요 기록이 없으면 getLiked는 false를 반환한다")
+	@DisplayName("동시성 문제로 좋아요 중복 삽입 시 false를 반환한다")
 	@Test
-	void getLiked_False_WhenNoRecord() {
+	void postToolLike_ConcurrentInsert() {
 		// given
+		Long userId = 1L;
+		Long toolId = 10L;
 		UserEntity user = UserEntity.builder()
 			.email("test@example.com")
 			.nickname("tester")
 			.positions(null)
 			.build();
-		Tool tool = Tool.builder().toolId(10L).build();
+		Tool tool = Tool.builder().toolId(toolId).build();
 
-		when(toolLikeRepository.findByUserAndTool(user, tool)).thenReturn(Optional.empty());
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
+		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(false);
+		when(toolLikeInternalService.saveIfAbsent(any(ToolLike.class))).thenReturn(false);
+		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(1);
 
 		// when
-		Boolean result = toolService.getLiked(user, tool);
+		ToolLikeRes result = toolService.postToolLike(userId, toolId);
 
 		// then
-		assertThat(result).isFalse();
+		assertThat(result.liked()).isFalse();
+		verify(toolLikeInternalService).saveIfAbsent(any(ToolLike.class));
 	}
 }

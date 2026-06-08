@@ -1,7 +1,6 @@
 package com.daruda.darudaserver.domain.community.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +20,19 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap, Long> {
 	@Transactional
 	void deleteAllByUserId(@Param("userId") Long userId);
 
-	@Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.delYn = false AND bs.delYn = false")
-	Page<BoardScrap> findAllActiveByUserId(@Param("userId") Long userId, Pageable pageable);
+	boolean existsByUserIdAndBoardId(@Param("userId") Long userId, @Param("boardId") Long boardId);
 
-	@Query("SELECT bs FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.id = :boardId")
-	Optional<BoardScrap> findByUserAndBoard(@Param("userId") Long userId, @Param("boardId") Long boardId);
+	@Modifying
+	@Transactional
+	void deleteByUserIdAndBoardId(@Param("userId") Long userId, @Param("boardId") Long boardId);
 
 	List<BoardScrap> findAllByBoardId(Long boardId);
+
+	@Query(value = "SELECT b.id as boardId, b.title as title, b.content as content, b.updatedAt as updatedAt, "
+		+ "t.toolMainName as toolName, t.toolLogo as toolLogo, "
+		+ "(SELECT COUNT(s) FROM BoardScrap s WHERE s.board.id = b.id) as scrapCount "
+		+ "FROM BoardScrap bs JOIN bs.board b LEFT JOIN b.tool t "
+		+ "WHERE bs.user.id = :userId AND b.delYn = false",
+		countQuery = "SELECT COUNT(bs) FROM BoardScrap bs WHERE bs.user.id = :userId AND bs.board.delYn = false")
+	Page<ScrapBoardProjection> findScrapBoardsWithCount(@Param("userId") Long userId, Pageable pageable);
 }

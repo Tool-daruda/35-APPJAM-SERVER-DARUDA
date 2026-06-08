@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.domain.community;
+package com.daruda.darudaserver.domain.community.service;
 
 import java.util.List;
 
@@ -13,9 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
-import com.daruda.darudaserver.domain.community.repository.BoardRepository;
-import com.daruda.darudaserver.domain.community.service.BoardImageService;
-import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.global.image.service.ImageService;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,9 +26,6 @@ class BoardServiceTest {
 
 	@Mock
 	private BoardImageService boardImageService;
-
-	@Mock
-	private BoardRepository boardRepository;
 
 	@Mock
 	private BoardImageRepository boardImageRepository;
@@ -49,6 +43,7 @@ class BoardServiceTest {
 		List<String> imageUrls = List.of("url1", "url2");
 
 		Mockito.when(board.getId()).thenReturn(boardId);
+		Mockito.when(boardImageRepository.findAllByBoardId(boardId)).thenReturn(java.util.Collections.emptyList());
 		Mockito.when(imageService.createImage(imageList)).thenReturn(imageIds);
 		Mockito.when(boardImageService.getBoardImageUrls(boardId)).thenReturn(imageUrls);
 
@@ -61,6 +56,7 @@ class BoardServiceTest {
 		List<String> result = (List<String>)method.invoke(boardService, board, imageList);
 
 		// then
+		Mockito.verify(boardImageRepository).findAllByBoardId(boardId);
 		Mockito.verify(imageService).createImage(imageList);
 		Mockito.verify(boardImageService).saveBoardImages(boardId, imageIds);
 		Mockito.verify(boardImageService).getBoardImageUrls(boardId);
