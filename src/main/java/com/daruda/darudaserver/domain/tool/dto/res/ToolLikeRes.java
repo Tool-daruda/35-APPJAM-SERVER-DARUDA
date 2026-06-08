@@ -5,10 +5,10 @@ import lombok.Builder;
 @Builder
 public record ToolLikeRes(
 	Long toolId,
-	Boolean liked,
+	boolean liked,
 	int likeCount
 ) {
-	public static ToolLikeRes of(final Long toolId, final Boolean liked, final int likeCount) {
+	public static ToolLikeRes of(final Long toolId, final boolean liked, final int likeCount) {
 		return ToolLikeRes.builder()
 			.toolId(toolId)
 			.liked(liked)
