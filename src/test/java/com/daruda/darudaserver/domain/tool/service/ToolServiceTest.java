@@ -87,8 +87,8 @@ class ToolServiceTest {
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
-		when(toolLikeRepository.findByUserAndTool(user, tool)).thenReturn(Optional.empty());
-		when(toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId)).thenReturn(1);
+		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(false);
+		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(1);
 
 		// when
 		ToolLikeRes result = toolService.postToolLike(userId, toolId);
@@ -112,12 +112,11 @@ class ToolServiceTest {
 			.positions(null)
 			.build();
 		Tool tool = Tool.builder().toolId(toolId).build();
-		ToolLike existingLike = ToolLike.of(user, tool);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
-		when(toolLikeRepository.findByUserAndTool(user, tool)).thenReturn(Optional.of(existingLike));
-		when(toolLikeRepository.countByTool_ToolIdAndDelYnFalse(toolId)).thenReturn(0);
+		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(true);
+		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(0);
 
 		// when
 		ToolLikeRes result = toolService.postToolLike(userId, toolId);
@@ -125,6 +124,7 @@ class ToolServiceTest {
 		// then
 		assertThat(result.liked()).isFalse();
 		assertThat(result.likeCount()).isEqualTo(0);
+		verify(toolLikeRepository).deleteByUserAndTool(user, tool);
 		verify(toolLikeRepository, never()).save(any(ToolLike.class));
 	}
 
@@ -139,7 +139,7 @@ class ToolServiceTest {
 			.build();
 		Tool tool = Tool.builder().toolId(10L).build();
 
-		when(toolLikeRepository.findByUserAndTool(user, tool)).thenReturn(Optional.empty());
+		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(false);
 
 		// when
 		Boolean result = toolService.getLiked(user, tool);
