@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,13 +40,40 @@ public class ElasticsearchIndexInitializer implements ApplicationRunner {
 	private final CommentRepository commentRepository;
 
 	@Override
-	@Transactional(readOnly = true)
 	public void run(ApplicationArguments args) {
 		log.info("Elasticsearch 인덱스 초기화 시작...");
 		initializeIndex(BoardDocument.class);
 		initializeIndex(ToolDocument.class);
-		syncIfEmpty();
 		log.info("Elasticsearch 인덱스 초기화 완료.");
+	}
+
+	@Async
+	@EventListener(ApplicationReadyEvent.class)
+	@Transactional(readOnly = true)
+	public void syncOnReady() {
+		int maxAttempts = 5;
+
+		for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				syncIfEmpty();
+				return;
+			} catch (Exception e) {
+				if (attempt < maxAttempts) {
+					long delaySec = attempt * 10L;
+
+					log.warn("ES 동기화 실패 ({}회차), {}초 후 재시도. 원인: {}", attempt, delaySec, e.getMessage());
+
+					try {
+						Thread.sleep(delaySec * 1000);
+					} catch (InterruptedException ie) {
+						Thread.currentThread().interrupt();
+						return;
+					}
+				} else {
+					log.error("ES 동기화 최종 실패 ({}회 시도). 원인: {}", maxAttempts, e.getMessage());
+				}
+			}
+		}
 	}
 
 	private void initializeIndex(Class<?> clazz) {
