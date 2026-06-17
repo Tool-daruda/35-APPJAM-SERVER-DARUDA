@@ -226,6 +226,10 @@ public class BoardService {
 		long nextScrapCount = -1L;
 
 		if (effectiveSortType == BoardSortType.SCRAP) {
+			if ((lastBoardId == null) ^ (lastScrapCount == null)) {
+				throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
+			}
+
 			NumberExpression<Long> scrapCountExpr = Expressions.asNumber(
 				com.querydsl.jpa.JPAExpressions
 					.select(boardScrap.count())
