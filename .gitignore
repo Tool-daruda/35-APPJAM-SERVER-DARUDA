@@ -46,3 +46,6 @@ src/main/generated/
 
 ### OCI ###
 private.pem
+
+### OMC ###
+.omc/

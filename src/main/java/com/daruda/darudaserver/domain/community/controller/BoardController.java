@@ -16,6 +16,7 @@ import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
 import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
 import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
+import com.daruda.darudaserver.domain.community.entity.BoardSortType;
 import com.daruda.darudaserver.domain.community.service.BoardScrapService;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
@@ -102,8 +103,14 @@ public class BoardController {
 		@Parameter(description = "조회할 게시글 개수", example = "10")
 		@RequestParam(value = "size", defaultValue = "10") int size,
 		@Parameter(description = "조회했을 때 마지막 board Id", example = "10")
-		@RequestParam(value = "lastBoardId", required = false) Long lastBoardId) {
-		GetBoardResponse boardResponse = boardService.getBoardList(userId, noTopic, toolId, size, lastBoardId);
+		@RequestParam(value = "lastBoardId", required = false) Long lastBoardId,
+		@Parameter(description = "정렬 기준 (LATEST: 최신순, SCRAP: 스크랩 많은 순)", example = "LATEST")
+		@RequestParam(value = "sortBy", required = false) String sortBy,
+		@Parameter(description = "스크랩 정렬 시 마지막 게시글의 스크랩 수 (sortBy=SCRAP일 때 필요)", example = "5")
+		@RequestParam(value = "lastScrapCount", required = false) Long lastScrapCount) {
+		BoardSortType sortType = BoardSortType.from(sortBy);
+		GetBoardResponse boardResponse = boardService.getBoardList(userId, noTopic, toolId, size, lastBoardId, sortType,
+			lastScrapCount);
 		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardResponse, SuccessCode.SUCCESS_FETCH));
 	}
 }

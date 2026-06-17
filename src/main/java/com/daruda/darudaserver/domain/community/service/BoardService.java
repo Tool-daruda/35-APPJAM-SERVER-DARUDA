@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.community.service;
 
 import static com.daruda.darudaserver.domain.community.entity.QBoard.*;
+import static com.daruda.darudaserver.domain.community.entity.QBoardScrap.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardImage;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
+import com.daruda.darudaserver.domain.community.entity.BoardSortType;
 import com.daruda.darudaserver.domain.community.event.BoardCreatedEvent;
 import com.daruda.darudaserver.domain.community.event.BoardUpdatedEvent;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
@@ -41,6 +43,10 @@ import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.repository.ImageRepository;
 import com.daruda.darudaserver.global.image.service.ImageService;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -184,10 +190,12 @@ public class BoardService {
 	}
 
 	public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId,
-		final int size, final Long lastBoardId) {
+		final int size, final Long lastBoardId, final BoardSortType sortType, final Long lastScrapCount) {
 
 		log.info("USERID OR NULL {}", userIdOrNull);
-		Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId + 1;
+		if (size < 1) {
+			throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
+		}
 		UserEntity user = getUser(userIdOrNull);
 		log.info("USER : {}", user);
 
@@ -211,25 +219,78 @@ public class BoardService {
 			)
 			.fetchFirst()).orElse(0L);
 
-		// Cursor 기반 페이징을 적용한 게시글 목록 가져오기
-		List<Board> boards = jpaQueryFactory
-			.selectFrom(board)
-			.where(
-				noTopic != null ? board.isFree.eq(noTopic) : null,
-				toolId != null ? board.tool.toolId.eq(toolId) : null,
-				board.delYn.eq(Boolean.FALSE),
-				board.id.lt(cursor)
-			)
-			.orderBy(board.id.desc())
-			.limit(size + 1)
-			.fetch();
+		final BoardSortType effectiveSortType = sortType == null ? BoardSortType.LATEST : sortType;
+		List<Board> paginatedBoards;
+		boolean hasNextPage;
+		long nextCursor;
+		long nextScrapCount = -1L;
 
-		// 다음 페이지 여부 확인
-		boolean hasNextPage = boards.size() > size;
-		List<Board> paginatedBoards = hasNextPage ? boards.subList(0, size) : boards;
+		if (effectiveSortType == BoardSortType.SCRAP) {
+			if ((lastBoardId == null) ^ (lastScrapCount == null)) {
+				throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
+			}
 
-		// nextCursor
-		long nextCursor = hasNextPage ? boards.get(size).getId() : -1L;
+			NumberExpression<Long> scrapCountExpr = Expressions.asNumber(
+				com.querydsl.jpa.JPAExpressions
+					.select(boardScrap.count())
+					.from(boardScrap)
+					.where(boardScrap.board.id.eq(board.id))
+			);
+
+			BooleanBuilder where = new BooleanBuilder();
+			where.and(board.delYn.eq(Boolean.FALSE));
+			if (noTopic != null) {
+				where.and(board.isFree.eq(noTopic));
+			}
+			if (toolId != null) {
+				where.and(board.tool.toolId.eq(toolId));
+			}
+			if (lastScrapCount != null && lastBoardId != null) {
+				where.and(
+					scrapCountExpr.lt(lastScrapCount)
+						.or(scrapCountExpr.eq(lastScrapCount).and(board.id.lt(lastBoardId)))
+				);
+			}
+
+			List<Tuple> results = jpaQueryFactory
+				.select(board, scrapCountExpr)
+				.from(board)
+				.where(where)
+				.orderBy(scrapCountExpr.desc(), board.id.desc())
+				.limit(size + 1L)
+				.fetch();
+
+			hasNextPage = results.size() > size;
+			List<Tuple> pagedResults = hasNextPage ? results.subList(0, size) : results;
+			paginatedBoards = pagedResults.stream().map(t -> t.get(board)).toList();
+
+			if (hasNextPage) {
+				Tuple lastInPage = pagedResults.get(pagedResults.size() - 1);
+				nextCursor = lastInPage.get(board).getId();
+				Long lastCount = lastInPage.get(scrapCountExpr);
+				nextScrapCount = lastCount == null ? 0L : lastCount;
+			} else {
+				nextCursor = -1L;
+			}
+		} else {
+			Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId + 1;
+
+			List<Board> boards = jpaQueryFactory
+				.selectFrom(board)
+				.where(
+					noTopic != null ? board.isFree.eq(noTopic) : null,
+					toolId != null ? board.tool.toolId.eq(toolId) : null,
+					board.delYn.eq(Boolean.FALSE),
+					board.id.lt(cursor)
+				)
+				.orderBy(board.id.desc())
+				.limit(size + 1)
+				.fetch();
+
+			hasNextPage = boards.size() > size;
+			paginatedBoards = hasNextPage ? boards.subList(0, size) : boards;
+			nextCursor = hasNextPage ? boards.get(size).getId() : -1L;
+		}
 
 		// 응답 데이터
 		List<BoardRes> boardResList = paginatedBoards.stream()
@@ -258,7 +319,9 @@ public class BoardService {
 			.toList();
 
 		ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(totalElements, nextCursor);
-		return new GetBoardResponse(boardResList, scrollPaginationDto);
+		Long responseNextScrapCount =
+			(effectiveSortType == BoardSortType.SCRAP && nextScrapCount >= 0) ? nextScrapCount : null;
+		return GetBoardResponse.of(boardResList, scrollPaginationDto, responseNextScrapCount);
 	}
 
 	private Board validateBoardAndUser(final Long userId, final Long boardId) {
