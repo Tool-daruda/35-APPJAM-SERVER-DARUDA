@@ -193,6 +193,9 @@ public class BoardService {
 		final int size, final Long lastBoardId, final BoardSortType sortType, final Long lastScrapCount) {
 
 		log.info("USERID OR NULL {}", userIdOrNull);
+		if (size < 1) {
+			throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
+		}
 		UserEntity user = getUser(userIdOrNull);
 		log.info("USER : {}", user);
 
