@@ -3,6 +3,7 @@ package com.daruda.darudaserver.domain.community.service;
 import static com.daruda.darudaserver.domain.community.entity.QBoard.*;
 import static com.daruda.darudaserver.domain.community.entity.QBoardScrap.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -225,6 +226,8 @@ public class BoardService {
 		boolean hasNextPage;
 		long nextCursor;
 		long nextScrapCount = -1L;
+		// board별 스크랩 수. SCRAP/LATEST 분기에서 채우는 경로는 다르지만 두 값의 의미(해당 board의 BoardScrap 총 개수)는 동일해야 한다.
+		Map<Long, Long> scrapCountMap = new HashMap<>();
 
 		if (effectiveSortType == BoardSortType.SCRAP) {
 			if ((lastBoardId == null) ^ (lastScrapCount == null)) {
@@ -265,6 +268,12 @@ public class BoardService {
 			List<Tuple> pagedResults = hasNextPage ? results.subList(0, size) : results;
 			paginatedBoards = pagedResults.stream().map(t -> t.get(board)).toList();
 
+			// 정렬 시 이미 조회한 스크랩 수를 재사용 → 추가 쿼리 없이, 커서(nextScrapCount)와 표시값의 시점도 일치
+			for (Tuple tuple : pagedResults) {
+				Long scrapCount = tuple.get(scrapCountExpr);
+				scrapCountMap.put(tuple.get(board).getId(), scrapCount == null ? 0L : scrapCount);
+			}
+
 			if (hasNextPage) {
 				Tuple lastInPage = pagedResults.get(pagedResults.size() - 1);
 				nextCursor = lastInPage.get(board).getId();
@@ -291,13 +300,13 @@ public class BoardService {
 			hasNextPage = boards.size() > size;
 			paginatedBoards = hasNextPage ? boards.subList(0, size) : boards;
 			nextCursor = hasNextPage ? boards.get(size).getId() : -1L;
-		}
 
-		// 정렬 기준과 무관하게 페이지 게시글들의 스크랩 수를 배치 쿼리로 한 번에 조회 (N+1 방지)
-		List<Long> boardIds = paginatedBoards.stream().map(Board::getId).toList();
-		Map<Long, Long> scrapCountMap = boardIds.isEmpty()
-			? Map.of()
-			: boardScrapRepository.countMapByBoardIds(boardIds);
+			// LATEST 정렬은 스크랩 수를 따로 조회하지 않으므로 배치 쿼리로 한 번에 조회 (N+1 방지)
+			List<Long> boardIds = paginatedBoards.stream().map(Board::getId).toList();
+			if (!boardIds.isEmpty()) {
+				scrapCountMap.putAll(boardScrapRepository.countMapByBoardIds(boardIds));
+			}
+		}
 
 		// 응답 데이터
 		List<BoardRes> boardResList = paginatedBoards.stream()
