@@ -23,6 +23,7 @@ import org.springframework.security.web.method.annotation.AuthenticationPrincipa
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
 import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
 import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.entity.BoardSortType;
@@ -108,6 +109,25 @@ class BoardControllerTest {
 			scrapCountCaptor.capture());
 		org.assertj.core.api.Assertions.assertThat(sortCaptor.getValue()).isEqualTo(BoardSortType.SCRAP);
 		org.assertj.core.api.Assertions.assertThat(scrapCountCaptor.getValue()).isEqualTo(5L);
+	}
+
+	@Test
+	@DisplayName("게시글 리스트 조회: 응답의 각 게시글에 스크랩 수(scrapCount)가 포함된다")
+	void getBoardList_includesScrapCount() throws Exception {
+		// given
+		BoardRes boardRes = BoardRes.builder()
+			.boardId(1L)
+			.scrapCount(7L)
+			.build();
+		GetBoardResponse mockResponse = GetBoardResponse.of(List.of(boardRes), ScrollPaginationDto.of(1L, -1L));
+		when(boardService.getBoardList(any(), any(), any(), anyInt(), any(), any(BoardSortType.class), any()))
+			.thenReturn(mockResponse);
+
+		// when & then
+		mockMvc.perform(get("/api/v1/board")
+				.param("size", "10"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.contents[0].scrapCount").value(7));
 	}
 
 	@Test
