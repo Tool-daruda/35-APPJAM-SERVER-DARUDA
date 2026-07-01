@@ -4,6 +4,7 @@ import static com.daruda.darudaserver.domain.community.entity.QBoard.*;
 import static com.daruda.darudaserver.domain.community.entity.QBoardScrap.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -292,6 +293,12 @@ public class BoardService {
 			nextCursor = hasNextPage ? boards.get(size).getId() : -1L;
 		}
 
+		// 정렬 기준과 무관하게 페이지 게시글들의 스크랩 수를 배치 쿼리로 한 번에 조회 (N+1 방지)
+		List<Long> boardIds = paginatedBoards.stream().map(Board::getId).toList();
+		Map<Long, Long> scrapCountMap = boardIds.isEmpty()
+			? Map.of()
+			: boardScrapRepository.countMapByBoardIds(boardIds);
+
 		// 응답 데이터
 		List<BoardRes> boardResList = paginatedBoards.stream()
 			.map(board -> {
@@ -314,7 +321,9 @@ public class BoardService {
 				int commentCount = getCommentCount(board.getId());
 				List<String> boardImages = boardImageService.getBoardImageUrls(board.getId());
 				boolean isScrapped = boardScrapService.isScraped(user, board);
-				return BoardRes.of(board, toolName, toolLogo, commentCount, boardImages, isScrapped, savedToolid);
+				long scrapCount = scrapCountMap.getOrDefault(board.getId(), 0L);
+				return BoardRes.of(board, toolName, toolLogo, commentCount, boardImages, isScrapped, savedToolid,
+					scrapCount);
 			})
 			.toList();
 
