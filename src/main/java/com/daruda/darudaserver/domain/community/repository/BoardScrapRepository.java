@@ -1,6 +1,8 @@
 package com.daruda.darudaserver.domain.community.repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,14 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap, Long> {
 	void deleteByUserIdAndBoardId(@Param("userId") Long userId, @Param("boardId") Long boardId);
 
 	List<BoardScrap> findAllByBoardId(Long boardId);
+
+	@Query("SELECT bs.board.id, COUNT(bs) FROM BoardScrap bs WHERE bs.board.id IN :boardIds GROUP BY bs.board.id")
+	List<Object[]> countByBoardIds(@Param("boardIds") List<Long> boardIds);
+
+	default Map<Long, Long> countMapByBoardIds(final List<Long> boardIds) {
+		return countByBoardIds(boardIds).stream()
+			.collect(Collectors.toMap(row -> (Long)row[0], row -> (Long)row[1]));
+	}
 
 	@Query(value = "SELECT b.id as boardId, b.title as title, b.content as content, b.updatedAt as updatedAt, "
 		+ "t.toolMainName as toolName, t.toolLogo as toolLogo, "
