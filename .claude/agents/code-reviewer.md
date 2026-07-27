@@ -22,7 +22,9 @@ daruda 서버(Java 17 / Spring Boot 3.4.1 / 단일 모듈 계층형)의 코드�
 ### 2. 트랜잭션 (Critical)
 
 - [ ] `import org.springframework.transaction.annotation.Transactional`인가
-      — **`jakarta.transaction.Transactional`이면 `readOnly` 속성 자체가 없어 조회 최적화가 불가능하고(전파도 `value = TxType.*`) 항상 쓰기 트랜잭션이 열린다. 반드시 지적할 것**
+      — `jakarta.transaction.Transactional`이면 `readOnly` 속성이 없어 조회에도 쓰기 트랜잭션이 열린다(전파도 `value = TxType.*`).
+      다만 Spring이 Jakarta 애노테이션도 인식하므로 **트랜잭션 자체는 정상적으로 열린다.** 동작 불능이 아니라 최적화 누락이므로,
+      **신규·변경 코드면 지적하고, 기존 코드(정리 대상 17곳)면 Critical이 아니라 정리 대상으로 분류한다**
 - [ ] 클래스에 `@Transactional(readOnly = true)`, 쓰기 메서드에만 `@Transactional`이 붙었는가
 - [ ] `REQUIRES_NEW`가 자기 호출(self-invocation)로 쓰이지 않는가 (프록시를 타지 않아 무효)
 - [ ] 트랜잭션 안에서 외부 API 호출(Feign/OCI/Elasticsearch)을 오래 붙잡지 않는가
@@ -72,15 +74,22 @@ daruda 서버(Java 17 / Spring Boot 3.4.1 / 단일 모듈 계층형)의 코드�
 ```markdown
 ## 🔴 Critical (반드시 수정)
 
-### 1. `BoardService.java:42` — jakarta 트랜잭션 사용
-`jakarta.transaction.Transactional`을 import하고 있어 `readOnly = true`를 지정할 수 없습니다
-(Jakarta 애노테이션에는 해당 속성이 없습니다). 조회 메서드에도 쓰기 트랜잭션이 열립니다.
+### 1. `BoardController.java:37` — 컨트롤러가 리포지토리를 직접 호출
+`BoardRepository`를 주입해 `findById`를 직접 호출합니다. 레이어 경계 위반이라
+트랜잭션 경계와 예외 변환이 컨트롤러로 새어 나옵니다.
 
-**수정:** `import org.springframework.transaction.annotation.Transactional;`
+**수정:** 조회 로직을 `BoardService`에 두고 컨트롤러는 서비스만 호출합니다.
 
 ## 🟡 Warning (수정 권장)
 
-### 2. `BoardController.java:88` — HTTP 상태 불일치
+### 2. `BoardService.java:42` — jakarta 트랜잭션 사용
+`jakarta.transaction.Transactional`을 import하고 있습니다. Spring이 인식하므로 트랜잭션은
+정상적으로 열리지만, `readOnly` 속성이 없어 조회에도 쓰기 트랜잭션이 열립니다.
+
+**수정:** `import org.springframework.transaction.annotation.Transactional;`
+(속성 없는 bare 애노테이션이면 교체해도 동작은 동일합니다.)
+
+### 3. `BoardController.java:88` — HTTP 상태 불일치
 ...
 
 ## 🟢 Suggestion (개선 제안)
