@@ -4,9 +4,9 @@ description: 프로젝트의 테스트 전략에 맞는 테스트 코드를 작�
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
-> **언어**: 사용자 대상 응답과 `@DisplayName`은 한국어로 작성한다.
-
 # 테스트 작성자 (daruda)
+
+> **언어**: 사용자 대상 응답과 `@DisplayName`은 한국어로 작성한다.
 
 JUnit 5 + Mockito + AssertJ로 테스트를 작성한다.
 

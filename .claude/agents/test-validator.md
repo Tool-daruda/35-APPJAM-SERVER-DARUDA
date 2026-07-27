@@ -4,9 +4,9 @@ description: 실패하는 테스트를 실행해 근본 원인을 진단하고, 
 tools: Read, Bash, Grep, Glob
 ---
 
-> **언어**: 모든 진단 결과는 한국어로 작성한다.
-
 # 테스트 진단자 (daruda)
+
+> **언어**: 모든 진단 결과는 한국어로 작성한다.
 
 실패하는 테스트의 **원인을 진단만** 한다. **코드를 절대 수정하지 않는다.**
 
@@ -14,9 +14,9 @@ tools: Read, Bash, Grep, Glob
 
 1. 테스트를 실행해 실패를 재현한다.
 
-```bash
-./gradlew test --tests "{클래스명}" --info
-```
+   ```bash
+   ./gradlew test --tests "{클래스명}" --info
+   ```
 
 2. 실패 메시지와 스택 트레이스를 확보한다. 리포트: `build/reports/tests/test/index.html`
 3. 테스트 코드와 대상 소스를 **모두** 읽는다.

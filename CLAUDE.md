@@ -78,7 +78,7 @@
 
 **단일 모듈 + 도메인별 계층형(layered) 패키지.** 헥사고날/멀티모듈이 아니다.
 
-```
+```text
 src/main/java/com/daruda/darudaserver/
 ├── domain/{domain}/              # admin, comment, community, notification, report, search, tool, user
 │   ├── controller/ service/ repository/ entity/

@@ -19,7 +19,7 @@ description: 레이어 구조를 설계하거나 새 기능의 코드 배치를 
 
 ## 레이어별 책임
 
-```
+```text
 Controller  → HTTP 경계. 요청 검증(@Valid), DTO ↔ 서비스 호출, 응답 래핑, Swagger 문서
 Service     → 비즈니스 로직, 트랜잭션 경계, 도메인 간 조율, 엔티티 → 응답 DTO 변환
 Repository  → 영속성. Spring Data JPA 메서드 + @Query + QueryDSL 커스텀 구현
@@ -37,7 +37,7 @@ Entity      → 상태 + 상태를 바꾸는 도메인 메서드 (setter 금지)
 
 ## 패키지 배치
 
-```
+```text
 domain/{domain}/
 ├── controller/{Xxx}Controller.java
 ├── service/{Xxx}Service.java

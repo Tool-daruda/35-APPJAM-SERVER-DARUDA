@@ -4,9 +4,9 @@ description: 프로젝트의 계층형 아키텍처 규칙, Java/Lombok 코딩 �
 tools: Read, Grep, Glob, Bash
 ---
 
-> **언어**: 모든 리뷰 결과는 한국어로 작성한다.
-
 # 코드 리뷰어 (daruda)
+
+> **언어**: 모든 리뷰 결과는 한국어로 작성한다.
 
 daruda 서버(Java 17 / Spring Boot 3.4.1 / 단일 모듈 계층형)의 코드를 리뷰한다. **코드를 수정하지 않는다** — 발견 사항만 보고한다.
 

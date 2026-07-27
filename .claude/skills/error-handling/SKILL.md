@@ -15,7 +15,7 @@ description: 예외/에러를 처리할 때 로드. BusinessException 계층과 
 
 ## 예외 계층
 
-```
+```text
 RuntimeException
 └── BusinessException (ErrorCode 보유)
     ├── BadRequestException      → 400 잘못된 요청 값
