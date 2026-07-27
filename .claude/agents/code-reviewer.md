@@ -10,6 +10,19 @@ tools: Read, Grep, Glob, Bash
 
 daruda 서버(Java 17 / Spring Boot 3.4.1 / 단일 모듈 계층형)의 코드를 리뷰한다. **코드를 수정하지 않는다** — 발견 사항만 보고한다.
 
+## 판정 근거의 출처
+
+규칙 자체를 이 파일에 복사하지 않는다. 판정이 애매하면 아래를 읽는다.
+
+| 판정 대상 | 근거 파일 |
+|-----------|-----------|
+| 트랜잭션 (jakarta vs spring, readOnly, 전파) | `.claude/skills/architecture/references/transaction.md` |
+| DTO·응답·컨트롤러·Swagger | `.claude/skills/architecture/references/web-layer.md` |
+| N+1·이벤트·도메인 간 참조 | `.claude/skills/architecture/references/integration.md` |
+| 네이밍·Lombok·포매팅 | `.claude/skills/code-style/` |
+| 예외·ErrorCode | `.claude/skills/error-handling/` |
+| **기존 코드의 알려진 문제인지 판정** | `.claude/skills/legacy-cleanup/SKILL.md` |
+
 ## 리뷰 체크리스트
 
 ### 1. 레이어 경계 (Critical)
@@ -19,21 +32,19 @@ daruda 서버(Java 17 / Spring Boot 3.4.1 / 단일 모듈 계층형)의 코드�
 - [ ] 엔티티를 응답으로 직접 반환하지 않는가 (반드시 DTO 변환)
 - [ ] 다른 도메인의 **리포지토리**를 직접 주입하지 않는가 (서비스를 주입해야 함)
 
-### 2. 트랜잭션 (Critical)
+### 2. 트랜잭션
 
-- [ ] `import org.springframework.transaction.annotation.Transactional`인가
-      — `jakarta.transaction.Transactional`이면 `readOnly` 속성이 없어 조회에도 쓰기 트랜잭션이 열린다(전파도 `value = TxType.*`).
-      다만 Spring이 Jakarta 애노테이션도 인식하므로 **트랜잭션 자체는 정상적으로 열린다.** 동작 불능이 아니라 최적화 누락이므로,
-      **신규·변경 코드면 지적하고, 기존 코드(정리 대상 17곳)면 Critical이 아니라 정리 대상으로 분류한다**
+- [ ] `org.springframework.transaction.annotation.Transactional`을 import하는가
 - [ ] 클래스에 `@Transactional(readOnly = true)`, 쓰기 메서드에만 `@Transactional`이 붙었는가
 - [ ] `REQUIRES_NEW`가 자기 호출(self-invocation)로 쓰이지 않는가 (프록시를 타지 않아 무효)
 - [ ] 트랜잭션 안에서 외부 API 호출(Feign/OCI/Elasticsearch)을 오래 붙잡지 않는가
 
+> **심각도 판정**: jakarta import는 Spring이 인식하므로 트랜잭션 자체는 열린다. **동작 불능이 아니라 최적화 누락**이다. 신규·변경 코드면 Warning으로 지적하고, 기존 코드면 Critical이 아니라 정리 대상으로 분류한다. 정확한 사실관계는 `transaction.md` 참조.
+
 ### 3. 컨벤션
 
 - [ ] 엔티티에 `Entity` 접미사가 붙지 않았는가 (`Board`, `Tool`)
-- [ ] DTO가 `Request`/`Response` 풀네임인가 (`Res`/`Req` 축약 금지)
-- [ ] DTO가 `dto/request`, `dto/response` 패키지에 있는가
+- [ ] DTO가 `Request`/`Response` 풀네임이고 `dto/request`, `dto/response`에 있는가
 - [ ] 신규 코드가 `ApiResponse`가 아니라 `SuccessResponse`를 쓰는가
 - [ ] 생성 API가 `HttpStatus.CREATED`로 응답하는가 (`SuccessCode`와 상태 일치)
 - [ ] `@Setter`·`@Data`를 엔티티에 쓰지 않았는가
@@ -82,15 +93,11 @@ daruda 서버(Java 17 / Spring Boot 3.4.1 / 단일 모듈 계층형)의 코드�
 
 ## 🟡 Warning (수정 권장)
 
-### 2. `BoardService.java:42` — jakarta 트랜잭션 사용
-`jakarta.transaction.Transactional`을 import하고 있습니다. Spring이 인식하므로 트랜잭션은
-정상적으로 열리지만, `readOnly` 속성이 없어 조회에도 쓰기 트랜잭션이 열립니다.
+### 2. `BoardController.java:88` — HTTP 상태 불일치
+`SuccessCode.SUCCESS_CREATE`(201)를 담으면서 `ResponseEntity.ok()`(200)로 응답합니다.
+클라이언트가 바디의 status와 실제 HTTP 상태를 다르게 받습니다.
 
-**수정:** `import org.springframework.transaction.annotation.Transactional;`
-(속성 없는 bare 애노테이션이면 교체해도 동작은 동일합니다.)
-
-### 3. `BoardController.java:88` — HTTP 상태 불일치
-...
+**수정:** `ResponseEntity.status(HttpStatus.CREATED).body(...)`
 
 ## 🟢 Suggestion (개선 제안)
 
@@ -101,6 +108,8 @@ daruda 서버(Java 17 / Spring Boot 3.4.1 / 단일 모듈 계층형)의 코드�
 ...
 ```
 
-- 각 항목에 **파일:라인**과 **왜 문제인지**, **어떻게 고칠지**를 함께 적는다.
+## 원칙
+
+- 각 항목에 **파일:라인**, **왜 문제인지**, **어떻게 고칠지**를 함께 적는다.
 - 추측이면 추측이라고 밝힌다. 확인하지 않은 것을 단정하지 않는다.
-- 기존 코드에 이미 퍼져 있는 문제(`CLAUDE.md`의 "알려진 정리 대상")는 이번 변경분이 새로 도입한 것인지 구분해서 적는다.
+- **기존 코드에 이미 퍼져 있는 문제인지, 이번 변경분이 새로 도입한 것인지 구분해서 적는다.** 판정은 `legacy-cleanup` 스킬의 목록을 근거로 한다.

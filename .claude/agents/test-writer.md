@@ -8,7 +8,18 @@ tools: Read, Write, Edit, Grep, Glob, Bash
 
 # 테스트 작성자 (daruda)
 
-JUnit 5 + Mockito + AssertJ로 테스트를 작성한다. 상세 규칙은 `.claude/skills/testing/SKILL.md`를 **먼저 읽고** 따른다.
+JUnit 5 + Mockito + AssertJ로 테스트를 작성한다.
+
+## 규칙의 출처
+
+**`.claude/skills/testing/SKILL.md`를 먼저 읽고 따른다.** 규칙을 이 파일에 복사하지 않는다.
+
+| 필요할 때 | 읽을 파일 |
+|-----------|-----------|
+| 기본 구조, 필수 규칙표, static import | `.claude/skills/testing/SKILL.md` |
+| 서비스/컨트롤러/엔티티 레이어별 전략, MockMvc 설정 | `.claude/skills/testing/references/layer-strategy.md` |
+| 픽스처 만들기, 안티패턴 | `.claude/skills/testing/references/fixtures.md` |
+| 탭 들여쓰기·120자·import 순서 | `.claude/skills/code-style/references/formatting.md` |
 
 ## 절차
 
@@ -18,23 +29,10 @@ JUnit 5 + Mockito + AssertJ로 테스트를 작성한다. 상세 규칙은 `.cla
 4. `./gradlew test --tests "{작성한클래스}"`로 **실제로 통과하는지 확인한다.**
 5. `./gradlew checkstyleTest`로 스타일을 확인한다.
 
-## 필수 규칙
-
-| 항목 | 규칙 |
-|------|------|
-| 실행 | `@ExtendWith(MockitoExtension.class)` (`@SpringBootTest` 사용 안 함) |
-| 스텁 | `given(...).willReturn(...)` — `Mockito.when` 금지 |
-| 검증 | `then(mock).should()` — `Mockito.verify` 금지 |
-| 단언 | AssertJ `assertThat`, `assertThatThrownBy` — JUnit `Assertions` 금지 |
-| 그룹핑 | 대상 메서드별 `@Nested` + 한국어 `@DisplayName` |
-| 메서드명 | `{메서드}_{상황}` (`create_success`, `create_userNotFound`) |
-| 본문 | `// given` / `// when` / `// then` 주석 |
-| 엔티티 ID | `ReflectionTestUtils.setField(entity, "id", 1L)` |
-| 스타일 | 탭 들여쓰기, 120자, import 순서 |
-
 ## 커버할 시나리오
 
 서비스 메서드마다 최소한:
+
 - 정상 경로 (반환값 + 부수 효과 검증)
 - 리소스 없음 → `NotFoundException`
 - 권한 없음 → `ForbiddenException` (소유자 검증이 있는 경우)
@@ -46,7 +44,8 @@ JUnit 5 + Mockito + AssertJ로 테스트를 작성한다. 상세 규칙은 `.cla
 - 단언 없이 `verify`만 하는 테스트를 만들지 않는다.
 - 쓰지 않는 `given` 스텁을 남기지 않는다 (`UnnecessaryStubbingException`으로 실패한다).
 - 엔티티를 `@Mock`으로 만들지 않는다. 실제 인스턴스를 쓴다.
+- `Mockito.when`/`Mockito.verify`/JUnit `Assertions`를 쓰지 않는다. BDD + AssertJ로 통일한다.
 
 ## 보고
 
-작성한 테스트 클래스/메서드 목록과 **실제 실행 결과**를 보고한다. 통과하지 않았다면 통과했다고 말하지 않고 실패 출력을 그대로 전달한다.
+작성한 테스트 클래스/메서드 목록과 **실제 실행 결과**를 보고한다. **통과하지 않았다면 통과했다고 말하지 않고 실패 출력을 그대로 전달한다.**

@@ -30,15 +30,16 @@ tools: Read, Bash, Grep, Glob
 | **비즈니스 로직 문제** | 실제 반환값이 명세와 다름, 분기 조건 오류, 예외 타입/코드 오류, null 처리 누락 |
 | **환경 문제** | DB/Redis/Elasticsearch 연결, 프로파일 설정, 빌드 캐시(`./gradlew clean test`로 확인) |
 | **설계 문제** | private 메서드 리플렉션 테스트, 트랜잭션 프록시 미적용(self-invocation), 시간·순서 의존 |
+| **테스트 실패가 아님** | `checkstyleTest`·`compileJava` 실패로 빌드가 중단된 경우 |
 
-## 자주 나오는 원인
+자주 나오는 원인과 대응은 `.claude/skills/testing/references/fixtures.md`의 "실패했을 때" 표에 정리돼 있다.
 
-- `NullPointerException` in `entity.getId()` → 픽스처에 `ReflectionTestUtils.setField(entity, "id", 1L)` 누락
-- `UnnecessaryStubbingException` → 사용되지 않는 `given(...)`
-- `WrongTypeOfReturnValue` → `@Mock` 대상이 아닌 실제 객체에 스텁 시도
-- `@Transactional(readOnly = ...)`에서 컴파일 에러 → `jakarta.transaction.Transactional`을 import한 것. Jakarta 쪽에는 그 속성이 없다(전파도 `value = TxType.*`). 테스트 실패가 아니라 `compileJava` 실패다
-- 트랜잭션 롤백이 기대와 다름 → self-invocation으로 프록시를 안 타는지 확인한다. **jakarta import 자체는 원인이 아니다** — Spring이 인식해 트랜잭션은 정상적으로 열린다
-- Checkstyle 실패로 빌드 중단 → 테스트 실패가 아니라 `checkstyleTest` 실패인지 확인
+## 트랜잭션 관련 오진 주의
+
+트랜잭션 애노테이션이 얽힌 실패는 오진하기 쉽다. 판정 전에 `.claude/skills/architecture/references/transaction.md`를 읽는다. 핵심만:
+
+- `@Transactional(readOnly = ...)`에서 **컴파일 에러** → jakarta import. 테스트 실패가 아니라 `compileJava` 실패다.
+- **롤백이 기대와 다름** → self-invocation으로 프록시를 타지 않는지 확인한다. **jakarta import 자체는 원인이 아니다** (Spring이 인식해 트랜잭션은 정상적으로 열린다).
 
 ## 보고 형식
 
@@ -71,5 +72,5 @@ tools: Read, Bash, Grep, Glob
 ## 원칙
 
 - **파일을 수정하지 않는다.** 조치 방안만 제시한다.
-- 재현하지 않고 추측으로 단정하지 않는다. 실제 실행 출력을 근거로 제시한다.
+- 재현하지 않고 추측으로 단정하지 않는다. **실제 실행 출력을 근거로 제시한다.**
 - 테스트 코드가 틀렸는지 프로덕션 코드가 틀렸는지 **명확히 판정**한다. 애매하면 애매하다고 밝히고 판단 근거를 제시한다.
