@@ -22,9 +22,9 @@ except Exception:
 
 [[ -n "$FILE" && -f "$FILE" && -s "$FILE" ]] || exit 0
 
-# 텍스트 소스 파일만 대상으로 한다
+# 텍스트 소스 파일만 대상으로 한다 (바이너리에 개행을 붙이면 파일이 깨진다)
 case "$FILE" in
-	*.java | *.gradle | *.xml | *.yml | *.yaml | *.md | *.sh | *.properties) ;;
+	*.java | *.gradle | *.kts | *.xml | *.yml | *.yaml | *.json | *.md | *.sh | *.properties | *.sql | *.txt | *.http) ;;
 	*) exit 0 ;;
 esac
 

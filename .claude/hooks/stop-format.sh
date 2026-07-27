@@ -8,16 +8,22 @@ set -euo pipefail
 PROJECT_ROOT="${CLAUDE_PROJECT_DIR:-.}"
 cd "$PROJECT_ROOT" || exit 0
 
-BINARY_EXTENSIONS="jar png jpg jpeg gif ico svg woff woff2 ttf class keystore p12 pem"
+# 확장자 목록은 신뢰할 수 없다(.zip·.pdf·확장자 없는 바이너리 등이 빠진다).
+# git과 동일한 휴리스틱으로 앞부분에 NUL 바이트가 있으면 바이너리로 판정한다.
+is_binary() {
+	local total stripped
+	total=$(LC_ALL=C head -c 8000 "$1" 2>/dev/null | wc -c)
+	stripped=$(LC_ALL=C head -c 8000 "$1" 2>/dev/null | LC_ALL=C tr -d '\000' | wc -c)
+	[[ "$total" != "$stripped" ]]
+}
 
 while IFS= read -r file; do
+	# 심볼릭 링크는 저장소 밖 파일을 가리킬 수 있으므로 -f 검사(링크를 따라간다)보다 먼저 건너뛴다
+	[[ -L "$file" ]] && continue
 	[[ -f "$file" ]] || continue
 	[[ -s "$file" ]] || continue
 
-	ext_lower=$(echo "${file##*.}" | tr '[:upper:]' '[:lower:]')
-	for bin_ext in $BINARY_EXTENSIONS; do
-		[[ "$ext_lower" == "$bin_ext" ]] && continue 2
-	done
+	is_binary "$file" && continue
 
 	last_byte=$(tail -c 1 "$file" | od -An -tx1 | tr -d ' ')
 	if [[ "$last_byte" != "0a" ]]; then
