@@ -76,7 +76,7 @@ src/main/java/com/daruda/darudaserver/
 
 | 제약 | 이유 |
 |------|------|
-| `jakarta.transaction.Transactional` import | `readOnly`·`propagation` 속성이 **무시된다**. 반드시 `org.springframework.transaction.annotation.Transactional`을 쓴다 |
+| `jakarta.transaction.Transactional` import | Jakarta 쪽에는 `readOnly` 속성이 **아예 없어서** 지정하면 컴파일 에러이고, 전파는 `propagation`이 아니라 `value = TxType.*`이다. 결국 조회에도 쓰기 트랜잭션(`TxType.REQUIRED`)이 열린다. 반드시 `org.springframework.transaction.annotation.Transactional`을 쓴다 |
 | `ApiResponse` 신규 사용 | 응답 래퍼는 `SuccessResponse`/`ErrorResponse`로 통일 (아래 "응답 포맷" 참조) |
 | DTO 이름에 `Res`/`Req` 축약 접미사 | `XxxRequest`/`XxxResponse` 풀네임으로 통일 |
 | JPA 엔티티 이름에 `Entity` 접미사 | 도메인 용어 그대로 쓴다 (`Board`, `Tool`, `Comment`) |
@@ -169,7 +169,7 @@ return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_DELETE));
 | 응답 래퍼 이원화 | `ApiResponse`(7개 컨트롤러) / `SuccessResponse`(4개) 병존 | `SuccessResponse`로 일원화 후 `ApiResponse` 삭제 |
 | DTO 축약 접미사 | `ToolDetailGetRes`, `CategoryRes`, `BoardRes` 등 (`dto/res`, `dto/req` 패키지) | `XxxResponse`/`XxxRequest` + `dto/response`, `dto/request` |
 | 엔티티 접미사 | `CommentEntity`, `UserEntity`, `NotificationEntity`, `ReportEntity` | `Comment`, `User`, `Notification`, `Report` |
-| 트랜잭션 import | `jakarta.transaction.Transactional` 17곳 (`readOnly` 무시됨) | `org.springframework.transaction.annotation.Transactional` |
+| 트랜잭션 import | `jakarta.transaction.Transactional` 17곳 (`readOnly` 지정 불가 → 조회도 쓰기 트랜잭션) | `org.springframework.transaction.annotation.Transactional` |
 | 트랜잭션 범위 | 서비스 클래스 레벨 `@Transactional`(쓰기) 23곳 | 클래스 `readOnly = true` + 쓰기 메서드만 `@Transactional` |
 | ErrorCode 중복 | `E400009`·`E400012`·`E400013` 코드값 중복, `REFREH_TOKEN_EMPTY_ERROR` 오타 상수가 `REFRESH_TOKEN_EMPTY_ERROR`와 중복 | 코드값 유일화 + 오타 상수 제거 |
 | HTTP 상태 불일치 | `ResponseEntity.ok()` + `SuccessCode.SUCCESS_CREATE(201)` → 바디는 201, 실제 응답은 200 | 생성 API는 `status(HttpStatus.CREATED)` |

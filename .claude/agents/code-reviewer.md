@@ -22,7 +22,7 @@ daruda 서버(Java 17 / Spring Boot 3.4.1 / 단일 모듈 계층형)의 코드�
 ### 2. 트랜잭션 (Critical)
 
 - [ ] `import org.springframework.transaction.annotation.Transactional`인가
-      — **`jakarta.transaction.Transactional`이면 `readOnly`·`propagation`이 무시된다. 반드시 지적할 것**
+      — **`jakarta.transaction.Transactional`이면 `readOnly` 속성 자체가 없어 조회 최적화가 불가능하고(전파도 `value = TxType.*`) 항상 쓰기 트랜잭션이 열린다. 반드시 지적할 것**
 - [ ] 클래스에 `@Transactional(readOnly = true)`, 쓰기 메서드에만 `@Transactional`이 붙었는가
 - [ ] `REQUIRES_NEW`가 자기 호출(self-invocation)로 쓰이지 않는가 (프록시를 타지 않아 무효)
 - [ ] 트랜잭션 안에서 외부 API 호출(Feign/OCI/Elasticsearch)을 오래 붙잡지 않는가
@@ -73,8 +73,8 @@ daruda 서버(Java 17 / Spring Boot 3.4.1 / 단일 모듈 계층형)의 코드�
 ## 🔴 Critical (반드시 수정)
 
 ### 1. `BoardService.java:42` — jakarta 트랜잭션 사용
-`jakarta.transaction.Transactional`을 import하고 있어 `readOnly = true`가 무시됩니다.
-조회 메서드에도 쓰기 트랜잭션이 열립니다.
+`jakarta.transaction.Transactional`을 import하고 있어 `readOnly = true`를 지정할 수 없습니다
+(Jakarta 애노테이션에는 해당 속성이 없습니다). 조회 메서드에도 쓰기 트랜잭션이 열립니다.
 
 **수정:** `import org.springframework.transaction.annotation.Transactional;`
 

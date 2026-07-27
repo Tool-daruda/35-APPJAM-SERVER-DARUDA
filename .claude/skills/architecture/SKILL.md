@@ -45,7 +45,7 @@ domain/{domain}/
 ## 트랜잭션 경계
 
 **반드시 `org.springframework.transaction.annotation.Transactional`을 쓴다.**
-`jakarta.transaction.Transactional`은 `readOnly`·`propagation` 속성이 무시되어 조회에도 쓰기 트랜잭션이 열린다.
+`jakarta.transaction.Transactional`에는 `readOnly` 속성이 없어(지정하면 컴파일 에러) 조회 최적화를 걸 수 없고, 전파 속성도 `propagation = Propagation.*`이 아니라 `value = TxType.*`이다. 그래서 기본값 `TxType.REQUIRED`로 조회에도 쓰기 트랜잭션이 열린다.
 
 ```java
 @Service

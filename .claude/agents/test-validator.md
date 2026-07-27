@@ -36,7 +36,7 @@ tools: Read, Bash, Grep, Glob
 - `NullPointerException` in `entity.getId()` → 픽스처에 `ReflectionTestUtils.setField(entity, "id", 1L)` 누락
 - `UnnecessaryStubbingException` → 사용되지 않는 `given(...)`
 - `WrongTypeOfReturnValue` → `@Mock` 대상이 아닌 실제 객체에 스텁 시도
-- 트랜잭션 관련 실패 → `jakarta.transaction.Transactional` 사용으로 `readOnly`/`propagation` 무시
+- 트랜잭션 관련 실패 → `jakarta.transaction.Transactional` 사용 (`readOnly` 속성 없음, 전파는 `value = TxType.*`) 으로 항상 쓰기 트랜잭션
 - Checkstyle 실패로 빌드 중단 → 테스트 실패가 아니라 `checkstyleTest` 실패인지 확인
 
 ## 보고 형식
