@@ -5,7 +5,7 @@ description: 지침 통일 이전에 작성된 기존 코드의 정리 대상 �
 
 # 알려진 정리 대상 (daruda)
 
-지침 통일 이전에 작성된 코드다. **새 코드는 현행 규칙을 따르되, 아래는 별도 리팩터링 작업으로 처리**한다. 관련 파일을 수정할 일이 생기면 그 김에 함께 정리하는 것을 권장한다.
+지침 통일 이전에 작성된 코드다. **새 코드는 현행 규칙을 따르되, 아래는 별도 리팩터링 작업으로 처리**한다. 관련 파일을 수정하다 아래 항목을 발견해도 **그 김에 함께 고치지 않는다.** 정리가 필요해 보이면 사용자에게 알리고 승인을 받은 뒤 별도 작업으로 진행한다(아래 "리팩터링 진행 원칙" 참조).
 
 > **판정 기준:** 코드 리뷰나 진단 중 아래 항목을 발견하면 **이번 변경이 새로 도입한 것인지 원래 있던 것인지 구분**해서 보고한다. 기존 항목은 Critical이 아니라 정리 대상으로 분류한다.
 
@@ -14,7 +14,7 @@ description: 지침 통일 이전에 작성된 기존 코드의 정리 대상 �
 | 응답 래퍼 이원화 | `ApiResponse`(7개 컨트롤러) / `SuccessResponse`(4개) 병존 | `SuccessResponse`로 일원화 후 `ApiResponse` 삭제 |
 | DTO 축약 접미사 | `ToolDetailGetRes`, `CategoryRes`, `BoardRes` 등 (`dto/res`, `dto/req` 패키지) | `XxxResponse`/`XxxRequest` + `dto/response`, `dto/request` |
 | 엔티티 접미사 | `CommentEntity`, `UserEntity`, `NotificationEntity`, `ReportEntity` | `Comment`, `User`, `Notification`, `Report` |
-| 트랜잭션 import | `jakarta.transaction.Transactional` 17곳 — 리포지토리 `@Modifying` 12곳 + 서비스 5곳(`UserService`, `CommentService`, `AuthService`, `NotificationService`, `TokenService`). 31개 사용처 전부 속성 없는 bare 애노테이션이라 import 교체만으로 동작이 동일하다 | `org.springframework.transaction.annotation.Transactional` |
+| 트랜잭션 import | `jakarta.transaction.Transactional`을 import하는 **17개 파일** — 리포지토리 `@Modifying` 12개 + 서비스 5개(`UserService`, `CommentService`, `AuthService`, `NotificationService`, `TokenService`). 이 파일들의 **애노테이션 선언 31개** 전부 속성 없는 bare 애노테이션이라 import 교체만으로 동작이 동일하다 | `org.springframework.transaction.annotation.Transactional` |
 | 트랜잭션 범위 | 서비스 클래스 레벨 `@Transactional`(쓰기) 23곳. 이 중 `UserService`·`CommentService`는 jakarta import까지 겹쳐 있어, import만 바꾸면 여전히 조회도 쓰기 트랜잭션이다 | 클래스 `readOnly = true` + 쓰기 메서드만 `@Transactional` |
 | ErrorCode 중복 | `E400009`·`E400012`·`E400013` 코드값 중복, `REFREH_TOKEN_EMPTY_ERROR` 오타 상수가 `REFRESH_TOKEN_EMPTY_ERROR`와 중복 | 코드값 유일화 + 오타 상수 제거 |
 | HTTP 상태 불일치 | `ResponseEntity.ok()` + `SuccessCode.SUCCESS_CREATE(201)` → 바디는 201, 실제 응답은 200 | 생성 API는 `status(HttpStatus.CREATED)` |
