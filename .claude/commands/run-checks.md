@@ -1,5 +1,5 @@
 ---
-description: PR 전 전체 검증을 순서대로 실행한다 (Checkstyle → editorconfig → test)
+description: PR 전 전체 검증을 순서대로 실행한다 (editorconfig → Checkstyle → test)
 ---
 
 # 전체 검증

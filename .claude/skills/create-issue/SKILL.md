@@ -3,9 +3,9 @@ name: create-issue
 description: 프로젝트 ISSUE_TEMPLATE에 따라 GitHub 이슈를 생성할 때 로드. 유형별 템플릿 매핑과 제목/라벨 컨벤션을 자동 적용.
 ---
 
-> **언어**: 이슈 제목·본문과 사용자 대상 응답은 모두 한국어로 작성한다.
-
 # GitHub 이슈 생성 (daruda)
+
+> **언어**: 이슈 제목·본문과 사용자 대상 응답은 모두 한국어로 작성한다.
 
 `.github/ISSUE_TEMPLATE/`의 4개 템플릿 중 작업 성격에 맞는 것을 골라 작성한다.
 

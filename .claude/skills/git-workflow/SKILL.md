@@ -7,7 +7,7 @@ description: 브랜치를 만들거나 커밋/PR을 작성할 때 로드. 브랜
 
 ## 브랜치 전략
 
-```
+```text
 main       ← 운영 배포 (cd-prod.yml)
 develop    ← 개발 통합 + 기본 브랜치, PR 대상 (cd-dev.yml)
 {type}/#{이슈번호}   ← 작업 브랜치
@@ -39,13 +39,13 @@ git switch -c feat/#357
 
 ## 커밋 메시지
 
-```
+```text
 #{이슈번호} [{type}] {한국어 설명}
 ```
 
 실제 예:
 
-```
+```text
 #355 [feat] 게시글별 스크랩 수 배치 조회 쿼리 추가
 #355 [test] 게시글 목록 응답에 스크랩 수 포함 검증 테스트 추가
 #353 [fix] 게시글 목록 조회 시 `size < 1` 입력 방어 로직 추가
@@ -139,7 +139,7 @@ git switch -c feat/#357
 
 커밋 메시지는 **제목(+ 필요 시 본문)만** 작성한다. 아래 트레일러를 **넣지 않는다**.
 
-```
+```text
 ❌ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 ```
 
