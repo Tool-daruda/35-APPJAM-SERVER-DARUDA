@@ -47,6 +47,12 @@ domain/{domain}/
 **반드시 `org.springframework.transaction.annotation.Transactional`을 쓴다.**
 `jakarta.transaction.Transactional`에는 `readOnly` 속성이 없어(지정하면 컴파일 에러) 조회 최적화를 걸 수 없고, 전파 속성도 `propagation = Propagation.*`이 아니라 `value = TxType.*`이다. 그래서 기본값 `TxType.REQUIRED`로 조회에도 쓰기 트랜잭션이 열린다.
 
+> **기존 코드에서 발견했을 때**: Spring은 `JtaTransactionAnnotationParser`로 Jakarta 애노테이션도 인식하므로 **트랜잭션 자체는 정상적으로 열린다.** "동작하지 않는 코드"가 아니라 "읽기 전용 최적화를 걸 수 없는 코드"다. 장애로 취급해 성급히 고치지 말고, 아래 순서로 처리한다.
+>
+> 1. 속성 없는 bare `@Transactional`이면 import 교체만으로 동작이 동일하다(양쪽 다 기본값이 REQUIRED + unchecked 예외 롤백).
+> 2. `TxType`·`rollbackOn`을 쓰고 있으면 Spring의 `propagation`·`rollbackFor`로 **수동 매핑**이 필요하다. 기계적으로 바꾸지 않는다.
+> 3. 클래스 레벨에 붙어 있으면 import만 바꿔도 여전히 모든 메서드가 쓰기 트랜잭션이다. `readOnly = true` 재배치까지 해야 실익이 생긴다.
+
 ```java
 @Service
 @RequiredArgsConstructor
