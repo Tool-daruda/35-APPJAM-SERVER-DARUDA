@@ -69,7 +69,7 @@ git push -u origin feat/#357
 
 ```bash
 gh pr create --base develop \
-  --title "[Feat] 게시글 목록 조회 정렬 기능" \
+  --title "#357 [Feat] 게시글 목록 조회 정렬 기능" \
   --label feat --label 예찬 \
   --assignee @me \
   --body "$(cat <<'EOF'
@@ -95,7 +95,7 @@ EOF
 
 규칙:
 - **PR 대상은 항상 `develop`**이다 (`main` 아님).
-- 제목은 이슈 제목(`[Feat] ...`)을 그대로 쓴다.
+- 제목은 `#{이슈번호} [{Type}] {한국어 설명}` — **이슈 제목 앞에 `#{이슈번호} `를 붙인 것**이다. 번호를 빠뜨리거나(`[Feat] ...`) 뒤에 붙이지(`... (#357)`) 않는다. 커밋과 달리 `Type`은 첫 글자가 대문자다.
 - **라벨과 assignee를 반드시 설정한다** — 유형 라벨(`feat`/`chore`/`⚒️ Fix`/`🔥 Refactor`) + 본인 이름 라벨(`예찬`) + `--assignee @me`. 상세는 `git-workflow`의 "라벨 & Assignee" 참조.
 - 본문은 `.github/PULL_REQUEST_TEMPLATE.md`의 4개 섹션(Related Issue / Summary / Question & PR point / Postman)을 채운다.
 - **`🤖 Generated with Claude Code` 서명을 붙이지 않는다.**

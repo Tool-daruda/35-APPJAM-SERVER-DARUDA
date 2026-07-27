@@ -101,6 +101,7 @@ src/main/java/com/daruda/darudaserver/
 | 들여쓰기는 **탭**, 한 줄 최대 120자, 파일 끝 개행 | Naver Checkstyle + editorconfig 강제 |
 | import는 `java.` → `javax.` → `org.` → `net.` → `com.` 순서, 그룹 사이 빈 줄 1개, 와일드카드 금지 | Checkstyle `ImportOrder` |
 | 커밋 메시지는 `#이슈번호 [type] 한국어 설명`, `Co-Authored-By: Claude` 트레일러는 붙이지 않는다 | 컨벤션 (`git-workflow`) |
+| 제목 포맷: 이슈 `[Type] 설명` (번호 없음) / PR `#이슈번호 [Type] 설명` / 커밋 `#이슈번호 [type] 설명` (소문자) | 세 포맷이 다르다 (`git-workflow`) |
 | 이슈·PR에 유형 라벨(`feat`/`chore`/`⚒️ Fix`/`🔥 Refactor`) + 이름 라벨 + assignee 설정 | 팀 트래킹 컨벤션 (`git-workflow`) |
 
 ## 응답 포맷
