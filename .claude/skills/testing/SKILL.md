@@ -1,13 +1,20 @@
 ---
 name: testing
-description: 테스트를 작성하거나 수정할 때 로드. JUnit 5 + Mockito + AssertJ, @Nested 구조, BDD 스타일, 레이어별 테스트 전략, 픽스처 작성, 컨트롤러 MockMvc 테스트.
+description: 테스트를 작성하거나 수정할 때 로드. JUnit 5 + Mockito(BDD) + AssertJ 기본 구조와 필수 규칙을 담고, 레이어별 전략과 픽스처·안티패턴은 references/에 분리돼 있다.
 ---
 
 # 테스트 (daruda)
 
 **JUnit 5 + Mockito + AssertJ.** 단위 테스트(`@ExtendWith(MockitoExtension.class)`)가 기본이고, 통합 테스트(`@SpringBootTest`)는 쓰지 않는다.
 
-## 공통 구조
+## 상세 규칙 라우팅
+
+| 무엇을 하려는가 | 읽을 파일 |
+|-----------------|-----------|
+| 서비스/컨트롤러/엔티티 레이어별 테스트 전략, MockMvc 설정 | `references/layer-strategy.md` |
+| 픽스처 만들기, 안티패턴, 실행 명령 | `references/fixtures.md` |
+
+## 기본 구조
 
 ```java
 @ExtendWith(MockitoExtension.class)
@@ -46,11 +53,6 @@ class BoardServiceTest {
 		void create_success() {
 			// given
 			given(userRepository.findById(1L)).willReturn(Optional.of(author));
-			given(boardRepository.save(any(Board.class))).willAnswer(inv -> {
-				Board saved = inv.getArgument(0);
-				ReflectionTestUtils.setField(saved, "id", 10L);
-				return saved;
-			});
 			CreateBoardRequest request = new CreateBoardRequest("제목", "본문", null);
 
 			// when
@@ -76,7 +78,7 @@ class BoardServiceTest {
 }
 ```
 
-## 규칙
+## 필수 규칙
 
 | 항목 | 규칙 |
 |------|------|
@@ -89,6 +91,7 @@ class BoardServiceTest {
 | 스텁 | **BDDMockito**: `given(...).willReturn(...)`, `willThrow`, `willAnswer` |
 | 검증 | **BDDMockito**: `then(mock).should().method()` |
 | 단언 | **AssertJ**: `assertThat(...)`, `assertThatThrownBy(...)` |
+| 엔티티 ID | `ReflectionTestUtils.setField(entity, "id", 1L)` |
 
 **혼용 금지**: `Mockito.when(...).thenReturn(...)` / `Mockito.verify(...)` / JUnit `Assertions.assertEquals`는 신규 코드에서 쓰지 않는다. 기존 파일에 섞여 있지만 새로 쓰는 테스트는 BDD + AssertJ로 통일한다.
 
@@ -102,128 +105,13 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 ```
 
-## 픽스처 만들기
+## 커버할 시나리오
 
-엔티티 ID는 `@GeneratedValue`라 빌더로 넣을 수 없다. **`ReflectionTestUtils.setField`로 주입**한다.
+서비스 메서드마다 최소한:
 
-```java
-Board board = Board.of("제목", "본문", author);
-ReflectionTestUtils.setField(board, "id", 10L);
-```
-
-- 여러 테스트가 공유하는 픽스처는 `@BeforeEach setUp()`에서 만든다.
-- 특정 테스트에만 필요한 데이터는 그 테스트의 `// given` 안에서 만든다.
-- 엔티티를 `@Mock`으로 만드는 것은 피한다(도메인 메서드 동작까지 사라진다). 실제 인스턴스를 쓴다.
-
-## 레이어별 전략
-
-### Service — 핵심 대상
-
-리포지토리·외부 서비스를 모두 `@Mock`으로 두고 **비즈니스 분기**를 검증한다.
-
-검증할 것: 정상 경로, 예외 경로(없는 리소스 / 권한 없음 / 중복), 경계값, 다른 서비스 호출 여부.
-
-```java
-@Test
-@DisplayName("작성자가 아닌 사용자가 삭제 시도 → ForbiddenException")
-void delete_notAuthor() {
-	// given
-	given(commentRepository.findById(100L)).willReturn(Optional.of(comment));
-
-	// when & then
-	assertThatThrownBy(() -> commentService.deleteComment(999L, 100L))
-		.isInstanceOf(ForbiddenException.class);
-	then(commentRepository).should(never()).delete(any());
-}
-```
-
-### Controller — MockMvc standalone
-
-`@WebMvcTest`가 아니라 `MockMvcBuilders.standaloneSetup`을 쓴다(컨텍스트를 띄우지 않아 빠르다).
-
-```java
-@ExtendWith(MockitoExtension.class)
-class BoardControllerTest {
-
-	@Mock
-	private BoardService boardService;
-	@Mock
-	private JwtTokenProvider jwtTokenProvider;
-
-	@InjectMocks
-	private BoardController boardController;
-
-	private MockMvc mockMvc;
-
-	@BeforeEach
-	void setUp() {
-		mockMvc = MockMvcBuilders.standaloneSetup(boardController)
-			.setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
-			.addFilters(new JwtAuthenticationFilter(jwtTokenProvider))
-			.build();
-	}
-
-	@AfterEach
-	void tearDown() {
-		SecurityContextHolder.clearContext();
-	}
-}
-```
-
-인증이 필요한 API는 `SecurityContextHolder`에 `UserAuthentication`을 미리 넣는다.
-
-검증할 것: 상태 코드, 응답 JSON 구조, **파라미터가 서비스에 제대로 위임되는지**(`ArgumentCaptor`).
-
-```java
-mockMvc.perform(get("/api/v1/board").param("sortBy", "SCRAP"))
-	.andExpect(status().isOk())
-	.andExpect(jsonPath("$.status").value(200))
-	.andExpect(jsonPath("$.data.boards[0].boardId").value(10));
-
-ArgumentCaptor<BoardSortType> captor = ArgumentCaptor.forClass(BoardSortType.class);
-then(boardService).should().getBoardList(any(), captor.capture(), anyInt());
-assertThat(captor.getValue()).isEqualTo(BoardSortType.SCRAP);
-```
-
-### Entity / Enum / DTO
-
-의존성이 없으므로 `@ExtendWith` 없이 순수 단위 테스트로 쓴다.
-
-- 엔티티: 도메인 메서드(상태 변경, 검증 예외)
-- enum: 파싱·매핑 로직 (`BoardSortTypeTest`, `PositionsTest` 참고)
-- DTO: Bean Validation 제약 — `Validator`를 직접 만들어 검증한다
-
-```java
-private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-
-@Test
-@DisplayName("제목이 비면 검증 실패")
-void title_blank() {
-	CreateBoardRequest request = new CreateBoardRequest("", "본문", null);
-	assertThat(validator.validate(request)).isNotEmpty();
-}
-```
-
-## 하지 말 것
-
-| 안티패턴 | 대안 |
-|----------|------|
-| `private` 메서드를 리플렉션(`getDeclaredMethod` + `setAccessible`)으로 테스트 | public 메서드를 통해 간접 검증한다. 꼭 단독 검증이 필요하면 그 로직은 별도 클래스로 분리할 신호다 |
-| `verify`만 있고 단언이 없는 테스트 | 결과 상태를 `assertThat`으로 확인 |
-| `any()`만으로 스텁·검증 | 실제 값으로 검증해야 회귀를 잡는다 |
-| 한 테스트에서 여러 시나리오 검증 | `@Nested` + 개별 `@Test`로 분리 |
-| 테스트 간 상태 공유(static 필드) | `@BeforeEach`에서 매번 새로 만든다 |
-| 불필요한 스텁 방치 | Mockito strict stub이 `UnnecessaryStubbingException`으로 실패시킨다. 안 쓰는 `given`은 지운다 |
-
-## 실행
-
-```bash
-./gradlew test                                  # 전체
-./gradlew test --tests "BoardServiceTest"       # 특정 클래스
-./gradlew test --tests "*.community.*"          # 패턴
-./gradlew test --info                           # 상세 로그 (CI와 동일)
-```
-
-리포트: `build/reports/tests/test/index.html`
+- 정상 경로 (반환값 + 부수 효과 검증)
+- 리소스 없음 → `NotFoundException`
+- 권한 없음 → `ForbiddenException` (소유자 검증이 있는 경우)
+- 경계값 (페이지 크기, 커서, 빈 목록)
 
 > 테스트 코드도 Checkstyle 대상이다(`checkstyleTest`). 탭 들여쓰기·120자·import 순서를 지킨다.
