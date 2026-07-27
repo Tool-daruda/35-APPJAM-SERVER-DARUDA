@@ -22,17 +22,24 @@ git status
 ```
 
 - **`.env`, `private.pem`, 시크릿이 담긴 yml은 절대 커밋하지 않는다.**
-- 변경 사항은 논리적 단위로 나눠 스테이징한다(기능과 테스트는 별도 커밋).
+- 커밋 분리 단위는 `git-convention`의 "커밋 type" 절 참조.
 
 ## 3. 브랜치 확인
 
-현재 `develop`이나 `main`이면 **먼저 작업 브랜치를 만든다.**
+현재 `develop`이나 `main`이면 **먼저 작업 브랜치를 만든다.** 직접 커밋하지 않는다.
 
 ```bash
-git switch -c feat/#357        # {type}/#{이슈번호}
+git switch -c feat/#357
 ```
 
-## 4. 커밋
+브랜치 이름 형식은 `git-convention`의 "브랜치 전략" 참조.
+
+## 4. 커밋 — HITL 지점
+
+**커밋 전에 확정된 내용을 제시하고 승인을 받는다.** 사용자가 커밋을 요청했더라도, 아래를 보여준 뒤 진행한다.
+
+- 최종 스테이징 파일 목록 (`git status --short`)
+- 커밋 메시지 전문
 
 포맷은 `git-convention` 참조. 한 줄이면:
 
@@ -51,21 +58,21 @@ EOF
 )"
 ```
 
-> 서명 트레일러(`Co-Authored-By`, `🤖 Generated with`)를 붙이지 않는다.
+> 서명 트레일러를 붙이지 않는다 — `git-convention`의 "커밋 서명 금지" 참조.
 
 ## 5. 푸시 — HITL 지점
 
-**사용자가 명시적으로 요청하기 전에는 푸시하지 않는다.**
+**사용자가 명시적으로 요청하기 전에는 푸시하지 않는다.** 요청받았으면 **대상 원격과 브랜치를 제시하고 승인을 받은 뒤** 실행한다.
 
 ```bash
 git push -u origin feat/#357
 ```
 
-`--force`는 사용하지 않는다. `main`/`develop`에 직접 푸시하지 않는다.
+**`--force`는 사용하지 않는다. `main`/`develop`에 직접 푸시하지 않는다.**
 
 ## 6. PR 생성 — HITL 지점
 
-**사용자가 명시적으로 요청할 때만** 만든다.
+**사용자가 명시적으로 요청할 때만** 만든다. 실행 전에 **제목·본문·라벨·assignee를 제시하고 승인을 받는다.**
 
 ```bash
 gh pr create --base develop \
@@ -93,8 +100,7 @@ EOF
 )"
 ```
 
-- **대상은 항상 `develop`** (`main` 아님).
-- **라벨(유형 + 이름)과 assignee를 반드시 설정한다** — `git-convention`의 "라벨 & Assignee" 참조.
+- 대상 브랜치·라벨(유형 + 이름)·assignee 규칙은 `git-convention`의 "브랜치 전략", "라벨 & Assignee" 참조.
 - 본문은 `.github/PULL_REQUEST_TEMPLATE.md`의 4개 섹션을 채운다.
 - `close #{이슈번호}`로 이슈를 연결한다.
 - Postman 스크린샷은 사람이 첨부해야 한다. 첨부할 수 없으면 그 자리에 테스트 통과 결과를 남기고 사용자에게 알린다.

@@ -29,22 +29,7 @@ JUnit 5 + Mockito + AssertJ로 테스트를 작성한다.
 4. `./gradlew test --tests "{작성한클래스}"`로 **실제로 통과하는지 확인한다.**
 5. `./gradlew checkstyleTest`로 스타일을 확인한다.
 
-## 커버할 시나리오
-
-서비스 메서드마다 최소한:
-
-- 정상 경로 (반환값 + 부수 효과 검증)
-- 리소스 없음 → `NotFoundException`
-- 권한 없음 → `ForbiddenException` (소유자 검증이 있는 경우)
-- 경계값 (페이지 크기, 커서, 빈 목록)
-
-## 금지
-
-- `private` 메서드를 리플렉션으로 테스트하지 않는다. public 경로로 검증한다.
-- 단언 없이 `verify`만 하는 테스트를 만들지 않는다.
-- 쓰지 않는 `given` 스텁을 남기지 않는다 (`UnnecessaryStubbingException`으로 실패한다).
-- 엔티티를 `@Mock`으로 만들지 않는다. 실제 인스턴스를 쓴다.
-- `Mockito.when`/`Mockito.verify`/JUnit `Assertions`를 쓰지 않는다. BDD + AssertJ로 통일한다.
+> 커버할 시나리오는 `testing/SKILL.md`, 안티패턴·금지 사항은 `testing/references/fixtures.md`가 SSOT다. 위 표의 링크를 따라 읽고, 규칙을 이 파일에 복사하지 않는다.
 
 ## 보고
 

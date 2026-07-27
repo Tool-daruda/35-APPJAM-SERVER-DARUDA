@@ -11,7 +11,8 @@ argument-hint: <도메인명> <기능 설명>
 
 1. 대상 도메인 패키지의 **기존 컨트롤러·서비스를 먼저 읽어** 스타일을 파악한다.
    `src/main/java/com/daruda/darudaserver/domain/{도메인}/`
-2. `architecture`, `code-style` 스킬을 로드한다. 상세 규칙은 각 스킬의 `references/`에 있으니 **필요한 것만** 읽는다.
+2. `architecture`, `code-style`, `testing` 스킬을 로드한다. 상세 규칙은 각 스킬의 `references/`에 있으니 **필요한 것만** 읽는다.
+   (⑦ 테스트를 `test-writer` 에이전트에 위임하면 그 에이전트가 `testing`을 직접 로드하므로 생략해도 된다.)
 
 ## 1. 작성 순서 — 안쪽부터
 

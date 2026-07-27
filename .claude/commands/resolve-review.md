@@ -46,11 +46,7 @@ gh api repos/{owner}/{repo}/pulls/<PR-number>/reviews \
 
 ## 4. 커밋
 
-```text
-#{이슈번호} [refactor] 리뷰 피드백 반영 - <요약>
-```
-
-변경 성격에 맞는 type을 쓴다. 절차는 `/commit-push-pr`, 컨벤션은 `git-convention` 참조.
+절차는 `/commit-push-pr`, 제목 포맷과 커밋 type은 `git-convention` 참조.
 **푸시는 사용자가 명시적으로 요청할 때만 한다.**
 
 ## 5. 답변
