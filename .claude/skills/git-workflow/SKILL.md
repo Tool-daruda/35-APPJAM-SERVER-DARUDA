@@ -58,10 +58,32 @@ git switch -c feat/#357
 - 한 커밋은 한 가지 일만 한다. 기능 + 테스트도 가급적 분리한다(위 예시처럼 `[feat]`과 `[test]`를 나눈다).
 - 본문이 필요하면 제목 다음 빈 줄 뒤에 한국어로 적는다.
 
+## 라벨 & Assignee
+
+이슈와 PR **모두**에 아래를 설정한다.
+
+| 항목 | 값 |
+|------|-----|
+| 유형 라벨 | `feat` / `chore` / `⚒️ Fix` / `🔥 Refactor` 중 하나 |
+| 담당자 이름 라벨 | 본인 이름 (`예찬`, `재민`, `지원`, `수인`) |
+| Assignee | 본인 (`@me`) |
+
+작업 성격 → 유형 라벨 매핑:
+
+| 작업 | 라벨 | 비고 |
+|------|------|------|
+| 새 기능 | `feat` | `📍 Feat`가 아니라 `feat`를 쓴다 |
+| 버그 수정 | `⚒️ Fix` | `bug`/`fix`가 아니다 |
+| 리팩터링 | `🔥 Refactor` | |
+| 설정·환경·의존성 | `chore` | |
+
+> 이름 라벨은 GitHub 계정과 별개로 팀원을 표시하는 용도다. 현재 세션 사용자는 `yechan-kim` = `예찬`이다. 다른 사람 이름 라벨을 임의로 붙이지 않는다.
+
 ## PR
 
 - 제목: `[{Type}] {한국어 설명}` 또는 커밋 메시지와 동일한 형식
 - 대상 브랜치: `develop`
+- 라벨·assignee를 위 규칙대로 설정한다.
 - 템플릿(`.github/PULL_REQUEST_TEMPLATE.md`)의 4개 섹션을 채운다.
 
 ```markdown
@@ -93,24 +115,20 @@ git switch -c feat/#357
 | 커밋/푸시 시점 | **사용자가 요청할 때만** 한다. 작업이 끝났다고 자동 커밋하지 않는다 |
 | `develop`/`main` 직접 커밋 | 금지. 반드시 작업 브랜치를 먼저 만든다 |
 | 커밋 전 검증 | `./gradlew checkstyleMain checkstyleTest editorconfigCheck test` 통과 확인 (`/run-checks`) |
-| 커밋 메시지 서명 | 아래 트레일러를 붙인다 |
+| **커밋 메시지 서명** | **붙이지 않는다.** `Co-Authored-By: Claude ...` 트레일러를 넣지 않는다 |
+| 라벨·assignee | 이슈·PR 생성 시 반드시 설정한다 (위 "라벨 & Assignee" 참조) |
 | `git push --force` | 금지 (`--force-with-lease`도 사용자 요청 시에만) |
 | 대화형 플래그 | `git rebase -i`, `git add -i`는 이 환경에서 동작하지 않는다 |
 | `.env`·시크릿 | 절대 커밋하지 않는다. `git status`에서 확인 후 스테이징 |
 
-커밋 메시지 끝에 붙이는 트레일러:
+### 커밋 서명 금지
+
+커밋 메시지는 **제목(+ 필요 시 본문)만** 작성한다. 아래 트레일러를 **넣지 않는다**.
 
 ```
-Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01TA69yPr3JSuepad72AXJcz
+❌ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 ```
 
-PR 본문 끝에 붙이는 서명:
-
-```
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-https://claude.ai/code/session_01TA69yPr3JSuepad72AXJcz
-```
+커밋 작성자는 실제 작업자(팀원)이며, 도구를 공동 작성자로 표기하지 않는다.
 
 > 실제 커밋·푸시·PR 생성 절차는 `commit-push-pr` 스킬을 따른다.

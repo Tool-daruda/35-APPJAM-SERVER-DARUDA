@@ -37,16 +37,23 @@ git switch -c feat/#357        # {type}/#{이슈번호}
 포맷: `#{이슈번호} [{type}] {한국어 설명}`
 
 ```bash
+git commit -m "#357 [feat] 게시글 목록 조회에 정렬 파라미터 추가"
+```
+
+본문이 필요하면 제목 다음 빈 줄 뒤에 적는다.
+
+```bash
 git commit -m "$(cat <<'EOF'
 #357 [feat] 게시글 목록 조회에 정렬 파라미터 추가
 
-Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01TA69yPr3JSuepad72AXJcz
+정렬 기준이 늘어날 것을 대비해 `BoardSortType` enum으로 분리했다.
 EOF
 )"
 ```
 
 type: `feat` / `fix` / `refactor` / `test` / `chore` / `style` / `delete`
+
+> **`Co-Authored-By: Claude ...` 트레일러를 붙이지 않는다.** 커밋 메시지는 제목과 본문만으로 구성한다.
 
 ## 4. 푸시 (사용자가 명시적으로 요청할 때만)
 
@@ -61,7 +68,11 @@ git push -u origin feat/#357
 ## 5. PR 생성
 
 ```bash
-gh pr create --base develop --title "[Feat] 게시글 목록 조회 정렬 기능" --body "$(cat <<'EOF'
+gh pr create --base develop \
+  --title "[Feat] 게시글 목록 조회 정렬 기능" \
+  --label feat --label 예찬 \
+  --assignee @me \
+  --body "$(cat <<'EOF'
 ## 📣 Related Issue
 
 - close #357
@@ -78,10 +89,6 @@ gh pr create --base develop --title "[Feat] 게시글 목록 조회 정렬 기�
 ## 📬 Postman
 
 <!-- 스크린샷 첨부 필요 -->
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-https://claude.ai/code/session_01TA69yPr3JSuepad72AXJcz
 EOF
 )"
 ```
@@ -89,7 +96,9 @@ EOF
 규칙:
 - **PR 대상은 항상 `develop`**이다 (`main` 아님).
 - 제목은 이슈 제목(`[Feat] ...`)을 그대로 쓴다.
+- **라벨과 assignee를 반드시 설정한다** — 유형 라벨(`feat`/`chore`/`⚒️ Fix`/`🔥 Refactor`) + 본인 이름 라벨(`예찬`) + `--assignee @me`. 상세는 `git-workflow`의 "라벨 & Assignee" 참조.
 - 본문은 `.github/PULL_REQUEST_TEMPLATE.md`의 4개 섹션(Related Issue / Summary / Question & PR point / Postman)을 채운다.
+- **`🤖 Generated with Claude Code` 서명을 붙이지 않는다.**
 - `close #{이슈번호}`로 이슈를 연결한다.
 - Postman 스크린샷은 사람이 첨부해야 한다. 첨부할 수 없으면 그 자리에 테스트 통과 결과를 남기고 사용자에게 알린다.
 - **자기 PR을 스스로 머지하지 않는다.** 생성까지만 하고 리뷰를 기다린다.
