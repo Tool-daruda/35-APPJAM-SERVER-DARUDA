@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.search.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -10,6 +11,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.daruda.darudaserver.domain.community.service.BoardScrapService;
 import com.daruda.darudaserver.domain.search.document.BoardDocument;
 import com.daruda.darudaserver.domain.search.dto.response.BoardSearchResponse;
 import com.daruda.darudaserver.domain.search.dto.response.GetBoardDocumentResponse;
@@ -33,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class BoardSearchService {
 
 	private final ElasticsearchTemplate elasticsearchTemplate;
+	private final BoardScrapService boardScrapService;
 
 
 	public GetBoardDocumentResponse searchByTitleAndContentAndTool(String keyword, String nextCursor, int size) {
@@ -102,8 +105,19 @@ public class BoardSearchService {
 
 		SearchHits<BoardDocument> hits = elasticsearchTemplate.search(query, BoardDocument.class);
 
-		List<BoardSearchResponse> boardSearchResponses = hits.getSearchHits().stream()
-			.map(hit -> BoardSearchResponse.from(hit.getContent()))
+		List<BoardDocument> documents = hits.getSearchHits().stream()
+			.map(hit -> hit.getContent())
+			.toList();
+
+		// 스크랩 수는 색인(ES)에 두면 스크랩 변동마다 재색인이 필요해 최신성이 떨어지므로, DB에서 일괄 조회해 채운다.
+		List<Long> boardIds = documents.stream()
+			.map(doc -> Long.valueOf(doc.getId()))
+			.toList();
+		Map<Long, Long> scrapCountMap = boardScrapService.getScrapCountMap(boardIds);
+
+		List<BoardSearchResponse> boardSearchResponses = documents.stream()
+			.map(doc -> BoardSearchResponse.from(doc,
+				scrapCountMap.getOrDefault(Long.valueOf(doc.getId()), 0L)))
 			.toList();
 
 		boolean hasNext = boardSearchResponses.size() > size;

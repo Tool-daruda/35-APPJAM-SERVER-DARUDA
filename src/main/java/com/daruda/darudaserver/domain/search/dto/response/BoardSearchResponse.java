@@ -19,9 +19,10 @@ public record BoardSearchResponse(
 	Long toolId,
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
 	Date updatedAt,
-	int commentCount
+	int commentCount,
+	Long scrapCount
 ) {
-	public static BoardSearchResponse from(BoardDocument doc) {
+	public static BoardSearchResponse from(BoardDocument doc, final long scrapCount) {
 		return new BoardSearchResponse(
 			Long.valueOf(doc.getId()),
 			doc.getToolMainName(),
@@ -33,7 +34,8 @@ public record BoardSearchResponse(
 			doc.isScraped(),
 			doc.getToolId(),
 			doc.getUpdatedAt(),
-			doc.getCommentCount()
+			doc.getCommentCount(),
+			scrapCount
 		);
 	}
 }

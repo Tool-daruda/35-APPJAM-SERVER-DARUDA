@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.community.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -59,6 +60,15 @@ public class BoardScrapService {
 			updateSearchIndex(boardId, true);
 			return BoardScrapRes.of(boardId, true);
 		}
+	}
+
+	// board별 스크랩 수 일괄 조회 (검색 등 타 도메인에서 스크랩 수를 표시할 때 사용)
+	@Transactional(readOnly = true)
+	public Map<Long, Long> getScrapCountMap(final List<Long> boardIds) {
+		if (boardIds == null || boardIds.isEmpty()) {
+			return Map.of();
+		}
+		return boardScrapRepository.countMapByBoardIds(boardIds);
 	}
 
 	// 스크랩 여부 확인 (UserEntity 기반)
