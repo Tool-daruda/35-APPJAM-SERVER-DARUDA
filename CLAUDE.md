@@ -34,6 +34,7 @@ When one of the tasks below is detected, load the corresponding skill (manual in
 | Exception/error handling | `error-handling` |
 | Branch/commit/issue/PR name & label conventions | `git-convention` |
 | Judging whether a rule violation in existing code was already there, refactoring | `legacy-cleanup` |
+| Reviewing a diff (checklist, severity, output format) | `code-review-checklist` |
 
 | Procedure | Command |
 |-----------|---------|

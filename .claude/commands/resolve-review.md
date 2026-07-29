@@ -16,11 +16,11 @@ Handle the review comments of the current branch (or the PR given in `$ARGUMENTS
 gh pr view --json number,title,headRefName
 
 # inline review comments (per file/line)
-gh api repos/{owner}/{repo}/pulls/<PR-number>/comments \
+gh api --paginate repos/{owner}/{repo}/pulls/<PR-number>/comments \
   --jq '.[] | {id, path, line, body, user: .user.login}'
 
 # general review comments (whole review body)
-gh api repos/{owner}/{repo}/pulls/<PR-number>/reviews \
+gh api --paginate repos/{owner}/{repo}/pulls/<PR-number>/reviews \
   --jq '.[] | select(.body != "") | {id, state, body, user: .user.login}'
 ```
 

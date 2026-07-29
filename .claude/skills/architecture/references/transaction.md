@@ -40,7 +40,7 @@ public class BoardService {
 | Read-only | `readOnly = true` | **no such attribute** (specifying it is a compile error) |
 | Propagation | `propagation = Propagation.*` | `value = TxType.*` |
 | Rollback | `rollbackFor` | `rollbackOn` |
-| Defaults | REQUIRED + rollback on unchecked exceptions | REQUIRED + rollback on unchecked exceptions (same) |
+| Defaults | REQUIRED + rollback on unchecked exceptions (`RuntimeException`/`Error`) | REQUIRED + rollback on unchecked exceptions (same) |
 
 **Important — premise to avoid misdiagnosis:** Spring recognizes the Jakarta annotation too, via `JtaTransactionAnnotationParser`. So even with a jakarta import, **the transaction itself opens normally.**
 

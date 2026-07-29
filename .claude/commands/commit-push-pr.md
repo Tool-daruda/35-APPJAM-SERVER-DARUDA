@@ -15,13 +15,15 @@ description: Commit following project conventions, and push and create a PR on r
 
 If it doesn't pass, **do not commit.** Report the failing step and the actual output.
 
+> `check-all.sh` runs `editorconfigFormat` first, which may modify the working tree. If files were already staged, re-stage the approved files and re-run this verification so the committed index matches exactly what was verified.
+
 ## 2. Check staging
 
 ```bash
 git status
 ```
 
-- **Never commit `.env`, `private.pem`, or ymls containing secrets.**
+- **Never commit secrets, regardless of file name** (`.env`, `private.pem`, `application-*.yml`, `.properties`, `.json`, shell scripts, …). Scan the staged diff for credentials before committing.
 - For commit-split units, see `git-convention`'s "Commit types" section.
 
 ## 3. Check the branch
@@ -58,7 +60,7 @@ EOF
 )"
 ```
 
-> Do not add a signature trailer — see `git-convention`'s "No commit signatures".
+> Commit-signature policy is owned by `git-convention` ("No commit signatures") — follow it there.
 
 ## 5. Push — HITL point
 

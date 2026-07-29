@@ -32,7 +32,7 @@ given(boardRepository.save(any(Board.class))).willAnswer(inv -> {
 
 ## Controller — MockMvc standalone
 
-Use `MockMvcBuilders.standaloneSetup`, not `@WebMvcTest` (it doesn't spin up the context, so it's fast).
+Use `MockMvcBuilders.standaloneSetup`, not `@WebMvcTest`. `standaloneSetup` wires up MVC infrastructure without loading a Spring context, so it's fast; `@WebMvcTest` loads a sliced Spring MVC context.
 
 ```java
 @ExtendWith(MockitoExtension.class)

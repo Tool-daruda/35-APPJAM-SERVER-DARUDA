@@ -47,7 +47,7 @@ if (tool == null) {
 
 **Forbidden**:
 
-- `throw new RuntimeException(...)`, `throw new IllegalArgumentException(...)` — there's no way to know which error code to respond with.
+- `throw new RuntimeException(...)`, `throw new IllegalArgumentException(...)` — even where `GlobalExceptionHandler` maps them (e.g. `IllegalArgumentException` → 400 `BAD_REQUEST_DATA`), you lose the specific domain `ErrorCode`. Use a `BusinessException` subclass + explicit `ErrorCode`.
 - Building exception messages as strings directly — messages live on the `ErrorCode`.
 - An empty `catch (Exception e) { }` block — if you must swallow it, leave the reason in a comment and at least a `log.warn`.
 

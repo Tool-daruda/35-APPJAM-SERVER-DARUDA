@@ -29,7 +29,7 @@ public void handle(final CommentCreatedEvent event) { ... }
 
 - Put event records in `domain/{domain}/event/`.
 - Use `@TransactionalEventListener` when it must run after transaction commit, `@EventListener` when immediate.
-- If the listener needs its own write transaction, add `@Transactional(propagation = REQUIRES_NEW)` as well (see the self-invocation caveat in `references/transaction.md`).
+- If the listener needs its own write transaction, add `@Transactional(propagation = Propagation.REQUIRES_NEW)` as well (see the self-invocation caveat in `references/transaction.md`).
 
 ## Cross-domain references
 

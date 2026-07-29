@@ -25,14 +25,10 @@ This is code written before the guidelines were unified. **New code follows the 
 
 ## Caution when cleaning up transaction imports
 
-Do not do a mechanical bulk replacement. The `architecture` skill's `references/transaction.md` is the SSOT for the order of handling and the exact facts. In summary:
+Do not do a mechanical bulk replacement. The order of handling and the exact facts are owned by `architecture` → `references/transaction.md` ("Order of handling when found in existing code") — read them there instead of relying on a copy.
 
-1. **Bare `@Transactional`** → swapping the import alone keeps behavior identical (safe)
-2. **Uses `TxType`·`rollbackOn`** → needs manual mapping to Spring attributes
-3. **Class level** → swapping the import alone gains nothing. You must also reposition `readOnly = true`
+## Scope rules for cleanup work
 
-## Refactoring principles
-
-- Handle one item at a time. Don't mix several items into one PR.
-- There must be no behavior change — the commit type is `refactor`.
-- Renames (entity suffix, DTO abbreviation) have references spread widely, so do an IDE rename then run full verification with `./.claude/scripts/check-all.sh`.
+- Handle one item at a time; don't mix several items into one PR.
+- Cleanup must be behavior-preserving. (The `refactor` commit type is owned by `git-convention`, and the full check by `/run-checks` — those are procedure, not rules restated here.)
+- Wide renames (entity suffix, DTO abbreviation) have references spread across the codebase, so rename via the IDE, then run the full check before opening the PR.

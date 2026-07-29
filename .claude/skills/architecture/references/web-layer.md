@@ -48,7 +48,7 @@ public record CreateBoardRequest(
 
 Trigger it in the controller with `@RequestBody @Valid`. On violation, `MethodArgumentNotValidException` → `GlobalExceptionHandler` responds with `ErrorCode.INVALID_FIELD_ERROR` + per-field messages. **Do not re-implement validation logic with `if` in the service.**
 
-Validate query parameters directly on the controller parameters (`@Min`, `@Max`); the class needs `@Validated`.
+Validate query parameters directly on controller parameters (`@Min`, `@Max`). Spring MVC's built-in method validation (Spring 6.1+, used by this project's Boot 3.4) runs them without a class-level `@Validated`; add `@Validated` only when AOP-based validation or validation groups are intentionally required.
 
 ## Controller pattern
 

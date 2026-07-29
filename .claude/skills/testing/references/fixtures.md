@@ -24,10 +24,11 @@ ReflectionTestUtils.setField(board, "id", 10L);
 | Sharing state between tests (static fields) | Rebuild each time in `@BeforeEach` |
 | Leaving unnecessary stubs | Mockito strict stubbing fails with `UnnecessaryStubbingException`. Delete unused `given`s |
 
-## Running
+## Running a specific test
+
+Full verification is owned by `/run-checks` (→ `check-all.sh`). Use these single-shot runs while writing one test class (an allowed exception to "the script is the SSOT"):
 
 ```bash
-./gradlew test                                  # all
 ./gradlew test --tests "BoardServiceTest"       # a specific class
 ./gradlew test --tests "*.community.*"          # a pattern
 ./gradlew test --info                           # verbose log (same as CI)
@@ -35,9 +36,9 @@ ReflectionTestUtils.setField(board, "id", 10L);
 
 Report: `build/reports/tests/test/index.html`
 
-## When it fails
+## Common failure causes
 
-Delegate diagnosing failure causes to the `test-validator` agent (read-only). Frequent causes:
+Diagnosing a failure is delegated to the `test-validator` agent (read-only). Frequent causes:
 
 | Symptom | Cause |
 |---------|-------|

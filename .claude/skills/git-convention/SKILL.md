@@ -85,7 +85,7 @@ Work nature → type label + issue-template mapping:
 | Refactoring | `🔥 Refactor` | 🎨 Other | `[Refactor]` | includes the emoji |
 | Config·env·dependency | `chore` | ⚙ Chore | `[Chore]` | |
 
-> The name labels indicate teammates separately from GitHub accounts. The current session user is `yechan-kim` = `예찬`. **Do not attach someone else's name label arbitrarily.**
+> The name labels indicate teammates separately from GitHub accounts. Determine the current user's own name label at runtime (map their GitHub account to one of `예찬`/`재민`/`지원`/`수인`); if the mapping is unclear, ask the user rather than guessing. **Do not attach someone else's name label arbitrarily.**
 
 ## No commit signatures
 
