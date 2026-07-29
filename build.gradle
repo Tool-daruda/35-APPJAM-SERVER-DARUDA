@@ -7,7 +7,7 @@ plugins {
 }
 
 editorconfig {
-    excludes = ['build']
+    excludes = ['build', '**/.omc/**']
 }
 
 check.dependsOn editorconfigCheck
