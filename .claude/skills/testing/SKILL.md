@@ -1,20 +1,20 @@
 ---
 name: testing
-description: 테스트를 작성하거나 수정할 때 로드. JUnit 5 + Mockito(BDD) + AssertJ 기본 구조와 필수 규칙을 담고, 레이어별 전략과 픽스처·안티패턴은 references/에 분리돼 있다.
+description: Load when writing or modifying tests. Holds the JUnit 5 + Mockito (BDD) + AssertJ base structure and required rules; per-layer strategy, fixtures, and anti-patterns are split into references/.
 ---
 
-# 테스트 (daruda)
+# Testing (daruda)
 
-**JUnit 5 + Mockito + AssertJ.** 단위 테스트(`@ExtendWith(MockitoExtension.class)`)가 기본이고, 통합 테스트(`@SpringBootTest`)는 쓰지 않는다.
+**JUnit 5 + Mockito + AssertJ.** Unit tests (`@ExtendWith(MockitoExtension.class)`) are the default; integration tests (`@SpringBootTest`) are not used.
 
-## 상세 규칙 라우팅
+## Detailed-rule routing
 
-| 무엇을 하려는가 | 읽을 파일 |
-|-----------------|-----------|
-| 서비스/컨트롤러/엔티티 레이어별 테스트 전략, MockMvc 설정 | `references/layer-strategy.md` |
-| 픽스처 만들기, 안티패턴, 실행 명령 | `references/fixtures.md` |
+| What you are doing | File to read |
+|--------------------|--------------|
+| Per-layer test strategy for service/controller/entity, MockMvc setup | `references/layer-strategy.md` |
+| Building fixtures, anti-patterns, run commands | `references/fixtures.md` |
 
-## 기본 구조
+## Base structure
 
 ```java
 @ExtendWith(MockitoExtension.class)
@@ -78,26 +78,26 @@ class BoardServiceTest {
 }
 ```
 
-## 필수 규칙
+## Required rules
 
-| 항목 | 규칙 |
+| Item | Rule |
 |------|------|
-| 클래스 이름 | `{대상}Test`, 접근제어자 없음(package-private) |
-| 클래스 `@DisplayName` | 생략 가능. `@Nested` 클래스에는 한국어로 필수 |
-| 메서드 이름 | `{메서드명}_{상황}` 영어 스네이크 (`create_success`, `create_userNotFound`) |
-| 메서드 `@DisplayName` | **한국어로 필수.** 실패 시나리오는 `"조건 → 예외명"` 형식 |
-| 그룹핑 | 대상 메서드별로 `@Nested` 클래스로 묶는다 |
-| 본문 | `// given` / `// when` / `// then` 주석으로 3단 구분 (예외 검증은 `// when & then`) |
-| 스텁 | **BDDMockito**: `given(...).willReturn(...)`, `willThrow`, `willAnswer` |
-| 검증 | **BDDMockito**: `then(mock).should().method()` |
-| 단언 | **AssertJ**: `assertThat(...)`, `assertThatThrownBy(...)` |
-| 엔티티 ID | `ReflectionTestUtils.setField(entity, "id", 1L)` |
+| Class name | `{target}Test`, no access modifier (package-private) |
+| Class `@DisplayName` | optional. Required (in Korean) on `@Nested` classes |
+| Method name | `{methodName}_{situation}` in English snake_case (`create_success`, `create_userNotFound`) |
+| Method `@DisplayName` | **required, in Korean.** Failure scenarios use the `"condition → ExceptionName"` form |
+| Grouping | group by target method into `@Nested` classes |
+| Body | 3-part split with `// given` / `// when` / `// then` comments (exception checks use `// when & then`) |
+| Stubbing | **BDDMockito**: `given(...).willReturn(...)`, `willThrow`, `willAnswer` |
+| Verification | **BDDMockito**: `then(mock).should().method()` |
+| Assertion | **AssertJ**: `assertThat(...)`, `assertThatThrownBy(...)` |
+| Entity ID | `ReflectionTestUtils.setField(entity, "id", 1L)` |
 
-**혼용 금지**: `Mockito.when(...).thenReturn(...)` / `Mockito.verify(...)` / JUnit `Assertions.assertEquals`는 신규 코드에서 쓰지 않는다. 기존 파일에 섞여 있지만 새로 쓰는 테스트는 BDD + AssertJ로 통일한다.
+**No mixing**: `Mockito.when(...).thenReturn(...)` / `Mockito.verify(...)` / JUnit `Assertions.assertEquals` are not used in new code. They're mixed in existing files, but new tests are unified to BDD + AssertJ.
 
 ## static import
 
-가독성을 위해 아래는 static import를 쓴다(이 코드베이스의 관용).
+For readability, use static imports for the following (this codebase's idiom).
 
 ```java
 import static org.assertj.core.api.Assertions.*;
@@ -105,13 +105,13 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 ```
 
-## 커버할 시나리오
+## Scenarios to cover
 
-서비스 메서드마다 최소한:
+For each service method, at minimum:
 
-- 정상 경로 (반환값 + 부수 효과 검증)
-- 리소스 없음 → `NotFoundException`
-- 권한 없음 → `ForbiddenException` (소유자 검증이 있는 경우)
-- 경계값 (페이지 크기, 커서, 빈 목록)
+- Happy path (verify return value + side effects)
+- Resource not found → `NotFoundException`
+- No permission → `ForbiddenException` (when there is an owner check)
+- Boundary values (page size, cursor, empty list)
 
-> 테스트 코드도 Checkstyle 대상이다(`checkstyleTest`). 탭 들여쓰기·120자·import 순서를 지킨다.
+> Test code is also subject to Checkstyle (`checkstyleTest`). Follow tab indentation·120 chars·import order.

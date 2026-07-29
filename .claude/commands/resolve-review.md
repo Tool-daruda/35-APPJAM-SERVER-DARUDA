@@ -1,67 +1,67 @@
 ---
-description: PR의 리뷰 코멘트를 읽고 반영한 뒤 각 코멘트에 한국어로 답변한다
-argument-hint: [PR 번호]
+description: Read a PR's review comments, apply them, then reply to each comment in Korean
+argument-hint: [PR number]
 ---
 
-# PR 리뷰 반영
+# Apply PR review feedback
 
-> **언어**: 사용자 대상 응답과 코멘트 답변은 모두 한국어로 작성한다.
+> **Language**: Write user-facing responses and comment replies all in Korean.
 
-현재 브랜치(또는 `$ARGUMENTS`로 지정된 PR)의 리뷰 코멘트를 처리한다.
+Handle the review comments of the current branch (or the PR given in `$ARGUMENTS`).
 
-## 1. 수집
+## 1. Collect
 
 ```bash
-# 현재 브랜치의 PR 번호 찾기
+# find the PR number of the current branch
 gh pr view --json number,title,headRefName
 
-# 인라인 리뷰 코멘트 (파일/라인별)
+# inline review comments (per file/line)
 gh api repos/{owner}/{repo}/pulls/<PR-number>/comments \
   --jq '.[] | {id, path, line, body, user: .user.login}'
 
-# 일반 리뷰 코멘트 (전체 리뷰 본문)
+# general review comments (whole review body)
 gh api repos/{owner}/{repo}/pulls/<PR-number>/reviews \
   --jq '.[] | select(.body != "") | {id, state, body, user: .user.login}'
 ```
 
-## 2. 분류 — HITL 지점
+## 2. Classify — HITL point
 
-각 코멘트를 셋 중 하나로 분류한다.
+Classify each comment into one of three.
 
-| 분류 | 처리 |
-|------|------|
-| ① 즉시 반영 | 바로 고친다 |
-| ② 논의 필요 | **사용자에게 확인한다.** 임의로 판단하지 않는다 |
-| ③ 반영 불가 | 사유를 명시해 답변한다 |
+| Class | Handling |
+|-------|----------|
+| ① Apply immediately | fix it right away |
+| ② Needs discussion | **confirm with the user.** Do not decide arbitrarily |
+| ③ Cannot apply | reply stating the reason |
 
-**리뷰어의 의도가 모호하면 추측해서 고치지 말고 사용자에게 묻는다.**
+**If the reviewer's intent is ambiguous, don't guess and fix — ask the user.**
 
-## 3. 반영
+## 3. Apply
 
-코드 변경은 프로젝트 규칙을 따른다 — `architecture`, `code-style`, `testing`, `error-handling` 스킬.
+Code changes follow the project rules — the `architecture`, `code-style`, `testing`, `error-handling` skills.
 
 ```bash
 ./.claude/scripts/check-all.sh
 ```
 
-## 4. 커밋
+## 4. Commit
 
-절차는 `/commit-push-pr`, 제목 포맷과 커밋 type은 `git-convention` 참조.
-**푸시는 사용자가 명시적으로 요청할 때만 한다.**
+For the procedure see `/commit-push-pr`; for the title format and commit type see `git-convention`.
+**Push only when the user explicitly asks.**
 
-## 5. 답변
+## 5. Reply
 
-각 인라인 코멘트에 **한국어로** 답변한다. 반영했다면 어떻게 했는지, 안 했다면 왜 안 했는지 밝힌다.
+Reply to each inline comment **in Korean**. If applied, state how; if not, state why not.
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/<PR-number>/comments/<comment_id>/replies \
   -f body='반영했습니다. <변경 요약>. (commit <sha>)'
 ```
 
-톤: 간결하고 정중하게. "반영했습니다 / 다음 이유로 유지했습니다 / 별도 이슈로 분리했습니다" 같은 형태.
+Tone: concise and polite. Forms like "반영했습니다 / 다음 이유로 유지했습니다 / 별도 이슈로 분리했습니다".
 
-## 6. 보고
+## 6. Report
 
-어떤 코멘트를 어떻게 처리했는지 표로 요약해 보고한다.
+Summarize which comments you handled and how, as a table.
 
-> **자기 PR을 스스로 머지하지 않는다.**
+> **Do not merge your own PR.**

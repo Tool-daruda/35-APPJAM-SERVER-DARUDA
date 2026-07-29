@@ -1,21 +1,21 @@
 ---
 name: git-convention
-description: 브랜치·커밋·이슈·PR의 이름과 라벨 컨벤션을 확인할 때 로드. 제목 포맷 3종(이슈/PR/커밋), 브랜치 전략, 커밋 type, 라벨·assignee 규칙의 단일 출처. 실제 실행 절차는 /commit-push-pr, /create-issue 커맨드에 있다.
+description: Load when checking the name and label conventions for branches, commits, issues, and PRs. The single source for the three title formats (issue/PR/commit), branch strategy, commit types, and label/assignee rules. The actual execution procedures live in the /commit-push-pr and /create-issue commands.
 ---
 
-# Git 컨벤션 (daruda)
+# Git conventions (daruda)
 
-> **이 파일이 이름·라벨 컨벤션의 단일 출처(SSOT)다.** 커맨드(`/commit-push-pr`, `/create-issue`, `/resolve-review`)는 절차만 담고 컨벤션은 여기를 참조한다. 내용을 복사하지 않는다.
+> **This file is the single source of truth (SSOT) for name & label conventions.** The commands (`/commit-push-pr`, `/create-issue`, `/resolve-review`) hold only procedures and reference here for conventions. Do not copy the contents.
 
-## 브랜치 전략
+## Branch strategy
 
 ```text
-main       ← 운영 배포 (cd-prod.yml)
-develop    ← 개발 통합 + 기본 브랜치, PR 대상 (cd-dev.yml)
-{type}/#{이슈번호}   ← 작업 브랜치
+main       ← production deploy (cd-prod.yml)
+develop    ← dev integration + default branch, PR target (cd-dev.yml)
+{type}/#{issue-number}   ← working branch
 ```
 
-작업 브랜치는 **`develop`에서 분기**하고 **`develop`으로 PR**을 올린다.
+Working branches **branch off `develop`** and **open a PR to `develop`**.
 
 ```bash
 git switch develop
@@ -23,35 +23,35 @@ git pull origin develop
 git switch -c feat/#357
 ```
 
-브랜치 이름은 `{type}/#{이슈번호}` 형식이다: `feat/#355`, `fix/#302`, `refactor/#270`, `chore/#250`.
+Branch names follow the `{type}/#{issue-number}` format: `feat/#355`, `fix/#302`, `refactor/#270`, `chore/#250`.
 
-## 제목 포맷 3종 — 미묘하게 다르다
+## The three title formats — subtly different
 
-**이슈에는 번호가 없고, PR에는 번호가 붙고, 커밋만 type이 소문자**다.
+**Issues have no number, PRs get a number, and only commits use a lowercase type.**
 
-| 대상 | 포맷 | 예 |
-|------|------|-----|
-| 이슈 | `[{Type}] {한국어 설명}` | `[Fix] JWT Token 재발급이 안되는 오류 수정` |
-| PR | `#{이슈번호} [{Type}] {한국어 설명}` | `#260 [Fix] JWT Token 재발급이 안되는 오류 수정` |
-| 커밋 | `#{이슈번호} [{type}] {한국어 설명}` | `#260 [feat] 알 수 없는 리프레쉬 토큰 오류메시지 추가` |
+| Target | Format | Example |
+|--------|--------|---------|
+| Issue | `[{Type}] {Korean description}` | `[Fix] JWT Token 재발급이 안되는 오류 수정` |
+| PR | `#{issue-number} [{Type}] {Korean description}` | `#260 [Fix] JWT Token 재발급이 안되는 오류 수정` |
+| Commit | `#{issue-number} [{type}] {Korean description}` | `#260 [feat] 알 수 없는 리프레쉬 토큰 오류메시지 추가` |
 
-- **PR 제목 = 이슈 제목 앞에 `#{이슈번호}`와 공백을 붙인 것.** 번호를 빠뜨리거나(`[Feat] ...`) 뒤에 붙이지(`... (#355)`) 않는다.
-- 이슈·PR의 `Type`은 첫 글자 대문자(`[Feat]`, `[Fix]`, `[Chore]`, `[Refactor]`), 커밋의 `type`은 소문자(`[feat]`)다.
-- 커밋 type은 커밋 단위의 성격이므로 이슈·PR의 Type 4종과 달라도 된다. 예: `[Feat]` 이슈에 `#357 [test] ...` 커밋.
+- **PR title = issue title with `#{issue-number}` and a space prepended.** Don't drop the number (`[Feat] ...`) or append it (`... (#355)`).
+- The `Type` in issues·PRs is capitalized (`[Feat]`, `[Fix]`, `[Chore]`, `[Refactor]`); the commit `type` is lowercase (`[feat]`).
+- The commit type reflects the nature of the commit unit, so it may differ from the 4 issue·PR Types. Example: a `#357 [test] ...` commit on a `[Feat]` issue.
 
-## 커밋 type
+## Commit types
 
-| type | 용도 |
-|------|------|
-| `feat` | 새 기능 |
-| `fix` | 버그 수정 |
-| `refactor` | 동작 변화 없는 구조 개선 |
-| `test` | 테스트 추가/수정 |
-| `chore` | 빌드·설정·의존성 등 부수 작업 |
-| `style` | 포매팅, 세미콜론 등 로직 무관 변경 |
-| `delete` | 파일·코드 삭제 |
+| type | Use |
+|------|-----|
+| `feat` | new feature |
+| `fix` | bug fix |
+| `refactor` | structural improvement with no behavior change |
+| `test` | adding/modifying tests |
+| `chore` | build·config·dependency and other incidental work |
+| `style` | formatting, semicolons, and other logic-irrelevant changes |
+| `delete` | deleting files·code |
 
-실제 예:
+Real examples:
 
 ```text
 #355 [feat] 게시글별 스크랩 수 배치 조회 쿼리 추가
@@ -60,51 +60,51 @@ git switch -c feat/#357
 #351 [refactor] `ToolService`의 `getLiked` 메서드를 `private`으로 변경
 ```
 
-규칙:
+Rules:
 
-- 설명은 **한국어**로, `~ 추가`, `~ 수정`, `~ 변경` 같은 명사형 종결로 끝낸다.
-- 코드 식별자는 백틱으로 감싼다: `` `BoardService` ``.
-- 이슈 번호는 `#` 포함, 대괄호 없이 맨 앞에 온다. (`[#355] feat: ...` 형식이 **아니다**)
-- 한 커밋은 한 가지 일만 한다. 기능과 테스트도 가급적 분리한다.
-- 본문이 필요하면 제목 다음 빈 줄 뒤에 한국어로 적는다.
+- Write the description in **Korean**, ending in a noun form like `~ 추가`, `~ 수정`, `~ 변경`.
+- Wrap code identifiers in backticks: `` `BoardService` ``.
+- The issue number includes `#`, no brackets, and comes first. (It is **not** the `[#355] feat: ...` format.)
+- One commit does one thing. Separate feature and tests where possible.
+- If a body is needed, write it in Korean after a blank line following the title.
 
-## 라벨 & Assignee (이슈·PR 모두 필수)
+## Labels & Assignee (required on both issues and PRs)
 
-| 항목 | 값 |
-|------|-----|
-| 유형 라벨 | `feat` / `chore` / `⚒️ Fix` / `🔥 Refactor` 중 하나 |
-| 담당자 이름 라벨 | 본인 이름 (`예찬`, `재민`, `지원`, `수인`) |
-| Assignee | 본인 (`@me`) |
+| Item | Value |
+|------|-------|
+| Type label | one of `feat` / `chore` / `⚒️ Fix` / `🔥 Refactor` |
+| Assignee-name label | your own name (`예찬`, `재민`, `지원`, `수인`) |
+| Assignee | yourself (`@me`) |
 
-작업 성격 → 유형 라벨 + 이슈 템플릿 매핑:
+Work nature → type label + issue-template mapping:
 
-| 작업 | 유형 라벨 | 이슈 템플릿 | 제목 접두사 | 주의 |
-|------|-----------|-------------|-------------|------|
-| 새 기능 | `feat` | 🛠 Feature | `[Feat]` | `📍 Feat`가 아니다 |
-| 버그 수정 | `⚒️ Fix` | 🔧 Fix | `[Fix]` | `bug`/`fix`가 아니다 |
-| 리팩터링 | `🔥 Refactor` | 🎨 Other | `[Refactor]` | 이모지 포함 |
-| 설정·환경·의존성 | `chore` | ⚙ Chore | `[Chore]` | |
+| Work | Type label | Issue template | Title prefix | Note |
+|------|------------|----------------|--------------|------|
+| New feature | `feat` | 🛠 Feature | `[Feat]` | not `📍 Feat` |
+| Bug fix | `⚒️ Fix` | 🔧 Fix | `[Fix]` | not `bug`/`fix` |
+| Refactoring | `🔥 Refactor` | 🎨 Other | `[Refactor]` | includes the emoji |
+| Config·env·dependency | `chore` | ⚙ Chore | `[Chore]` | |
 
-> 이름 라벨은 GitHub 계정과 별개로 팀원을 표시하는 용도다. 현재 세션 사용자는 `yechan-kim` = `예찬`이다. **다른 사람 이름 라벨을 임의로 붙이지 않는다.**
+> The name labels indicate teammates separately from GitHub accounts. The current session user is `yechan-kim` = `예찬`. **Do not attach someone else's name label arbitrarily.**
 
-## 커밋 서명 금지
+## No commit signatures
 
-커밋 메시지는 **제목(+ 필요 시 본문)만** 작성한다. 아래 트레일러를 **넣지 않는다**.
+Write **only the title (+ body if needed)** in commit messages. **Do not add** the trailers below.
 
 ```text
 ❌ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 ❌ 🤖 Generated with Claude Code
 ```
 
-커밋 작성자는 실제 작업자(팀원)이며, 도구를 공동 작성자로 표기하지 않는다. PR 본문에도 생성 서명을 붙이지 않는다.
+The commit author is the actual worker (a teammate); do not credit tools as co-authors. Do not add generation signatures to PR bodies either.
 
-## Git 안전 규칙
+## Git safety rules
 
-| 규칙 | 내용 |
-|------|------|
-| 커밋/푸시 시점 | **사용자가 요청할 때만.** 작업이 끝났다고 자동 커밋하지 않는다 |
-| `develop`/`main` 직접 커밋 | 금지. 반드시 작업 브랜치를 먼저 만든다 |
-| `git push --force` | 금지 (`--force-with-lease`도 사용자 요청 시에만) |
-| 자기 PR 머지 | 금지. 생성까지만 하고 리뷰를 기다린다 |
-| 대화형 플래그 | `git rebase -i`, `git add -i`는 이 환경에서 동작하지 않는다 |
-| `.env`·시크릿 | 절대 커밋하지 않는다. `git status`로 스테이징 목록을 반드시 확인 |
+| Rule | Content |
+|------|---------|
+| When to commit/push | **Only when the user asks.** Do not auto-commit just because work is done |
+| Direct commit to `develop`/`main` | Forbidden. Always create a working branch first |
+| `git push --force` | Forbidden (`--force-with-lease` only on user request) |
+| Merging your own PR | Forbidden. Only create it, then wait for review |
+| Interactive flags | `git rebase -i`, `git add -i` do not work in this environment |
+| `.env`·secrets | Never commit them. Always check the staged list with `git status` |

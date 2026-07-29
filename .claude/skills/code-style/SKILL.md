@@ -1,65 +1,65 @@
 ---
 name: code-style
-description: Java 코드를 작성하거나 수정할 때 로드. 네이밍·Lombok·Checkstyle 핵심 규칙을 담고, 포매팅/import 순서 상세와 엔티티·서비스 작성 관용구는 references/에 분리돼 있다.
+description: Load when writing or modifying Java code. Holds the core naming, Lombok, and Checkstyle rules; formatting/import-order details and entity/service writing idioms are split into references/.
 ---
 
-# 코드 스타일 (daruda)
+# Code style (daruda)
 
-Java 17 + Lombok. **Naver Checkstyle**(`config/naver-checkstyle-rules.xml`, `maxWarnings = 0`) + **editorconfig**가 빌드에서 강제된다. 둘 중 하나라도 실패하면 `./gradlew build`가 깨진다.
+Java 17 + Lombok. **Naver Checkstyle** (`config/naver-checkstyle-rules.xml`, `maxWarnings = 0`) + **editorconfig** are enforced by the build. If either fails, `./gradlew build` breaks.
 
-## 상세 규칙 라우팅
+## Detailed-rule routing
 
-| 무엇을 하려는가 | 읽을 파일 |
-|-----------------|-----------|
-| 포매팅 세부값, import 순서 예시, Checkstyle 위반 해결 | `references/formatting.md` |
-| 엔티티·서비스 작성 관용구, 로깅, 주석 | `references/idioms.md` |
+| What you are doing | File to read |
+|--------------------|--------------|
+| Formatting specifics, import-order examples, resolving Checkstyle violations | `references/formatting.md` |
+| Entity/service writing idioms, logging, comments | `references/idioms.md` |
 
-## 항상 지키는 것 (요약)
+## Always follow (summary)
 
-| 규칙 | 값 |
-|------|-----|
-| 들여쓰기 | **탭** (스페이스는 Checkstyle 위반) |
-| 한 줄 최대 | 120자 |
-| 파일 끝 | 개행 필수 (LF, UTF-8) |
-| import 순서 | `java.` → `javax.` → `org.` → `net.` → `com.` → 기타, 그룹 사이 빈 줄 1개, **와일드카드 금지** |
-| 중괄호 | K&R, 단일 문장에도 중괄호 필수 |
+| Rule | Value |
+|------|-------|
+| Indentation | **tabs** (spaces are a Checkstyle violation) |
+| Max line length | 120 chars |
+| End of file | trailing newline required (LF, UTF-8) |
+| Import order | `java.` → `javax.` → `org.` → `net.` → `com.` → others, one blank line between groups, **no wildcards** |
+| Braces | K&R, braces required even for a single statement |
 
-## 네이밍
+## Naming
 
-| 대상 | 규칙 | 예 |
-|------|------|-----|
-| 클래스 | PascalCase | `BoardService` |
-| 메서드/변수 | camelCase | `getBoardList` |
-| 상수 | UPPER_SNAKE_CASE | `ALLOWED_EXTENSIONS` |
-| JPA 엔티티 | 도메인 용어, **`Entity` 접미사 없음** | `Board`, `Tool`, `Comment` |
-| 요청 DTO | `{동사}{대상}Request` | `CreateBoardRequest` |
-| 응답 DTO | `{동사}{대상}Response` 또는 `{대상}Response` | `BoardResponse` |
-| 리포지토리 | `{엔티티}Repository` | `BoardRepository` |
-| 테스트 | `{대상}Test` | `BoardServiceTest` |
-| DB 컬럼 | snake_case | `board_id`, `created_at` |
-| URL 경로 변수 | kebab-case | `/{board-id}` |
+| Target | Rule | Example |
+|--------|------|---------|
+| Class | PascalCase | `BoardService` |
+| Method/variable | camelCase | `getBoardList` |
+| Constant | UPPER_SNAKE_CASE | `ALLOWED_EXTENSIONS` |
+| JPA entity | domain term, **no `Entity` suffix** | `Board`, `Tool`, `Comment` |
+| Request DTO | `{verb}{target}Request` | `CreateBoardRequest` |
+| Response DTO | `{verb}{target}Response` or `{target}Response` | `BoardResponse` |
+| Repository | `{entity}Repository` | `BoardRepository` |
+| Test | `{target}Test` | `BoardServiceTest` |
+| DB column | snake_case | `board_id`, `created_at` |
+| URL path variable | kebab-case | `/{board-id}` |
 
-**축약 금지**: `Res`/`Req`가 아니라 `Response`/`Request`. 연속 대문자 약어는 `AbbreviationAsWordInName` 규칙에 걸리므로 `ToolPlatForm` 같은 기존 오탈자를 따라 하지 말고 `HttpClient` 형태로 쓴다.
+**No abbreviations**: `Response`/`Request`, not `Res`/`Req`. Consecutive-uppercase acronyms hit the `AbbreviationAsWordInName` rule, so don't copy existing typos like `ToolPlatForm`; write it as `HttpClient`.
 
 ## Lombok
 
-| 어노테이션 | 용도 |
-|-----------|------|
-| `@Getter` | 엔티티·DTO. **`@Setter`는 쓰지 않는다** (상태 변경은 도메인 메서드로) |
-| `@RequiredArgsConstructor` | 서비스·컨트롤러의 생성자 주입. 필드는 `private final` |
-| `@NoArgsConstructor(access = AccessLevel.PROTECTED)` | JPA 엔티티 필수 |
-| `@Builder` | **생성자에만** 붙인다. 클래스 레벨과 중복 선언 금지 |
-| `@Slf4j` | 로깅 |
+| Annotation | Use |
+|------------|-----|
+| `@Getter` | Entities·DTOs. **Do not use `@Setter`** (state changes go through domain methods) |
+| `@RequiredArgsConstructor` | Constructor injection for services·controllers. Fields are `private final` |
+| `@NoArgsConstructor(access = AccessLevel.PROTECTED)` | Required on JPA entities |
+| `@Builder` | **On the constructor only.** No duplicate declaration with the class level |
+| `@Slf4j` | Logging |
 
-**금지**: `@Data`(setter + equals/hashCode를 엔티티에 자동 생성), 엔티티에 `@AllArgsConstructor`, 클래스 레벨 `@Builder` + 생성자 `@Builder` 중복, `@Autowired` 필드 주입.
+**Forbidden**: `@Data` (auto-generates setters + equals/hashCode on entities), `@AllArgsConstructor` on entities, duplicate class-level `@Builder` + constructor `@Builder`, `@Autowired` field injection.
 
-## 검증
+## Verification
 
 ```bash
-./.claude/scripts/check-all.sh        # 전체 검증 (권장 · 순서는 이 스크립트가 SSOT)
+./.claude/scripts/check-all.sh        # full verification (recommended · this script is the SSOT for order)
 ```
 
-| 도구 | 자동 수정 |
-|------|-----------|
-| editorconfig | **가능** — `./gradlew editorconfigFormat` |
-| Checkstyle | **불가능** — `build/reports/checkstyle/main.html`을 보고 직접 고친다 |
+| Tool | Auto-fix |
+|------|----------|
+| editorconfig | **Yes** — `./gradlew editorconfigFormat` |
+| Checkstyle | **No** — read `build/reports/checkstyle/main.html` and fix by hand |

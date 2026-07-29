@@ -1,10 +1,10 @@
-# 레이어별 테스트 전략 (daruda)
+# Per-layer test strategy (daruda)
 
-## Service — 핵심 대상
+## Service — the core target
 
-리포지토리·외부 서비스를 모두 `@Mock`으로 두고 **비즈니스 분기**를 검증한다.
+Put repositories and external services all under `@Mock` and verify the **business branching**.
 
-검증할 것: 정상 경로, 예외 경로(없는 리소스 / 권한 없음 / 중복), 경계값, 다른 서비스 호출 여부.
+Verify: happy path, exception paths (missing resource / no permission / duplicate), boundary values, whether other services are called.
 
 ```java
 @Test
@@ -20,7 +20,7 @@ void delete_notAuthor() {
 }
 ```
 
-`save()`가 ID를 채워야 하는 경우는 `willAnswer`로 흉내낸다.
+When `save()` must fill in an ID, mimic it with `willAnswer`.
 
 ```java
 given(boardRepository.save(any(Board.class))).willAnswer(inv -> {
@@ -32,7 +32,7 @@ given(boardRepository.save(any(Board.class))).willAnswer(inv -> {
 
 ## Controller — MockMvc standalone
 
-`@WebMvcTest`가 아니라 `MockMvcBuilders.standaloneSetup`을 쓴다(컨텍스트를 띄우지 않아 빠르다).
+Use `MockMvcBuilders.standaloneSetup`, not `@WebMvcTest` (it doesn't spin up the context, so it's fast).
 
 ```java
 @ExtendWith(MockitoExtension.class)
@@ -63,9 +63,9 @@ class BoardControllerTest {
 }
 ```
 
-인증이 필요한 API는 `SecurityContextHolder`에 `UserAuthentication`을 미리 넣는다.
+For APIs that need authentication, put a `UserAuthentication` into `SecurityContextHolder` in advance.
 
-검증할 것: 상태 코드, 응답 JSON 구조, **파라미터가 서비스에 제대로 위임되는지**(`ArgumentCaptor`).
+Verify: status code, response JSON structure, **whether parameters are properly delegated to the service** (`ArgumentCaptor`).
 
 ```java
 mockMvc.perform(get("/api/v1/board").param("sortBy", "SCRAP"))
@@ -78,15 +78,15 @@ then(boardService).should().getBoardList(any(), captor.capture(), anyInt());
 assertThat(captor.getValue()).isEqualTo(BoardSortType.SCRAP);
 ```
 
-생성 API는 상태 코드가 **201**인지 확인한다(`SuccessCode`와 HTTP 상태 불일치를 잡는 지점이다).
+For creation APIs, check that the status code is **201** (this is where you catch a `SuccessCode`/HTTP-status mismatch).
 
 ## Entity / Enum / DTO
 
-의존성이 없으므로 `@ExtendWith` 없이 순수 단위 테스트로 쓴다.
+They have no dependencies, so write pure unit tests without `@ExtendWith`.
 
-- **엔티티**: 도메인 메서드(상태 변경, 검증 예외)
-- **enum**: 파싱·매핑 로직 (`BoardSortTypeTest`, `PositionsTest` 참고)
-- **DTO**: Bean Validation 제약 — `Validator`를 직접 만들어 검증한다
+- **Entity**: domain methods (state changes, validation exceptions)
+- **enum**: parsing·mapping logic (see `BoardSortTypeTest`, `PositionsTest`)
+- **DTO**: Bean Validation constraints — build a `Validator` directly and validate
 
 ```java
 private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();

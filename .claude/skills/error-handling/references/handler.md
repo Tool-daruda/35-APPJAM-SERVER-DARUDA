@@ -1,25 +1,25 @@
-# GlobalExceptionHandler · 응답 포맷 · 인증 예외 (daruda)
+# GlobalExceptionHandler · response format · auth exceptions (daruda)
 
-## 이미 처리되는 예외
+## Already-handled exceptions
 
-`global/handler/GlobalExceptionHandler.java`가 아래를 처리한다. **새 핸들러를 추가하기 전에 중복인지 확인한다.**
+`global/handler/GlobalExceptionHandler.java` handles the following. **Before adding a new handler, check whether it's a duplicate.**
 
-| 예외 | 응답 |
-|------|------|
-| `BusinessException` | 해당 `ErrorCode` 그대로 |
-| `MethodArgumentNotValidException` | 400 + 필드별 메시지 |
-| `ConstraintViolationException` | 400 + 경로별 메시지 |
-| `MissingServletRequestParameterException` | 400 파라미터 누락 |
-| `MissingRequestHeaderException` | 400 헤더 누락 |
-| `MethodArgumentTypeMismatchException` | 400 타입 불일치 |
-| `DataIntegrityViolationException` | 400 무결성 위반 |
+| Exception | Response |
+|-----------|----------|
+| `BusinessException` | the corresponding `ErrorCode` as-is |
+| `MethodArgumentNotValidException` | 400 + per-field messages |
+| `ConstraintViolationException` | 400 + per-path messages |
+| `MissingServletRequestParameterException` | 400 missing parameter |
+| `MissingRequestHeaderException` | 400 missing header |
+| `MethodArgumentTypeMismatchException` | 400 type mismatch |
+| `DataIntegrityViolationException` | 400 integrity violation |
 | `IllegalArgumentException` / `IllegalStateException` | 400 |
-| `MultipartException` / `MaxUploadSizeExceededException` | 500 업로드 실패 |
+| `MultipartException` / `MaxUploadSizeExceededException` | 500 upload failure |
 | `IOException` / `Exception` | 500 |
 
-## 핸들러 추가
+## Adding a handler
 
-기존 스타일을 따른다.
+Follow the existing style.
 
 ```java
 @ExceptionHandler(XxxException.class)
@@ -30,11 +30,11 @@ public ResponseEntity<ErrorResponse> handleXxxException(XxxException ex) {
 }
 ```
 
-로그 레벨: 클라이언트 잘못(4xx)은 `debug`/`warn`, 서버 잘못(5xx)은 `error`(스택 트레이스 포함).
+Log level: client fault (4xx) → `debug`/`warn`, server fault (5xx) → `error` (with stack trace).
 
-## 응답 포맷
+## Response format
 
-**에러**(`ErrorResponse`):
+**Error** (`ErrorResponse`):
 
 ```json
 {
@@ -44,7 +44,7 @@ public ResponseEntity<ErrorResponse> handleXxxException(XxxException ex) {
 }
 ```
 
-**검증 실패**(필드 정보 포함):
+**Validation failure** (includes field info):
 
 ```json
 {
@@ -57,7 +57,7 @@ public ResponseEntity<ErrorResponse> handleXxxException(XxxException ex) {
 }
 ```
 
-**성공**(`SuccessResponse`):
+**Success** (`SuccessResponse`):
 
 ```json
 {
@@ -67,16 +67,16 @@ public ResponseEntity<ErrorResponse> handleXxxException(XxxException ex) {
 }
 ```
 
-`data`가 null이면 응답에서 생략된다(`@JsonInclude(NON_NULL)`).
+If `data` is null it is omitted from the response (`@JsonInclude(NON_NULL)`).
 
-## 인증/인가 예외
+## Auth/authorization exceptions
 
-Security 필터 체인에서 발생하는 예외는 **`GlobalExceptionHandler`가 잡지 못한다**(컨트롤러 진입 전에 발생한다).
+Exceptions raised in the Security filter chain **are not caught by `GlobalExceptionHandler`** (they occur before the controller is reached).
 
-| 상황 | 처리 위치 |
-|------|-----------|
-| 인증 실패 | `JwtAuthenticationEntryPoint` |
-| 인가 실패 | `CustomAccessDeniedHandler` |
-| 필터 내부 예외 | `ExceptionHandlerFilter` |
+| Situation | Handling location |
+|-----------|-------------------|
+| Authentication failure | `JwtAuthenticationEntryPoint` |
+| Authorization failure | `CustomAccessDeniedHandler` |
+| Exception inside a filter | `ExceptionHandlerFilter` |
 
-JWT 관련 예외를 다룰 때는 `global/auth/security/` 아래를 수정한다.
+When dealing with JWT-related exceptions, modify under `global/auth/security/`.
