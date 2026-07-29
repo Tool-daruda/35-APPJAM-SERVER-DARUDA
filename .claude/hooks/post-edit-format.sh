@@ -24,6 +24,18 @@ except Exception:
 [[ -L "$FILE" ]] && exit 0
 [[ -n "$FILE" && -f "$FILE" && -s "$FILE" ]] || exit 0
 
+# -L 검사는 마지막 경로 요소만 본다. 상위 디렉터리가 저장소 밖을 가리키는 심볼릭 링크면
+# (예: repo/link/file.java 에서 link 가 외부를 가리킴) 파일 자체는 링크가 아니라 통과한다.
+# 파일과 프로젝트 루트를 모두 canonical 경로로 변환해, 해석된 파일이 루트 내부일 때만 보정한다.
+ROOT="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+INSIDE_ROOT=$(FILE="$FILE" ROOT="$ROOT" python3 -c "
+import os
+f = os.path.realpath(os.environ['FILE'])
+root = os.path.realpath(os.environ['ROOT'])
+print('1' if f == root or f.startswith(root + os.sep) else '0')
+" 2>/dev/null || echo '0')
+[[ "$INSIDE_ROOT" == "1" ]] || exit 0
+
 # 텍스트 소스 파일만 대상으로 한다 (바이너리에 개행을 붙이면 파일이 깨진다)
 case "$FILE" in
 	*.java | *.gradle | *.kts | *.xml | *.yml | *.yaml | *.json | *.md | *.sh | *.properties | *.sql | *.txt | *.http) ;;
