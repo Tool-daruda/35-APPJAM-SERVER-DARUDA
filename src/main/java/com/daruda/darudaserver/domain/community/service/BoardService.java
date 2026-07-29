@@ -29,7 +29,6 @@ import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.community.util.ValidateBoard;
-import com.daruda.darudaserver.domain.search.document.BoardDocument;
 import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
@@ -88,10 +87,17 @@ public class BoardService {
 			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
 		}
 
-		Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
-		Board board = boardCreateAndUpdateReq.isFree()
-			? createFreeBoard(user, boardCreateAndUpdateReq) :
-			createToolBoard(tool, boardCreateAndUpdateReq, user);
+		// 자유 게시판(isFree=true)은 toolId가 없으므로 Tool을 조회하지 않는다. (toolId=null로 조회 시 예외 발생 방지)
+		Board board;
+		Long toolId;
+		if (boardCreateAndUpdateReq.isFree()) {
+			board = createFreeBoard(user, boardCreateAndUpdateReq);
+			toolId = null;
+		} else {
+			Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
+			board = createToolBoard(tool, boardCreateAndUpdateReq, user);
+			toolId = tool.getToolId();
+		}
 
 		// 이미지 처리
 		List<String> imageUrls = processImages(board, boardCreateAndUpdateReq.imageList());
@@ -104,7 +110,7 @@ public class BoardService {
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, tool.getToolId());
+		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, toolId);
 	}
 
 	// 게시판 업데이트
@@ -118,9 +124,9 @@ public class BoardService {
 			throw new ForbiddenException(ErrorCode.USER_SUSPENDED);
 		}
 
-		boardSearchRepository.findById(boardId.toString())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
-
+		// 게시글 존재 여부는 validateBoardAndUser(DB)로 이미 검증된다.
+		// 검색 색인(ES) 문서 유무로 판단하면 색인 지연/유실 시 정상 게시글도 수정 불가가 되므로 사전 검증하지 않는다.
+		// 수정 후 BoardUpdatedEvent 처리에서 ES 문서를 upsert(save)하여 재색인한다.
 		Tool tool = boardCreateAndUpdateReq.isFree() ? null : getToolById(boardCreateAndUpdateReq.toolId());
 
 		board.update(
@@ -148,8 +154,6 @@ public class BoardService {
 	// 게시판 삭제
 	public void deleteBoard(final Long userId, final Long boardId) {
 		Board board = validateBoardAndUser(userId, boardId);
-		BoardDocument boardDocument = boardSearchRepository.findById(boardId.toString())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 		deleteOriginImages(boardId);
 
 		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
@@ -164,7 +168,8 @@ public class BoardService {
 			log.info("삭제된 게시글과 연관된 스크랩 데이터를 제거했습니다. Scrap Count: {}", scraps.size());
 		}
 		board.delete();
-		boardSearchRepository.delete(boardDocument);
+		// 검색 색인(ES) 문서가 없어도 삭제가 실패하지 않도록 idempotent하게 처리한다.
+		boardSearchRepository.deleteById(boardId.toString());
 	}
 
 	// 게시판 조회
