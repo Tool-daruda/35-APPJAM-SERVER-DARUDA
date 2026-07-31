@@ -24,7 +24,7 @@ git status
 ```
 
 - **Never commit secrets, regardless of file name** (`.env`, `private.pem`, `application-*.yml`, `.properties`, `.json`, shell scripts, …). Scan the staged diff for credentials before committing.
-- For commit-split units, see `git-convention`'s "Commit types" section.
+- For commit-split units, see `git-convention`'s "Commit granularity" section — split to the smallest self-contained unit, even within one file.
 
 ## 3. Check the branch
 
