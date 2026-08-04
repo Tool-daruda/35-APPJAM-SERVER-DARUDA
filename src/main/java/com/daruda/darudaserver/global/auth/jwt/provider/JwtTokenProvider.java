@@ -135,7 +135,7 @@ public class JwtTokenProvider {
 				case INVALID_JWT_TOKEN -> new BadRequestException(ErrorCode.INVALID_REFRESH_TOKEN_ERROR);
 				case INVALID_JWT_SIGNATURE -> new BadRequestException(ErrorCode.REFRESH_TOKEN_SIGNATURE_ERROR);
 				case UNSUPPORTED_JWT_TOKEN -> new BadRequestException(ErrorCode.UNSUPPORTED_REFRESH_TOKEN_ERROR);
-				case EMPTY_JWT -> new BadRequestException(ErrorCode.REFREH_TOKEN_EMPTY_ERROR);
+				case EMPTY_JWT -> new BadRequestException(ErrorCode.REFRESH_TOKEN_EMPTY_ERROR);
 				default -> new BusinessException(ErrorCode.UNSUPPORTED_REFRESH_TOKEN_ERROR);
 			};
 		}
