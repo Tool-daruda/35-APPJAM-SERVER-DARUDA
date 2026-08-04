@@ -43,7 +43,8 @@ public class ImageController {
 		@RequestParam String extension) {
 		PresignedUrlResponse response = imageService.createUploadPresignedUrl(prefix, extension);
 
-		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_CREATE, response));
+		return ResponseEntity.status(SuccessCode.SUCCESS_CREATE.getHttpStatus())
+			.body(SuccessResponse.of(SuccessCode.SUCCESS_CREATE, response));
 	}
 
 }

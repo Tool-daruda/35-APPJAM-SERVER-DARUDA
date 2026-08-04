@@ -19,8 +19,8 @@ import com.daruda.darudaserver.domain.notification.dto.request.CommunityBlockNot
 import com.daruda.darudaserver.domain.notification.dto.request.NoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.response.NotificationResponse;
 import com.daruda.darudaserver.domain.notification.service.NotificationService;
-import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
+import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -44,43 +44,44 @@ public class NotificationController {
 
 	@PatchMapping("/read/{notification-id}")
 	@Operation(summary = "알림 읽음", description = "알림을 읽음 처리 합니다.")
-	public ResponseEntity<ApiResponse<Void>> readNotification(
+	public ResponseEntity<SuccessResponse<Void>> readNotification(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "notification Id", example = "1")
 		@PathVariable(name = "notification-id") Long notificationId) {
 		notificationService.readNotification(userId, notificationId);
-		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_UPDATE));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_UPDATE));
 	}
 
 	@GetMapping
 	@Operation(summary = "전체 알림 목록 조회", description = "전체 알림을 목록으로 조회합니다.")
-	public ResponseEntity<ApiResponse<List<NotificationResponse>>> getNotifications(
+	public ResponseEntity<SuccessResponse<List<NotificationResponse>>> getNotifications(
 		@AuthenticationPrincipal Long userId) {
 		return ResponseEntity.ok(
-			ApiResponse.ofSuccessWithData(notificationService.getNotifications(userId), SuccessCode.SUCCESS_FETCH));
+			SuccessResponse.of(SuccessCode.SUCCESS_FETCH, notificationService.getNotifications(userId)));
 	}
 
 	@GetMapping("/recent")
 	@Operation(summary = "최근 알림 목록 조회", description = "최근 3개의 알림을 목록으로 조회합니다.")
-	public ResponseEntity<ApiResponse<List<NotificationResponse>>> getRecentNotifications(
+	public ResponseEntity<SuccessResponse<List<NotificationResponse>>> getRecentNotifications(
 		@AuthenticationPrincipal Long userId) {
 		return ResponseEntity.ok(
-			ApiResponse.ofSuccessWithData(notificationService.getRecentNotifications(userId),
-				SuccessCode.SUCCESS_FETCH));
+			SuccessResponse.of(SuccessCode.SUCCESS_FETCH, notificationService.getRecentNotifications(userId)));
 	}
 
 	@PostMapping("/notice")
 	@Operation(summary = "공지 발송(관리자)", description = "모든 사용자에게 공지를 발송합니다.")
-	public ResponseEntity<ApiResponse<Void>> notice(@RequestBody NoticeRequest noticeRequest) {
+	public ResponseEntity<SuccessResponse<Void>> notice(@RequestBody NoticeRequest noticeRequest) {
 		notificationService.sendNotice(noticeRequest);
-		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_SEND_NOTICE));
+		return ResponseEntity.status(SuccessCode.SUCCESS_SEND_NOTICE.getHttpStatus())
+			.body(SuccessResponse.of(SuccessCode.SUCCESS_SEND_NOTICE));
 	}
 
 	@PostMapping("/block-notice")
 	@Operation(summary = "커뮤니티 제한 공지 발송(관리자)", description = "커뮤니티가 제한된 사용자에게 공지를 발송합니다.")
-	public ResponseEntity<ApiResponse<Void>> blockNotice(
+	public ResponseEntity<SuccessResponse<Void>> blockNotice(
 		@RequestBody CommunityBlockNoticeRequest communityBlockNoticeRequest) {
 		notificationService.sendBlockNotice(communityBlockNoticeRequest);
-		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_SEND_COMMUNITY_BLOCK_NOTICE));
+		return ResponseEntity.status(SuccessCode.SUCCESS_SEND_COMMUNITY_BLOCK_NOTICE.getHttpStatus())
+			.body(SuccessResponse.of(SuccessCode.SUCCESS_SEND_COMMUNITY_BLOCK_NOTICE));
 	}
 }

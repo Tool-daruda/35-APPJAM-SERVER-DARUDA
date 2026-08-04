@@ -25,8 +25,8 @@ import com.daruda.darudaserver.domain.user.service.SocialService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
 import com.daruda.darudaserver.global.auth.cookie.CookieProvider;
 import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
-import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
+import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -51,20 +51,20 @@ public class AuthController {
 	@DisableSwaggerSecurity
 	@GetMapping("/login-url")
 	@Operation(summary = "소셜 로그인 URL 반환", description = "소셜 로그인 URL을 반환합니다.")
-	public ResponseEntity<ApiResponse<String>> requestLoginUrl(
+	public ResponseEntity<SuccessResponse<String>> requestLoginUrl(
 		@Parameter(description = "소셜 로그인 타입", example = "KAKAO")
 		@RequestParam SocialType socialType
 	) {
 		SocialService socialService = authService.findSocialService(socialType);
 		String redirectUrl = socialService.getLoginUrl();
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(redirectUrl, SuccessCode.SUCCESS_REDIRECT));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_REDIRECT, redirectUrl));
 	}
 
 	@DisableSwaggerSecurity
 	@PostMapping(value = "/login")
 	@Operation(summary = "소셜 로그인",
 		description = "소셜 로그인에서 발급받은 Authorization Code를 통해, 로그인을 진행합니다.")
-	public ResponseEntity<ApiResponse<LoginResponse>> login(
+	public ResponseEntity<SuccessResponse<LoginResponse>> login(
 		@Parameter(description = "Authorization Code", example = "1234")
 		@RequestParam("code") String code,
 		@RequestBody LoginRequest loginRequest,
@@ -86,13 +86,13 @@ public class AuthController {
 
 		LoginResponse loginResponse = LoginResponse.from(loginSuccessResponse);
 
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(loginResponse, SuccessCode.SUCCESS_LOGIN));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_LOGIN, loginResponse));
 	}
 
 	@DisableSwaggerSecurity
 	@PostMapping("/sign-up")
 	@Operation(summary = "회원 가입", description = "회원 가입을 진행합니다.")
-	public ResponseEntity<ApiResponse<SignUpResponse>> register(
+	public ResponseEntity<SuccessResponse<SignUpResponse>> register(
 		@Valid @RequestBody SignUpRequest signUpRequest,
 		HttpServletResponse httpServletResponse
 	) {
@@ -110,24 +110,25 @@ public class AuthController {
 
 		SignUpResponse signUpResponse = SignUpResponse.from(signUpSuccessResponse);
 
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(signUpResponse, SuccessCode.SUCCESS_CREATE));
+		return ResponseEntity.status(SuccessCode.SUCCESS_CREATE.getHttpStatus())
+			.body(SuccessResponse.of(SuccessCode.SUCCESS_CREATE, signUpResponse));
 	}
 
 	@PostMapping("/logout")
 	@Operation(summary = "로그아웃", description = "로그아웃을 진행합니다.")
-	public ResponseEntity<ApiResponse<Long>> logout(
+	public ResponseEntity<SuccessResponse<Long>> logout(
 		@AuthenticationPrincipal Long userId,
 		HttpServletResponse httpServletResponse
 	) {
 		cookieProvider.deleteTokenCookies(httpServletResponse);
 
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(authService.logout(userId), SuccessCode.SUCCESS_LOGOUT));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_LOGOUT, authService.logout(userId)));
 	}
 
 	@DisableSwaggerSecurity
 	@PostMapping("/reissue")
 	@Operation(summary = "Access Token 재발급", description = "Refresh Token을 통해 Access Token을 재발급합니다.")
-	public ResponseEntity<ApiResponse<TokenResponse>> reissueToken(HttpServletRequest httpServletRequest,
+	public ResponseEntity<SuccessResponse<TokenResponse>> reissueToken(HttpServletRequest httpServletRequest,
 		HttpServletResponse httpServletResponse) {
 
 		JwtTokenResponse tokenResponse = tokenService.reissueToken(httpServletRequest);
@@ -137,17 +138,18 @@ public class AuthController {
 			tokenResponse.refreshToken()
 		);
 
-		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_REISSUE));
+		return ResponseEntity.status(SuccessCode.SUCCESS_REISSUE.getHttpStatus())
+			.body(SuccessResponse.of(SuccessCode.SUCCESS_REISSUE));
 	}
 
 	@DeleteMapping("/withdraw")
 	@Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 진행합니다.")
-	public ResponseEntity<ApiResponse<Void>> withdraw(
+	public ResponseEntity<SuccessResponse<Void>> withdraw(
 		@AuthenticationPrincipal Long userId,
 		HttpServletResponse httpServletResponse
 	) {
 		cookieProvider.deleteTokenCookies(httpServletResponse);
 		authService.withdraw(userId);
-		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_WITHDRAW));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_WITHDRAW));
 	}
 }
