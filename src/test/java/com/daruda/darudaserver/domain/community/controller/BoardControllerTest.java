@@ -23,9 +23,9 @@ import org.springframework.security.web.method.annotation.AuthenticationPrincipa
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
-import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
-import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
+import com.daruda.darudaserver.domain.community.dto.response.BoardResponse;
+import com.daruda.darudaserver.domain.community.dto.response.BoardScrapResponse;
+import com.daruda.darudaserver.domain.community.dto.response.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.entity.BoardSortType;
 import com.daruda.darudaserver.domain.community.service.BoardScrapService;
 import com.daruda.darudaserver.domain.community.service.BoardService;
@@ -115,7 +115,7 @@ class BoardControllerTest {
 	@DisplayName("게시글 리스트 조회: 응답의 각 게시글에 스크랩 수(scrapCount)가 포함된다")
 	void getBoardList_includesScrapCount() throws Exception {
 		// given
-		BoardRes boardRes = BoardRes.builder()
+		BoardResponse boardRes = BoardResponse.builder()
 			.boardId(1L)
 			.scrapCount(7L)
 			.build();
@@ -142,7 +142,7 @@ class BoardControllerTest {
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 
-		BoardScrapRes mockRes = new BoardScrapRes(boardId, true);
+		BoardScrapResponse mockRes = new BoardScrapResponse(boardId, true);
 
 		when(boardScrapService.toggleScrap(userId, boardId)).thenReturn(mockRes);
 
@@ -154,7 +154,7 @@ class BoardControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.boardId").value(boardId))
 			.andExpect(jsonPath("$.data.scrap").value(true))
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_SCRAP.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_SCRAP.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_SCRAP.getMessage()));
 	}
 }

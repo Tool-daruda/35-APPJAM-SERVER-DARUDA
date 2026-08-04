@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
-import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
-import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
-import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
+import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateRequest;
+import com.daruda.darudaserver.domain.community.dto.response.BoardResponse;
+import com.daruda.darudaserver.domain.community.dto.response.BoardScrapResponse;
+import com.daruda.darudaserver.domain.community.dto.response.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.entity.BoardSortType;
 import com.daruda.darudaserver.domain.community.service.BoardScrapService;
 import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
-import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
+import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,62 +39,63 @@ public class BoardController {
 
 	@PostMapping
 	@Operation(summary = "게시글 작성", description = "게시글을 작성합니다.")
-	public ResponseEntity<ApiResponse<BoardRes>> createBoard(
+	public ResponseEntity<SuccessResponse<BoardResponse>> createBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "작성할 게시글")
-		@RequestBody @Valid BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+		@RequestBody @Valid BoardCreateAndUpdateRequest boardCreateAndUpdateReq) {
 
-		BoardRes boardRes = boardService.createBoard(userId, boardCreateAndUpdateReq);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes, SuccessCode.SUCCESS_CREATE));
+		BoardResponse boardRes = boardService.createBoard(userId, boardCreateAndUpdateReq);
+		return ResponseEntity.status(SuccessCode.SUCCESS_CREATE.getHttpStatus())
+			.body(SuccessResponse.of(SuccessCode.SUCCESS_CREATE, boardRes));
 	}
 
 	@PatchMapping("/{board-id}")
 	@Operation(summary = "게시글 수정", description = "게시글을 수정합니다.")
-	public ResponseEntity<ApiResponse<BoardRes>> updateBoard(
+	public ResponseEntity<SuccessResponse<BoardResponse>> updateBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId,
 		@Parameter(description = "수정할 게시글")
-		@RequestBody @Valid final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
-		BoardRes boardRes = boardService.updateBoard(userId, boardId, boardCreateAndUpdateReq);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes, SuccessCode.SUCCESS_UPDATE));
+		@RequestBody @Valid final BoardCreateAndUpdateRequest boardCreateAndUpdateReq) {
+		BoardResponse boardRes = boardService.updateBoard(userId, boardId, boardCreateAndUpdateReq);
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_UPDATE, boardRes));
 	}
 
 	@DisableSwaggerSecurity
 	@GetMapping("/{board-id}")
 	@Operation(summary = "게시글 조회", description = "게시글을 조회합니다.")
-	public ResponseEntity<ApiResponse<BoardRes>> getBoard(
+	public ResponseEntity<SuccessResponse<BoardResponse>> getBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId) {
-		BoardRes boardRes = boardService.getBoard(userId, boardId);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardRes, SuccessCode.SUCCESS_FETCH));
+		BoardResponse boardRes = boardService.getBoard(userId, boardId);
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, boardRes));
 	}
 
 	@DeleteMapping("/{board-id}")
 	@Operation(summary = "게시글 삭제", description = "게시글을 삭제합니다.")
-	public ResponseEntity<ApiResponse<Void>> deleteBoard(
+	public ResponseEntity<SuccessResponse<Void>> deleteBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId) {
 		boardService.deleteBoard(userId, boardId);
-		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_DELETE));
 	}
 
 	@PostMapping("/{board-id}/scrap")
 	@Operation(summary = "게시글 스크랩", description = "게시글을 스크랩합니다.")
-	public ResponseEntity<ApiResponse<BoardScrapRes>> scrapBoard(
+	public ResponseEntity<SuccessResponse<BoardScrapResponse>> scrapBoard(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "board Id", example = "1")
 		@PathVariable(name = "board-id") final Long boardId) {
-		BoardScrapRes boardScrapRes = boardScrapService.toggleScrap(userId, boardId);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardScrapRes, SuccessCode.SUCCESS_SCRAP));
+		BoardScrapResponse boardScrapRes = boardScrapService.toggleScrap(userId, boardId);
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_SCRAP, boardScrapRes));
 	}
 
 	@DisableSwaggerSecurity
 	@GetMapping
 	@Operation(summary = "게시글 리스트 조회", description = "게시글 리스트를 조회합니다.")
-	public ResponseEntity<ApiResponse<GetBoardResponse>> getBoardList(
+	public ResponseEntity<SuccessResponse<GetBoardResponse>> getBoardList(
 		@AuthenticationPrincipal Long userId,
 		@Parameter(description = "자유 게시판 게시글 여부", example = "true")
 		@RequestParam(name = "noTopic", required = false) Boolean noTopic,
@@ -111,6 +112,6 @@ public class BoardController {
 		BoardSortType sortType = BoardSortType.from(sortBy);
 		GetBoardResponse boardResponse = boardService.getBoardList(userId, noTopic, toolId, size, lastBoardId, sortType,
 			lastScrapCount);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardResponse, SuccessCode.SUCCESS_FETCH));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, boardResponse));
 	}
 }

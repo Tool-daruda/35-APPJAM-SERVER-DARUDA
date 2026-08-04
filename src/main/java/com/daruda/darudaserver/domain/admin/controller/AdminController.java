@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
 import com.daruda.darudaserver.domain.admin.dto.request.UpdateToolRequest;
-import com.daruda.darudaserver.domain.admin.dto.response.AdminToolPageRes;
+import com.daruda.darudaserver.domain.admin.dto.response.AdminToolPageResponse;
 import com.daruda.darudaserver.domain.admin.service.AdminService;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
 import com.daruda.darudaserver.global.error.dto.SuccessResponse;
@@ -35,7 +35,7 @@ public class AdminController {
 
 	@GetMapping("/tool")
 	@Operation(summary = "관리자용 툴 조회", description = "관리자용 전체 툴 조회 API입니다.")
-	public ResponseEntity<SuccessResponse<AdminToolPageRes>> fetchAllTool(
+	public ResponseEntity<SuccessResponse<AdminToolPageResponse>> fetchAllTool(
 		@Parameter(description = "정렬 기준", example = "createdAt")
 		@RequestParam(defaultValue = "createdAt", value = "criteria") String criteria,
 		@Parameter(description = "정렬 순서 (ASC/DESC)", example = "DESC")
@@ -47,7 +47,7 @@ public class AdminController {
 		@Parameter(description = "페이지 크기", example = "10")
 		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
-		AdminToolPageRes res = adminService.fetchAllTool(criteria, direction, page, size);
+		AdminToolPageResponse res = adminService.fetchAllTool(criteria, direction, page, size);
 		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, res));
 	}
 
@@ -90,7 +90,8 @@ public class AdminController {
 		@RequestBody @Valid CreateToolRequest createToolRequest) {
 
 		adminService.createTool(createToolRequest);
-		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_CREATE));
+		return ResponseEntity.status(SuccessCode.SUCCESS_CREATE.getHttpStatus())
+			.body(SuccessResponse.of(SuccessCode.SUCCESS_CREATE));
 	}
 
 	@PatchMapping("/tools/{toolId}")

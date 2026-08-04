@@ -9,15 +9,15 @@ import com.daruda.darudaserver.domain.tool.entity.Category;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-public record AdminToolPageRes(
-	List<ToolRes> tools,
+public record AdminToolPageResponse(
+	List<ToolResponse> tools,
 	int page,
 	int totalPages,
 	long totalElements
 ) {
-	public static AdminToolPageRes of(Page<Tool> toolPage) {
-		List<ToolRes> toolResList = toolPage.getContent().stream()
-			.map(tool -> new ToolRes(
+	public static AdminToolPageResponse of(Page<Tool> toolPage) {
+		List<ToolResponse> toolResList = toolPage.getContent().stream()
+			.map(tool -> new ToolResponse(
 				tool.getToolId(),
 				tool.getToolLogo(),
 				tool.getToolMainName(),
@@ -27,7 +27,7 @@ public record AdminToolPageRes(
 			))
 			.toList();
 
-		return new AdminToolPageRes(
+		return new AdminToolPageResponse(
 			toolResList,
 			toolPage.getNumber(),
 			toolPage.getTotalPages(),
@@ -35,7 +35,7 @@ public record AdminToolPageRes(
 		);
 	}
 
-	public record ToolRes(
+	public record ToolResponse(
 		Long toolId,
 		String toolLogo,
 		String toolName,

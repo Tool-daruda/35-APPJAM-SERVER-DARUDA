@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.domain.tool.dto.res;
+package com.daruda.darudaserver.domain.tool.dto.response;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 
 @Builder
-public record ToolDetailGetRes(
+public record ToolDetailGetResponse(
 	Long toolId,
 	String toolLogo,
 	String toolMainName,
@@ -20,7 +20,7 @@ public record ToolDetailGetRes(
 	String category,
 	String toolLink,
 	Boolean supportKorea,
-	List<PlatformRes> platform,
+	List<PlatformResponse> platform,
 	String detailDescription,
 	List<String> videos,
 	List<String> images,
@@ -30,10 +30,10 @@ public record ToolDetailGetRes(
 	Boolean isLiked,
 	int likeCount
 ) {
-	public static ToolDetailGetRes of(Tool tool, List<PlatformRes> platform, List<String> keywords,
+	public static ToolDetailGetResponse of(Tool tool, List<PlatformResponse> platform, List<String> keywords,
 		List<String> images, List<String> videos, Boolean isScrapped, Boolean isLiked, int likeCount) {
 
-		return ToolDetailGetRes.builder()
+		return ToolDetailGetResponse.builder()
 			.toolId(tool.getToolId())
 			.toolLogo(tool.getToolLogo())
 			.toolMainName(tool.upperMainName(tool.getToolMainName()))

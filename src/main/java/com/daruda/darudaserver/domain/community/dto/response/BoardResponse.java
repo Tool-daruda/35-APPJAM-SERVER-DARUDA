@@ -1,6 +1,6 @@
-package com.daruda.darudaserver.domain.community.dto.res;
+package com.daruda.darudaserver.domain.community.dto.response;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
@@ -11,7 +11,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class BoardRes {
+public class BoardResponse {
 	private Long boardId;
 	private String toolName;
 	private String toolLogo;
@@ -24,33 +24,34 @@ public class BoardRes {
 	private Long scrapCount;
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
-	private Timestamp updatedAt;
+	private LocalDateTime updatedAt;
 	private int commentCount;
 
-	public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount,
-		final List<String> images, final Long toolId) {
+	public static BoardResponse of(final Board board, final String toolName, final String toolLogo,
+		final int commentCount, final List<String> images, final Long toolId) {
 		return createBoardRes(board, toolName, toolLogo, commentCount, images, toolId);
 	}
 
-	public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount,
-		final List<String> images, final Boolean isScraped) {
+	public static BoardResponse of(final Board board, final String toolName, final String toolLogo,
+		final int commentCount, final List<String> images, final Boolean isScraped) {
 		return getBoardRes(board, toolName, toolLogo, commentCount, images, isScraped);
 	}
 
-	public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount,
-		final List<String> images, final Boolean isScraped, final Long toolId) {
+	public static BoardResponse of(final Board board, final String toolName, final String toolLogo,
+		final int commentCount, final List<String> images, final Boolean isScraped, final Long toolId) {
 		return getBoardResWithToolId(board, toolName, toolLogo, commentCount, images, isScraped, toolId);
 	}
 
-	public static BoardRes of(final Board board, final String toolName, final String toolLogo, final int commentCount,
-		final List<String> images, final Boolean isScraped, final Long toolId, final Long scrapCount) {
+	public static BoardResponse of(final Board board, final String toolName, final String toolLogo,
+		final int commentCount, final List<String> images, final Boolean isScraped, final Long toolId,
+		final Long scrapCount) {
 		return getBoardResWithToolIdAndScrapCount(board, toolName, toolLogo, commentCount, images, isScraped, toolId,
 			scrapCount);
 	}
 
-	public static BoardRes createBoardRes(final Board board, final String toolName, final String toolLogo,
+	public static BoardResponse createBoardRes(final Board board, final String toolName, final String toolLogo,
 		final int commentCount, final List<String> images, final Long toolId) {
-		return BoardRes.builder()
+		return BoardResponse.builder()
 			.boardId(board.getId())
 			.toolName(toolName)
 			.toolLogo(toolLogo)
@@ -65,9 +66,9 @@ public class BoardRes {
 			.build();
 	}
 
-	public static BoardRes getBoardRes(final Board board, final String toolName, final String toolLogo,
+	public static BoardResponse getBoardRes(final Board board, final String toolName, final String toolLogo,
 		final int commentCount, final List<String> images, final Boolean isScraped) {
-		return BoardRes.builder()
+		return BoardResponse.builder()
 			.boardId(board.getId())
 			.toolName(toolName)
 			.toolLogo(toolLogo)
@@ -81,9 +82,9 @@ public class BoardRes {
 			.build();
 	}
 
-	public static BoardRes getBoardResWithToolId(final Board board, final String toolName, final String toolLogo,
+	public static BoardResponse getBoardResWithToolId(final Board board, final String toolName, final String toolLogo,
 		final int commentCount, final List<String> images, final Boolean isScraped, final Long toolId) {
-		return BoardRes.builder()
+		return BoardResponse.builder()
 			.boardId(board.getId())
 			.toolName(toolName)
 			.toolLogo(toolLogo)
@@ -98,10 +99,10 @@ public class BoardRes {
 			.build();
 	}
 
-	public static BoardRes getBoardResWithToolIdAndScrapCount(final Board board, final String toolName,
+	public static BoardResponse getBoardResWithToolIdAndScrapCount(final Board board, final String toolName,
 		final String toolLogo, final int commentCount, final List<String> images, final Boolean isScraped,
 		final Long toolId, final Long scrapCount) {
-		return BoardRes.builder()
+		return BoardResponse.builder()
 			.boardId(board.getId())
 			.toolName(toolName)
 			.toolLogo(toolLogo)

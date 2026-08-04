@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.domain.report.dto.req;
+package com.daruda.darudaserver.domain.report.dto.request;
 
 import com.daruda.darudaserver.domain.report.entity.ReportStatus;
 import com.daruda.darudaserver.domain.report.entity.SuspensionDuration;

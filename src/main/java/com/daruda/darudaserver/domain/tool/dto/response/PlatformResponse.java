@@ -1,17 +1,17 @@
-package com.daruda.darudaserver.domain.tool.dto.res;
+package com.daruda.darudaserver.domain.tool.dto.response;
 
 import com.daruda.darudaserver.domain.tool.entity.ToolPlatForm;
 
 import lombok.Builder;
 
 @Builder
-public record PlatformRes(
+public record PlatformResponse(
 	Boolean Web,
 	Boolean Windows,
 	Boolean Mac
 ) {
-	public static PlatformRes of(ToolPlatForm platForm) {
-		return PlatformRes.builder()
+	public static PlatformResponse of(ToolPlatForm platForm) {
+		return PlatformResponse.builder()
 			.Web(platForm.getWeb())
 			.Windows(platForm.getWindows())
 			.Mac(platForm.getMac())

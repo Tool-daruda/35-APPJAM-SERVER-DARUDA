@@ -14,7 +14,7 @@ import com.daruda.darudaserver.domain.admin.dto.request.CreateToolCoreRequest;
 import com.daruda.darudaserver.domain.admin.dto.request.CreateToolPlanRequest;
 import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
 import com.daruda.darudaserver.domain.admin.dto.request.UpdateToolRequest;
-import com.daruda.darudaserver.domain.admin.dto.response.AdminToolPageRes;
+import com.daruda.darudaserver.domain.admin.dto.response.AdminToolPageResponse;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
 import com.daruda.darudaserver.domain.tool.entity.Category;
 import com.daruda.darudaserver.domain.tool.entity.License;
@@ -44,7 +44,7 @@ import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
-@Transactional
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 public class AdminService {
@@ -61,6 +61,7 @@ public class AdminService {
 	private final ToolLikeRepository toolLikeRepository;
 	private final ToolBlogRepository toolBlogRepository;
 
+	@Transactional
 	public void createTool(CreateToolRequest createToolRequest) {
 
 		//Tool entity 가공
@@ -168,6 +169,7 @@ public class AdminService {
 		}
 	}
 
+	@Transactional
 	public void updateTool(final Long toolId, final UpdateToolRequest req) {
 		Tool tool = toolRepository.findById(toolId)
 			.orElseThrow(() -> new IllegalArgumentException("Tool not found: " + toolId));
@@ -329,6 +331,7 @@ public class AdminService {
 		toolRepository.save(tool);
 	}
 
+	@Transactional
 	public void deleteTool(final Long toolId) {
 		Tool tool = toolRepository.findById(toolId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
@@ -356,11 +359,11 @@ public class AdminService {
 		toolRepository.delete(tool);
 	}
 
-	public AdminToolPageRes fetchAllTool(String criteria, String direction, int page, int size) {
+	public AdminToolPageResponse fetchAllTool(String criteria, String direction, int page, int size) {
 		Sort.Direction dir = Sort.Direction.fromString(direction);
 		Pageable pageable = PageRequest.of(page, size, Sort.by(dir, criteria));
 		Page<Tool> toolPage = toolRepository.findAll(pageable);
 
-		return AdminToolPageRes.of(toolPage);
+		return AdminToolPageResponse.of(toolPage);
 	}
 }

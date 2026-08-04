@@ -1,4 +1,4 @@
-package com.daruda.darudaserver.domain.tool.dto.res;
+package com.daruda.darudaserver.domain.tool.dto.response;
 
 import java.util.List;
 
@@ -7,24 +7,21 @@ import com.daruda.darudaserver.domain.tool.entity.Tool;
 import lombok.Builder;
 
 @Builder
-public record ToolResponse(
+public record RelatedToolResponse(
 	Long toolId,
 	String toolName,
 	String toolLogo,
-	String description,
 	String license,
-	List<String> keywords,
-	Boolean isScraped
+	List<String> keywords
 ) {
-	public static ToolResponse of(Tool tool, List<String> keywords, Boolean isScraped) {
-		return ToolResponse.builder()
+
+	public static RelatedToolResponse of(Tool tool, List<String> keywords) {
+		return RelatedToolResponse.builder()
 			.toolId(tool.getToolId())
 			.toolName(tool.getToolMainName())
 			.toolLogo(tool.getToolLogo())
-			.description(tool.getDescription())
 			.license(tool.getLicense().getKoreanName())
 			.keywords(keywords)
-			.isScraped(isScraped)
 			.build();
 	}
 }
