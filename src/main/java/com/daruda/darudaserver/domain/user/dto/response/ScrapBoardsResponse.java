@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.domain.user.dto.response;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -12,13 +12,13 @@ public record ScrapBoardsResponse(
 	String title,
 	String content,
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
-	Timestamp updatedAt,
+	LocalDateTime updatedAt,
 	String toolName,
 	String toolLogo,
 	Boolean isScrapped,
 	Long scrapCount
 ) {
-	public static ScrapBoardsResponse of(Long boardId, String title, String content, Timestamp updatedAt,
+	public static ScrapBoardsResponse of(Long boardId, String title, String content, LocalDateTime updatedAt,
 		String toolName, String toolLogo, Boolean isScrapped, Long scrapCount) {
 		return ScrapBoardsResponse.builder()
 			.boardId(boardId)

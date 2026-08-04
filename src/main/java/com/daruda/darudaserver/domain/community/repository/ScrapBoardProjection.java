@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.domain.community.repository;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public interface ScrapBoardProjection {
 	Long getBoardId();
@@ -9,7 +9,7 @@ public interface ScrapBoardProjection {
 
 	String getContent();
 
-	Timestamp getUpdatedAt();
+	LocalDateTime getUpdatedAt();
 
 	String getToolName();
 
