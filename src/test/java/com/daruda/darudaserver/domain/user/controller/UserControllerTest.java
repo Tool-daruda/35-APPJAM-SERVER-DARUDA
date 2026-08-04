@@ -32,7 +32,7 @@ import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
 import com.daruda.darudaserver.domain.user.dto.response.MyProfileResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
@@ -102,7 +102,7 @@ class UserControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.nickname").value(nickname))
 			.andExpect(jsonPath("$.data.positions").value("STUDENT"))
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_UPDATE.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_UPDATE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_UPDATE.getMessage()));
 	}
 
@@ -128,7 +128,7 @@ class UserControllerTest {
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.toolList").isArray())
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_FETCH.getMessage()));
 	}
 
@@ -156,7 +156,7 @@ class UserControllerTest {
 				.param("size", "5") // 페이지 크기
 				.param("criteria", "createdAt")) // 정렬 기준
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_FETCH.getMessage()));
 	}
 
@@ -169,7 +169,7 @@ class UserControllerTest {
 		Positions positions = Positions.STUDENT;
 		String positionEngName = positions.getEngName();
 
-		UserEntity user = UserEntity.builder()
+		User user = User.builder()
 			.nickname(nickname)
 			.positions(positions)
 			.build();
@@ -195,7 +195,7 @@ class UserControllerTest {
 			.andExpect(jsonPath("$.data.userId").value(userId))
 			.andExpect(jsonPath("$.data.nickname").value(nickname))
 			.andExpect(jsonPath("$.data.positions").value("STUDENT"))
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_FETCH.getMessage()));
 	}
 
@@ -223,7 +223,7 @@ class UserControllerTest {
 					.param("nickname", nickname))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").value(false))
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_FETCH.getMessage()));
 	}
 
@@ -244,7 +244,7 @@ class UserControllerTest {
 		mockMvc.perform(get("/api/v1/user/scrap-boards")
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_FETCH.getMessage()));
 	}
 }

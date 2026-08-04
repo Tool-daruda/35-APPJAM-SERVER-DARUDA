@@ -26,20 +26,20 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.notification.dto.request.CommunityBlockNoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.request.NoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.response.NotificationResponse;
-import com.daruda.darudaserver.domain.notification.entity.NotificationEntity;
+import com.daruda.darudaserver.domain.notification.entity.Notification;
 import com.daruda.darudaserver.domain.notification.entity.enums.BlockDurationInDay;
 import com.daruda.darudaserver.domain.notification.entity.enums.NotificationFormat;
 import com.daruda.darudaserver.domain.notification.entity.enums.NotificationType;
 import com.daruda.darudaserver.domain.notification.repository.EmitterRepository;
 import com.daruda.darudaserver.domain.notification.repository.NotificationRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -167,20 +167,20 @@ class NotificationServiceTest {
 		Long commenterId = 2L;
 		Long otherCommenterId = 3L;
 
-		UserEntity author = UserEntity.of("author@test.com", "author", Positions.STUDENT);
+		User author = User.of("author@test.com", "author", Positions.STUDENT);
 		ReflectionTestUtils.setField(author, "id", authorId);
 
-		UserEntity commenter = UserEntity.of("commenter@test.com", "commenter", Positions.STUDENT);
+		User commenter = User.of("commenter@test.com", "commenter", Positions.STUDENT);
 		ReflectionTestUtils.setField(commenter, "id", commenterId);
 
-		UserEntity otherCommenter = UserEntity.of("other@test.com", "other", Positions.STUDENT);
+		User otherCommenter = User.of("other@test.com", "other", Positions.STUDENT);
 		ReflectionTestUtils.setField(otherCommenter, "id", otherCommenterId);
 
 		Tool tool = Tool.builder().toolMainName("test").build();
 		Board board = Board.create(tool, author, "board title", "board content");
 		ReflectionTestUtils.setField(board, "id", 100L);
 
-		CommentEntity comment = CommentEntity.of("new comment", null, commenter, board);
+		Comment comment = Comment.of("new comment", null, commenter, board);
 		ReflectionTestUtils.setField(comment, "id", 200L);
 
 		// when
@@ -204,8 +204,8 @@ class NotificationServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity user1 = UserEntity.of(email, nickname, positions);
-		UserEntity user2 = UserEntity.of(email, nickname, positions);
+		User user1 = User.of(email, nickname, positions);
+		User user2 = User.of(email, nickname, positions);
 
 		String title = "title";
 		String url = "https://notion.so/test";
@@ -233,7 +233,7 @@ class NotificationServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 		ReflectionTestUtils.setField(userEntity, "id", userId); // id 설정
 
 		String blockDurationInDayString = "1일";
@@ -247,7 +247,7 @@ class NotificationServiceTest {
 		String content = String.format(NotificationFormat.COMMUNITY_BLOCK_NOTICE_CONTENT.getMessageFormat(),
 			formattedDate, blockDurationInDay.getDays());
 
-		NotificationEntity expectedNotification = NotificationEntity.of(userEntity, NotificationType.NOTICE, title,
+		Notification expectedNotification = Notification.of(userEntity, NotificationType.NOTICE, title,
 			content, null);
 
 		SseEmitter emitter = mock(SseEmitter.class);
@@ -259,22 +259,22 @@ class NotificationServiceTest {
 		// when
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 		when(emitterRepository.findAllEmitterStartWithByUserId(userIdString)).thenReturn(Map.of(emitterId, emitter));
-		when(notificationRepository.save(any(NotificationEntity.class))).thenReturn(expectedNotification);
+		when(notificationRepository.save(any(Notification.class))).thenReturn(expectedNotification);
 
 		notificationService.sendBlockNotice(communityBlockNoticeRequest);
 		triggerAfterCommit();
 
 		// then
-		ArgumentCaptor<NotificationEntity> notificationCaptor = ArgumentCaptor.forClass(NotificationEntity.class);
+		ArgumentCaptor<Notification> notificationCaptor = ArgumentCaptor.forClass(Notification.class);
 		verify(notificationRepository).save(notificationCaptor.capture());
-		NotificationEntity capturedNotification = notificationCaptor.getValue();
+		Notification capturedNotification = notificationCaptor.getValue();
 
 		assertEquals(expectedNotification.getTitle(), capturedNotification.getTitle());
 		assertEquals(expectedNotification.getContent(), capturedNotification.getContent());
 		assertEquals(expectedNotification.getType(), capturedNotification.getType());
 
 		verify(emitterRepository).findAllEmitterStartWithByUserId(userIdString);
-		verify(emitterRepository).saveEventCache(eq(emitterId), any(NotificationEntity.class));
+		verify(emitterRepository).saveEventCache(eq(emitterId), any(Notification.class));
 		verifyNoMoreInteractions(emitterRepository);
 	}
 
@@ -286,7 +286,7 @@ class NotificationServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 
 		// when
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
@@ -306,7 +306,7 @@ class NotificationServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 
 		String toolName = "test";
 		Tool tool = Tool.builder().toolMainName(toolName).build();
@@ -316,9 +316,9 @@ class NotificationServiceTest {
 		Board board = Board.create(tool, userEntity, title, content);
 
 		String photoUrl = "http://test.test";
-		CommentEntity comment = CommentEntity.of(content, photoUrl, userEntity, board);
+		Comment comment = Comment.of(content, photoUrl, userEntity, board);
 
-		NotificationEntity notification = NotificationEntity.of(userEntity, NotificationType.COMMENT, title, content,
+		Notification notification = Notification.of(userEntity, NotificationType.COMMENT, title, content,
 			comment);
 
 		// when
@@ -340,7 +340,7 @@ class NotificationServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 
 		String toolName = "test";
 		Tool tool = Tool.builder().toolMainName(toolName).build();
@@ -350,9 +350,9 @@ class NotificationServiceTest {
 		Board board = Board.create(tool, userEntity, title, content);
 
 		String photoUrl = "http://test.test";
-		CommentEntity comment = CommentEntity.of(content, photoUrl, userEntity, board);
+		Comment comment = Comment.of(content, photoUrl, userEntity, board);
 
-		NotificationEntity notification = NotificationEntity.of(userEntity, NotificationType.COMMENT, title, content,
+		Notification notification = Notification.of(userEntity, NotificationType.COMMENT, title, content,
 			comment);
 
 		// when
@@ -374,7 +374,7 @@ class NotificationServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 		ReflectionTestUtils.setField(userEntity, "id", userId);
 
 		String toolName = "test";
@@ -385,10 +385,10 @@ class NotificationServiceTest {
 		Board board = Board.create(tool, userEntity, title, content);
 
 		String photoUrl = "http://test.test";
-		CommentEntity comment = CommentEntity.of(content, photoUrl, userEntity, board);
+		Comment comment = Comment.of(content, photoUrl, userEntity, board);
 
 		Long notificationId = 1L;
-		NotificationEntity notification = NotificationEntity.of(userEntity, NotificationType.COMMENT, title, content,
+		Notification notification = Notification.of(userEntity, NotificationType.COMMENT, title, content,
 			comment);
 
 		// when
@@ -427,7 +427,7 @@ class NotificationServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 		ReflectionTestUtils.setField(userEntity, "id", user1Id);
 
 		String toolName = "test";
@@ -438,10 +438,10 @@ class NotificationServiceTest {
 		Board board = Board.create(tool, userEntity, title, content);
 
 		String photoUrl = "http://test.test";
-		CommentEntity comment = CommentEntity.of(content, photoUrl, userEntity, board);
+		Comment comment = Comment.of(content, photoUrl, userEntity, board);
 
 		Long notificationId = 1L;
-		NotificationEntity notification = NotificationEntity.of(userEntity, NotificationType.COMMENT, title, content,
+		Notification notification = Notification.of(userEntity, NotificationType.COMMENT, title, content,
 			comment);
 
 		// when

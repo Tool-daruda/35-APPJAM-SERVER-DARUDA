@@ -27,7 +27,7 @@ import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.service.AuthService;
@@ -94,7 +94,7 @@ class AuthControllerTest {
 				.param("socialType", socialType.name()))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").value(redirectUrl))
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_REDIRECT.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_REDIRECT.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_REDIRECT.getMessage()));
 
 		// verify
@@ -111,7 +111,7 @@ class AuthControllerTest {
 		String nickname = "testUser";
 		String email = "test@example.com";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 		ReflectionTestUtils.setField(userEntity, "id", userId);
 
 		LoginRequest loginRequest = new LoginRequest(SocialType.KAKAO);
@@ -135,7 +135,7 @@ class AuthControllerTest {
 			.andExpect(jsonPath("$.data.email").doesNotExist())
 			.andExpect(jsonPath("$.data.isUser").value(true))
 			.andExpect(jsonPath("$.data.positions").value(positions.toString()))
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_LOGIN.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_LOGIN.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_LOGIN.getMessage()));
 
 		// verify
@@ -166,12 +166,12 @@ class AuthControllerTest {
 		mockMvc.perform(post("/api/v1/auth/sign-up")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(signUpRequest)))
-			.andExpect(status().isOk())
+			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.data.userId").value(userId))
 			.andExpect(jsonPath("$.data.nickname").value(nickname))
 			.andExpect(jsonPath("$.data.email").value(email))
 			.andExpect(jsonPath("$.data.positions").value(positions.toString()))
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_CREATE.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_CREATE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_CREATE.getMessage()));
 
 		// verify
@@ -197,7 +197,7 @@ class AuthControllerTest {
 		mockMvc.perform(post("/api/v1/auth/logout"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").value(userId))
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_LOGOUT.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_LOGOUT.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_LOGOUT.getMessage()));
 
 		verify(authService).logout(userId);
@@ -215,8 +215,8 @@ class AuthControllerTest {
 		// then
 		mockMvc.perform(post("/api/v1/auth/reissue")
 				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_REISSUE.getHttpStatus().value()))
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_REISSUE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_REISSUE.getMessage()));
 
 		// verify
@@ -241,7 +241,7 @@ class AuthControllerTest {
 		// then
 		mockMvc.perform(delete("/api/v1/auth/withdraw"))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_WITHDRAW.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_WITHDRAW.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_WITHDRAW.getMessage()));
 
 		verify(authService).withdraw(userId);

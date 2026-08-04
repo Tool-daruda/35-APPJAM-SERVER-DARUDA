@@ -23,15 +23,15 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.notification.dto.request.NoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.response.NotificationResponse;
-import com.daruda.darudaserver.domain.notification.entity.NotificationEntity;
+import com.daruda.darudaserver.domain.notification.entity.Notification;
 import com.daruda.darudaserver.domain.notification.entity.enums.NotificationType;
 import com.daruda.darudaserver.domain.notification.service.NotificationService;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.global.auth.jwt.provider.JwtTokenProvider;
 import com.daruda.darudaserver.global.auth.security.JwtAuthenticationFilter;
@@ -105,7 +105,7 @@ class NotificationControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_UPDATE.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_UPDATE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_UPDATE.getMessage()));
 	}
 
@@ -122,7 +122,7 @@ class NotificationControllerTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 		ReflectionTestUtils.setField(userEntity, "id", userId);
 
 		String toolName = "test";
@@ -133,9 +133,9 @@ class NotificationControllerTest {
 		Board board = Board.create(tool, userEntity, title, content);
 
 		String photoUrl = "http://test.test";
-		CommentEntity comment = CommentEntity.of(content, photoUrl, userEntity, board);
+		Comment comment = Comment.of(content, photoUrl, userEntity, board);
 
-		NotificationEntity notification = NotificationEntity.of(userEntity, NotificationType.COMMENT, title, content,
+		Notification notification = Notification.of(userEntity, NotificationType.COMMENT, title, content,
 			comment);
 		List<NotificationResponse> notifications = List.of(NotificationResponse.from(notification));
 
@@ -149,7 +149,7 @@ class NotificationControllerTest {
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").isArray())
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_FETCH.getMessage()));
 	}
 
@@ -166,7 +166,7 @@ class NotificationControllerTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 		ReflectionTestUtils.setField(userEntity, "id", userId);
 
 		String toolName = "test";
@@ -177,9 +177,9 @@ class NotificationControllerTest {
 		Board board = Board.create(tool, userEntity, title, content);
 
 		String photoUrl = "http://test.test";
-		CommentEntity comment = CommentEntity.of(content, photoUrl, userEntity, board);
+		Comment comment = Comment.of(content, photoUrl, userEntity, board);
 
-		NotificationEntity notification = NotificationEntity.of(userEntity, NotificationType.COMMENT, title, content,
+		Notification notification = Notification.of(userEntity, NotificationType.COMMENT, title, content,
 			comment);
 		List<NotificationResponse> notifications = List.of(NotificationResponse.from(notification));
 
@@ -193,7 +193,7 @@ class NotificationControllerTest {
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").isArray())
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_FETCH.getMessage()));
 	}
 
@@ -216,8 +216,8 @@ class NotificationControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))
 				.header("Authorization", "Bearer " + token))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.statusCode").value(SuccessCode.SUCCESS_SEND_NOTICE.getHttpStatus().value()))
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_SEND_NOTICE.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_SEND_NOTICE.getMessage()));
 	}
 }

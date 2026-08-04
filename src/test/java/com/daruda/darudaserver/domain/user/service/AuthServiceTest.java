@@ -26,7 +26,7 @@ import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
@@ -75,12 +75,12 @@ public class AuthServiceTest {
 		String nickname = "tester";
 		Positions position = Positions.STUDENT;
 		String positionStr = position.getName();
-		UserEntity mockUser = UserEntity.of(email, nickname, Positions.fromString(positionStr));
+		User mockUser = User.of(email, nickname, Positions.fromString(positionStr));
 		ReflectionTestUtils.setField(mockUser, "id", 1L);
 		JwtTokenResponse mockTokenResponse = new JwtTokenResponse("accessToken", "refreshToken");
 
 		when(userRepository.existsByEmail(email)).thenReturn(false);
-		when(userRepository.save(any(UserEntity.class))).thenReturn(mockUser);
+		when(userRepository.save(any(User.class))).thenReturn(mockUser);
 		when(tokenService.createToken(1L, position.getEngName())).thenReturn(mockTokenResponse);
 
 		// when
@@ -93,7 +93,7 @@ public class AuthServiceTest {
 		assertThat(response.jwtTokenResponse()).isEqualTo(mockTokenResponse);
 
 		verify(userRepository).existsByEmail(email);
-		verify(userRepository).save(any(UserEntity.class));
+		verify(userRepository).save(any(User.class));
 		verify(tokenService).createToken(1L, position.getEngName());
 	}
 
@@ -115,7 +115,7 @@ public class AuthServiceTest {
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.DUPLICATED_EMAIL);
 
 		verify(userRepository).existsByEmail(email);
-		verify(userRepository, never()).save(any(UserEntity.class));
+		verify(userRepository, never()).save(any(User.class));
 		verify(tokenService, never()).createToken(anyLong(), anyString());
 	}
 
@@ -127,7 +127,7 @@ public class AuthServiceTest {
 		String nickname = "tester";
 		Long userId = 1L;
 		Positions position = Positions.STUDENT;
-		UserEntity mockUser = mock(UserEntity.class);
+		User mockUser = mock(User.class);
 		JwtTokenResponse mockTokenResponse = JwtTokenResponse.of("accessToken", "refreshToken");
 
 		when(userRepository.findByEmail(email)).thenReturn(Optional.of(mockUser));
@@ -198,7 +198,7 @@ public class AuthServiceTest {
 	void withdrawSuccess() {
 		// given
 		Long userId = 1L;
-		UserEntity mockUser = mock(UserEntity.class);
+		User mockUser = mock(User.class);
 		List<Board> mockBoardList = List.of(mock(Board.class), mock(Board.class));
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
@@ -245,7 +245,7 @@ public class AuthServiceTest {
 		verify(boardScrapRepository, never()).deleteAllByUserId(userId);
 		verify(boardRepository, never()).deleteAllByUserId(userId);
 		verify(tokenService, never()).deleteRefreshToken(userId);
-		verify(userRepository, never()).delete(any(UserEntity.class));
+		verify(userRepository, never()).delete(any(User.class));
 	}
 
 	@Test
