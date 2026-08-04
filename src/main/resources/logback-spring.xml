@@ -63,12 +63,16 @@
     <springProperty name="SENTRY_REPOSITORY_URI" source="logging.sentry.repository-uri"/>
     <springProperty name="ENVIRONMENT" source="logging.sentry.environment"/>
     <springProperty name="DISCORD_WEBHOOK_URL" source="logging.sentry.discord-webhook-url"/>
+
+    <!-- 패턴 본문의 공백/줄바꿈은 그대로 출력되므로, 포매터가 줄을 접지 못하도록 속성값으로 정의한다 -->
+    <!-- 리터럴 괄호는 반드시 \( \) 로 이스케이프한다. 그러지 않으면 그룹 종료 토큰으로 해석돼 뒤쪽 패턴이 통째로 사라진다 -->
+    <property name="DISCORD_LOG_PATTERN"
+              value="**🚨 [${ENVIRONMENT}] %d{yyyy-MM-dd HH:mm:ss, Asia/Seoul} %-5level** `%logger{40}`%n%msg%n[🔗 Sentry 열기]\(&lt;${SENTRY_REPOSITORY_URI}&gt;\)%n```%n%ex{12}```"/>
+
     <appender name="DISCORD" class="com.github.napstr.logback.DiscordAppender">
         <webhookUri>${DISCORD_WEBHOOK_URL}</webhookUri>
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>*🚨[${ENVIRONMENT}] %d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level %class - %msg &lt;[Go-To-Sentry](${SENTRY_REPOSITORY_URI})&gt;*
-                %n
-            </pattern>
+            <pattern>${DISCORD_LOG_PATTERN}</pattern>
         </layout>
     </appender>
     <appender name="ASYNC_DISCORD" class="ch.qos.logback.classic.AsyncAppender">
