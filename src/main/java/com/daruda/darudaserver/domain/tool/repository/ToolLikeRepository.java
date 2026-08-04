@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.entity.ToolLike;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 
 @Repository
 public interface ToolLikeRepository extends JpaRepository<ToolLike, Long> {
@@ -14,10 +14,10 @@ public interface ToolLikeRepository extends JpaRepository<ToolLike, Long> {
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	void deleteAllByUserId(Long userId);
 
-	boolean existsByUserAndTool(final UserEntity user, final Tool tool);
+	boolean existsByUserAndTool(final User user, final Tool tool);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
-	void deleteByUserAndTool(final UserEntity user, final Tool tool);
+	void deleteByUserAndTool(final User user, final Tool tool);
 
 	int countByTool_ToolId(final Long toolId);
 

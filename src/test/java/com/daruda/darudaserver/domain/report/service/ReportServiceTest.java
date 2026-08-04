@@ -17,21 +17,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
-import com.daruda.darudaserver.domain.report.dto.req.CreateReportRequest;
-import com.daruda.darudaserver.domain.report.dto.req.ProcessReportRequest;
-import com.daruda.darudaserver.domain.report.dto.res.CreateReportResponse;
-import com.daruda.darudaserver.domain.report.dto.res.ProcessReportResponse;
-import com.daruda.darudaserver.domain.report.entity.ReportEntity;
+import com.daruda.darudaserver.domain.report.dto.request.CreateReportRequest;
+import com.daruda.darudaserver.domain.report.dto.request.ProcessReportRequest;
+import com.daruda.darudaserver.domain.report.dto.response.CreateReportResponse;
+import com.daruda.darudaserver.domain.report.dto.response.ProcessReportResponse;
+import com.daruda.darudaserver.domain.report.entity.Report;
 import com.daruda.darudaserver.domain.report.entity.ReportStatus;
 import com.daruda.darudaserver.domain.report.entity.ReportType;
 import com.daruda.darudaserver.domain.report.entity.SuspensionDuration;
 import com.daruda.darudaserver.domain.report.repository.ReportRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -56,31 +56,31 @@ class ReportServiceTest {
 	@InjectMocks
 	private ReportService reportService;
 
-	private UserEntity reporter;
-	private UserEntity admin;
-	private UserEntity reportedUser;
+	private User reporter;
+	private User admin;
+	private User reportedUser;
 	private Board board;
-	private CommentEntity comment;
-	private ReportEntity report;
+	private Comment comment;
+	private Report report;
 	private Tool tool;
 
 	@BeforeEach
 	void setUp() {
-		reporter = UserEntity.builder()
+		reporter = User.builder()
 			.email("reporter@test.com")
 			.nickname("신고자")
 			.positions(Positions.WORKER)
 			.build();
 		ReflectionTestUtils.setField(reporter, "id", 1L);
 
-		admin = UserEntity.builder()
+		admin = User.builder()
 			.email("admin@test.com")
 			.nickname("관리자")
 			.positions(Positions.ADMIN)
 			.build();
 		ReflectionTestUtils.setField(admin, "id", 99L);
 
-		reportedUser = UserEntity.builder()
+		reportedUser = User.builder()
 			.email("target@test.com")
 			.nickname("대상자")
 			.positions(Positions.WORKER)
@@ -92,13 +92,13 @@ class ReportServiceTest {
 		board = Board.create(tool, reportedUser, "제목", "본문");
 		ReflectionTestUtils.setField(board, "id", 10L);
 
-		comment = CommentEntity.of("댓글 내용", null, reportedUser, board);
+		comment = Comment.of("댓글 내용", null, reportedUser, board);
 		ReflectionTestUtils.setField(comment, "id", 100L);
 
-		report = ReportEntity.of(reporter, reportedUser, board, null, ReportType.SPAM, "스팸 신고 제목", "스팸 게시글");
+		report = Report.of(reporter, reportedUser, board, null, ReportType.SPAM, "스팸 신고 제목", "스팸 게시글");
 		ReflectionTestUtils.setField(report, "id", 1000L);
-		ReflectionTestUtils.setField(report, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
-		ReflectionTestUtils.setField(report, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
+		ReflectionTestUtils.setField(report, "createdAt", LocalDateTime.now());
+		ReflectionTestUtils.setField(report, "updatedAt", LocalDateTime.now());
 	}
 
 	@Nested
@@ -113,12 +113,12 @@ class ReportServiceTest {
 			given(boardRepository.findById(board.getId())).willReturn(Optional.of(board));
 			given(reportRepository.existsByReporterAndBoard(reporter, board))
 				.willReturn(false);
-			given(reportRepository.save(any(ReportEntity.class)))
+			given(reportRepository.save(any(Report.class)))
 				.willAnswer(inv -> {
-					ReportEntity report = inv.getArgument(0);
+					Report report = inv.getArgument(0);
 					ReflectionTestUtils.setField(report, "id", 1000L);
-					ReflectionTestUtils.setField(report, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
-					ReflectionTestUtils.setField(report, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
+					ReflectionTestUtils.setField(report, "createdAt", LocalDateTime.now());
+					ReflectionTestUtils.setField(report, "updatedAt", LocalDateTime.now());
 					return report;
 				});
 
@@ -134,7 +134,7 @@ class ReportServiceTest {
 
 			// then
 			assertThat(response.getId()).isEqualTo(1000L);
-			then(reportRepository).should().save(any(ReportEntity.class));
+			then(reportRepository).should().save(any(Report.class));
 		}
 
 		@Test
@@ -145,12 +145,12 @@ class ReportServiceTest {
 			given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
 			given(reportRepository.existsByReporterAndComment(reporter, comment))
 				.willReturn(false);
-			given(reportRepository.save(any(ReportEntity.class)))
+			given(reportRepository.save(any(Report.class)))
 				.willAnswer(inv -> {
-					ReportEntity report = inv.getArgument(0);
+					Report report = inv.getArgument(0);
 					ReflectionTestUtils.setField(report, "id", 1000L);
-					ReflectionTestUtils.setField(report, "createdAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
-					ReflectionTestUtils.setField(report, "updatedAt", java.sql.Timestamp.valueOf(LocalDateTime.now()));
+					ReflectionTestUtils.setField(report, "createdAt", LocalDateTime.now());
+					ReflectionTestUtils.setField(report, "updatedAt", LocalDateTime.now());
 					return report;
 				});
 
@@ -166,7 +166,7 @@ class ReportServiceTest {
 
 			// then
 			assertThat(response.getId()).isEqualTo(1000L);
-			then(reportRepository).should().save(any(ReportEntity.class));
+			then(reportRepository).should().save(any(Report.class));
 		}
 
 		@Test
@@ -416,7 +416,7 @@ class ReportServiceTest {
 			given(userRepository.findById(admin.getId())).willReturn(Optional.of(admin));
 
 			// 이미 처리된 신고로 설정
-			ReportEntity processedReport = ReportEntity.of(reporter, reportedUser, board, null, ReportType.SPAM,
+			Report processedReport = Report.of(reporter, reportedUser, board, null, ReportType.SPAM,
 				"스팸 신고 제목", "스팸글입니다.");
 			processedReport.updateStatus(ReportStatus.APPROVED);
 			processedReport.updateProcessInfo(admin.getId(), "처리 완료", LocalDateTime.now());
@@ -444,7 +444,7 @@ class ReportServiceTest {
 		@DisplayName("제재되지 않은 사용자는 isSuspended가 false")
 		void user_not_suspended() {
 			// given
-			UserEntity user = UserEntity.builder()
+			User user = User.builder()
 				.email("test@test.com")
 				.nickname("테스트")
 				.positions(Positions.WORKER)
@@ -458,7 +458,7 @@ class ReportServiceTest {
 		@DisplayName("제재 기간이 지난 사용자는 isSuspended가 false")
 		void user_suspension_expired() {
 			// given
-			UserEntity user = UserEntity.builder()
+			User user = User.builder()
 				.email("test@test.com")
 				.nickname("테스트")
 				.positions(Positions.WORKER)
@@ -475,7 +475,7 @@ class ReportServiceTest {
 		@DisplayName("제재 기간 중인 사용자는 isSuspended가 true")
 		void user_currently_suspended() {
 			// given
-			UserEntity user = UserEntity.builder()
+			User user = User.builder()
 				.email("test@test.com")
 				.nickname("테스트")
 				.positions(Positions.WORKER)

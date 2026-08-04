@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.global.common.entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -18,9 +18,9 @@ public abstract class BaseTimeEntity {
 
 	@Column(name = "created_at", updatable = false, nullable = false)
 	@CreationTimestamp
-	private Timestamp createdAt;
+	private LocalDateTime createdAt;
 
 	@Column(name = "updated_at", nullable = false)
 	@UpdateTimestamp
-	private Timestamp updatedAt;
+	private LocalDateTime updatedAt;
 }

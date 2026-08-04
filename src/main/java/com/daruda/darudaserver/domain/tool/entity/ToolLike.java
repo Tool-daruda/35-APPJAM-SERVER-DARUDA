@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -32,7 +32,7 @@ public class ToolLike extends BaseTimeEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
-	private UserEntity user;
+	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tool_id", nullable = false)
@@ -42,13 +42,13 @@ public class ToolLike extends BaseTimeEntity {
 	private boolean delYn = false;
 
 	@Builder
-	private ToolLike(final Long toolLikeId, final UserEntity user, final Tool tool) {
+	private ToolLike(final Long toolLikeId, final User user, final Tool tool) {
 		this.toolLikeId = toolLikeId;
 		this.user = user;
 		this.tool = tool;
 	}
 
-	public static ToolLike of(final UserEntity user, final Tool tool) {
+	public static ToolLike of(final User user, final Tool tool) {
 		return ToolLike.builder()
 			.user(user)
 			.tool(tool)

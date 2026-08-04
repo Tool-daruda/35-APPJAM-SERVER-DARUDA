@@ -3,6 +3,7 @@ package com.daruda.darudaserver.global.auth.jwt.service;
 import java.util.Arrays;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
@@ -20,7 +21,6 @@ import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

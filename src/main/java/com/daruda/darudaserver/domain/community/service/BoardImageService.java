@@ -11,7 +11,7 @@ import com.daruda.darudaserver.global.image.service.ImageService;
 
 import lombok.RequiredArgsConstructor;
 
-@Transactional
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 public class BoardImageService {
@@ -21,6 +21,7 @@ public class BoardImageService {
 	private final BoardImageRepository boardImageRepository;
 	private final ImageService imageService;
 
+	@Transactional
 	public void saveBoardImages(Long boardId, List<Long> imageIds) {
 		imageIds.forEach(imageId -> {
 			BoardImage boardImage = BoardImage.create(boardId, imageId);

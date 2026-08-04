@@ -22,8 +22,8 @@ import com.daruda.darudaserver.domain.user.dto.response.ScrapBoardsRetrieveRespo
 import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
 import com.daruda.darudaserver.domain.user.service.UserService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
-import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
+import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,24 +45,25 @@ public class UserController {
 
 	@PatchMapping("/profile")
 	@Operation(summary = "프로필 수정", description = "사용자의 프로필을 수정합니다.")
-	public ResponseEntity<ApiResponse<UpdateMyResponse>> updateProfile(@AuthenticationPrincipal Long userId,
+	public ResponseEntity<SuccessResponse<UpdateMyResponse>> updateProfile(@AuthenticationPrincipal Long userId,
 		@Valid @RequestBody UpdateMyRequest updateMyRequest) {
 		UpdateMyResponse updateMyResponse = userService.updateProfile(userId, updateMyRequest.nickname(),
 			updateMyRequest.positions());
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(updateMyResponse, SuccessCode.SUCCESS_UPDATE));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_UPDATE, updateMyResponse));
 	}
 
 	@GetMapping("/scrap-tools")
 	@Operation(summary = "찜한 툴 목록 조회", description = "사용자의 찜한 툴 목록을 조회합니다.")
-	public ResponseEntity<ApiResponse<FavoriteToolsResponse>> getFavoriteTools(@AuthenticationPrincipal Long userId) {
+	public ResponseEntity<SuccessResponse<FavoriteToolsResponse>> getFavoriteTools(
+		@AuthenticationPrincipal Long userId) {
 		FavoriteToolsResponse favoriteToolsResponse = userService.getFavoriteTools(userId);
 
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(favoriteToolsResponse, SuccessCode.SUCCESS_FETCH));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, favoriteToolsResponse));
 	}
 
 	@GetMapping("/boards")
 	@Operation(summary = "작성한 게시글 목록 조회", description = "사용자가 작성한 게시글 목록을 조회합니다.")
-	public ResponseEntity<ApiResponse<BoardListResponse>> getUserBoards(@AuthenticationPrincipal Long userIdOrNull,
+	public ResponseEntity<SuccessResponse<BoardListResponse>> getUserBoards(@AuthenticationPrincipal Long userIdOrNull,
 		@Parameter(description = "조회할 페이지", example = "1")
 		@RequestParam(defaultValue = "1", value = "page") @Positive int pageNo,
 		@Parameter(description = "조회할 게시글 개수", example = "5")
@@ -71,29 +72,29 @@ public class UserController {
 		@RequestParam(defaultValue = "createdAt", value = "criteria") String criteria) {
 		Pageable pageable = PageRequest.of(pageNo - 1, size, Sort.by(Sort.Direction.DESC, criteria));
 		BoardListResponse boardListResponse = boardService.getUserBoards(userIdOrNull, pageable);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(boardListResponse, SuccessCode.SUCCESS_FETCH));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, boardListResponse));
 	}
 
 	@GetMapping("/profile")
 	@Operation(summary = "프로필 조회", description = "사용자의 프로필을 조회합니다.")
-	public ResponseEntity<ApiResponse<MyProfileResponse>> getMyProfile(@AuthenticationPrincipal Long userId) {
+	public ResponseEntity<SuccessResponse<MyProfileResponse>> getMyProfile(@AuthenticationPrincipal Long userId) {
 		MyProfileResponse myProfileResponse = userService.getMyProfile(userId);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(myProfileResponse, SuccessCode.SUCCESS_FETCH));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, myProfileResponse));
 	}
 
 	@DisableSwaggerSecurity
 	@GetMapping("/nickname")
 	@Operation(summary = "닉네임 중복 확인", description = "닉네임 중복을 검사합니다.")
-	public ResponseEntity<ApiResponse<Boolean>> checkDuplicate(
+	public ResponseEntity<SuccessResponse<Boolean>> checkDuplicate(
 		@Parameter(description = "닉네임", example = "test")
 		@NotNull(message = "닉네임은 필수 입력값입니다.") @RequestParam("nickname") String nickName) {
 		boolean result = userService.isDuplicatedNickname(nickName);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(result, SuccessCode.SUCCESS_FETCH));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, result));
 	}
 
 	@GetMapping("/scrap-boards")
 	@Operation(summary = "스크랩 글 목록 조회", description = "스크랩 글 목록을 조회합니다.")
-	public ResponseEntity<ApiResponse<ScrapBoardsRetrieveResponse>> getScrapBoards(
+	public ResponseEntity<SuccessResponse<ScrapBoardsRetrieveResponse>> getScrapBoards(
 		@AuthenticationPrincipal Long userIdOrNull,
 		@Parameter(description = "조회할 페이지", example = "1")
 		@RequestParam(value = "page", defaultValue = "1") @Positive int pageNo,
@@ -106,6 +107,6 @@ public class UserController {
 			pageable);
 
 		return ResponseEntity.ok(
-			ApiResponse.ofSuccessWithData(scrapBoardsRetrieveResponse, SuccessCode.SUCCESS_FETCH));
+			SuccessResponse.of(SuccessCode.SUCCESS_FETCH, scrapBoardsRetrieveResponse));
 	}
 }

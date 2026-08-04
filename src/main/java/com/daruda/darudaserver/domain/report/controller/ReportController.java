@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.daruda.darudaserver.domain.report.dto.req.CreateReportRequest;
-import com.daruda.darudaserver.domain.report.dto.req.ProcessReportRequest;
-import com.daruda.darudaserver.domain.report.dto.res.CreateReportResponse;
-import com.daruda.darudaserver.domain.report.dto.res.ProcessReportResponse;
+import com.daruda.darudaserver.domain.report.dto.request.CreateReportRequest;
+import com.daruda.darudaserver.domain.report.dto.request.ProcessReportRequest;
+import com.daruda.darudaserver.domain.report.dto.response.CreateReportResponse;
+import com.daruda.darudaserver.domain.report.dto.response.ProcessReportResponse;
 import com.daruda.darudaserver.domain.report.service.ReportService;
-import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
+import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,22 +33,23 @@ public class ReportController {
 
 	@PostMapping
 	@Operation(summary = "신고 생성", description = "게시글이나 댓글을 신고합니다.")
-	public ResponseEntity<ApiResponse<CreateReportResponse>> createReport(
+	public ResponseEntity<SuccessResponse<CreateReportResponse>> createReport(
 		@AuthenticationPrincipal Long userId,
 		@Valid @RequestBody CreateReportRequest request
 	) {
 		CreateReportResponse response = reportService.createReport(userId, request);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(response, SuccessCode.SUCCESS_CREATE));
+		return ResponseEntity.status(SuccessCode.SUCCESS_CREATE.getHttpStatus())
+			.body(SuccessResponse.of(SuccessCode.SUCCESS_CREATE, response));
 	}
 
 	@PatchMapping("/{reportId}")
 	@Operation(summary = "신고 처리", description = "관리자가 신고를 처리합니다. (승인/거절 및 제재 적용)")
-	public ResponseEntity<ApiResponse<ProcessReportResponse>> processReport(
+	public ResponseEntity<SuccessResponse<ProcessReportResponse>> processReport(
 		@AuthenticationPrincipal Long adminId,
 		@Parameter(description = "신고 ID", required = true) @PathVariable Long reportId,
 		@Valid @RequestBody ProcessReportRequest request
 	) {
 		ProcessReportResponse response = reportService.processReport(adminId, reportId, request);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(response, SuccessCode.SUCCESS_UPDATE));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_UPDATE, response));
 	}
 }

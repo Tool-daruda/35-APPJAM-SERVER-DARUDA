@@ -12,12 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.daruda.darudaserver.domain.tool.dto.res.ToolLikeRes;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolLikeResponse;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.entity.ToolLike;
 import com.daruda.darudaserver.domain.tool.repository.ToolLikeRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
@@ -45,7 +45,7 @@ class ToolServiceTest {
 	void getUserById_Success() {
 		// given
 		Long userId = 1L;
-		UserEntity mockUser = UserEntity.builder()
+		User mockUser = User.builder()
 			.email("test@example.com")
 			.nickname("tester")
 			.positions(null)
@@ -54,7 +54,7 @@ class ToolServiceTest {
 		when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
 
 		// when
-		UserEntity result = toolService.getUserById(userId);
+		User result = toolService.getUserById(userId);
 
 		// then
 		assertThat(result).isNotNull();
@@ -81,7 +81,7 @@ class ToolServiceTest {
 		// given
 		Long userId = 1L;
 		Long toolId = 10L;
-		UserEntity user = UserEntity.builder()
+		User user = User.builder()
 			.email("test@example.com")
 			.nickname("tester")
 			.positions(null)
@@ -95,7 +95,7 @@ class ToolServiceTest {
 		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(1);
 
 		// when
-		ToolLikeRes result = toolService.postToolLike(userId, toolId);
+		ToolLikeResponse result = toolService.postToolLike(userId, toolId);
 
 		// then
 		assertThat(result.toolId()).isEqualTo(toolId);
@@ -110,7 +110,7 @@ class ToolServiceTest {
 		// given
 		Long userId = 1L;
 		Long toolId = 10L;
-		UserEntity user = UserEntity.builder()
+		User user = User.builder()
 			.email("test@example.com")
 			.nickname("tester")
 			.positions(null)
@@ -123,7 +123,7 @@ class ToolServiceTest {
 		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(0);
 
 		// when
-		ToolLikeRes result = toolService.postToolLike(userId, toolId);
+		ToolLikeResponse result = toolService.postToolLike(userId, toolId);
 
 		// then
 		assertThat(result.liked()).isFalse();
@@ -138,7 +138,7 @@ class ToolServiceTest {
 		// given
 		Long userId = 1L;
 		Long toolId = 10L;
-		UserEntity user = UserEntity.builder()
+		User user = User.builder()
 			.email("test@example.com")
 			.nickname("tester")
 			.positions(null)
@@ -152,7 +152,7 @@ class ToolServiceTest {
 		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(1);
 
 		// when
-		ToolLikeRes result = toolService.postToolLike(userId, toolId);
+		ToolLikeResponse result = toolService.postToolLike(userId, toolId);
 
 		// then
 		assertThat(result.liked()).isFalse();

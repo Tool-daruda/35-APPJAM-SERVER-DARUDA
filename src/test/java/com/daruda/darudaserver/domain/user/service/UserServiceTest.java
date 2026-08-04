@@ -23,7 +23,7 @@ import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
 import com.daruda.darudaserver.domain.user.dto.response.MyProfileResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -68,7 +68,7 @@ class UserServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 
@@ -105,7 +105,7 @@ class UserServiceTest {
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
 		PlanType planType = PlanType.FREE;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 		Tool tool = Tool.builder()
 			.toolMainName("toolName")
 			.toolSubName("toolSubName")
@@ -143,7 +143,7 @@ class UserServiceTest {
 		Positions positions = Positions.STUDENT;
 		String newNickname = "newTester";
 		Positions newPositions = Positions.NORMAL;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 		when(userRepository.existsByNickname(newNickname)).thenReturn(false);
@@ -166,7 +166,7 @@ class UserServiceTest {
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
 		String newNickname = "newTester";
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 		when(userRepository.existsByNickname(newNickname)).thenReturn(false);
@@ -188,7 +188,7 @@ class UserServiceTest {
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
 		Positions newPositions = Positions.NORMAL;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 
@@ -239,7 +239,7 @@ class UserServiceTest {
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 		when(userRepository.existsByNickname(nickname)).thenReturn(true);

@@ -4,16 +4,16 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
-import com.daruda.darudaserver.domain.notification.entity.NotificationEntity;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
+import com.daruda.darudaserver.domain.notification.entity.Notification;
+import com.daruda.darudaserver.domain.user.entity.User;
 
-public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
-	List<NotificationEntity> findAllByReceiver(UserEntity receiver);
+public interface NotificationRepository extends JpaRepository<Notification, Long> {
+	List<Notification> findAllByReceiver(User receiver);
 
-	void deleteAllByReceiver(UserEntity receiver);
+	void deleteAllByReceiver(User receiver);
 
-	void deleteAllByComment(CommentEntity comment);
+	void deleteAllByComment(Comment comment);
 
-	List<NotificationEntity> findTop3ByReceiverOrderByCreatedAtDesc(UserEntity receiver);
+	List<Notification> findTop3ByReceiverOrderByCreatedAtDesc(User receiver);
 }

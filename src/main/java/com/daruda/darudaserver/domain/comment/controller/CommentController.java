@@ -16,8 +16,8 @@ import com.daruda.darudaserver.domain.comment.dto.response.CreateCommentResponse
 import com.daruda.darudaserver.domain.comment.dto.response.GetCommentRetrieveResponse;
 import com.daruda.darudaserver.domain.comment.service.CommentService;
 import com.daruda.darudaserver.global.annotation.DisableSwaggerSecurity;
-import com.daruda.darudaserver.global.common.response.ApiResponse;
 import com.daruda.darudaserver.global.error.code.SuccessCode;
+import com.daruda.darudaserver.global.error.dto.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +35,7 @@ public class CommentController {
 
 	@PostMapping
 	@Operation(summary = "댓글 작성", description = "댓글을 작성합니다.")
-	public ResponseEntity<ApiResponse<CreateCommentResponse>> postComment(
+	public ResponseEntity<SuccessResponse<CreateCommentResponse>> postComment(
 		@AuthenticationPrincipal Long userId,
 
 		@Parameter(description = "board Id", example = "1")
@@ -45,13 +45,14 @@ public class CommentController {
 		@RequestBody @Valid CreateCommentRequest request
 	) {
 		CreateCommentResponse response = commentService.postComment(userId, boardId, request);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(response, SuccessCode.SUCCESS_CREATE));
+		return ResponseEntity.status(SuccessCode.SUCCESS_CREATE.getHttpStatus())
+			.body(SuccessResponse.of(SuccessCode.SUCCESS_CREATE, response));
 	}
 
 	@DisableSwaggerSecurity
 	@GetMapping
 	@Operation(summary = "댓글 조회", description = "댓글을 조회합니다.")
-	public ResponseEntity<ApiResponse<GetCommentRetrieveResponse>> getComment(
+	public ResponseEntity<SuccessResponse<GetCommentRetrieveResponse>> getComment(
 		@Parameter(description = "board Id", example = "1")
 		@RequestParam("board-id") Long boardId,
 
@@ -62,18 +63,18 @@ public class CommentController {
 		@RequestParam(value = "lastCommentId", required = false) Long commentId
 	) {
 		GetCommentRetrieveResponse response = commentService.getComments(boardId, size, commentId);
-		return ResponseEntity.ok(ApiResponse.ofSuccessWithData(response, SuccessCode.SUCCESS_FETCH));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_FETCH, response));
 	}
 
 	@DeleteMapping("/{comment-id}")
 	@Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다.")
-	public ResponseEntity<ApiResponse<Void>> deleteComment(
+	public ResponseEntity<SuccessResponse<Void>> deleteComment(
 		@AuthenticationPrincipal Long userId,
 
 		@Parameter(description = "comment Id", example = "1")
 		@PathVariable("comment-id") Long commentId
 	) {
 		commentService.deleteComment(userId, commentId);
-		return ResponseEntity.ok(ApiResponse.ofSuccess(SuccessCode.SUCCESS_DELETE));
+		return ResponseEntity.ok(SuccessResponse.of(SuccessCode.SUCCESS_DELETE));
 	}
 }

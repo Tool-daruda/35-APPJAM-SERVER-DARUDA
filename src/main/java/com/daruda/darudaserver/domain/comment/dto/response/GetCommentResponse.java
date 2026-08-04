@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.domain.comment.dto.response;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -14,11 +14,11 @@ public record GetCommentResponse(
 	String image,
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
-	Timestamp updatedAt
+	LocalDateTime updatedAt
 ) {
 
 	public static GetCommentResponse of(String content, Long commentId, String nickname, String image,
-		Timestamp updatedAt) {
+		LocalDateTime updatedAt) {
 		return GetCommentResponse.builder()
 			.content(content)
 			.commentId(commentId)

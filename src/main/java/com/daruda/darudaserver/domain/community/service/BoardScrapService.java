@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.daruda.darudaserver.domain.community.dto.res.BoardScrapRes;
+import com.daruda.darudaserver.domain.community.dto.response.BoardScrapResponse;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
@@ -19,7 +19,7 @@ import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
 import com.daruda.darudaserver.domain.user.dto.response.ScrapBoardsResponse;
 import com.daruda.darudaserver.domain.user.dto.response.ScrapBoardsRetrieveResponse;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 public class BoardScrapService {
@@ -44,8 +44,9 @@ public class BoardScrapService {
 	private final BoardScrapInternalService boardScrapInternalService;
 
 	// 스크랩 토글 (존재하면 삭제, 없으면 생성)
-	public BoardScrapRes toggleScrap(final Long userId, final Long boardId) {
-		UserEntity user = getUserById(userId);
+	@Transactional
+	public BoardScrapResponse toggleScrap(final Long userId, final Long boardId) {
+		User user = getUserById(userId);
 		Board board = getBoardById(boardId);
 
 		boolean exists = boardScrapRepository.existsByUserIdAndBoardId(userId, boardId);
@@ -53,17 +54,16 @@ public class BoardScrapService {
 		if (exists) {
 			boardScrapRepository.deleteByUserIdAndBoardId(userId, boardId);
 			updateSearchIndex(boardId, false);
-			return BoardScrapRes.of(boardId, false);
+			return BoardScrapResponse.of(boardId, false);
 		} else {
 			BoardScrap boardScrap = BoardScrap.builder().user(user).board(board).build();
 			boardScrapInternalService.saveIfAbsent(boardScrap); // 별도 트랜잭션에서 처리
 			updateSearchIndex(boardId, true);
-			return BoardScrapRes.of(boardId, true);
+			return BoardScrapResponse.of(boardId, true);
 		}
 	}
 
 	// board별 스크랩 수 일괄 조회 (검색 등 타 도메인에서 스크랩 수를 표시할 때 사용)
-	@Transactional(readOnly = true)
 	public Map<Long, Long> getScrapCountMap(final List<Long> boardIds) {
 		if (boardIds == null || boardIds.isEmpty()) {
 			return Map.of();
@@ -71,9 +71,8 @@ public class BoardScrapService {
 		return boardScrapRepository.countMapByBoardIds(boardIds);
 	}
 
-	// 스크랩 여부 확인 (UserEntity 기반)
-	@Transactional(readOnly = true)
-	public boolean isScraped(final UserEntity user, final Board board) {
+	// 스크랩 여부 확인 (User 기반)
+	public boolean isScraped(final User user, final Board board) {
 		if (user == null) {
 			log.info("** Board : {} 스크랩 여부 : false (비로그인 사용자)", board.getId());
 			return false;
@@ -84,7 +83,6 @@ public class BoardScrapService {
 	}
 
 	// 즐겨찾기 게시글 목록 조회
-	@Transactional(readOnly = true)
 	public ScrapBoardsRetrieveResponse getScrapBoards(final Long userId, final Pageable pageable) {
 		validateBoard.validateUser(userId);
 
@@ -114,7 +112,7 @@ public class BoardScrapService {
 		});
 	}
 
-	private UserEntity getUserById(final Long userId) {
+	private User getUserById(final Long userId) {
 		return userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 	}

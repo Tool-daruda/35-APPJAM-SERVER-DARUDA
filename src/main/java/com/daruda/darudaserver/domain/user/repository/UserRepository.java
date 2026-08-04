@@ -4,12 +4,12 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 
-public interface UserRepository extends JpaRepository<UserEntity, Long> {
-	Optional<UserEntity> findByEmail(String email);
+public interface UserRepository extends JpaRepository<User, Long> {
+	Optional<User> findByEmail(String email);
 
-	Optional<UserEntity> findByNickname(String nickname);
+	Optional<User> findByNickname(String nickname);
 
 	Boolean existsByEmail(String email);
 

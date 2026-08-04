@@ -21,7 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.daruda.darudaserver.domain.comment.dto.request.CreateCommentRequest;
 import com.daruda.darudaserver.domain.comment.dto.response.GetCommentRetrieveResponse;
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
@@ -30,7 +30,7 @@ import com.daruda.darudaserver.domain.notification.service.NotificationService;
 import com.daruda.darudaserver.domain.search.document.BoardDocument;
 import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.exception.ForbiddenException;
@@ -61,22 +61,22 @@ class CommentServiceTest {
 	NotificationService notificationService;
 	@InjectMocks
 	CommentService commentService;
-	private UserEntity author;
-	private UserEntity stranger;
+	private User author;
+	private User stranger;
 	private Board board;
-	private CommentEntity comment;
+	private Comment comment;
 	private BoardDocument boardDocument;
 
 	@BeforeEach
 	void setUp() {
-		author = UserEntity.builder()
+		author = User.builder()
 			.email("writer@test.com")
 			.nickname("작성자")
 			.positions(Positions.WORKER)
 			.build();
 		ReflectionTestUtils.setField(author, "id", 1L);
 
-		stranger = UserEntity.builder()
+		stranger = User.builder()
 			.email("other@test.com")
 			.nickname("다른 사용자")
 			.positions(Positions.WORKER)
@@ -87,7 +87,7 @@ class CommentServiceTest {
 		board = Board.create(tool, author, "제목", "본문");
 		ReflectionTestUtils.setField(board, "id", 10L);
 
-		comment = CommentEntity.of("내용", null, author, board);
+		comment = Comment.of("내용", null, author, board);
 		ReflectionTestUtils.setField(comment, "id", 100L);
 
 		boardDocument = BoardDocument.builder()
@@ -111,9 +111,9 @@ class CommentServiceTest {
 			// given
 			given(userRepository.findById(author.getId())).willReturn(Optional.of(author));
 			given(boardRepository.findById(board.getId())).willReturn(Optional.of(board));
-			given(commentRepository.save(any(CommentEntity.class)))
+			given(commentRepository.save(any(Comment.class)))
 				.willAnswer(inv -> {
-					CommentEntity commentEntity = inv.getArgument(0);
+					Comment commentEntity = inv.getArgument(0);
 					ReflectionTestUtils.setField(commentEntity, "id", 100L);
 					return commentEntity;
 				});
@@ -125,7 +125,7 @@ class CommentServiceTest {
 
 			// then
 			assertThat(result.commentId()).isEqualTo(100L);
-			then(notificationService).should().sendCommentNotification(any(CommentEntity.class));
+			then(notificationService).should().sendCommentNotification(any(Comment.class));
 		}
 
 		@Test

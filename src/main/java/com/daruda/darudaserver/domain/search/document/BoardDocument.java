@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.search.document;
 
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -85,7 +86,9 @@ public class BoardDocument {
 			.toolLogo(
 				tool != null ? tool.getToolLogo() : "https://daruda.s3.ap-northeast-2.amazonaws.com/Cursor_logo.png")
 			.createdAt(board.getCreatedAt().toString())
-			.updatedAt(board.getUpdatedAt() != null ? board.getUpdatedAt() : null)
+			.updatedAt(board.getUpdatedAt() != null
+				? Date.from(board.getUpdatedAt().atZone(ZoneId.systemDefault()).toInstant())
+				: null)
 			.imageUrl(imageUrls)
 			.commentCount(commentCount)
 			.isScraped(isScraped)
