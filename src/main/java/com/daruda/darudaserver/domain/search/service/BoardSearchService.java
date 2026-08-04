@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class BoardSearchService {
 
 	private final ElasticsearchTemplate elasticsearchTemplate;
