@@ -1,10 +1,10 @@
 package com.daruda.darudaserver.domain.notification.entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.notification.entity.enums.NotificationType;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity(name = "notification")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class NotificationEntity extends BaseTimeEntity {
+public class Notification extends BaseTimeEntity {
 
 	@Id
 	@Column(name = "notification_id")
@@ -40,11 +40,11 @@ public class NotificationEntity extends BaseTimeEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "comment_id")
-	private CommentEntity comment;
+	private Comment comment;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
-	private UserEntity receiver;
+	private User receiver;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -57,7 +57,7 @@ public class NotificationEntity extends BaseTimeEntity {
 	private String url;
 
 	@Builder
-	public NotificationEntity(String title, String content, CommentEntity comment, UserEntity receiver,
+	public Notification(String title, String content, Comment comment, User receiver,
 		NotificationType type, boolean isRead, String url) {
 		this.title = title;
 		this.content = content;
@@ -68,9 +68,9 @@ public class NotificationEntity extends BaseTimeEntity {
 		this.url = url;
 	}
 
-	public static NotificationEntity of(UserEntity receiver, NotificationType type, String title, String content,
-		CommentEntity comment) {
-		return NotificationEntity.builder()
+	public static Notification of(User receiver, NotificationType type, String title, String content,
+		Comment comment) {
+		return Notification.builder()
 			.receiver(receiver)
 			.type(type)
 			.title(title)
@@ -84,7 +84,7 @@ public class NotificationEntity extends BaseTimeEntity {
 		this.isRead = true;
 	}
 
-	public Timestamp getCreatedAt() {
+	public LocalDateTime getCreatedAt() {
 		return super.getCreatedAt();
 	}
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
@@ -16,7 +17,7 @@ import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.dto.response.LoginSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.SignUpSuccessResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UserInformationResponse;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
@@ -25,7 +26,6 @@ import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,9 +57,9 @@ public class AuthService {
 			throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
 		}
 
-		UserEntity userEntity = UserEntity.of(email, nickname, positions);
+		User userEntity = User.of(email, nickname, positions);
 
-		UserEntity savedUser = userRepository.save(userEntity);
+		User savedUser = userRepository.save(userEntity);
 
 		Long userId = savedUser.getId();
 		log.debug("유저 아이디를 성공적으로 조회했습니다. userId : {}", userId);
@@ -73,7 +73,7 @@ public class AuthService {
 
 	public LoginSuccessResponse login(final UserInformationResponse userInformationResponse) {
 		String email = userInformationResponse.email();
-		Optional<UserEntity> userEntity = userRepository.findByEmail(email);
+		Optional<User> userEntity = userRepository.findByEmail(email);
 		//등록된 회원이 아닌 경우
 		if (userEntity.isEmpty()) {
 			return LoginSuccessResponse.ofNonRegisteredUser(email);
@@ -97,7 +97,7 @@ public class AuthService {
 	@Transactional
 	public void withdraw(Long userId) {
 		//사용자 찾기
-		UserEntity userEntity = userRepository.findById(userId)
+		User userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
 		//FK로 묶여있는 toolScrap삭제

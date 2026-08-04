@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @SQLRestriction("is_deleted = false")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user")
-public class UserEntity extends BaseTimeEntity {
+public class User extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,15 +57,15 @@ public class UserEntity extends BaseTimeEntity {
 	private String suspensionReason;
 
 	@Builder
-	private UserEntity(String email, String nickname, Positions positions) {
+	private User(String email, String nickname, Positions positions) {
 		this.email = email;
 		this.nickname = nickname;
 		this.positions = positions;
 		this.isDeleted = false;
 	}
 
-	public static UserEntity of(String email, String nickname, Positions positions) {
-		return UserEntity.builder()
+	public static User of(String email, String nickname, Positions positions) {
+		return User.builder()
 			.email(email)
 			.nickname(nickname)
 			.positions(positions)

@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.domain.community.entity;
 
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Entity;
@@ -36,5 +36,5 @@ public class BoardScrap extends BaseTimeEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
-	private UserEntity user;
+	private User user;
 }

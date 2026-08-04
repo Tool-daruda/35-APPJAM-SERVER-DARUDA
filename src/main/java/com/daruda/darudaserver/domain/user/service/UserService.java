@@ -3,8 +3,9 @@ package com.daruda.darudaserver.domain.user.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.daruda.darudaserver.domain.tool.dto.res.ToolDtoGetRes;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolDtoGetResponse;
 import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.entity.ToolScrap;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
@@ -12,20 +13,19 @@ import com.daruda.darudaserver.domain.tool.service.ToolService;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
 import com.daruda.darudaserver.domain.user.dto.response.MyProfileResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Slf4j
 public class UserService {
 
@@ -38,13 +38,13 @@ public class UserService {
 	}
 
 	public MyProfileResponse getMyProfile(Long userId) {
-		UserEntity userEntity = userRepository.findById(userId)
+		User userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 		return MyProfileResponse.of(userEntity);
 	}
 
 	public FavoriteToolsResponse getFavoriteTools(Long userId) {
-		UserEntity userEntity = userRepository.findById(userId)
+		User userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
 		List<ToolScrap> toolScrapList = toolScrapRepository.findAllByUserId(userId);
@@ -53,11 +53,11 @@ public class UserService {
 			.map(ToolScrap::getTool)
 			.toList();
 
-		List<ToolDtoGetRes> toolDtoGetResList = tools.stream()
+		List<ToolDtoGetResponse> toolDtoGetResList = tools.stream()
 			.map(tool -> {
 				toolService.convertToKeywordRes(tool);
 				boolean isScrapped = getToolScrap(userEntity, tool);
-				return ToolDtoGetRes.from(tool, toolService.convertToKeywordRes(tool), isScrapped);
+				return ToolDtoGetResponse.from(tool, toolService.convertToKeywordRes(tool), isScrapped);
 			})
 			.toList();
 
@@ -65,12 +65,13 @@ public class UserService {
 
 	}
 
+	@Transactional
 	public UpdateMyResponse updateProfile(Long userId, String nickname, String positionStr) {
 		if (positionStr == null && nickname == null) {
 			throw new BusinessException(ErrorCode.MISSING_PARAMETER);
 		}
 
-		UserEntity userEntity = userRepository.findById(userId)
+		User userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 		log.debug("사용자를 성공적으로 조회하였습니다., {}", userId);
 
@@ -97,7 +98,7 @@ public class UserService {
 		return UpdateMyResponse.of(nickname, positions);
 	}
 
-	private Boolean getToolScrap(final UserEntity user, final Tool tool) {
+	private Boolean getToolScrap(final User user, final Tool tool) {
 		return toolScrapRepository.findByUserAndTool(user, tool)
 			.map(toolScrap -> !toolScrap.isDelYn())
 			.orElse(false);

@@ -8,20 +8,20 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.daruda.darudaserver.domain.tool.dto.res.PlanListRes;
-import com.daruda.darudaserver.domain.tool.dto.res.PlanRes;
-import com.daruda.darudaserver.domain.tool.dto.res.PlatformRes;
-import com.daruda.darudaserver.domain.tool.dto.res.RelatedToolListRes;
-import com.daruda.darudaserver.domain.tool.dto.res.RelatedToolRes;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolBlogListRes;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolBlogRes;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolCoreListRes;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolCoreRes;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolDetailGetRes;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolLikeRes;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolListRes;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolResponse;
-import com.daruda.darudaserver.domain.tool.dto.res.ToolScrapRes;
+import com.daruda.darudaserver.domain.tool.dto.response.PlanListResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.PlanResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.PlatformResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.RelatedToolListResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.RelatedToolResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolBlogListResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolBlogResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolCoreListResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolCoreResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolDetailGetResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolLikeResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolListResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolResponse;
+import com.daruda.darudaserver.domain.tool.dto.response.ToolScrapResponse;
 import com.daruda.darudaserver.domain.tool.entity.License;
 import com.daruda.darudaserver.domain.tool.entity.Plan;
 import com.daruda.darudaserver.domain.tool.entity.RelatedTool;
@@ -45,7 +45,7 @@ import com.daruda.darudaserver.domain.tool.repository.ToolPlatFormRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolVideoRepository;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -54,7 +54,7 @@ import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Transactional
+@Transactional(readOnly = true)
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -74,17 +74,18 @@ public class ToolService {
 	private final ToolBlogRepository toolBlogRepository;
 	private final ToolLikeInternalService toolLikeInternalService;
 
-	public ToolDetailGetRes getToolDetail(Long userId, final Long toolId) {
+	@Transactional
+	public ToolDetailGetResponse getToolDetail(Long userId, final Long toolId) {
 		log.info("툴 세부 정보를 조회합니다. toolId={}, userId={}", toolId, userId);
 
 		Tool tool = getToolById(toolId);
 		List<String> images = getImageById(tool);
-		List<PlatformRes> platformRes = convertToPlatformRes(tool);
+		List<PlatformResponse> platformRes = convertToPlatformRes(tool);
 		List<String> keywordRes = convertToKeywordRes(tool);
 		List<String> videos = getVideoById(tool);
 		tool.incrementViewCount();
 
-		Optional<UserEntity> userOptional = Optional.ofNullable(userId)
+		Optional<User> userOptional = Optional.ofNullable(userId)
 			.flatMap(userRepository::findById);
 
 		Boolean isScrapped = userOptional
@@ -103,56 +104,56 @@ public class ToolService {
 		log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
 		log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
 		toolRepository.save(tool);
-		return ToolDetailGetRes.of(tool, platformRes, keywordRes, images, videos, isScrapped, isLiked, likeCount);
+		return ToolDetailGetResponse.of(tool, platformRes, keywordRes, images, videos, isScrapped, isLiked, likeCount);
 	}
 
-	public PlanListRes getPlan(final Long toolId) {
+	public PlanListResponse getPlan(final Long toolId) {
 		log.info("플랜 정보를 조회합니다. toolId={}", toolId);
 		Tool tool = getToolById(toolId);
-		List<PlanRes> toolPlans = getPlanByTool(tool);
+		List<PlanResponse> toolPlans = getPlanByTool(tool);
 		log.info("플랜 정보를 성공적으로 조회했습니다. toolId={}", toolId);
-		return PlanListRes.of(tool.getPlanLink(), toolPlans);
+		return PlanListResponse.of(tool.getPlanLink(), toolPlans);
 	}
 
-	public ToolBlogListRes getBlog(final Long toolId) {
+	public ToolBlogListResponse getBlog(final Long toolId) {
 		log.info("블로그 정보를 조회합니다. toolId={}", toolId);
 		Tool tool = getToolById(toolId);
-		List<ToolBlogRes> toolBlogs = getBlogByTool(tool);
+		List<ToolBlogResponse> toolBlogs = getBlogByTool(tool);
 		log.info("블로그 정보를 성공적으로 조회했습니다. toolId={}", toolId);
-		return ToolBlogListRes.of(toolBlogs);
+		return ToolBlogListResponse.of(toolBlogs);
 	}
 
-	public ToolCoreListRes getToolCore(final Long toolId) {
+	public ToolCoreListResponse getToolCore(final Long toolId) {
 		log.debug("툴 핵심 정보를 조회합니다. toolId={}", toolId);
 		Tool tool = getToolById(toolId);
-		List<ToolCoreRes> toolCore = getToolCoreByTool(tool);
+		List<ToolCoreResponse> toolCore = getToolCoreByTool(tool);
 		log.info("툴 핵심 정보를 성공적으로 조회했습니다. toolId={}", toolId);
-		return ToolCoreListRes.of(toolCore);
+		return ToolCoreListResponse.of(toolCore);
 	}
 
-	public RelatedToolListRes getRelatedTool(final Long toolId) {
+	public RelatedToolListResponse getRelatedTool(final Long toolId) {
 		log.info("관련 툴 정보를 조회합니다. toolId={}", toolId);
 		Tool tool = getToolById(toolId);
 		List<RelatedTool> relatedTools = relatedTool(tool);
 		validateList(relatedTools);
-		List<RelatedToolRes> relatedToolResList = relatedTools.stream()
+		List<RelatedToolResponse> relatedToolResList = relatedTools.stream()
 			.map(relatedTool -> {
 				Tool related = relatedTool.getAlternativeTool();
 				List<String> keywords = convertToKeywordRes(related);
-				return RelatedToolRes.of(related, keywords);
+				return RelatedToolResponse.of(related, keywords);
 			})
 			.toList();
 
 		log.info("관련 툴 정보를 성공적으로 조회했습니다. toolId={}", toolId);
-		return RelatedToolListRes.of(relatedToolResList);
+		return RelatedToolListResponse.of(relatedToolResList);
 	}
 
-	public ToolListRes getToolList(final Long userIdOrNull, final String criteria, final String category,
+	public ToolListResponse getToolList(final Long userIdOrNull, final String criteria, final String category,
 		final int size, final Long lastToolId, final Boolean isFree) {
 		log.debug("카테고리별 툴 목록을 조회 category: {}, sort: {}, size: {}, lastToolId: {}", category, criteria, size,
 			lastToolId);
 
-		UserEntity user;
+		User user;
 		if (userIdOrNull != null) {
 			user = userRepository.findById(userIdOrNull)
 				.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -228,11 +229,12 @@ public class ToolService {
 			.toList();
 
 		ScrollPaginationDto scrollPaginationDto = ScrollPaginationDto.of(filteredTools.size(), nextCursor);
-		return ToolListRes.of(toolResponses, scrollPaginationDto);
+		return ToolListResponse.of(toolResponses, scrollPaginationDto);
 	}
 
-	public ToolScrapRes postToolScrap(final Long userId, final Long toolId) {
-		UserEntity user = getUserById(userId);
+	@Transactional
+	public ToolScrapResponse postToolScrap(final Long userId, final Long toolId) {
+		User user = getUserById(userId);
 		Tool tool = getToolById(toolId);
 		ToolScrap toolScrap = toolScrapRepository.findByUserAndTool(user, tool).orElse(null);
 
@@ -249,11 +251,12 @@ public class ToolService {
 		}
 		int scrapCount = toolScrapRepository.countByTool_ToolIdAndDelYnFalse(toolId);
 		tool.updatePopular(scrapCount);
-		return ToolScrapRes.of(toolId, !toolScrap.isDelYn());
+		return ToolScrapResponse.of(toolId, !toolScrap.isDelYn());
 	}
 
-	public ToolLikeRes postToolLike(final Long userId, final Long toolId) {
-		UserEntity user = getUserById(userId);
+	@Transactional
+	public ToolLikeResponse postToolLike(final Long userId, final Long toolId) {
+		User user = getUserById(userId);
 		Tool tool = getToolById(toolId);
 
 		boolean exists = toolLikeRepository.existsByUserAndTool(user, tool);
@@ -273,7 +276,7 @@ public class ToolService {
 			}
 		}
 		int likeCount = toolLikeRepository.countByTool_ToolId(toolId);
-		return ToolLikeRes.of(toolId, liked, likeCount);
+		return ToolLikeResponse.of(toolId, liked, likeCount);
 	}
 
 	private List<RelatedTool> relatedTool(final Tool tool) {
@@ -290,31 +293,31 @@ public class ToolService {
 			});
 	}
 
-	private List<PlanRes> getPlanByTool(final Tool tool) {
+	private List<PlanResponse> getPlanByTool(final Tool tool) {
 		log.debug("툴에 연결된 플랜 정보를 조회합니다. toolId={}", tool.getToolId());
 		List<Plan> planList = planRepository.findAllByTool(tool);
 		validateList(planList);
 		return planList.stream()
-			.map(PlanRes::of)
+			.map(PlanResponse::of)
 			.toList();
 
 	}
 
-	private List<ToolBlogRes> getBlogByTool(final Tool tool) {
+	private List<ToolBlogResponse> getBlogByTool(final Tool tool) {
 		log.debug("툴에 연결된 블로그 정보를 조회합니다. toolId={}", tool.getToolId());
 		List<ToolBlog> blogList = toolBlogRepository.findAllByTool(tool);
 		validateList(blogList);
 		return blogList.stream()
-			.map(ToolBlogRes::from)
+			.map(ToolBlogResponse::from)
 			.toList();
 	}
 
-	private List<ToolCoreRes> getToolCoreByTool(final Tool tool) {
+	private List<ToolCoreResponse> getToolCoreByTool(final Tool tool) {
 		log.debug("툴에 연결된 핵심 정보를 조회합니다. toolId={}", tool.getToolId());
 		List<ToolCore> toolCoreList = toolCoreRepository.findAllByTool(tool);
 		validateList(toolCoreList);
 		return toolCoreList.stream()
-			.map(ToolCoreRes::of)
+			.map(ToolCoreResponse::of)
 			.toList();
 	}
 
@@ -336,12 +339,12 @@ public class ToolService {
 			.toList();
 	}
 
-	private List<PlatformRes> convertToPlatformRes(Tool tool) {
+	private List<PlatformResponse> convertToPlatformRes(Tool tool) {
 		List<ToolPlatForm> toolPlatForms = toolPlatFormRepository.findAllByTool(tool);
 		validateList(toolPlatForms);
 		log.debug("툴에 연결된 플랫폼 정보를 조회했습니다");
 		return toolPlatForms.stream()
-			.map(PlatformRes::of)
+			.map(PlatformResponse::of)
 			.toList();
 	}
 
@@ -360,7 +363,7 @@ public class ToolService {
 		}
 	}
 
-	public UserEntity getUserById(final Long userId) {
+	public User getUserById(final Long userId) {
 		log.debug("유저를 조회합니다. userId={}", userId);
 		return userRepository.findById(userId)
 			.orElseThrow(() -> {
@@ -369,7 +372,7 @@ public class ToolService {
 			});
 	}
 
-	public Boolean getScrapped(final UserEntity user, final Tool tool) {
+	public Boolean getScrapped(final User user, final Tool tool) {
 		ToolScrap toolScrap = toolScrapRepository.findByUserAndTool(user, tool)
 			.orElse(null);
 		if (toolScrap == null) {
@@ -378,7 +381,7 @@ public class ToolService {
 		return !toolScrap.isDelYn();
 	}
 
-	private boolean getLiked(final UserEntity user, final Tool tool) {
+	private boolean getLiked(final User user, final Tool tool) {
 		return toolLikeRepository.existsByUserAndTool(user, tool);
 	}
 

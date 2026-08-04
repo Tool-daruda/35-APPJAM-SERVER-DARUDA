@@ -12,28 +12,28 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.notification.dto.request.CommunityBlockNoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.request.NoticeRequest;
 import com.daruda.darudaserver.domain.notification.dto.response.NotificationResponse;
-import com.daruda.darudaserver.domain.notification.entity.NotificationEntity;
+import com.daruda.darudaserver.domain.notification.entity.Notification;
 import com.daruda.darudaserver.domain.notification.entity.enums.BlockDurationInDay;
 import com.daruda.darudaserver.domain.notification.entity.enums.NotificationType;
 import com.daruda.darudaserver.domain.notification.repository.EmitterRepository;
 import com.daruda.darudaserver.domain.notification.repository.NotificationRepository;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -87,9 +87,9 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void sendCommentNotification(CommentEntity commentEntity) {
+	public void sendCommentNotification(Comment commentEntity) {
 		Board board = commentEntity.getBoard();
-		UserEntity commenter = commentEntity.getUser();
+		User commenter = commentEntity.getUser();
 
 		String title = createCommentNotificationTitle(commentEntity);
 		String content = COMMENT_CONTENT_BOARD_TITLE.format(board.getTitle());
@@ -100,8 +100,8 @@ public class NotificationService {
 		}
 
 		// 2. 다른 댓글 작성자들에게 알림
-		List<UserEntity> otherCommenters = commentRepository.findDistinctUserByBoardId(board.getId());
-		for (UserEntity receiver : otherCommenters) {
+		List<User> otherCommenters = commentRepository.findDistinctUserByBoardId(board.getId());
+		for (User receiver : otherCommenters) {
 			// 알림 받을 사람이 댓글 작성자 본인이 아니고, 게시글 작성자도 아닐 경우 (게시글 작성자는 위에서 보냄)
 			if (!receiver.getId().equals(commenter.getId()) && !receiver.getId().equals(board.getUser().getId())) {
 				send(receiver, NotificationType.COMMENT, title, content, commentEntity, null);
@@ -109,7 +109,7 @@ public class NotificationService {
 		}
 	}
 
-	private String createCommentNotificationTitle(CommentEntity commentEntity) {
+	private String createCommentNotificationTitle(Comment commentEntity) {
 		boolean hasPhoto = commentEntity.getPhotoUrl() != null && !commentEntity.getPhotoUrl().isBlank();
 		boolean hasText = commentEntity.getContent() != null && !commentEntity.getContent().isBlank();
 
@@ -129,11 +129,11 @@ public class NotificationService {
 		int batchSize = 1000;
 		int page = 0;
 		Pageable pageable;
-		Page<UserEntity> users;
+		Page<User> users;
 		do {
 			pageable = PageRequest.of(page, batchSize);
 			users = userRepository.findAll(pageable);
-			for (UserEntity userEntity : users.getContent()) {
+			for (User userEntity : users.getContent()) {
 				send(userEntity,
 					NotificationType.NOTICE,
 					NOTICE_TITLE.format(noticeRequest.title()),
@@ -146,7 +146,7 @@ public class NotificationService {
 	}
 
 	public void sendBlockNotice(CommunityBlockNoticeRequest communityBlockNoticeRequest) {
-		UserEntity receiver = userRepository.findById(communityBlockNoticeRequest.userId())
+		User receiver = userRepository.findById(communityBlockNoticeRequest.userId())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
 		BlockDurationInDay blockDurationInDay = BlockDurationInDay.fromString(
@@ -165,7 +165,7 @@ public class NotificationService {
 	@Transactional
 	public void delete(Long userId) {
 		String userIdString = String.valueOf(userId);
-		UserEntity userEntity = userRepository.findById(userId)
+		User userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 		emitterRepository.deleteAllEmitterStartWithId(userIdString);
 		emitterRepository.deleteAllEventCacheStartWithId(userIdString);
@@ -174,7 +174,7 @@ public class NotificationService {
 
 	@Transactional
 	public void readNotification(Long userId, Long notificationId) {
-		NotificationEntity notificationEntity = notificationRepository.findById(notificationId)
+		Notification notificationEntity = notificationRepository.findById(notificationId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.NOTIFICATION_NOT_FOUND));
 		if (!notificationEntity.getReceiver().getId().equals(userId)) {
 			throw new BadRequestException(ErrorCode.NOTIFICATION_READ_FORBIDDEN);
@@ -184,7 +184,7 @@ public class NotificationService {
 
 	@Transactional
 	public List<NotificationResponse> getNotifications(Long userId) {
-		UserEntity userEntity = userRepository.findById(userId)
+		User userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
 		return notificationRepository.findAllByReceiver(userEntity).stream()
@@ -194,7 +194,7 @@ public class NotificationService {
 
 	@Transactional
 	public List<NotificationResponse> getRecentNotifications(Long userId) {
-		UserEntity userEntity = userRepository.findById(userId)
+		User userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
 		return notificationRepository.findTop3ByReceiverOrderByCreatedAtDesc(userEntity).stream()
@@ -202,9 +202,9 @@ public class NotificationService {
 			.toList();
 	}
 
-	private void send(UserEntity receiver, NotificationType notificationType, String title, String content,
-		CommentEntity commentEntity, String url) {
-		NotificationEntity notificationEntity = NotificationEntity.builder()
+	private void send(User receiver, NotificationType notificationType, String title, String content,
+		Comment commentEntity, String url) {
+		Notification notificationEntity = Notification.builder()
 			.receiver(receiver)
 			.type(notificationType)
 			.title(title)

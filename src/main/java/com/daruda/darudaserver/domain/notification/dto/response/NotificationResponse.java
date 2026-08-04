@@ -1,9 +1,9 @@
 package com.daruda.darudaserver.domain.notification.dto.response;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
-import com.daruda.darudaserver.domain.notification.entity.NotificationEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
+import com.daruda.darudaserver.domain.notification.entity.Notification;
 import com.daruda.darudaserver.domain.notification.entity.enums.NotificationType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -14,11 +14,11 @@ public record NotificationResponse(
 	Long boardId,
 	NotificationType type,
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
-	Timestamp createdAt,
+	LocalDateTime createdAt,
 	boolean isRead,
 	String url
 ) {
-	public static NotificationResponse from(NotificationEntity notificationEntity) {
+	public static NotificationResponse from(Notification notificationEntity) {
 		return new NotificationResponse(
 			notificationEntity.getId(),
 			notificationEntity.getTitle(),
@@ -31,7 +31,7 @@ public record NotificationResponse(
 		);
 	}
 
-	private static Long getBoardId(CommentEntity comment) {
+	private static Long getBoardId(Comment comment) {
 		if (comment != null) {
 			return comment.getBoard().getId();
 		}

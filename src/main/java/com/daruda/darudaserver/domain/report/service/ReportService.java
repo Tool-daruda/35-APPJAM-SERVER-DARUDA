@@ -5,17 +5,17 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
-import com.daruda.darudaserver.domain.report.dto.req.CreateReportRequest;
-import com.daruda.darudaserver.domain.report.dto.req.ProcessReportRequest;
-import com.daruda.darudaserver.domain.report.dto.res.CreateReportResponse;
-import com.daruda.darudaserver.domain.report.dto.res.ProcessReportResponse;
-import com.daruda.darudaserver.domain.report.entity.ReportEntity;
+import com.daruda.darudaserver.domain.report.dto.request.CreateReportRequest;
+import com.daruda.darudaserver.domain.report.dto.request.ProcessReportRequest;
+import com.daruda.darudaserver.domain.report.dto.response.CreateReportResponse;
+import com.daruda.darudaserver.domain.report.dto.response.ProcessReportResponse;
+import com.daruda.darudaserver.domain.report.entity.Report;
 import com.daruda.darudaserver.domain.report.repository.ReportRepository;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -35,11 +35,11 @@ public class ReportService {
 
 	@Transactional
 	public CreateReportResponse createReport(Long reporterId, CreateReportRequest request) {
-		UserEntity reportedUser;
-		UserEntity reporter = userRepository.findById(reporterId)
+		User reportedUser;
+		User reporter = userRepository.findById(reporterId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-		CommentEntity comment = null;
+		Comment comment = null;
 		Board board = null;
 
 		if (request.isCommentReport()) {
@@ -73,7 +73,7 @@ public class ReportService {
 			}
 		}
 
-		ReportEntity report = ReportEntity.of(
+		Report report = Report.of(
 			reporter,
 			reportedUser,
 			board,
@@ -89,7 +89,7 @@ public class ReportService {
 
 	@Transactional
 	public ProcessReportResponse processReport(Long adminId, Long reportId, ProcessReportRequest request) {
-		UserEntity admin = userRepository.findById(adminId)
+		User admin = userRepository.findById(adminId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
 		// 관리자 권한 검증
@@ -97,7 +97,7 @@ public class ReportService {
 			throw new ForbiddenException(ErrorCode.ACCESS_DENIED);
 		}
 
-		ReportEntity report = reportRepository.findById(reportId)
+		Report report = reportRepository.findById(reportId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
 
 		// 이미 처리된 신고인지 확인
@@ -112,7 +112,7 @@ public class ReportService {
 
 		// 제재 적용
 		if (report.shouldApplySuspension()) {
-			UserEntity reportedUser = report.getReportedUser();
+			User reportedUser = report.getReportedUser();
 			reportedUser.suspend(
 				LocalDateTime.now().plusDays(request.getSuspensionDays()),
 				String.format("%s로 인한 %d일 활동 정지",

@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.domain.user.dto.response;
 
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -19,7 +19,7 @@ public record LoginSuccessResponse(
 	}
 
 	//등록된 회원인 경우
-	public static LoginSuccessResponse ofRegisteredUser(JwtTokenResponse jwtTokenResponse, UserEntity userEntity) {
+	public static LoginSuccessResponse ofRegisteredUser(JwtTokenResponse jwtTokenResponse, User userEntity) {
 		return new LoginSuccessResponse(userEntity.getId(), null, true, userEntity.getNickname(),
 			userEntity.getPositions(), jwtTokenResponse);
 	}

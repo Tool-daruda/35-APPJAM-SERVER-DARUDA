@@ -1,12 +1,8 @@
 package com.daruda.darudaserver.domain.community.service;
 
-import static com.daruda.darudaserver.domain.community.entity.QBoard.*;
-import static com.daruda.darudaserver.domain.community.entity.QBoardScrap.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -14,11 +10,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
-import com.daruda.darudaserver.domain.community.dto.req.BoardCreateAndUpdateReq;
-import com.daruda.darudaserver.domain.community.dto.res.BoardRes;
-import com.daruda.darudaserver.domain.community.dto.res.GetBoardResponse;
+import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateRequest;
+import com.daruda.darudaserver.domain.community.dto.response.BoardResponse;
+import com.daruda.darudaserver.domain.community.dto.response.GetBoardResponse;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardImage;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
@@ -27,6 +23,7 @@ import com.daruda.darudaserver.domain.community.event.BoardCreatedEvent;
 import com.daruda.darudaserver.domain.community.event.BoardUpdatedEvent;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
+import com.daruda.darudaserver.domain.community.repository.BoardScrapCountRow;
 import com.daruda.darudaserver.domain.community.repository.BoardScrapRepository;
 import com.daruda.darudaserver.domain.community.util.ValidateBoard;
 import com.daruda.darudaserver.domain.search.repository.BoardSearchRepository;
@@ -34,7 +31,7 @@ import com.daruda.darudaserver.domain.tool.entity.Tool;
 import com.daruda.darudaserver.domain.tool.repository.ToolRepository;
 import com.daruda.darudaserver.domain.user.dto.response.BoardListResponse;
 import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.common.response.ScrollPaginationDto;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
@@ -44,17 +41,12 @@ import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 import com.daruda.darudaserver.global.image.repository.ImageRepository;
 import com.daruda.darudaserver.global.image.service.ImageService;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 public class BoardService {
@@ -73,14 +65,14 @@ public class BoardService {
 	private final ToolRepository toolRepository;
 	private final CommentRepository commentRepository;
 	private final ValidateBoard validateBoard;
-	private final JPAQueryFactory jpaQueryFactory;
 	private final BoardSearchRepository boardSearchRepository;
 	private final ApplicationEventPublisher eventPublisher;
 
 	// 게시판 생성
-	public BoardRes createBoard(final Long userId, final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+	@Transactional
+	public BoardResponse createBoard(final Long userId, final BoardCreateAndUpdateRequest boardCreateAndUpdateReq) {
 		log.info("유저아이디: {}", userId);
-		UserEntity user = getUserById(userId);
+		User user = getUserById(userId);
 
 		// 제재 상태 확인
 		if (user.isSuspended()) {
@@ -110,14 +102,15 @@ public class BoardService {
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
-		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, toolId);
+		return BoardResponse.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, toolId);
 	}
 
 	// 게시판 업데이트
-	public BoardRes updateBoard(final Long userId, final Long boardId,
-		final BoardCreateAndUpdateReq boardCreateAndUpdateReq) {
+	@Transactional
+	public BoardResponse updateBoard(final Long userId, final Long boardId,
+		final BoardCreateAndUpdateRequest boardCreateAndUpdateReq) {
 		Board board = validateBoardAndUser(userId, boardId);
-		UserEntity user = board.getUser();
+		User user = board.getUser();
 
 		// 제재 상태 확인
 		if (user.isSuspended()) {
@@ -148,15 +141,16 @@ public class BoardService {
 
 		boolean isScrapped = boardScrapService.isScraped(user, board);
 
-		return BoardRes.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, isScrapped);
+		return BoardResponse.of(board, toolName, toolLogo, getCommentCount(board.getId()), imageUrls, isScrapped);
 	}
 
 	// 게시판 삭제
+	@Transactional
 	public void deleteBoard(final Long userId, final Long boardId) {
 		Board board = validateBoardAndUser(userId, boardId);
 		deleteOriginImages(boardId);
 
-		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
+		List<Comment> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
 		if (!commentEntityList.isEmpty()) {
 			commentRepository.deleteAll(commentEntityList);
 			log.info("삭제된 게시글과 연관된 댓글 데이터를 제거했습니다. Comment Count: {}", commentEntityList.size());
@@ -173,8 +167,8 @@ public class BoardService {
 	}
 
 	// 게시판 조회
-	public BoardRes getBoard(final Long userIdOrNull, final Long boardId) {
-		UserEntity user = getUser(userIdOrNull);
+	public BoardResponse getBoard(final Long userIdOrNull, final Long boardId) {
+		User user = getUser(userIdOrNull);
 		Board board = getBoardById(boardId);
 		Long toolId = getToolId(boardId);
 		List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
@@ -182,18 +176,18 @@ public class BoardService {
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 		Boolean isScraped = boardScrapService.isScraped(user, board);
-		return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped, toolId);
+		return BoardResponse.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped, toolId);
 	}
 
 	// 내가 쓴  게시판 조회
-	public BoardRes getMyBoard(final UserEntity user, final Long boardId) {
+	public BoardResponse getMyBoard(final User user, final Long boardId) {
 		Board board = getBoardById(boardId);
 		List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
 		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 
 		Boolean isScraped = boardScrapService.isScraped(user, board);
-		return BoardRes.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped);
+		return BoardResponse.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped);
 	}
 
 	public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId,
@@ -203,7 +197,7 @@ public class BoardService {
 		if (size < 1) {
 			throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
 		}
-		UserEntity user = getUser(userIdOrNull);
+		User user = getUser(userIdOrNull);
 		log.info("USER : {}", user);
 
 		//NoTopic = null, toolId = null -> 전체 게시판 조회
@@ -216,15 +210,7 @@ public class BoardService {
 		}
 
 		// 전체 데이터 개수를 가져옴 (cursor 조건 없음)
-		long totalElements = Optional.ofNullable(jpaQueryFactory
-			.select(board.count())
-			.from(board)
-			.where(
-				board.delYn.eq(false),
-				noTopic != null ? board.isFree.eq(noTopic) : null,
-				toolId != null ? board.tool.toolId.eq(toolId) : null
-			)
-			.fetchFirst()).orElse(0L);
+		long totalElements = boardRepository.countBoards(noTopic, toolId);
 
 		final BoardSortType effectiveSortType = sortType == null ? BoardSortType.LATEST : sortType;
 		List<Board> paginatedBoards;
@@ -239,68 +225,29 @@ public class BoardService {
 				throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
 			}
 
-			NumberExpression<Long> scrapCountExpr = Expressions.asNumber(
-				com.querydsl.jpa.JPAExpressions
-					.select(boardScrap.count())
-					.from(boardScrap)
-					.where(boardScrap.board.id.eq(board.id))
-			);
-
-			BooleanBuilder where = new BooleanBuilder();
-			where.and(board.delYn.eq(Boolean.FALSE));
-			if (noTopic != null) {
-				where.and(board.isFree.eq(noTopic));
-			}
-			if (toolId != null) {
-				where.and(board.tool.toolId.eq(toolId));
-			}
-			if (lastScrapCount != null && lastBoardId != null) {
-				where.and(
-					scrapCountExpr.lt(lastScrapCount)
-						.or(scrapCountExpr.eq(lastScrapCount).and(board.id.lt(lastBoardId)))
-				);
-			}
-
-			List<Tuple> results = jpaQueryFactory
-				.select(board, scrapCountExpr)
-				.from(board)
-				.where(where)
-				.orderBy(scrapCountExpr.desc(), board.id.desc())
-				.limit(size + 1L)
-				.fetch();
+			List<BoardScrapCountRow> results = boardRepository.findBoardsByScrapCountDesc(
+				noTopic, toolId, lastScrapCount, lastBoardId, size + 1L);
 
 			hasNextPage = results.size() > size;
-			List<Tuple> pagedResults = hasNextPage ? results.subList(0, size) : results;
-			paginatedBoards = pagedResults.stream().map(t -> t.get(board)).toList();
+			List<BoardScrapCountRow> pagedResults = hasNextPage ? results.subList(0, size) : results;
+			paginatedBoards = pagedResults.stream().map(BoardScrapCountRow::board).toList();
 
 			// 정렬 시 이미 조회한 스크랩 수를 재사용 → 추가 쿼리 없이, 커서(nextScrapCount)와 표시값의 시점도 일치
-			for (Tuple tuple : pagedResults) {
-				Long scrapCount = tuple.get(scrapCountExpr);
-				scrapCountMap.put(tuple.get(board).getId(), scrapCount == null ? 0L : scrapCount);
+			for (BoardScrapCountRow row : pagedResults) {
+				scrapCountMap.put(row.board().getId(), row.scrapCount());
 			}
 
 			if (hasNextPage) {
-				Tuple lastInPage = pagedResults.get(pagedResults.size() - 1);
-				nextCursor = lastInPage.get(board).getId();
-				Long lastCount = lastInPage.get(scrapCountExpr);
-				nextScrapCount = lastCount == null ? 0L : lastCount;
+				BoardScrapCountRow lastInPage = pagedResults.get(pagedResults.size() - 1);
+				nextCursor = lastInPage.board().getId();
+				nextScrapCount = lastInPage.scrapCount();
 			} else {
 				nextCursor = -1L;
 			}
 		} else {
 			Long cursor = (lastBoardId == null) ? Long.MAX_VALUE : lastBoardId + 1;
 
-			List<Board> boards = jpaQueryFactory
-				.selectFrom(board)
-				.where(
-					noTopic != null ? board.isFree.eq(noTopic) : null,
-					toolId != null ? board.tool.toolId.eq(toolId) : null,
-					board.delYn.eq(Boolean.FALSE),
-					board.id.lt(cursor)
-				)
-				.orderBy(board.id.desc())
-				.limit(size + 1)
-				.fetch();
+			List<Board> boards = boardRepository.findBoardsByIdDesc(noTopic, toolId, cursor, size + 1);
 
 			hasNextPage = boards.size() > size;
 			paginatedBoards = hasNextPage ? boards.subList(0, size) : boards;
@@ -314,7 +261,7 @@ public class BoardService {
 		}
 
 		// 응답 데이터
-		List<BoardRes> boardResList = paginatedBoards.stream()
+		List<BoardResponse> boardResList = paginatedBoards.stream()
 			.map(board -> {
 				String toolName;
 				String toolLogo;
@@ -336,7 +283,7 @@ public class BoardService {
 				List<String> boardImages = boardImageService.getBoardImageUrls(board.getId());
 				boolean isScrapped = boardScrapService.isScraped(user, board);
 				long scrapCount = scrapCountMap.getOrDefault(board.getId(), 0L);
-				return BoardRes.of(board, toolName, toolLogo, commentCount, boardImages, isScrapped, savedToolid,
+				return BoardResponse.of(board, toolName, toolLogo, commentCount, boardImages, isScrapped, savedToolid,
 					scrapCount);
 			})
 			.toList();
@@ -405,14 +352,14 @@ public class BoardService {
 		return boardImageService.getBoardImageUrls(board.getId());
 	}
 
-	private Board createToolBoard(final Tool tool, final BoardCreateAndUpdateReq req, final UserEntity user) {
+	private Board createToolBoard(final Tool tool, final BoardCreateAndUpdateRequest req, final User user) {
 		Board board = Board.create(tool, user, req.title(), req.content());
 		board = boardRepository.save(board);
 
 		return board;
 	}
 
-	private Board createFreeBoard(final UserEntity user, final BoardCreateAndUpdateReq req) {
+	private Board createFreeBoard(final User user, final BoardCreateAndUpdateRequest req) {
 		Board board = Board.createFree(user, req.title(), req.content());
 		board = boardRepository.save(board);
 
@@ -428,7 +375,7 @@ public class BoardService {
 		return toolRepository.findById(toolId).orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
 	}
 
-	public UserEntity getUserById(final Long userId) {
+	public User getUserById(final Long userId) {
 		return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 	}
 
@@ -443,8 +390,8 @@ public class BoardService {
 		validateBoard.validateUser(userIdOrNull);
 		log.debug("사용자를 조회합니다, {}", userIdOrNull);
 		Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userIdOrNull, pageable);
-		UserEntity user = getUser(userIdOrNull);
-		List<BoardRes> boardResList = boards.getContent().stream()
+		User user = getUser(userIdOrNull);
+		List<BoardResponse> boardResList = boards.getContent().stream()
 			.map(board -> getMyBoard(user, board.getId()))
 			.toList();
 
@@ -455,13 +402,13 @@ public class BoardService {
 	}
 
 	public int getCommentCount(final Long boardId) {
-		List<CommentEntity> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
+		List<Comment> commentEntityList = commentRepository.findCommentsByBoardId(boardId);
 		log.debug("댓글 Entity리스트를 받아옵니다 : {}", commentEntityList.size());
 		return commentEntityList.size();
 	}
 
-	public UserEntity getUser(final Long userIdOrNull) {
-		UserEntity user = null;
+	public User getUser(final Long userIdOrNull) {
+		User user = null;
 		if (userIdOrNull != null) {
 			user = userRepository.findById(userIdOrNull)
 				.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));

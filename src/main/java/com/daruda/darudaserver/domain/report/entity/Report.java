@@ -2,9 +2,9 @@ package com.daruda.darudaserver.domain.report.entity;
 
 import java.time.LocalDateTime;
 
-import com.daruda.darudaserver.domain.comment.entity.CommentEntity;
+import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.community.entity.Board;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "report")
-public class ReportEntity extends BaseTimeEntity {
+public class Report extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,11 +36,11 @@ public class ReportEntity extends BaseTimeEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "reporter_id", nullable = false)
-	private UserEntity reporter;
+	private User reporter;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "reported_user_id", nullable = false)
-	private UserEntity reportedUser;
+	private User reportedUser;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "board_id", nullable = true)
@@ -48,7 +48,7 @@ public class ReportEntity extends BaseTimeEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "comment_id", nullable = true)
-	private CommentEntity comment;
+	private Comment comment;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "report_type", nullable = false, length = 50)
@@ -77,11 +77,11 @@ public class ReportEntity extends BaseTimeEntity {
 	private String processNote;
 
 	@Builder
-	private ReportEntity(
-		UserEntity reporter,
-		UserEntity reportedUser,
+	private Report(
+		User reporter,
+		User reportedUser,
 		Board board,
-		CommentEntity comment,
+		Comment comment,
 		ReportType reportType,
 		String title,
 		String detail
@@ -95,16 +95,16 @@ public class ReportEntity extends BaseTimeEntity {
 		this.detail = detail;
 	}
 
-	public static ReportEntity of(
-		UserEntity reporter,
-		UserEntity reportedUser,
+	public static Report of(
+		User reporter,
+		User reportedUser,
 		Board board,
-		CommentEntity comment,
+		Comment comment,
 		ReportType reportType,
 		String title,
 		String detail
 	) {
-		return ReportEntity.builder()
+		return Report.builder()
 			.reporter(reporter)
 			.reportedUser(reportedUser)
 			.board(board)

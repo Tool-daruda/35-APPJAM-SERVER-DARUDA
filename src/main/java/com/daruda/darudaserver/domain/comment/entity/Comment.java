@@ -6,7 +6,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import com.daruda.darudaserver.domain.community.entity.Board;
-import com.daruda.darudaserver.domain.user.entity.UserEntity;
+import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 	"UPDATE comment SET is_deleted = true, deleted_at = NOW() "
 		+ "WHERE comment_id = ?")
 @SQLRestriction("is_deleted = false")
-public class CommentEntity extends BaseTimeEntity {
+public class Comment extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,15 +52,15 @@ public class CommentEntity extends BaseTimeEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
-	private UserEntity user;
+	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "board_id", nullable = false)
 	private Board board;
 
 	@Builder
-	private CommentEntity(
-		String content, String photoUrl, UserEntity user, Board board
+	private Comment(
+		String content, String photoUrl, User user, Board board
 	) {
 		this.content = content;
 		this.photoUrl = photoUrl;
@@ -71,10 +71,10 @@ public class CommentEntity extends BaseTimeEntity {
 		this.deletedAt = null;
 	}
 
-	public static CommentEntity of(
-		String content, String photoUrl, UserEntity user, Board board
+	public static Comment of(
+		String content, String photoUrl, User user, Board board
 	) {
-		return CommentEntity.builder()
+		return Comment.builder()
 			.content(content)
 			.photoUrl(photoUrl)
 			.user(user)
