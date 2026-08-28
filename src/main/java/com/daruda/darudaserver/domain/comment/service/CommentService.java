@@ -117,6 +117,10 @@ public class CommentService {
 		return new GetCommentRetrieveResponse(items, pageInfo);
 	}
 
+	public int getCommentCount(final Long boardId) {
+		return commentRepository.findCommentsByBoardId(boardId).size();
+	}
+
 	@Transactional
 	public void deleteComment(Long userId, Long commentId) {
 		// 댓글 유효성 검사
