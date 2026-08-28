@@ -88,6 +88,9 @@ dependencies {
     // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
+    // HTML parsing (OG metadata)
+    implementation 'org.jsoup:jsoup:1.18.1'
+
     // Sentry
     implementation 'io.sentry:sentry-logback:7.17.0'
     implementation 'com.github.napstr:logback-discord-appender:1.0.0'
