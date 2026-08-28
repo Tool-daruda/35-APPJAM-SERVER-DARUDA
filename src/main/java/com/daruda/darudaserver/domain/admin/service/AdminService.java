@@ -41,6 +41,8 @@ import com.daruda.darudaserver.domain.tool.repository.ToolScrapRepository;
 import com.daruda.darudaserver.domain.tool.repository.ToolVideoRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
+import com.daruda.darudaserver.global.scraper.OgMetadata;
+import com.daruda.darudaserver.global.scraper.OgMetadataScraper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -60,6 +62,7 @@ public class AdminService {
 	private final ToolScrapRepository toolScrapRepository;
 	private final ToolLikeRepository toolLikeRepository;
 	private final ToolBlogRepository toolBlogRepository;
+	private final OgMetadataScraper ogMetadataScraper;
 
 	@Transactional
 	public void createTool(CreateToolRequest createToolRequest) {
@@ -116,12 +119,16 @@ public class AdminService {
 			}
 		}
 
-		//ToolBlog 가공
+		//ToolBlog 가공 — 생성 시점에 OG 메타데이터를 1회 스크래핑해 저장한다. 링크 하나가 실패해도 생성은 중단되지 않는다.
 		List<String> blogLinks = createToolRequest.blogLinks();
 		if (blogLinks != null && !blogLinks.isEmpty()) {
 			List<ToolBlog> blogEntities = blogLinks.stream()
 				.filter(link -> link != null && !link.isBlank())
-				.map(link -> ToolBlog.create(link.trim(), savedTool))
+				.map(link -> {
+					String trimmedLink = link.trim();
+					OgMetadata metadata = ogMetadataScraper.fetch(trimmedLink).orElse(null);
+					return ToolBlog.create(trimmedLink, savedTool, metadata);
+				})
 				.toList();
 			if (!blogEntities.isEmpty()) {
 				toolBlogRepository.saveAll(blogEntities);
@@ -293,7 +300,11 @@ public class AdminService {
 			if (!req.blogLinks().isEmpty()) {
 				List<ToolBlog> toSave = req.blogLinks().stream()
 					.filter(link -> link != null && !link.isBlank())
-					.map(link -> ToolBlog.create(link.trim(), tool))
+					.map(link -> {
+						String trimmedLink = link.trim();
+						OgMetadata metadata = ogMetadataScraper.fetch(trimmedLink).orElse(null);
+						return ToolBlog.create(trimmedLink, tool, metadata);
+					})
 					.toList();
 				if (!toSave.isEmpty()) {
 					toolBlogRepository.saveAll(toSave);
