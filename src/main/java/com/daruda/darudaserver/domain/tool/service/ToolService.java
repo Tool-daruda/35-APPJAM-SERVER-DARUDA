@@ -73,6 +73,7 @@ public class ToolService {
 	private final UserRepository userRepository;
 	private final ToolBlogRepository toolBlogRepository;
 	private final ToolLikeInternalService toolLikeInternalService;
+	private final ToolBlogMetadataService toolBlogMetadataService;
 
 	@Transactional
 	public ToolDetailGetResponse getToolDetail(Long userId, final Long toolId) {
@@ -312,7 +313,12 @@ public class ToolService {
 	private List<ToolBlogResponse> getBlogByTool(final Tool tool) {
 		log.debug("툴에 연결된 블로그 정보를 조회합니다. toolId={}", tool.getToolId());
 		List<ToolBlog> blogList = toolBlogRepository.findAllByTool(tool);
-		validateList(blogList);
+		// 블로그가 없으면 빈 목록을 반환한다(404 아님).
+		boolean needsBackfill = blogList.stream().anyMatch(ToolBlog::needsMetadataBackfill);
+		if (needsBackfill) {
+			// 아직 스크래핑을 시도한 적 없는 행은 별도 트랜잭션에서 스크래핑 후 저장한다(조회 트랜잭션은 readOnly 유지).
+			return toolBlogMetadataService.backfillAndGet(tool);
+		}
 		return blogList.stream()
 			.map(ToolBlogResponse::from)
 			.toList();
