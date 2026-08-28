@@ -218,13 +218,19 @@ public class ToolService {
 			nextCursor = filteredTools.get(lastIndex).getToolId(); // 다음 `toolId` 설정
 		}
 
+		//  키워드 일괄 조회 (키워드가 없는 툴은 빈 목록으로 처리)
+		List<Long> toolIds = paginatedTools.stream()
+			.map(Tool::getToolId)
+			.toList();
+		Map<Long, List<String>> keywordMap = getKeywordsBatch(toolIds);
+
 		//  응답 데이터 변환
 		List<ToolResponse> toolResponses = paginatedTools.stream()
 			.map(tool -> {
 				boolean isScraped = user != null && toolScrapRepository.findByUserAndTool(user, tool)
 					.map(toolScrap -> !toolScrap.isDelYn())
 					.orElse(false);
-				return ToolResponse.of(tool, convertToKeywordRes(tool), isScraped);
+				return ToolResponse.of(tool, keywordMap.getOrDefault(tool.getToolId(), List.of()), isScraped);
 			})
 			.toList();
 
