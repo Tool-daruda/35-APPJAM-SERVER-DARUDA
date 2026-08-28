@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import com.daruda.darudaserver.domain.comment.service.CommentService;
 import com.daruda.darudaserver.domain.community.dto.response.BoardScrapResponse;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
@@ -54,6 +55,12 @@ class BoardScrapServiceTest {
 
 	@Mock
 	private BoardScrapInternalService boardScrapInternalService;
+
+	@Mock
+	private BoardImageService boardImageService;
+
+	@Mock
+	private CommentService commentService;
 
 	@Test
 	@DisplayName("게시글 스크랩 토글 - 새로운 스크랩 생성 성공")
@@ -147,14 +154,18 @@ class BoardScrapServiceTest {
 		given(projection.getTitle()).willReturn("Test Title");
 		given(projection.getContent()).willReturn("Test Content");
 		given(projection.getUpdatedAt()).willReturn(LocalDateTime.now());
+		given(projection.getAuthor()).willReturn("작성자");
 		given(projection.getToolName()).willReturn("ToolName");
 		given(projection.getToolLogo()).willReturn("ToolLogo");
+		given(projection.getToolId()).willReturn(7L);
 		given(projection.getScrapCount()).willReturn(5L);
 
 		Page<ScrapBoardProjection> projectionPage = new PageImpl<>(List.of(projection), pageable, 1);
 
 		doNothing().when(validateBoard).validateUser(userId);
 		given(boardScrapRepository.findScrapBoardsWithCount(userId, pageable)).willReturn(projectionPage);
+		given(boardImageService.getBoardImageUrls(1L)).willReturn(List.of("https://image1.png"));
+		given(commentService.getCommentCount(1L)).willReturn(3);
 
 		// when
 		ScrapBoardsRetrieveResponse result = boardScrapService.getScrapBoards(userId, pageable);
@@ -164,7 +175,47 @@ class BoardScrapServiceTest {
 		assertThat(result.boardList()).hasSize(1);
 		assertThat(result.boardList().get(0).boardId()).isEqualTo(1L);
 		assertThat(result.boardList().get(0).title()).isEqualTo("Test Title");
+		assertThat(result.boardList().get(0).author()).isEqualTo("작성자");
+		assertThat(result.boardList().get(0).images()).containsExactly("https://image1.png");
+		assertThat(result.boardList().get(0).commentCount()).isEqualTo(3);
+		assertThat(result.boardList().get(0).isScraped()).isTrue();
+		assertThat(result.boardList().get(0).toolId()).isEqualTo(7L);
 		assertThat(result.boardList().get(0).scrapCount()).isEqualTo(5L);
 		assertThat(result.pageInfo().totalPages()).isEqualTo(1);
+	}
+
+	@Test
+	@DisplayName("즐겨찾기(스크랩) 게시글 목록 조회 - 자유 게시글은 toolName이 자유, toolId는 null")
+	void getScrapBoards_FreeBoard() {
+		// given
+		Long userId = 1L;
+		Pageable pageable = PageRequest.of(0, 10);
+
+		ScrapBoardProjection projection = mock(ScrapBoardProjection.class);
+		given(projection.getBoardId()).willReturn(2L);
+		given(projection.getTitle()).willReturn("자유 글");
+		given(projection.getContent()).willReturn("자유 내용");
+		given(projection.getUpdatedAt()).willReturn(LocalDateTime.now());
+		given(projection.getAuthor()).willReturn("자유작성자");
+		given(projection.getToolName()).willReturn(null);
+		given(projection.getToolLogo()).willReturn(null);
+		given(projection.getToolId()).willReturn(null);
+		given(projection.getScrapCount()).willReturn(0L);
+
+		Page<ScrapBoardProjection> projectionPage = new PageImpl<>(List.of(projection), pageable, 1);
+
+		doNothing().when(validateBoard).validateUser(userId);
+		given(boardScrapRepository.findScrapBoardsWithCount(userId, pageable)).willReturn(projectionPage);
+		given(boardImageService.getBoardImageUrls(2L)).willReturn(List.of());
+		given(commentService.getCommentCount(2L)).willReturn(0);
+
+		// when
+		ScrapBoardsRetrieveResponse result = boardScrapService.getScrapBoards(userId, pageable);
+
+		// then
+		assertThat(result.boardList().get(0).toolName()).isEqualTo("자유");
+		assertThat(result.boardList().get(0).toolId()).isNull();
+		assertThat(result.boardList().get(0).author()).isEqualTo("자유작성자");
+		assertThat(result.boardList().get(0).isScraped()).isTrue();
 	}
 }

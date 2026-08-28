@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -31,6 +32,9 @@ import com.daruda.darudaserver.domain.community.service.BoardService;
 import com.daruda.darudaserver.domain.user.dto.request.UpdateMyRequest;
 import com.daruda.darudaserver.domain.user.dto.response.FavoriteToolsResponse;
 import com.daruda.darudaserver.domain.user.dto.response.MyProfileResponse;
+import com.daruda.darudaserver.domain.user.dto.response.PagenationDto;
+import com.daruda.darudaserver.domain.user.dto.response.ScrapBoardsResponse;
+import com.daruda.darudaserver.domain.user.dto.response.ScrapBoardsRetrieveResponse;
 import com.daruda.darudaserver.domain.user.dto.response.UpdateMyResponse;
 import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
@@ -237,6 +241,15 @@ class UserControllerTest {
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
+		Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+		ScrapBoardsResponse item = ScrapBoardsResponse.of(1L, "Cursor", "https://logo.png", "작성자", "제목", "내용",
+			List.of("https://img1.png"), true, 10L, 5L, LocalDateTime.now(), 2);
+		ScrapBoardsRetrieveResponse response = ScrapBoardsRetrieveResponse.of(userId, List.of(item),
+			PagenationDto.of(0, 5, 1));
+
+		// when
+		when(boardScrapService.getScrapBoards(userId, pageable)).thenReturn(response);
 
 		// then
 		String token = "accessToken";
@@ -245,6 +258,11 @@ class UserControllerTest {
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(SuccessCode.SUCCESS_FETCH.getHttpStatus().value()))
-			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_FETCH.getMessage()));
+			.andExpect(jsonPath("$.message").value(SuccessCode.SUCCESS_FETCH.getMessage()))
+			.andExpect(jsonPath("$.data.boardList[0].author").value("작성자"))
+			.andExpect(jsonPath("$.data.boardList[0].images[0]").value("https://img1.png"))
+			.andExpect(jsonPath("$.data.boardList[0].commentCount").value(2))
+			.andExpect(jsonPath("$.data.boardList[0].isScraped").value(true))
+			.andExpect(jsonPath("$.data.boardList[0].isScrapped").doesNotExist());
 	}
 }
