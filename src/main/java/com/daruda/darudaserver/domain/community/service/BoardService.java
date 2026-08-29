@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
+import com.daruda.darudaserver.domain.comment.service.CommentService;
 import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateRequest;
 import com.daruda.darudaserver.domain.community.dto.response.BoardResponse;
 import com.daruda.darudaserver.domain.community.dto.response.GetBoardResponse;
@@ -64,6 +65,7 @@ public class BoardService {
 	private final BoardScrapService boardScrapService;
 	private final ToolRepository toolRepository;
 	private final CommentRepository commentRepository;
+	private final CommentService commentService;
 	private final ValidateBoard validateBoard;
 	private final BoardSearchRepository boardSearchRepository;
 	private final ApplicationEventPublisher eventPublisher;
@@ -177,17 +179,6 @@ public class BoardService {
 		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 		Boolean isScraped = boardScrapService.isScraped(user, board);
 		return BoardResponse.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped, toolId);
-	}
-
-	// 내가 쓴  게시판 조회
-	public BoardResponse getMyBoard(final User user, final Long boardId) {
-		Board board = getBoardById(boardId);
-		List<String> imageUrls = boardImageService.getBoardImageUrls(boardId);
-		String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
-		String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
-
-		Boolean isScraped = boardScrapService.isScraped(user, board);
-		return BoardResponse.of(board, toolName, toolLogo, getCommentCount(boardId), imageUrls, isScraped);
 	}
 
 	public GetBoardResponse getBoardList(final Long userIdOrNull, final Boolean noTopic, final Long toolId,
@@ -391,8 +382,28 @@ public class BoardService {
 		log.debug("사용자를 조회합니다, {}", userIdOrNull);
 		Page<Board> boards = boardRepository.findAllByUserIdAndDelYnFalse(userIdOrNull, pageable);
 		User user = getUser(userIdOrNull);
-		List<BoardResponse> boardResList = boards.getContent().stream()
-			.map(board -> getMyBoard(user, board.getId()))
+
+		List<Board> content = boards.getContent();
+		List<Long> boardIds = content.stream().map(Board::getId).toList();
+		// 스크랩 수는 배치 쿼리로 한 번에 조회 (N+1 방지)
+		Map<Long, Long> scrapCountMap = boardIds.isEmpty()
+			? Map.of() : boardScrapRepository.countMapByBoardIds(boardIds);
+		// 댓글 수도 배치로 한 번에 조회 (N+1 방지). 도메인 경계상 `CommentService`를 경유한다.
+		Map<Long, Long> commentCountMap = commentService.getCommentCountMap(boardIds);
+
+		List<BoardResponse> boardResList = content.stream()
+			.map(board -> {
+				// 자유 게시판은 tool이 없으므로 toolId는 nullable
+				Long savedToolId = board.getTool() != null ? board.getTool().getToolId() : null;
+				String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
+				String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
+				int commentCount = commentCountMap.getOrDefault(board.getId(), 0L).intValue();
+				List<String> images = boardImageService.getBoardImageUrls(board.getId());
+				boolean isScraped = boardScrapService.isScraped(user, board);
+				long scrapCount = scrapCountMap.getOrDefault(board.getId(), 0L);
+				return BoardResponse.of(board, toolName, toolLogo, commentCount, images, isScraped, savedToolId,
+					scrapCount);
+			})
 			.toList();
 
 		PagenationDto pageInfo = PagenationDto.of(pageable.getPageNumber(), pageable.getPageSize(),

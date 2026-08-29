@@ -11,9 +11,13 @@ public interface ScrapBoardProjection {
 
 	LocalDateTime getUpdatedAt();
 
+	String getAuthor();
+
 	String getToolName();
 
 	String getToolLogo();
+
+	Long getToolId();
 
 	Long getScrapCount();
 }

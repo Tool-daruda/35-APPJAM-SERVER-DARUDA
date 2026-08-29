@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.comment.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -115,6 +116,10 @@ public class CommentService {
 		ScrollPaginationDto pageInfo = ScrollPaginationDto.of(items.size(), nextCursor);  // 현재 페이지 건수만 전달
 
 		return new GetCommentRetrieveResponse(items, pageInfo);
+	}
+
+	public Map<Long, Long> getCommentCountMap(final List<Long> boardIds) {
+		return boardIds.isEmpty() ? Map.of() : commentRepository.countMapByBoardIds(boardIds);
 	}
 
 	@Transactional

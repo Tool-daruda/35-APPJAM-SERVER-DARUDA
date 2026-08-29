@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.daruda.darudaserver.domain.comment.service.CommentService;
 import com.daruda.darudaserver.domain.community.dto.response.BoardScrapResponse;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.entity.BoardScrap;
@@ -42,6 +43,8 @@ public class BoardScrapService {
 	private final BoardSearchRepository boardSearchRepository;
 	private final ValidateBoard validateBoard;
 	private final BoardScrapInternalService boardScrapInternalService;
+	private final BoardImageService boardImageService;
+	private final CommentService commentService;
 
 	// 스크랩 토글 (존재하면 삭제, 없으면 생성)
 	@Transactional
@@ -87,16 +90,24 @@ public class BoardScrapService {
 		validateBoard.validateUser(userId);
 
 		Page<ScrapBoardProjection> boardScraps = boardScrapRepository.findScrapBoardsWithCount(userId, pageable);
+		List<Long> boardIds = boardScraps.getContent().stream()
+			.map(ScrapBoardProjection::getBoardId)
+			.toList();
+		Map<Long, Long> commentCountMap = commentService.getCommentCountMap(boardIds);
 		List<ScrapBoardsResponse> scrapBoardsResponses = boardScraps.getContent().stream()
 			.map(projection -> ScrapBoardsResponse.of(
 				projection.getBoardId(),
-				projection.getTitle(),
-				projection.getContent(),
-				projection.getUpdatedAt(),
 				projection.getToolName() != null ? projection.getToolName() : FREE,
 				projection.getToolLogo() != null ? projection.getToolLogo() : TOOL_LOGO,
+				projection.getAuthor(),
+				projection.getTitle(),
+				projection.getContent(),
+				boardImageService.getBoardImageUrls(projection.getBoardId()),
 				true,
-				projection.getScrapCount()
+				projection.getToolId(),
+				projection.getScrapCount(),
+				projection.getUpdatedAt(),
+				commentCountMap.getOrDefault(projection.getBoardId(), 0L).intValue()
 			))
 			.toList();
 

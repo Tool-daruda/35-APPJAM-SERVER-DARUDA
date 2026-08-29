@@ -1,6 +1,8 @@
 package com.daruda.darudaserver.domain.comment.repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,6 +40,15 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
 	@Query("SELECT COUNT(c) FROM Comment c WHERE c.board.id = :boardId AND c.isDeleted = false")
 	int countByBoardId(@Param("boardId") Long boardId);
+
+	@Query("SELECT c.board.id, COUNT(c) FROM Comment c "
+		+ "WHERE c.board.id IN :boardIds AND c.isDeleted = false GROUP BY c.board.id")
+	List<Object[]> countByBoardIds(@Param("boardIds") List<Long> boardIds);
+
+	default Map<Long, Long> countMapByBoardIds(final List<Long> boardIds) {
+		return countByBoardIds(boardIds).stream()
+			.collect(Collectors.toMap(row -> (Long)row[0], row -> (Long)row[1]));
+	}
 
 	@Query("SELECT DISTINCT c.user FROM Comment c "
 		+ "WHERE c.board.id = :boardId "
