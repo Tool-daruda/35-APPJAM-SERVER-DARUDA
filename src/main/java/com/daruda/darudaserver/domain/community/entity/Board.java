@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.domain.community.entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -66,7 +66,7 @@ public class Board extends BaseTimeEntity {
 	@Builder.Default
 	private boolean isFree = true;
 
-	private Timestamp deletedAt;
+	private LocalDateTime deletedAt;
 
 	@Builder
 	public Board(final String title, final String content, final Tool tool, final User user, final boolean delYn,
