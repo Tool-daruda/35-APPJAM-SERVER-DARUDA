@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
+import com.daruda.darudaserver.domain.comment.service.CommentService;
 import com.daruda.darudaserver.domain.community.entity.Board;
 import com.daruda.darudaserver.domain.community.repository.BoardImageRepository;
 import com.daruda.darudaserver.domain.community.repository.BoardRepository;
@@ -61,6 +62,9 @@ class BoardServiceTest {
 
 	@Mock
 	private CommentRepository commentRepository;
+
+	@Mock
+	private CommentService commentService;
 
 	@Mock
 	private ValidateBoard validateBoard;
@@ -124,7 +128,7 @@ class BoardServiceTest {
 				.willReturn(new PageImpl<>(List.of(toolBoard), pageable, 1));
 			given(userRepository.findById(userId)).willReturn(Optional.of(user));
 			given(boardScrapRepository.countMapByBoardIds(List.of(10L))).willReturn(Map.of(10L, 3L));
-			given(commentRepository.countMapByBoardIds(List.of(10L))).willReturn(Map.of(10L, 3L));
+			given(commentService.getCommentCountMap(List.of(10L))).willReturn(Map.of(10L, 3L));
 			given(boardImageService.getBoardImageUrls(10L)).willReturn(List.of());
 			given(boardScrapService.isScraped(user, toolBoard)).willReturn(false);
 
@@ -155,7 +159,7 @@ class BoardServiceTest {
 				.willReturn(new PageImpl<>(List.of(freeBoard), pageable, 1));
 			given(userRepository.findById(userId)).willReturn(Optional.of(user));
 			given(boardScrapRepository.countMapByBoardIds(List.of(20L))).willReturn(Map.of());
-			given(commentRepository.countMapByBoardIds(List.of(20L))).willReturn(Map.of());
+			given(commentService.getCommentCountMap(List.of(20L))).willReturn(Map.of());
 			given(boardImageService.getBoardImageUrls(20L)).willReturn(List.of());
 			given(boardScrapService.isScraped(user, freeBoard)).willReturn(false);
 

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.daruda.darudaserver.domain.comment.entity.Comment;
 import com.daruda.darudaserver.domain.comment.repository.CommentRepository;
+import com.daruda.darudaserver.domain.comment.service.CommentService;
 import com.daruda.darudaserver.domain.community.dto.request.BoardCreateAndUpdateRequest;
 import com.daruda.darudaserver.domain.community.dto.response.BoardResponse;
 import com.daruda.darudaserver.domain.community.dto.response.GetBoardResponse;
@@ -64,6 +65,7 @@ public class BoardService {
 	private final BoardScrapService boardScrapService;
 	private final ToolRepository toolRepository;
 	private final CommentRepository commentRepository;
+	private final CommentService commentService;
 	private final ValidateBoard validateBoard;
 	private final BoardSearchRepository boardSearchRepository;
 	private final ApplicationEventPublisher eventPublisher;
@@ -386,9 +388,8 @@ public class BoardService {
 		// 스크랩 수는 배치 쿼리로 한 번에 조회 (N+1 방지)
 		Map<Long, Long> scrapCountMap = boardIds.isEmpty()
 			? Map.of() : boardScrapRepository.countMapByBoardIds(boardIds);
-		// 댓글 수도 배치 쿼리로 한 번에 조회 (N+1 방지)
-		Map<Long, Long> commentCountMap = boardIds.isEmpty()
-			? Map.of() : commentRepository.countMapByBoardIds(boardIds);
+		// 댓글 수도 배치로 한 번에 조회 (N+1 방지). 도메인 경계상 `CommentService`를 경유한다.
+		Map<Long, Long> commentCountMap = commentService.getCommentCountMap(boardIds);
 
 		List<BoardResponse> boardResList = content.stream()
 			.map(board -> {
