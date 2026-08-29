@@ -1,6 +1,10 @@
 package com.daruda.darudaserver.global.scraper;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.DisplayName;
@@ -104,6 +108,93 @@ class OgMetadataScraperTest {
 			// then
 			assertThat(result.thumbnailUrl()).isEqualTo("https://example.com/img/thumb.png");
 			assertThat(result.faviconUrl()).isEqualTo("https://example.com/favicon.png");
+		}
+
+		@Test
+		@DisplayName("포트가 있는 페이지 URL 이면 기본 favicon 경로에도 포트를 보존한다")
+		void parse_defaultFaviconPreservesPort() {
+			// given
+			String html = "<html><head><title>포트 있음</title></head><body></body></html>";
+
+			// when
+			OgMetadata result = scraper.parse(Jsoup.parse(html, "http://example.com:8080/post"),
+				"http://example.com:8080/post");
+
+			// then
+			assertThat(result.faviconUrl()).isEqualTo("http://example.com:8080/favicon.ico");
+		}
+	}
+
+	@Nested
+	@DisplayName("isSafePublicHttpUrl - SSRF 완화용 URL 검증")
+	class IsSafePublicHttpUrl {
+
+		@Test
+		@DisplayName("공개 IP 주소의 http URL 은 허용한다")
+		void isSafePublicHttpUrl_publicIp_true() {
+			// when & then
+			assertThat(OgMetadataScraper.isSafePublicHttpUrl("http://8.8.8.8/path")).isTrue();
+		}
+
+		@Test
+		@DisplayName("공개 도메인의 https URL 은 허용한다 (DNS 미가용 환경에서는 스킵)")
+		void isSafePublicHttpUrl_publicDomain_true() {
+			// given
+			assumeTrue(resolves("example.com"), "DNS 미가용 환경 - 스킵");
+
+			// when & then
+			assertThat(OgMetadataScraper.isSafePublicHttpUrl("https://example.com/post")).isTrue();
+		}
+
+		@Test
+		@DisplayName("localhost 호스트는 차단한다")
+		void isSafePublicHttpUrl_localhost_false() {
+			// when & then
+			assertThat(OgMetadataScraper.isSafePublicHttpUrl("http://localhost/admin")).isFalse();
+		}
+
+		@Test
+		@DisplayName("루프백 IP 는 차단한다")
+		void isSafePublicHttpUrl_loopbackIp_false() {
+			// when & then
+			assertThat(OgMetadataScraper.isSafePublicHttpUrl("https://127.0.0.1/secret")).isFalse();
+		}
+
+		@Test
+		@DisplayName("링크 로컬(메타데이터 엔드포인트) IP 는 차단한다")
+		void isSafePublicHttpUrl_linkLocalIp_false() {
+			// when & then
+			assertThat(OgMetadataScraper.isSafePublicHttpUrl("http://169.254.169.254/latest/meta-data/")).isFalse();
+		}
+
+		@Test
+		@DisplayName("사설(사이트 로컬) IP 는 차단한다")
+		void isSafePublicHttpUrl_siteLocalIp_false() {
+			// when & then
+			assertThat(OgMetadataScraper.isSafePublicHttpUrl("http://10.0.0.5/")).isFalse();
+		}
+
+		@Test
+		@DisplayName("http(s) 가 아닌 스킴은 차단한다")
+		void isSafePublicHttpUrl_nonHttpScheme_false() {
+			// when & then
+			assertThat(OgMetadataScraper.isSafePublicHttpUrl("ftp://example.com")).isFalse();
+		}
+
+		@Test
+		@DisplayName("URL 로 파싱되지 않는 문자열은 차단한다")
+		void isSafePublicHttpUrl_notAUrl_false() {
+			// when & then
+			assertThat(OgMetadataScraper.isSafePublicHttpUrl("not a url")).isFalse();
+		}
+
+		private boolean resolves(final String host) {
+			try {
+				InetAddress.getByName(host);
+				return true;
+			} catch (UnknownHostException e) {
+				return false;
+			}
 		}
 	}
 }
