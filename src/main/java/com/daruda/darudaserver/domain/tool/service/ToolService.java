@@ -239,10 +239,7 @@ public class ToolService {
 		ToolScrap toolScrap = toolScrapRepository.findByUserAndTool(user, tool).orElse(null);
 
 		if (toolScrap == null) {
-			toolScrap = ToolScrap.builder()
-				.user(user)
-				.tool(tool)
-				.build();
+			toolScrap = ToolScrap.of(user, tool);
 			toolScrapRepository.save(toolScrap);
 			log.debug("툴 스크랩이 생 되었습니다");
 		} else {
