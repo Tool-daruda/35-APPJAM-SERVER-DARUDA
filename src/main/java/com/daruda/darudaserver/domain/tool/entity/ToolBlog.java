@@ -26,6 +26,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "tool_blog")
 public class ToolBlog {
+
+	private static final int TITLE_MAX_LENGTH = 500;
+	private static final int THUMBNAIL_URL_MAX_LENGTH = 2000;
+	private static final int SUMMARY_MAX_LENGTH = 2000;
+	private static final int SITE_NAME_MAX_LENGTH = 200;
+	private static final int FAVICON_URL_MAX_LENGTH = 2000;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "tool_blog_id")
@@ -34,19 +41,19 @@ public class ToolBlog {
 	@Column(name = "blog_url", nullable = false, length = 50000)
 	private String blogUrl;
 
-	@Column(name = "title", length = 500)
+	@Column(name = "title", length = TITLE_MAX_LENGTH)
 	private String title;
 
-	@Column(name = "thumbnail_url", length = 2000)
+	@Column(name = "thumbnail_url", length = THUMBNAIL_URL_MAX_LENGTH)
 	private String thumbnailUrl;
 
-	@Column(name = "summary", length = 2000)
+	@Column(name = "summary", length = SUMMARY_MAX_LENGTH)
 	private String summary;
 
-	@Column(name = "site_name", length = 200)
+	@Column(name = "site_name", length = SITE_NAME_MAX_LENGTH)
 	private String siteName;
 
-	@Column(name = "favicon_url", length = 2000)
+	@Column(name = "favicon_url", length = FAVICON_URL_MAX_LENGTH)
 	private String faviconUrl;
 
 	@Column(name = "metadata_fetched_at")
@@ -63,11 +70,11 @@ public class ToolBlog {
 			.tool(tool)
 			.metadataFetchedAt(LocalDateTime.now());
 		if (metadata != null) {
-			builder.title(metadata.title())
-				.thumbnailUrl(metadata.thumbnailUrl())
-				.summary(metadata.summary())
-				.siteName(metadata.siteName())
-				.faviconUrl(metadata.faviconUrl());
+			builder.title(clampText(metadata.title(), TITLE_MAX_LENGTH))
+				.thumbnailUrl(clampUrl(metadata.thumbnailUrl(), THUMBNAIL_URL_MAX_LENGTH))
+				.summary(clampText(metadata.summary(), SUMMARY_MAX_LENGTH))
+				.siteName(clampText(metadata.siteName(), SITE_NAME_MAX_LENGTH))
+				.faviconUrl(clampUrl(metadata.faviconUrl(), FAVICON_URL_MAX_LENGTH));
 		}
 		return builder.build();
 	}
@@ -81,14 +88,27 @@ public class ToolBlog {
 		if (metadata == null) {
 			return;
 		}
-		this.title = metadata.title();
-		this.thumbnailUrl = metadata.thumbnailUrl();
-		this.summary = metadata.summary();
-		this.siteName = metadata.siteName();
-		this.faviconUrl = metadata.faviconUrl();
+		this.title = clampText(metadata.title(), TITLE_MAX_LENGTH);
+		this.thumbnailUrl = clampUrl(metadata.thumbnailUrl(), THUMBNAIL_URL_MAX_LENGTH);
+		this.summary = clampText(metadata.summary(), SUMMARY_MAX_LENGTH);
+		this.siteName = clampText(metadata.siteName(), SITE_NAME_MAX_LENGTH);
+		this.faviconUrl = clampUrl(metadata.faviconUrl(), FAVICON_URL_MAX_LENGTH);
 	}
 
 	public boolean needsMetadataBackfill() {
 		return this.metadataFetchedAt == null;
+	}
+
+	// 컬럼 길이를 초과한 텍스트는 잘라서 저장한다(플러시 시 DB 에러 방지).
+	private static String clampText(final String value, final int max) {
+		if (value == null) {
+			return null;
+		}
+		return value.length() > max ? value.substring(0, max) : value;
+	}
+
+	// 컬럼 길이를 초과한 URL 은 잘라 쓰면 깨진 링크가 되므로 통째로 버린다.
+	private static String clampUrl(final String value, final int max) {
+		return (value == null || value.length() > max) ? null : value;
 	}
 }
