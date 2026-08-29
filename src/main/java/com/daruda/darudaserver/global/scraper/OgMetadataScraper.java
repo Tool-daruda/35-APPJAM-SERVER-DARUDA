@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.global.scraper;
 
 import java.io.IOException;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -97,7 +98,7 @@ public class OgMetadataScraper {
 		try {
 			for (InetAddress addr : InetAddress.getAllByName(host)) {
 				if (addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isLinkLocalAddress()
-					|| addr.isSiteLocalAddress() || addr.isMulticastAddress()) {
+					|| addr.isSiteLocalAddress() || addr.isMulticastAddress() || isUniqueLocalIpv6(addr)) {
 					return false;
 				}
 			}
@@ -105,6 +106,13 @@ public class OgMetadataScraper {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * IPv6 Unique Local Address(`fc00::/7`) 여부. `isSiteLocalAddress()`가 커버하지 않는 사설 대역이다.
+	 */
+	private static boolean isUniqueLocalIpv6(final InetAddress addr) {
+		return addr instanceof Inet6Address && (addr.getAddress()[0] & 0xFE) == 0xFC;
 	}
 
 	private static String attr(final Document doc, final String cssQuery, final String attributeKey) {
