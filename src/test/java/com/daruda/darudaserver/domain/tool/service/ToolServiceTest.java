@@ -110,13 +110,13 @@ class ToolServiceTest {
 			.nickname("tester")
 			.positions(null)
 			.build();
-		Tool tool = Tool.builder().toolId(toolId).build();
+		Tool tool = Tool.builder().id(toolId).build();
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
 		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(false);
 		when(toolLikeInternalService.saveIfAbsent(any(ToolLike.class))).thenReturn(true);
-		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(1);
+		when(toolLikeRepository.countByTool_Id(toolId)).thenReturn(1);
 
 		// when
 		ToolLikeResponse result = toolService.postToolLike(userId, toolId);
@@ -139,12 +139,12 @@ class ToolServiceTest {
 			.nickname("tester")
 			.positions(null)
 			.build();
-		Tool tool = Tool.builder().toolId(toolId).build();
+		Tool tool = Tool.builder().id(toolId).build();
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
 		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(true);
-		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(0);
+		when(toolLikeRepository.countByTool_Id(toolId)).thenReturn(0);
 
 		// when
 		ToolLikeResponse result = toolService.postToolLike(userId, toolId);
@@ -167,13 +167,13 @@ class ToolServiceTest {
 			.nickname("tester")
 			.positions(null)
 			.build();
-		Tool tool = Tool.builder().toolId(toolId).build();
+		Tool tool = Tool.builder().id(toolId).build();
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(toolRepository.findById(toolId)).thenReturn(Optional.of(tool));
 		when(toolLikeRepository.existsByUserAndTool(user, tool)).thenReturn(false);
 		when(toolLikeInternalService.saveIfAbsent(any(ToolLike.class))).thenReturn(false);
-		when(toolLikeRepository.countByTool_ToolId(toolId)).thenReturn(1);
+		when(toolLikeRepository.countByTool_Id(toolId)).thenReturn(1);
 
 		// when
 		ToolLikeResponse result = toolService.postToolLike(userId, toolId);
@@ -189,7 +189,7 @@ class ToolServiceTest {
 
 		private Tool tool(final Long toolId, final String createdAt, final License license) {
 			return Tool.builder()
-				.toolId(toolId)
+				.id(toolId)
 				.toolMainName("tool" + toolId)
 				.toolLogo("logo" + toolId)
 				.description("description" + toolId)
@@ -209,7 +209,7 @@ class ToolServiceTest {
 
 			given(toolRepository.findAll())
 				.willReturn(List.of(toolWithKeywords, toolWithoutKeywords, anotherToolWithKeywords));
-			given(toolKeywordRepository.findByTool_ToolIdIn(anyList()))
+			given(toolKeywordRepository.findByTool_IdIn(anyList()))
 				.willReturn(List.of(
 					ToolKeyword.builder().keywordName("문서").tool(toolWithKeywords).build(),
 					ToolKeyword.builder().keywordName("협업").tool(anotherToolWithKeywords).build()
@@ -240,7 +240,7 @@ class ToolServiceTest {
 		void getBlog_toolWithoutBlogs_returnsEmptyList() {
 			// given
 			Long toolId = 10L;
-			Tool tool = Tool.builder().toolId(toolId).build();
+			Tool tool = Tool.builder().id(toolId).build();
 			given(toolRepository.findById(toolId)).willReturn(Optional.of(tool));
 			given(toolBlogRepository.findAllByTool(tool)).willReturn(List.of());
 
@@ -257,12 +257,12 @@ class ToolServiceTest {
 		void getBlog_blogAlreadyAttempted_returnedWithoutBackfill() {
 			// given
 			Long toolId = 10L;
-			Tool tool = Tool.builder().toolId(toolId).build();
+			Tool tool = Tool.builder().id(toolId).build();
 			OgMetadata metadata = new OgMetadata(
 				"제목", "https://cdn.example.com/thumb.png", "요약", "예시 블로그", "https://example.com/favicon.ico");
 			// create(...) 는 metadataFetchedAt 을 찍으므로 needsMetadataBackfill() == false
 			ToolBlog blog = ToolBlog.create("https://blog.example.com/1", tool, metadata);
-			ReflectionTestUtils.setField(blog, "blogId", 1L);
+			ReflectionTestUtils.setField(blog, "id", 1L);
 			assertThat(blog.needsMetadataBackfill()).isFalse();
 			given(toolRepository.findById(toolId)).willReturn(Optional.of(tool));
 			given(toolBlogRepository.findAllByTool(tool)).willReturn(List.of(blog));
@@ -284,7 +284,7 @@ class ToolServiceTest {
 		void getBlog_blogNeverAttempted_delegatesToBackfill() {
 			// given
 			Long toolId = 10L;
-			Tool tool = Tool.builder().toolId(toolId).build();
+			Tool tool = Tool.builder().id(toolId).build();
 			ToolBlog blog = ToolBlog.builder()
 				.blogUrl("https://blog.example.com/1")
 				.tool(tool)

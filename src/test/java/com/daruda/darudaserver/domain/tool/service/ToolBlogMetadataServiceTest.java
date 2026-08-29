@@ -32,7 +32,7 @@ class ToolBlogMetadataServiceTest {
 	@InjectMocks
 	private ToolBlogMetadataService toolBlogMetadataService;
 
-	private final Tool tool = Tool.builder().toolId(10L).build();
+	private final Tool tool = Tool.builder().id(10L).build();
 
 	private ToolBlog blogNeedingBackfill(final String url) {
 		return ToolBlog.builder()
