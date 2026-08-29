@@ -27,7 +27,9 @@ import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.ConflictException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,7 +59,20 @@ class UserServiceTest {
 
 		// then
 		assertTrue(result);
-		verify(userRepository).existsByNickname(nickname);
+	}
+
+	@Test
+	@DisplayName("닉네임 중복 확인 - 중복되지 않은 경우")
+	void isDuplicatedNickname_notDuplicated() {
+		// given
+		String nickname = "tester";
+		when(userRepository.existsByNickname(nickname)).thenReturn(false);
+
+		// when
+		boolean result = userService.isDuplicatedNickname(nickname);
+
+		// then
+		assertFalse(result);
 	}
 
 	@Test
@@ -76,7 +91,6 @@ class UserServiceTest {
 		MyProfileResponse response = userService.getMyProfile(userId);
 
 		// then
-		assertNotNull(response);
 		assertEquals(nickname, response.nickname());
 		assertEquals(positions, response.positions());
 	}
@@ -88,42 +102,35 @@ class UserServiceTest {
 		Long userId = 1L;
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-		// when
-		when(userRepository.findById(userId)).thenReturn(Optional.empty());
+		// when & then
 		NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getMyProfile(userId));
-
-		// then
 		assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
 	}
 
 	@Test
-	@DisplayName("찜한 도구 목록 조회 성공")
+	@DisplayName("좋아하는 툴 목록 조회 성공")
 	void getFavoriteTools_success() {
 		// given
 		Long userId = 1L;
 		String email = "test@example.com";
 		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		PlanType planType = PlanType.FREE;
 		User userEntity = User.of(email, nickname, positions);
+
 		Tool tool = Tool.builder()
-			.toolMainName("toolName")
-			.toolSubName("toolSubName")
-			.category(Category.ALL)
-			.toolLink("toolLink")
-			.description("toolDescription")
+			.toolMainName("tool1")
+			.toolLogo("logo1")
+			.description("desc1")
 			.license(License.FREE)
-			.supportKorea(true)
-			.detailDescription("toolDetailDescription")
-			.planLink("toolPlanLink")
-			.toolLogo("toolLogo")
-			.planType(planType)
+			.category(Category.AI)
 			.build();
+
 		ToolScrap toolScrap = ToolScrap.of(userEntity, tool);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 		when(toolScrapRepository.findAllByUserId(userId)).thenReturn(List.of(toolScrap));
-		when(toolService.convertToKeywordRes(tool)).thenReturn(List.of("keyword"));
+		when(toolScrapRepository.findByUserAndTool(userEntity, tool)).thenReturn(Optional.of(toolScrap));
+		when(toolService.convertToKeywordRes(tool)).thenReturn(List.of());
 
 		// when
 		FavoriteToolsResponse response = userService.getFavoriteTools(userId);
@@ -134,39 +141,15 @@ class UserServiceTest {
 	}
 
 	@Test
-	@DisplayName("프로필 업데이트 성공 - 닉네임과 포지션 모두 변경")
-	void updateProfile_success() {
+	@DisplayName("프로필 업데이트 성공 - 닉네임만 변경")
+	void updateProfile_onlyNickname() {
 		// given
 		Long userId = 1L;
 		String email = "test@example.com";
-		String nickname = "tester";
-		Positions positions = Positions.STUDENT;
+		String oldNickname = "tester";
 		String newNickname = "newTester";
-		Positions newPositions = Positions.NORMAL;
-		User userEntity = User.of(email, nickname, positions);
-
-		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
-		when(userRepository.existsByNickname(newNickname)).thenReturn(false);
-
-		// when
-		UpdateMyResponse response = userService.updateProfile(userId, newNickname, Positions.NORMAL.getName());
-
-		// then
-		assertNotNull(response);
-		assertEquals(newNickname, response.nickname());
-		assertEquals(newPositions, response.positions());
-	}
-
-	@Test
-	@DisplayName("프로필 업데이트 성공 - 닉네임 변경")
-	void updateProfile_nickname_success() {
-		// given
-		Long userId = 1L;
-		String email = "test@example.com";
-		String nickname = "tester";
 		Positions positions = Positions.STUDENT;
-		String newNickname = "newTester";
-		User userEntity = User.of(email, nickname, positions);
+		User userEntity = User.of(email, oldNickname, positions);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 		when(userRepository.existsByNickname(newNickname)).thenReturn(false);
@@ -175,20 +158,20 @@ class UserServiceTest {
 		UpdateMyResponse response = userService.updateProfile(userId, newNickname, null);
 
 		// then
-		assertNotNull(response);
 		assertEquals(newNickname, response.nickname());
+		assertEquals(positions, response.positions());
 	}
 
 	@Test
-	@DisplayName("프로필 업데이트 성공 - 포지션 변경")
-	void updateProfile_position_success() {
+	@DisplayName("프로필 업데이트 성공 - 직무만 변경")
+	void updateProfile_onlyPosition() {
 		// given
 		Long userId = 1L;
 		String email = "test@example.com";
 		String nickname = "tester";
-		Positions positions = Positions.STUDENT;
-		Positions newPositions = Positions.NORMAL;
-		User userEntity = User.of(email, nickname, positions);
+		Positions oldPositions = Positions.STUDENT;
+		Positions newPositions = Positions.WORKER;
+		User userEntity = User.of(email, nickname, oldPositions);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 
@@ -196,7 +179,30 @@ class UserServiceTest {
 		UpdateMyResponse response = userService.updateProfile(userId, null, newPositions.getName());
 
 		// then
-		assertNotNull(response);
+		assertEquals(nickname, response.nickname());
+		assertEquals(newPositions, response.positions());
+	}
+
+	@Test
+	@DisplayName("프로필 업데이트 성공 - 닉네임과 직무 모두 변경")
+	void updateProfile_bothNicknameAndPosition() {
+		// given
+		Long userId = 1L;
+		String email = "test@example.com";
+		String oldNickname = "tester";
+		String newNickname = "newTester";
+		Positions oldPositions = Positions.STUDENT;
+		Positions newPositions = Positions.WORKER;
+		User userEntity = User.of(email, oldNickname, oldPositions);
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
+		when(userRepository.existsByNickname(newNickname)).thenReturn(false);
+
+		// when
+		UpdateMyResponse response = userService.updateProfile(userId, newNickname, newPositions.getName());
+
+		// then
+		assertEquals(newNickname, response.nickname());
 		assertEquals(newPositions, response.positions());
 	}
 
@@ -207,7 +213,7 @@ class UserServiceTest {
 		Long userId = 1L;
 
 		// when
-		BusinessException exception = assertThrows(BusinessException.class,
+		BadRequestException exception = assertThrows(BadRequestException.class,
 			() -> userService.updateProfile(userId, null, null));
 
 		// then
@@ -224,7 +230,7 @@ class UserServiceTest {
 
 		// when
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
-		BusinessException exception = assertThrows(BusinessException.class,
+		NotFoundException exception = assertThrows(NotFoundException.class,
 			() -> userService.updateProfile(userId, nickname, positionStr));
 
 		// then
@@ -245,7 +251,7 @@ class UserServiceTest {
 		when(userRepository.existsByNickname(nickname)).thenReturn(true);
 
 		// when
-		BusinessException exception = assertThrows(BusinessException.class,
+		ConflictException exception = assertThrows(ConflictException.class,
 			() -> userService.updateProfile(userId, nickname, positions.getName()));
 
 		// then

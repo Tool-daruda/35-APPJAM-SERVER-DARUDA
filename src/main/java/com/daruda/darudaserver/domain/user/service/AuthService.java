@@ -23,7 +23,8 @@ import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.ConflictException;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -47,14 +48,14 @@ public class AuthService {
 	@Transactional
 	public SignUpSuccessResponse register(final String email, final String nickname, final String positionStr) {
 		if (userRepository.existsByEmail(email)) {
-			throw new BusinessException(ErrorCode.DUPLICATED_EMAIL);
+			throw new ConflictException(ErrorCode.DUPLICATED_EMAIL);
 		}
 
 		Positions positions = Positions.fromString(positionStr);
 
 		// 관리자로 회원 가입 불가
 		if (Positions.ADMIN.equals(positions)) {
-			throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
+			throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
 		}
 
 		User userEntity = User.of(email, nickname, positions);

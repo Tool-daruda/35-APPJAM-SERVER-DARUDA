@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 import com.daruda.darudaserver.global.image.dto.response.PresignedUrlResponse;
 import com.daruda.darudaserver.global.image.entity.Image;
@@ -79,18 +79,18 @@ public class ImageService {
 
 	private void validateExtensionString(String extension) {
 		if (extension == null || !ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
-			throw new BusinessException(ErrorCode.INVALID_IMAGE_TYPE);
+			throw new InvalidValueException(ErrorCode.INVALID_IMAGE_TYPE);
 		}
 	}
 
 	private void validateUrlExtension(String url) {
 		if (url == null) {
-			throw new BusinessException(ErrorCode.INVALID_IMAGE_TYPE);
+			throw new InvalidValueException(ErrorCode.INVALID_IMAGE_TYPE);
 		}
 		String lowerUrl = url.toLowerCase();
 		boolean isValid = ALLOWED_EXTENSIONS.stream().anyMatch(lowerUrl::endsWith);
 		if (!isValid) {
-			throw new BusinessException(ErrorCode.INVALID_IMAGE_TYPE);
+			throw new InvalidValueException(ErrorCode.INVALID_IMAGE_TYPE);
 		}
 	}
 }

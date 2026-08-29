@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public enum SuspensionDuration {
 	public static SuspensionDuration fromString(String description) {
 		SuspensionDuration duration = DESCRIPTION_MAP.get(description);
 		if (duration == null) {
-			throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
+			throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
 		}
 
 		return duration;

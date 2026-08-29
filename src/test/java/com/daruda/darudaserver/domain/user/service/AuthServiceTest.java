@@ -32,7 +32,8 @@ import com.daruda.darudaserver.domain.user.entity.enums.SocialType;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.auth.jwt.service.TokenService;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.ConflictException;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -108,7 +109,7 @@ public class AuthServiceTest {
 		when(userRepository.existsByEmail(email)).thenReturn(true);
 
 		// when
-		BusinessException exception = assertThrows(BusinessException.class,
+		ConflictException exception = assertThrows(ConflictException.class,
 			() -> authService.register(email, nickname, positionStr));
 
 		// then
@@ -231,7 +232,7 @@ public class AuthServiceTest {
 
 		// when
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
-		BusinessException exception = assertThrows(BusinessException.class,
+		NotFoundException exception = assertThrows(NotFoundException.class,
 			() -> authService.withdraw(userId));
 
 		// then
