@@ -8,6 +8,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -20,7 +23,7 @@ public class UserAuthentication extends UsernamePasswordAuthenticationToken {
 	public static UserAuthentication createUserAuthentication(Long userId, String role) {
 		log.debug("createUserAuthentication - userId: {} role: {}", userId, role);
 		if (role == null || role.isBlank()) {
-			throw new IllegalArgumentException("role must not be null/blank");
+			throw new UnauthorizedException(ErrorCode.EMPTY_OR_INVALID_TOKEN);
 		}
 		String normalized = role.startsWith("ROLE_") ? role.substring(5) : role;
 		SimpleGrantedAuthority authority =

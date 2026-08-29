@@ -35,8 +35,11 @@ import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
 import com.daruda.darudaserver.global.error.exception.ForbiddenException;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class ReportServiceTest {
@@ -184,12 +187,12 @@ class ReportServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> reportService.createReport(99L, request))
-				.isInstanceOf(BusinessException.class)
+				.isInstanceOf(NotFoundException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
 		}
 
 		@Test
-		@DisplayName("게시글이 존재하지 않으면 BusinessException")
+		@DisplayName("게시글이 존재하지 않으면 NotFoundException")
 		void createReport_board_not_found() {
 			// given
 			given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
@@ -204,12 +207,12 @@ class ReportServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> reportService.createReport(reporter.getId(), request))
-				.isInstanceOf(BusinessException.class)
+				.isInstanceOf(NotFoundException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.BOARD_NOT_FOUND);
 		}
 
 		@Test
-		@DisplayName("댓글이 존재하지 않으면 BusinessException")
+		@DisplayName("댓글이 존재하지 않으면 NotFoundException")
 		void createReport_comment_not_found() {
 			// given
 			given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
@@ -224,12 +227,12 @@ class ReportServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> reportService.createReport(reporter.getId(), request))
-				.isInstanceOf(BusinessException.class)
+				.isInstanceOf(NotFoundException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.COMMENT_NOT_FOUND);
 		}
 
 		@Test
-		@DisplayName("이미 신고한 게시글을 다시 신고하면 BusinessException")
+		@DisplayName("이미 신고한 게시글을 다시 신고하면 BadRequestException")
 		void createReport_duplicate_board_report() {
 			// given
 			given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
@@ -246,12 +249,12 @@ class ReportServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> reportService.createReport(reporter.getId(), request))
-				.isInstanceOf(BusinessException.class)
+				.isInstanceOf(BadRequestException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_REPORTED);
 		}
 
 		@Test
-		@DisplayName("이미 신고한 댓글을 다시 신고하면 BusinessException")
+		@DisplayName("이미 신고한 댓글을 다시 신고하면 BadRequestException")
 		void createReport_duplicate_comment_report() {
 			// given
 			given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
@@ -268,12 +271,12 @@ class ReportServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> reportService.createReport(reporter.getId(), request))
-				.isInstanceOf(BusinessException.class)
+				.isInstanceOf(BadRequestException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_REPORTED);
 		}
 
 		@Test
-		@DisplayName("댓글ID와 게시글ID가 모두 있으면 BusinessException")
+		@DisplayName("댓글ID와 게시글ID가 모두 있으면 NotFoundException")
 		void createReport_both_ids_present() {
 			// given
 			given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
@@ -287,12 +290,12 @@ class ReportServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> reportService.createReport(reporter.getId(), request))
-				.isInstanceOf(BusinessException.class)
+				.isInstanceOf(NotFoundException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.COMMENT_NOT_FOUND);
 		}
 
 		@Test
-		@DisplayName("댓글ID와 게시글ID가 모두 없으면 BusinessException")
+		@DisplayName("댓글ID와 게시글ID가 모두 없으면 InvalidValueException")
 		void createReport_no_target_specified() {
 			// given
 			given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
@@ -304,7 +307,7 @@ class ReportServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> reportService.createReport(reporter.getId(), request))
-				.isInstanceOf(BusinessException.class)
+				.isInstanceOf(InvalidValueException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_FIELD_ERROR);
 		}
 	}
@@ -368,7 +371,7 @@ class ReportServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> reportService.processReport(99L, report.getId(), request))
-				.isInstanceOf(BusinessException.class)
+				.isInstanceOf(NotFoundException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
 		}
 
@@ -391,7 +394,7 @@ class ReportServiceTest {
 		}
 
 		@Test
-		@DisplayName("신고가 존재하지 않으면 BusinessException")
+		@DisplayName("신고가 존재하지 않으면 NotFoundException")
 		void processReport_report_not_found() {
 			// given
 			given(userRepository.findById(admin.getId())).willReturn(Optional.of(admin));
@@ -405,12 +408,12 @@ class ReportServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> reportService.processReport(admin.getId(), 999L, request))
-				.isInstanceOf(BusinessException.class)
+				.isInstanceOf(NotFoundException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.REPORT_NOT_FOUND);
 		}
 
 		@Test
-		@DisplayName("이미 처리된 신고를 다시 처리하면 BusinessException")
+		@DisplayName("이미 처리된 신고를 다시 처리하면 BadRequestException")
 		void processReport_already_processed() {
 			// given
 			given(userRepository.findById(admin.getId())).willReturn(Optional.of(admin));
@@ -431,7 +434,7 @@ class ReportServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> reportService.processReport(admin.getId(), 1L, request))
-				.isInstanceOf(BusinessException.class)
+				.isInstanceOf(BadRequestException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_PROCESSED_REPORT);
 		}
 	}

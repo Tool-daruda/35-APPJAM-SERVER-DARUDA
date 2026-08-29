@@ -1,7 +1,7 @@
 package com.daruda.darudaserver.domain.notification.entity.enums;
 
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,6 @@ public enum BlockDurationInDay {
 				return blockDurationInDay;
 			}
 		}
-		throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
+		throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
 	}
 }

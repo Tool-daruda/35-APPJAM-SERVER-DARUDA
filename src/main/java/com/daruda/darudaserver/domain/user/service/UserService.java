@@ -17,7 +17,8 @@ import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.BadRequestException;
+import com.daruda.darudaserver.global.error.exception.ConflictException;
 import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 @Slf4j
 public class UserService {
-
 	private final UserRepository userRepository;
 	private final ToolScrapRepository toolScrapRepository;
 	private final ToolService toolService;
@@ -45,7 +45,7 @@ public class UserService {
 
 	public FavoriteToolsResponse getFavoriteTools(Long userId) {
 		User userEntity = userRepository.findById(userId)
-			.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
 		List<ToolScrap> toolScrapList = toolScrapRepository.findAllByUserId(userId);
 		List<Tool> tools = toolScrapList.stream()
@@ -68,7 +68,7 @@ public class UserService {
 	@Transactional
 	public UpdateMyResponse updateProfile(Long userId, String nickname, String positionStr) {
 		if (positionStr == null && nickname == null) {
-			throw new BusinessException(ErrorCode.MISSING_PARAMETER);
+			throw new BadRequestException(ErrorCode.MISSING_PARAMETER);
 		}
 
 		User userEntity = userRepository.findById(userId)
@@ -83,7 +83,7 @@ public class UserService {
 		}
 
 		if (isDuplicatedNickname(nickname)) {
-			throw new BusinessException(ErrorCode.DUPLICATED_NICKNAME);
+			throw new ConflictException(ErrorCode.DUPLICATED_NICKNAME);
 		}
 
 		if (positions == null) {

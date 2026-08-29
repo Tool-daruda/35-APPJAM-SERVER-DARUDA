@@ -19,8 +19,10 @@ import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.domain.user.entity.enums.Positions;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.BadRequestException;
 import com.daruda.darudaserver.global.error.exception.ForbiddenException;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,39 +39,39 @@ public class ReportService {
 	public CreateReportResponse createReport(Long reporterId, CreateReportRequest request) {
 		User reportedUser;
 		User reporter = userRepository.findById(reporterId)
-			.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
 		Comment comment = null;
 		Board board = null;
 
 		if (request.isCommentReport()) {
 			if (request.getCommentId() == null) {
-				throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
+				throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
 			}
 
 			comment = commentRepository.findById(request.getCommentId())
-				.orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
+				.orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
 
 			board = comment.getBoard();
 			reportedUser = comment.getUser();
 
 			// 중복 신고 검증
 			if (reportRepository.existsByReporterAndComment(reporter, comment)) {
-				throw new BusinessException(ErrorCode.ALREADY_REPORTED);
+				throw new BadRequestException(ErrorCode.ALREADY_REPORTED);
 			}
 		} else {
 			if (request.getBoardId() == null) {
-				throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
+				throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
 			}
 
 			board = boardRepository.findById(request.getBoardId())
-				.orElseThrow(() -> new BusinessException(ErrorCode.BOARD_NOT_FOUND));
+				.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 
 			reportedUser = board.getUser();
 
 			// 중복 신고 검증
 			if (reportRepository.existsByReporterAndBoard(reporter, board)) {
-				throw new BusinessException(ErrorCode.ALREADY_REPORTED);
+				throw new BadRequestException(ErrorCode.ALREADY_REPORTED);
 			}
 		}
 
@@ -90,7 +92,7 @@ public class ReportService {
 	@Transactional
 	public ProcessReportResponse processReport(Long adminId, Long reportId, ProcessReportRequest request) {
 		User admin = userRepository.findById(adminId)
-			.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
 		// 관리자 권한 검증
 		if (admin.getPositions() != Positions.ADMIN) {
@@ -98,11 +100,11 @@ public class ReportService {
 		}
 
 		Report report = reportRepository.findById(reportId)
-			.orElseThrow(() -> new BusinessException(ErrorCode.REPORT_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.REPORT_NOT_FOUND));
 
 		// 이미 처리된 신고인지 확인
 		if (!report.isPending()) {
-			throw new BusinessException(ErrorCode.ALREADY_PROCESSED_REPORT);
+			throw new BadRequestException(ErrorCode.ALREADY_PROCESSED_REPORT);
 		}
 
 		// 신고 상태 변경

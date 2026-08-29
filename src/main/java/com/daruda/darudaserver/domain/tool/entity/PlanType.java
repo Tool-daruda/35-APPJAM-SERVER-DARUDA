@@ -1,5 +1,8 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
+import com.daruda.darudaserver.global.error.code.ErrorCode;
+import com.daruda.darudaserver.global.error.exception.NotFoundException;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +22,6 @@ public enum PlanType {
 				return planType;
 			}
 		}
-		throw new IllegalArgumentException("Invalid PlanType: " + type);
+		throw new NotFoundException(ErrorCode.DATA_NOT_FOUND);
 	}
 }

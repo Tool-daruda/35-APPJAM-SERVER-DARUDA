@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.daruda.darudaserver.global.error.code.ErrorCode;
-import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.InvalidValueException;
 
 @ExtendWith(MockitoExtension.class)
 class PositionsTest {
@@ -34,7 +34,7 @@ class PositionsTest {
 		String invalidName = "없는값";
 
 		// when & then
-		BusinessException exception = assertThrows(BusinessException.class,
+		InvalidValueException exception = assertThrows(InvalidValueException.class,
 			() -> Positions.fromString(invalidName));
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_FIELD_ERROR);
 	}
