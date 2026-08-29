@@ -22,16 +22,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Builder
 @Table(name = "board")
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql =
 	"UPDATE board SET del_yn = true, deleted_at = NOW() "
@@ -52,7 +49,6 @@ public class Board extends BaseTimeEntity {
 	private String content;
 
 	@NotNull
-	@Builder.Default
 	private boolean delYn = false;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -63,7 +59,6 @@ public class Board extends BaseTimeEntity {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	@Builder.Default
 	private boolean isFree = true;
 
 	private Timestamp deletedAt;
