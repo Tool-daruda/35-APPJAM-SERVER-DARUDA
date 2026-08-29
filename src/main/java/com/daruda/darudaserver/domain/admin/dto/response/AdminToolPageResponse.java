@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.domain.admin.dto.response;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -42,7 +42,7 @@ public record AdminToolPageResponse(
 		String description,
 		Category category,
 		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
-		Timestamp createdAt
+		LocalDateTime createdAt
 	) {
 	}
 }
