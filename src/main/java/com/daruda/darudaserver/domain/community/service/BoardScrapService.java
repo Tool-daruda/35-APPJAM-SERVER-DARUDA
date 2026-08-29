@@ -90,6 +90,10 @@ public class BoardScrapService {
 		validateBoard.validateUser(userId);
 
 		Page<ScrapBoardProjection> boardScraps = boardScrapRepository.findScrapBoardsWithCount(userId, pageable);
+		List<Long> boardIds = boardScraps.getContent().stream()
+			.map(ScrapBoardProjection::getBoardId)
+			.toList();
+		Map<Long, Long> commentCountMap = commentService.getCommentCountMap(boardIds);
 		List<ScrapBoardsResponse> scrapBoardsResponses = boardScraps.getContent().stream()
 			.map(projection -> ScrapBoardsResponse.of(
 				projection.getBoardId(),
@@ -103,7 +107,7 @@ public class BoardScrapService {
 				projection.getToolId(),
 				projection.getScrapCount(),
 				projection.getUpdatedAt(),
-				commentService.getCommentCount(projection.getBoardId())
+				commentCountMap.getOrDefault(projection.getBoardId(), 0L).intValue()
 			))
 			.toList();
 

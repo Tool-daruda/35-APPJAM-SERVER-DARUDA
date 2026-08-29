@@ -124,7 +124,7 @@ class BoardServiceTest {
 				.willReturn(new PageImpl<>(List.of(toolBoard), pageable, 1));
 			given(userRepository.findById(userId)).willReturn(Optional.of(user));
 			given(boardScrapRepository.countMapByBoardIds(List.of(10L))).willReturn(Map.of(10L, 3L));
-			given(commentRepository.findCommentsByBoardId(10L)).willReturn(List.of());
+			given(commentRepository.countMapByBoardIds(List.of(10L))).willReturn(Map.of(10L, 3L));
 			given(boardImageService.getBoardImageUrls(10L)).willReturn(List.of());
 			given(boardScrapService.isScraped(user, toolBoard)).willReturn(false);
 
@@ -155,7 +155,7 @@ class BoardServiceTest {
 				.willReturn(new PageImpl<>(List.of(freeBoard), pageable, 1));
 			given(userRepository.findById(userId)).willReturn(Optional.of(user));
 			given(boardScrapRepository.countMapByBoardIds(List.of(20L))).willReturn(Map.of());
-			given(commentRepository.findCommentsByBoardId(20L)).willReturn(List.of());
+			given(commentRepository.countMapByBoardIds(List.of(20L))).willReturn(Map.of());
 			given(boardImageService.getBoardImageUrls(20L)).willReturn(List.of());
 			given(boardScrapService.isScraped(user, freeBoard)).willReturn(false);
 

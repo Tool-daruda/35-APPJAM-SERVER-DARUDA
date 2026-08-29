@@ -386,6 +386,9 @@ public class BoardService {
 		// 스크랩 수는 배치 쿼리로 한 번에 조회 (N+1 방지)
 		Map<Long, Long> scrapCountMap = boardIds.isEmpty()
 			? Map.of() : boardScrapRepository.countMapByBoardIds(boardIds);
+		// 댓글 수도 배치 쿼리로 한 번에 조회 (N+1 방지)
+		Map<Long, Long> commentCountMap = boardIds.isEmpty()
+			? Map.of() : commentRepository.countMapByBoardIds(boardIds);
 
 		List<BoardResponse> boardResList = content.stream()
 			.map(board -> {
@@ -393,7 +396,7 @@ public class BoardService {
 				Long savedToolId = board.getTool() != null ? board.getTool().getToolId() : null;
 				String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 				String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
-				int commentCount = getCommentCount(board.getId());
+				int commentCount = commentCountMap.getOrDefault(board.getId(), 0L).intValue();
 				List<String> images = boardImageService.getBoardImageUrls(board.getId());
 				boolean isScraped = boardScrapService.isScraped(user, board);
 				long scrapCount = scrapCountMap.getOrDefault(board.getId(), 0L);

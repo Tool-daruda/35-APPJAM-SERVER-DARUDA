@@ -1,6 +1,7 @@
 package com.daruda.darudaserver.domain.comment.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -117,8 +118,8 @@ public class CommentService {
 		return new GetCommentRetrieveResponse(items, pageInfo);
 	}
 
-	public int getCommentCount(final Long boardId) {
-		return commentRepository.findCommentsByBoardId(boardId).size();
+	public Map<Long, Long> getCommentCountMap(final List<Long> boardIds) {
+		return boardIds.isEmpty() ? Map.of() : commentRepository.countMapByBoardIds(boardIds);
 	}
 
 	@Transactional

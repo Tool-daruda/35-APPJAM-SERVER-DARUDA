@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -165,7 +166,7 @@ class BoardScrapServiceTest {
 		doNothing().when(validateBoard).validateUser(userId);
 		given(boardScrapRepository.findScrapBoardsWithCount(userId, pageable)).willReturn(projectionPage);
 		given(boardImageService.getBoardImageUrls(1L)).willReturn(List.of("https://image1.png"));
-		given(commentService.getCommentCount(1L)).willReturn(3);
+		given(commentService.getCommentCountMap(anyList())).willReturn(Map.of(1L, 3L));
 
 		// when
 		ScrapBoardsRetrieveResponse result = boardScrapService.getScrapBoards(userId, pageable);
@@ -207,7 +208,7 @@ class BoardScrapServiceTest {
 		doNothing().when(validateBoard).validateUser(userId);
 		given(boardScrapRepository.findScrapBoardsWithCount(userId, pageable)).willReturn(projectionPage);
 		given(boardImageService.getBoardImageUrls(2L)).willReturn(List.of());
-		given(commentService.getCommentCount(2L)).willReturn(0);
+		given(commentService.getCommentCountMap(anyList())).willReturn(Map.of());
 
 		// when
 		ScrapBoardsRetrieveResponse result = boardScrapService.getScrapBoards(userId, pageable);
