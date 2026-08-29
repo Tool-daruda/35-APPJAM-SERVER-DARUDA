@@ -43,11 +43,11 @@ public class ReportService {
 		Board board = null;
 
 		if (request.isCommentReport()) {
-			if (request.getCommentId() == null) {
+			if (request.commentId() == null) {
 				throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
 			}
 
-			comment = commentRepository.findById(request.getCommentId())
+			comment = commentRepository.findById(request.commentId())
 				.orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
 			board = comment.getBoard();
@@ -58,11 +58,11 @@ public class ReportService {
 				throw new BusinessException(ErrorCode.ALREADY_REPORTED);
 			}
 		} else {
-			if (request.getBoardId() == null) {
+			if (request.boardId() == null) {
 				throw new BusinessException(ErrorCode.INVALID_FIELD_ERROR);
 			}
 
-			board = boardRepository.findById(request.getBoardId())
+			board = boardRepository.findById(request.boardId())
 				.orElseThrow(() -> new BusinessException(ErrorCode.BOARD_NOT_FOUND));
 
 			reportedUser = board.getUser();
@@ -78,9 +78,9 @@ public class ReportService {
 			reportedUser,
 			board,
 			comment,
-			request.getReportType(),
-			request.getTitle(),
-			request.getDetail()
+			request.reportType(),
+			request.title(),
+			request.detail()
 		);
 
 		report = reportRepository.save(report);
@@ -106,8 +106,8 @@ public class ReportService {
 		}
 
 		// 신고 상태 변경
-		report.updateStatus(request.getStatus());
-		report.updateProcessInfo(admin.getId(), request.getProcessNote(), LocalDateTime.now());
+		report.updateStatus(request.status());
+		report.updateProcessInfo(admin.getId(), request.processNote(), LocalDateTime.now());
 		report.updateSuspensionDays(request.getSuspensionDays());
 
 		// 제재 적용

@@ -8,51 +8,31 @@ import com.daruda.darudaserver.domain.report.entity.SuspensionDuration;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
+@Builder
 @Schema(description = "신고 처리 응답")
-public class ProcessReportResponse {
-
+public record ProcessReportResponse(
 	@Schema(description = "신고 ID", example = "1")
-	private final Long id;
+	Long id,
 
 	@Schema(description = "처리 상태", example = "APPROVED")
-	private final ReportStatus status;
+	ReportStatus status,
 
 	@Schema(description = "제재 기간(일)", example = "7")
-	private final Integer suspensionDays;
+	Integer suspensionDays,
 
 	@Schema(description = "제재 기간", example = "SEVEN")
-	private final SuspensionDuration suspensionDuration;
+	SuspensionDuration suspensionDuration,
 
 	@Schema(description = "처리자 ID", example = "1")
-	private final Long processedById;
+	Long processedById,
 
 	@Schema(description = "처리 일시")
-	private final LocalDateTime processedAt;
+	LocalDateTime processedAt,
 
 	@Schema(description = "처리 메모", example = "불건전한 게시글로 인한 제재")
-	private final String processNote;
-
-	@Builder
-	private ProcessReportResponse(
-		Long id,
-		ReportStatus status,
-		Integer suspensionDays,
-		SuspensionDuration suspensionDuration,
-		Long processedById,
-		LocalDateTime processedAt,
-		String processNote
-	) {
-		this.id = id;
-		this.status = status;
-		this.suspensionDays = suspensionDays;
-		this.suspensionDuration = suspensionDuration;
-		this.processedById = processedById;
-		this.processedAt = processedAt;
-		this.processNote = processNote;
-	}
+	String processNote
+) {
 
 	public static ProcessReportResponse from(Report report) {
 		SuspensionDuration suspensionDuration = null;
