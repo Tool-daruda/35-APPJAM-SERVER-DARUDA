@@ -148,6 +148,7 @@ public class NotificationService {
 		} while (users.hasNext());
 	}
 
+	@Transactional
 	public void sendBlockNotice(CommunityBlockNoticeRequest communityBlockNoticeRequest) {
 		User receiver = userRepository.findById(communityBlockNoticeRequest.userId())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
