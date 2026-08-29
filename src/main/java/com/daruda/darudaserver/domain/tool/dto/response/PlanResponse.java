@@ -14,7 +14,7 @@ public record PlanResponse(
 ) {
 	public static PlanResponse of(final Plan plan) {
 		return PlanResponse.builder()
-			.planId(plan.getPlanId())
+			.planId(plan.getId())
 			.planName(plan.getPlanName())
 			.priceAnnual(plan.getPriceAnnual())
 			.priceMonthly(plan.getPriceMonthly())

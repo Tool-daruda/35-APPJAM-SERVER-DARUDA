@@ -69,7 +69,7 @@ public class ToolDocument {
 
 	public static ToolDocument from(Tool tool) {
 		return ToolDocument.builder()
-			.id(tool.getToolId().toString())
+			.id(tool.getId().toString())
 			.toolMainName(tool.getToolMainName())
 			.toolSubName(tool.getToolSubName())
 			.category(tool.getCategory().name())

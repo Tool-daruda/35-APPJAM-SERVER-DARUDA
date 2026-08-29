@@ -25,7 +25,7 @@ public class ToolVideo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "tool_video_id")
-	private Long videoId;
+	private Long id;
 
 	@Column(name = "tool_video_url", nullable = false)
 	private String videoUrl;

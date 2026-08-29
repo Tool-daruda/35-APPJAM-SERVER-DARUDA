@@ -16,7 +16,7 @@ public record ToolDtoGetResponse(
 	// 정적 팩토리 메서드
 	public static ToolDtoGetResponse from(Tool tool, List<String> keywords, Boolean isScraped) {
 		return new ToolDtoGetResponse(
-			tool.getToolId(),
+			tool.getId(),
 			tool.upperMainName(tool.getToolMainName()),
 			tool.getToolLogo(),
 			tool.getDescription(),

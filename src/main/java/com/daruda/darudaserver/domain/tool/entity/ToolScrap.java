@@ -3,6 +3,7 @@ package com.daruda.darudaserver.domain.tool.entity;
 import com.daruda.darudaserver.domain.user.entity.User;
 import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -27,7 +28,8 @@ import lombok.NoArgsConstructor;
 public class ToolScrap extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long toolScrapId;
+	@Column(name = "tool_scrap_id")
+	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
@@ -42,8 +44,8 @@ public class ToolScrap extends BaseTimeEntity {
 	private boolean delYn = false;
 
 	@Builder
-	private ToolScrap(final Long toolScrapId, final User user, final Tool tool) {
-		this.toolScrapId = toolScrapId;
+	private ToolScrap(final Long id, final User user, final Tool tool) {
+		this.id = id;
 		this.user = user;
 		this.tool = tool;
 	}

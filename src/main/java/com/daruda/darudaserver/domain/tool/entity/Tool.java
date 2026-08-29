@@ -34,7 +34,8 @@ public class Tool {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long toolId;
+	@Column(name = "tool_id")
+	private Long id;
 	@Column(name = "tool_main_name", nullable = false)
 	private String toolMainName;
 	@Column(name = "tool_sub_name", nullable = false)

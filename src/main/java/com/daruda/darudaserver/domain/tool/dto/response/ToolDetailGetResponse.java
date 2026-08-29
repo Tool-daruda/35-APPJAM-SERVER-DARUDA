@@ -34,7 +34,7 @@ public record ToolDetailGetResponse(
 		List<String> images, List<String> videos, Boolean isScrapped, Boolean isLiked, int likeCount) {
 
 		return ToolDetailGetResponse.builder()
-			.toolId(tool.getToolId())
+			.toolId(tool.getId())
 			.toolLogo(tool.getToolLogo())
 			.toolMainName(tool.upperMainName(tool.getToolMainName()))
 			.toolSubName(tool.getToolSubName())

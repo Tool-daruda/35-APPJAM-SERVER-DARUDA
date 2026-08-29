@@ -27,7 +27,7 @@ public class ToolPlatForm {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "platform_id")
-	private Long platformId;
+	private Long id;
 
 	@Column(name = "web", nullable = false)
 	private Boolean web;

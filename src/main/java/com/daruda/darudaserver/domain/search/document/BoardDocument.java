@@ -80,7 +80,7 @@ public class BoardDocument {
 			.id(board.getId().toString())
 			.title(board.getTitle())
 			.author(board.getUser().getNickname())
-			.toolId(tool != null ? tool.getToolId() : null)
+			.toolId(tool != null ? tool.getId() : null)
 			.toolMainName(tool != null ? tool.getToolMainName() : "자유")
 			.toolSubName(tool != null ? tool.getToolSubName() : null)
 			.toolLogo(
@@ -99,7 +99,7 @@ public class BoardDocument {
 		if (tool != null) {
 			this.toolMainName = tool.getToolMainName();
 			this.toolSubName = tool.getToolSubName();
-			this.toolId = tool.getToolId();
+			this.toolId = tool.getId();
 		} else {
 			this.toolMainName = "자유";
 			this.toolSubName = null;
