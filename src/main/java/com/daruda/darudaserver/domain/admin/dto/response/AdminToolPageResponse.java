@@ -18,7 +18,7 @@ public record AdminToolPageResponse(
 	public static AdminToolPageResponse of(Page<Tool> toolPage) {
 		List<ToolResponse> toolResList = toolPage.getContent().stream()
 			.map(tool -> new ToolResponse(
-				tool.getToolId(),
+				tool.getId(),
 				tool.getToolLogo(),
 				tool.getToolMainName(),
 				tool.getDescription(),

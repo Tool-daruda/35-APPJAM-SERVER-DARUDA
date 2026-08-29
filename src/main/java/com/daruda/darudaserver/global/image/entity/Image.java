@@ -16,14 +16,15 @@ public class Image {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long imageId;
+	@Column(name = "image_id")
+	private Long id;
 
 	@Column(name = "image_url", nullable = false, length = 500)
 	private String imageUrl;
 
 	@Builder
-	public Image(final Long imageId, final String imageUrl) {
-		this.imageId = imageId;
+	public Image(final Long id, final String imageUrl) {
+		this.id = id;
 		this.imageUrl = imageUrl;
 	}
 

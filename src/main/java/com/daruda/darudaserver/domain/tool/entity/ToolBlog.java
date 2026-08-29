@@ -36,7 +36,7 @@ public class ToolBlog {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "tool_blog_id")
-	private Long blogId;
+	private Long id;
 
 	@Column(name = "blog_url", nullable = false, length = 50000)
 	private String blogUrl;

@@ -100,7 +100,7 @@ public class ToolService {
 			.map(user -> getLiked(user, tool))
 			.orElse(false);
 
-		int likeCount = toolLikeRepository.countByTool_ToolId(toolId);
+		int likeCount = toolLikeRepository.countByTool_Id(toolId);
 
 		log.debug("툴의 조회수가 증가되었습니다" + tool.getViewCount());
 		log.info("툴 세부 정보를 성공적으로 조회했습니다. toolId={}", toolId);
@@ -180,14 +180,14 @@ public class ToolService {
 			filteredTools = filteredTools.stream()
 				.sorted((t1, t2) -> {
 					int cmp = Integer.compare(t2.getPopular(), t1.getPopular());
-					return cmp != 0 ? cmp : Long.compare(t2.getToolId(), t1.getToolId());
+					return cmp != 0 ? cmp : Long.compare(t2.getId(), t1.getId());
 				})
 				.toList();
 		} else {
 			filteredTools = filteredTools.stream()
 				.sorted((t1, t2) -> {
 					int cmp = t2.getCreatedAt().compareTo(t1.getCreatedAt());
-					return cmp != 0 ? cmp : Long.compare(t2.getToolId(), t1.getToolId());
+					return cmp != 0 ? cmp : Long.compare(t2.getId(), t1.getId());
 				})
 				.toList();
 		}
@@ -198,7 +198,7 @@ public class ToolService {
 		int startIndex = 0;
 		if (lastToolId != null) {
 			Optional<Tool> lastTool = filteredTools.stream()
-				.filter(tool -> tool.getToolId().equals(lastToolId))
+				.filter(tool -> tool.getId().equals(lastToolId))
 				.findFirst();
 
 			if (lastTool.isPresent()) {
@@ -216,12 +216,12 @@ public class ToolService {
 		int lastIndex = startIndex + paginatedTools.size(); // 현재 페이지의 마지막 요소 인덱스
 
 		if (lastIndex < filteredTools.size()) {
-			nextCursor = filteredTools.get(lastIndex).getToolId(); // 다음 `toolId` 설정
+			nextCursor = filteredTools.get(lastIndex).getId(); // 다음 `toolId` 설정
 		}
 
 		//  키워드 일괄 조회 (키워드가 없는 툴은 빈 목록으로 처리)
 		List<Long> toolIds = paginatedTools.stream()
-			.map(Tool::getToolId)
+			.map(Tool::getId)
 			.toList();
 		Map<Long, List<String>> keywordMap = getKeywordsBatch(toolIds);
 
@@ -231,7 +231,7 @@ public class ToolService {
 				boolean isScraped = user != null && toolScrapRepository.findByUserAndTool(user, tool)
 					.map(toolScrap -> !toolScrap.isDelYn())
 					.orElse(false);
-				return ToolResponse.of(tool, keywordMap.getOrDefault(tool.getToolId(), List.of()), isScraped);
+				return ToolResponse.of(tool, keywordMap.getOrDefault(tool.getId(), List.of()), isScraped);
 			})
 			.toList();
 
@@ -256,7 +256,7 @@ public class ToolService {
 			log.debug("툴 스크랩이 업데이트 되었습니다");
 			toolScrap.update();
 		}
-		int scrapCount = toolScrapRepository.countByTool_ToolIdAndDelYnFalse(toolId);
+		int scrapCount = toolScrapRepository.countByTool_IdAndDelYnFalse(toolId);
 		tool.updatePopular(scrapCount);
 		return ToolScrapResponse.of(toolId, !toolScrap.isDelYn());
 	}
@@ -282,12 +282,12 @@ public class ToolService {
 				log.warn("툴 좋아요 중복 삽입 감지 (userId={}, toolId={})", userId, toolId);
 			}
 		}
-		int likeCount = toolLikeRepository.countByTool_ToolId(toolId);
+		int likeCount = toolLikeRepository.countByTool_Id(toolId);
 		return ToolLikeResponse.of(toolId, liked, likeCount);
 	}
 
 	private List<RelatedTool> relatedTool(final Tool tool) {
-		log.info("툴의 관련 툴 데이터를 조회합니다. toolId={}", tool.getToolId());
+		log.info("툴의 관련 툴 데이터를 조회합니다. toolId={}", tool.getId());
 		return relatedToolRepository.findAllByTool(tool);
 	}
 
@@ -301,7 +301,7 @@ public class ToolService {
 	}
 
 	private List<PlanResponse> getPlanByTool(final Tool tool) {
-		log.debug("툴에 연결된 플랜 정보를 조회합니다. toolId={}", tool.getToolId());
+		log.debug("툴에 연결된 플랜 정보를 조회합니다. toolId={}", tool.getId());
 		List<Plan> planList = planRepository.findAllByTool(tool);
 		validateList(planList);
 		return planList.stream()
@@ -311,7 +311,7 @@ public class ToolService {
 	}
 
 	private List<ToolBlogResponse> getBlogByTool(final Tool tool) {
-		log.debug("툴에 연결된 블로그 정보를 조회합니다. toolId={}", tool.getToolId());
+		log.debug("툴에 연결된 블로그 정보를 조회합니다. toolId={}", tool.getId());
 		List<ToolBlog> blogList = toolBlogRepository.findAllByTool(tool);
 		// 블로그가 없으면 빈 목록을 반환한다(404 아님).
 		boolean needsBackfill = blogList.stream().anyMatch(ToolBlog::needsMetadataBackfill);
@@ -325,7 +325,7 @@ public class ToolService {
 	}
 
 	private List<ToolCoreResponse> getToolCoreByTool(final Tool tool) {
-		log.debug("툴에 연결된 핵심 정보를 조회합니다. toolId={}", tool.getToolId());
+		log.debug("툴에 연결된 핵심 정보를 조회합니다. toolId={}", tool.getId());
 		List<ToolCore> toolCoreList = toolCoreRepository.findAllByTool(tool);
 		validateList(toolCoreList);
 		return toolCoreList.stream()
@@ -404,11 +404,11 @@ public class ToolService {
 		}
 
 		List<ToolKeyword> keywords =
-			toolKeywordRepository.findByTool_ToolIdIn(toolIds);
+			toolKeywordRepository.findByTool_IdIn(toolIds);
 
 		return keywords.stream()
 			.collect(Collectors.groupingBy(
-				k -> k.getTool().getToolId(),
+				k -> k.getTool().getId(),
 				Collectors.mapping(
 					ToolKeyword::getKeywordName,
 					Collectors.toList()

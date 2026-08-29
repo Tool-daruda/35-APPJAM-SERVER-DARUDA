@@ -17,7 +17,7 @@ public record RelatedToolResponse(
 
 	public static RelatedToolResponse of(Tool tool, List<String> keywords) {
 		return RelatedToolResponse.builder()
-			.toolId(tool.getToolId())
+			.toolId(tool.getId())
 			.toolName(tool.getToolMainName())
 			.toolLogo(tool.getToolLogo())
 			.license(tool.getLicense().getKoreanName())

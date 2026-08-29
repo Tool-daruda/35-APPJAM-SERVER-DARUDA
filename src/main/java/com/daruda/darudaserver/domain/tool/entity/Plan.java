@@ -27,7 +27,8 @@ public class Plan {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long planId;
+	@Column(name = "plan_id")
+	private Long id;
 
 	@Column(name = "plan_name", nullable = false)
 	private String planName;

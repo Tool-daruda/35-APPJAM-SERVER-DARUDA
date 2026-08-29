@@ -90,7 +90,7 @@ public class BoardService {
 		} else {
 			Tool tool = getToolById(boardCreateAndUpdateReq.toolId());
 			board = createToolBoard(tool, boardCreateAndUpdateReq, user);
-			toolId = tool.getToolId();
+			toolId = tool.getId();
 		}
 
 		// 이미지 처리
@@ -260,14 +260,14 @@ public class BoardService {
 				if (Boolean.FALSE.equals(noTopic) && toolId != null) {  // 툴 게시판
 					toolName = board.getTool().getToolMainName();
 					toolLogo = board.getTool().getToolLogo();
-					savedToolid = board.getTool().getToolId();
+					savedToolid = board.getTool().getId();
 				} else if (Boolean.TRUE.equals(noTopic) && toolId == null) { // 자유 게시판
 					toolName = FREE;
 					toolLogo = TOOL_LOGO;
 				} else { // 전체 게시판 (툴이 있는 경우만 가져옴)
 					toolName = (board.getTool() != null) ? board.getTool().getToolMainName() : FREE;
 					toolLogo = (board.getTool() != null) ? board.getTool().getToolLogo() : TOOL_LOGO;
-					savedToolid = (board.getTool() != null) ? board.getTool().getToolId() : null;
+					savedToolid = (board.getTool() != null) ? board.getTool().getId() : null;
 				}
 
 				int commentCount = getCommentCount(board.getId());
@@ -315,7 +315,7 @@ public class BoardService {
 		// 삭제 대상 식별 (기존에 있었지만 새로 전달받지 않은 URL)
 		List<Long> imageIdsToDelete = existingImages.stream()
 			.filter(img -> !validNewUrls.contains(img.getImageUrl()))
-			.map(com.daruda.darudaserver.global.image.entity.Image::getImageId)
+			.map(com.daruda.darudaserver.global.image.entity.Image::getId)
 			.toList();
 
 		if (!imageIdsToDelete.isEmpty()) {
@@ -394,7 +394,7 @@ public class BoardService {
 		List<BoardResponse> boardResList = content.stream()
 			.map(board -> {
 				// 자유 게시판은 tool이 없으므로 toolId는 nullable
-				Long savedToolId = board.getTool() != null ? board.getTool().getToolId() : null;
+				Long savedToolId = board.getTool() != null ? board.getTool().getId() : null;
 				String toolName = board.getTool() != null ? board.getTool().getToolMainName() : FREE;
 				String toolLogo = board.getTool() != null ? board.getTool().getToolLogo() : TOOL_LOGO;
 				int commentCount = commentCountMap.getOrDefault(board.getId(), 0L).intValue();
@@ -430,6 +430,6 @@ public class BoardService {
 
 	public Long getToolId(Long boardId) {
 		Board board = getBoardById(boardId);
-		return board.isFree() ? null : board.getTool().getToolId();
+		return board.isFree() ? null : board.getTool().getId();
 	}
 }

@@ -120,7 +120,7 @@ class BoardServiceTest {
 			given(toolBoard.getTool()).willReturn(tool);
 			given(toolBoard.getUser()).willReturn(user);
 			given(user.getNickname()).willReturn("작성자");
-			given(tool.getToolId()).willReturn(100L);
+			given(tool.getId()).willReturn(100L);
 			given(tool.getToolMainName()).willReturn("Cursor");
 			given(tool.getToolLogo()).willReturn("https://logo.png");
 
