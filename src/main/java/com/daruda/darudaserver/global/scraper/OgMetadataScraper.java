@@ -43,7 +43,8 @@ public class OgMetadataScraper {
 				.userAgent(USER_AGENT)
 				.maxBodySize(MAX_BODY_SIZE)
 				.get();
-			return Optional.of(parse(document, url));
+			String finalUrl = firstNonBlank(document.location(), url);
+			return Optional.of(parse(document, finalUrl));
 		} catch (IOException | RuntimeException e) {
 			log.warn("OG 메타데이터 수집 실패: host={}", safeHost(url), e);
 			return Optional.empty();
@@ -138,7 +139,8 @@ public class OgMetadataScraper {
 			if (uri.getScheme() == null || uri.getHost() == null) {
 				return null;
 			}
-			return uri.getScheme() + "://" + uri.getHost() + "/favicon.ico";
+			// resolve 로 절대 URI에 맞추면 포트(:8080 등)가 보존된다.
+			return uri.resolve("/favicon.ico").toString();
 		} catch (IllegalArgumentException e) {
 			return null;
 		}
