@@ -188,6 +188,14 @@ class OgMetadataScraperTest {
 			assertThat(OgMetadataScraper.isSafePublicHttpUrl("not a url")).isFalse();
 		}
 
+		@Test
+		@DisplayName("IPv6 Unique Local Address(fc00::/7) 는 차단한다")
+		void isSafePublicHttpUrl_ipv6UniqueLocal_false() {
+			// when & then
+			assertThat(OgMetadataScraper.isSafePublicHttpUrl("http://[fc00::1]/")).isFalse();
+			assertThat(OgMetadataScraper.isSafePublicHttpUrl("http://[fd00::1]/")).isFalse();
+		}
+
 		private boolean resolves(final String host) {
 			try {
 				InetAddress.getByName(host);
