@@ -73,7 +73,7 @@ public class ImageService {
 			.toList();
 
 		return imageRepository.saveAll(images).stream()
-			.map(Image::getImageId)
+			.map(Image::getId)
 			.toList();
 	}
 

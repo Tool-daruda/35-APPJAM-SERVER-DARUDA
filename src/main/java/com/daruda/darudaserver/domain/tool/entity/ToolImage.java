@@ -25,7 +25,7 @@ public class ToolImage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "tool_image_id")
-	private Long imageId;
+	private Long id;
 
 	@Column(name = "image_url", nullable = false)
 	private String imageUrl;

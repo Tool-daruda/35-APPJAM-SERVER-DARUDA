@@ -19,7 +19,7 @@ public interface ToolLikeRepository extends JpaRepository<ToolLike, Long> {
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	void deleteByUserAndTool(final User user, final Tool tool);
 
-	int countByTool_ToolId(final Long toolId);
+	int countByTool_Id(final Long toolId);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	void deleteByTool(Tool tool);

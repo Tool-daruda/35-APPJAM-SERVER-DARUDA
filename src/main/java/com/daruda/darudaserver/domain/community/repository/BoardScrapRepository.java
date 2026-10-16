@@ -38,7 +38,7 @@ public interface BoardScrapRepository extends JpaRepository<BoardScrap, Long> {
 	}
 
 	@Query(value = "SELECT b.id as boardId, b.title as title, b.content as content, b.updatedAt as updatedAt, "
-		+ "u.nickname as author, t.toolMainName as toolName, t.toolLogo as toolLogo, t.toolId as toolId, "
+		+ "u.nickname as author, t.toolMainName as toolName, t.toolLogo as toolLogo, t.id as toolId, "
 		+ "(SELECT COUNT(s) FROM BoardScrap s WHERE s.board.id = b.id) as scrapCount "
 		+ "FROM BoardScrap bs JOIN bs.board b JOIN b.user u LEFT JOIN b.tool t "
 		+ "WHERE bs.user.id = :userId AND b.delYn = false",

@@ -27,7 +27,8 @@ public class ToolCore {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long coreId;
+	@Column(name = "core_id")
+	private Long id;
 
 	@Column(name = "core_title", nullable = false)
 	private String coreTitle;

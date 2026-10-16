@@ -46,7 +46,7 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	@Query(value = """
 		UPDATE board
 		SET tool_id = 0, updated_at = CURRENT_TIMESTAMP
-		WHERE tool_id = :#{#tool.toolId}
+		WHERE tool_id = :#{#tool.id}
 		""",
 		nativeQuery = true)
 	void clearTool(Tool tool);

@@ -16,7 +16,7 @@ public record ToolBlogResponse(
 ) {
 	public static ToolBlogResponse from(ToolBlog toolBlog) {
 		return ToolBlogResponse.builder()
-			.blogId(toolBlog.getBlogId())
+			.blogId(toolBlog.getId())
 			.blogUrl(toolBlog.getBlogUrl())
 			.title(toolBlog.getTitle())
 			.thumbnailUrl(toolBlog.getThumbnailUrl())

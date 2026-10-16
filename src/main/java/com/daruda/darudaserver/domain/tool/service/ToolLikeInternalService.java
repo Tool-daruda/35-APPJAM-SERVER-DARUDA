@@ -25,7 +25,7 @@ public class ToolLikeInternalService {
 			return true;
 		} catch (DataIntegrityViolationException e) {
 			log.warn("툴 좋아요 중복 삽입 시도 감지 (userId={}, toolId={})",
-				toolLike.getUser().getId(), toolLike.getTool().getToolId());
+				toolLike.getUser().getId(), toolLike.getTool().getId());
 			return false; // 이미 존재 → 중복으로 간주
 		}
 	}

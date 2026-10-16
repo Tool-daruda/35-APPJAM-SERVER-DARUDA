@@ -26,11 +26,11 @@ public interface ToolScrapRepository extends JpaRepository<ToolScrap, Long> {
 
 	Optional<ToolScrap> findByUserAndTool(final User user, final Tool tool);
 
-	@Query("SELECT COUNT(ts) FROM ToolScrap ts WHERE ts.tool.toolId = :toolId AND ts.delYn = false")
+	@Query("SELECT COUNT(ts) FROM ToolScrap ts WHERE ts.tool.id = :toolId AND ts.delYn = false")
 	int countByToolId(@Param("toolId") final Long toolId);
 
 	// toolId와 isDelYn이 false인 경우의 스크랩 수 계산
-	int countByTool_ToolIdAndDelYnFalse(final Long toolId);
+	int countByTool_IdAndDelYnFalse(final Long toolId);
 
 	boolean existsByUserAndTool(User user, Tool tool);
 
@@ -39,11 +39,11 @@ public interface ToolScrapRepository extends JpaRepository<ToolScrap, Long> {
 	void deleteByTool(Tool tool);
 
 	@Query("""
-			select ts.tool.toolId
+			select ts.tool.id
 			from ToolScrap ts
 			where ts.user.id = :userId
 			and ts.delYn = false
-			and ts.tool.toolId in :toolIds
+			and ts.tool.id in :toolIds
 		""")
 	Set<Long> findScrappedToolIds(
 		@Param("userId") Long userId,

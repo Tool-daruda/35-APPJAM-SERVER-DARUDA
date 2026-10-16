@@ -18,7 +18,7 @@ public record ToolResponse(
 ) {
 	public static ToolResponse of(Tool tool, List<String> keywords, Boolean isScraped) {
 		return ToolResponse.builder()
-			.toolId(tool.getToolId())
+			.toolId(tool.getId())
 			.toolName(tool.getToolMainName())
 			.toolLogo(tool.getToolLogo())
 			.description(tool.getDescription())
