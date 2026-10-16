@@ -179,7 +179,7 @@ public class AdminService {
 	@Transactional
 	public void updateTool(final Long toolId, final UpdateToolRequest req) {
 		Tool tool = toolRepository.findById(toolId)
-			.orElseThrow(() -> new IllegalArgumentException("Tool not found: " + toolId));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.TOOL_NOT_FOUND));
 
 		// 툴 정보 수정
 		tool.update(

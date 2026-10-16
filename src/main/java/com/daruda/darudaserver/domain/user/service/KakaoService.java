@@ -10,6 +10,7 @@ import com.daruda.darudaserver.global.auth.client.KakaoAPiFeignClient;
 import com.daruda.darudaserver.global.auth.client.KakaoFeignClient;
 import com.daruda.darudaserver.global.error.code.ErrorCode;
 import com.daruda.darudaserver.global.error.exception.BusinessException;
+import com.daruda.darudaserver.global.error.exception.UnauthorizedException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +66,7 @@ public class KakaoService implements SocialService {
 			return kakaoTokenResponse.accessToken();
 		} catch (Exception e) {
 			log.error("Error on: ", e);
-			throw new BusinessException(ErrorCode.AUTHENTICATION_CODE_EXPIRED);
+			throw new UnauthorizedException(ErrorCode.AUTHENTICATION_CODE_EXPIRED);
 		}
 	}
 }
