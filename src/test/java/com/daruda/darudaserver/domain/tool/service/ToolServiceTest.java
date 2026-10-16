@@ -188,7 +188,7 @@ class ToolServiceTest {
 	class GetToolList {
 
 		private Tool tool(final Long toolId, final String createdAt, final License license) {
-			return Tool.builder()
+			Tool tool = Tool.builder()
 				.id(toolId)
 				.toolMainName("tool" + toolId)
 				.toolLogo("logo" + toolId)

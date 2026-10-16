@@ -46,11 +46,11 @@ public class ReportService {
 		Board board = null;
 
 		if (request.isCommentReport()) {
-			if (request.getCommentId() == null) {
+			if (request.commentId() == null) {
 				throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
 			}
 
-			comment = commentRepository.findById(request.getCommentId())
+			comment = commentRepository.findById(request.commentId())
 				.orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
 
 			board = comment.getBoard();
@@ -61,11 +61,11 @@ public class ReportService {
 				throw new BadRequestException(ErrorCode.ALREADY_REPORTED);
 			}
 		} else {
-			if (request.getBoardId() == null) {
+			if (request.boardId() == null) {
 				throw new InvalidValueException(ErrorCode.INVALID_FIELD_ERROR);
 			}
 
-			board = boardRepository.findById(request.getBoardId())
+			board = boardRepository.findById(request.boardId())
 				.orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 
 			reportedUser = board.getUser();
