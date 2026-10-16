@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -40,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class NotificationService {
 
 	// 한 시간 동안 연결
@@ -50,6 +52,7 @@ public class NotificationService {
 	private final NotificationRepository notificationRepository;
 	private final CommentRepository commentRepository;
 
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public SseEmitter subscribe(Long userId, String lastEventId) {
 		String emitterId = userId + "_" + System.currentTimeMillis();
 		SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
@@ -145,6 +148,7 @@ public class NotificationService {
 		} while (users.hasNext());
 	}
 
+	@Transactional
 	public void sendBlockNotice(CommunityBlockNoticeRequest communityBlockNoticeRequest) {
 		User receiver = userRepository.findById(communityBlockNoticeRequest.userId())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -182,7 +186,6 @@ public class NotificationService {
 		notificationEntity.markAsRead();
 	}
 
-	@Transactional
 	public List<NotificationResponse> getNotifications(Long userId) {
 		User userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -192,7 +195,6 @@ public class NotificationService {
 			.toList();
 	}
 
-	@Transactional
 	public List<NotificationResponse> getRecentNotifications(Long userId) {
 		User userEntity = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
