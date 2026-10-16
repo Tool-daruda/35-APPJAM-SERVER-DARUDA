@@ -137,8 +137,8 @@ class BoardServiceTest {
 
 			// then
 			assertThat(result.boardList()).hasSize(1);
-			assertThat(result.boardList().get(0).getToolId()).isEqualTo(100L);
-			assertThat(result.boardList().get(0).getScrapCount()).isEqualTo(3L);
+			assertThat(result.boardList().get(0).toolId()).isEqualTo(100L);
+			assertThat(result.boardList().get(0).scrapCount()).isEqualTo(3L);
 		}
 
 		@Test
@@ -168,8 +168,8 @@ class BoardServiceTest {
 
 			// then
 			assertThat(result.boardList()).hasSize(1);
-			assertThat(result.boardList().get(0).getToolId()).isNull();
-			assertThat(result.boardList().get(0).getScrapCount()).isEqualTo(0L);
+			assertThat(result.boardList().get(0).toolId()).isNull();
+			assertThat(result.boardList().get(0).scrapCount()).isEqualTo(0L);
 		}
 	}
 }
