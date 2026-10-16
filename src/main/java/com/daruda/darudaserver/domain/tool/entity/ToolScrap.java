@@ -14,17 +14,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "tool_scrap")
-@Builder
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ToolScrap extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +37,6 @@ public class ToolScrap extends BaseTimeEntity {
 	private Tool tool;
 
 	@NotNull
-	@Builder.Default
 	private boolean delYn = false;
 
 	@Builder

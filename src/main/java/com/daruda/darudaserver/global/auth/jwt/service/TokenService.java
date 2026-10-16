@@ -3,7 +3,6 @@ package com.daruda.darudaserver.global.auth.jwt.service;
 import java.util.Arrays;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.daruda.darudaserver.domain.user.dto.response.JwtTokenResponse;
 import com.daruda.darudaserver.domain.user.repository.UserRepository;
@@ -33,7 +32,6 @@ public class TokenService {
 	private final UserRepository userRepository;
 	private final JwtTokenProvider jwtTokenProvider;
 
-	@Transactional
 	public JwtTokenResponse createToken(final Long userId, final String role) {
 		if (role == null || role.isBlank()) {
 			throw new BadRequestException(ErrorCode.INVALID_FIELD_ERROR);
@@ -49,7 +47,6 @@ public class TokenService {
 		return JwtTokenResponse.of(accessToken, refreshToken);
 	}
 
-	@Transactional
 	public JwtTokenResponse reissueToken(HttpServletRequest request) {
 		String refreshToken = getRefreshToken(request);
 
@@ -70,7 +67,6 @@ public class TokenService {
 		return createToken(userId, role);
 	}
 
-	@Transactional
 	public void deleteRefreshToken(final Long userId) {
 		Token token = tokenRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));

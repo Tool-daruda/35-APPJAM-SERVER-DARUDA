@@ -1,6 +1,6 @@
 package com.daruda.darudaserver.domain.tool.dto.response;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.daruda.darudaserver.domain.tool.entity.Tool;
@@ -25,7 +25,7 @@ public record ToolDetailGetResponse(
 	List<String> videos,
 	List<String> images,
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
-	Timestamp updatedAt,
+	LocalDateTime updatedAt,
 	Boolean isScrapped,
 	Boolean isLiked,
 	int likeCount

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -195,8 +195,9 @@ class ToolServiceTest {
 				.description("description" + toolId)
 				.license(license)
 				.category(Category.AI)
-				.createdAt(Timestamp.valueOf(createdAt))
 				.build();
+			ReflectionTestUtils.setField(tool, "createdAt", LocalDateTime.parse(createdAt.replace(" ", "T")));
+			return tool;
 		}
 
 		@DisplayName("키워드가 없는 툴이 페이지에 포함돼도 예외 없이 전체 페이지를 반환한다")
