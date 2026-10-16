@@ -28,7 +28,8 @@ import lombok.NoArgsConstructor;
 public class ToolLike extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long toolLikeId;
+	@Column(name = "tool_like_id")
+	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
@@ -42,8 +43,8 @@ public class ToolLike extends BaseTimeEntity {
 	private boolean delYn = false;
 
 	@Builder
-	private ToolLike(final Long toolLikeId, final User user, final Tool tool) {
-		this.toolLikeId = toolLikeId;
+	private ToolLike(final Long id, final User user, final Tool tool) {
+		this.id = id;
 		this.user = user;
 		this.tool = tool;
 	}

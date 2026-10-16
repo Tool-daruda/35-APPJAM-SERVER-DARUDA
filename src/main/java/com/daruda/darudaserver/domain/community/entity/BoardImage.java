@@ -1,5 +1,6 @@
 package com.daruda.darudaserver.domain.community.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,7 +19,8 @@ import lombok.NoArgsConstructor;
 public class BoardImage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long boardImageId;
+	@Column(name = "board_image_id")
+	private Long id;
 	private Long boardId;
 	private Long imageId;
 

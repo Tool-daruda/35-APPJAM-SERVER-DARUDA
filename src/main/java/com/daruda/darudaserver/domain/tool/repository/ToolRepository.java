@@ -15,30 +15,30 @@ import com.daruda.darudaserver.domain.tool.entity.Tool;
 public interface ToolRepository extends JpaRepository<Tool, Long> {
 
 	// 1. popular 기준 (전체 조회)
-	@Query("SELECT t FROM Tool t WHERE t.toolId < :cursor ORDER BY t.popular DESC, t.toolId DESC")
+	@Query("SELECT t FROM Tool t WHERE t.id < :cursor ORDER BY t.popular DESC, t.id DESC")
 	List<Tool> findAllWithCursorOrderByPopular(@Param("cursor") Long cursor, Pageable pageable);
 
 	// 1-2. 카테고리별 popular 조회
 	@Query("SELECT t FROM Tool t "
 		+ "WHERE t.category = :category "
-		+ "AND t.toolId < :cursor "
-		+ "ORDER BY t.popular DESC, t.toolId DESC")
+		+ "AND t.id < :cursor "
+		+ "ORDER BY t.popular DESC, t.id DESC")
 	List<Tool> findByCategoryWithCursorOrderByPopular(@Param("category") Category category,
 		@Param("cursor") Long cursor, Pageable pageable);
 
 	// 2. createdAt 기준 (전체 조회)
-	@Query("SELECT t FROM Tool t WHERE t.toolId < :cursor ORDER BY t.createdAt DESC, t.toolId DESC")
+	@Query("SELECT t FROM Tool t WHERE t.id < :cursor ORDER BY t.createdAt DESC, t.id DESC")
 	List<Tool> findAllWithCursorOrderByCreatedAt(@Param("cursor") Long cursor, Pageable pageable);
 
 	// 2-2. 카테고리별 createdAt 조회
 	@Query("SELECT t FROM Tool t "
 		+ "WHERE t.category = :category "
-		+ "AND t.toolId < :cursor "
-		+ "ORDER BY t.createdAt DESC, t.toolId DESC")
+		+ "AND t.id < :cursor "
+		+ "ORDER BY t.createdAt DESC, t.id DESC")
 	List<Tool> findByCategoryWithCursorOrderByCreatedAt(@Param("category") Category category,
 		@Param("cursor") Long cursor, Pageable pageable);
 
-	@Query("SELECT COUNT(t) FROM Tool t WHERE t.category = :category AND t.toolId < :cursor")
+	@Query("SELECT COUNT(t) FROM Tool t WHERE t.category = :category AND t.id < :cursor")
 	long countWithCursor(@Param("category") Category category, @Param("cursor") Long cursor);
 
 	long count();

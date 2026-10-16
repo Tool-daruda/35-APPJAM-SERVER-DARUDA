@@ -32,7 +32,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
 			.where(
 				board.delYn.eq(false),
 				noTopic != null ? board.isFree.eq(noTopic) : null,
-				toolId != null ? board.tool.toolId.eq(toolId) : null
+				toolId != null ? board.tool.id.eq(toolId) : null
 			)
 			.fetchFirst()).orElse(0L);
 	}
@@ -55,7 +55,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
 			where.and(board.isFree.eq(noTopic));
 		}
 		if (toolId != null) {
-			where.and(board.tool.toolId.eq(toolId));
+			where.and(board.tool.id.eq(toolId));
 		}
 		if (lastScrapCount != null && lastBoardId != null) {
 			where.and(
@@ -88,7 +88,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
 			.selectFrom(board)
 			.where(
 				noTopic != null ? board.isFree.eq(noTopic) : null,
-				toolId != null ? board.tool.toolId.eq(toolId) : null,
+				toolId != null ? board.tool.id.eq(toolId) : null,
 				board.delYn.eq(Boolean.FALSE),
 				board.id.lt(cursor)
 			)

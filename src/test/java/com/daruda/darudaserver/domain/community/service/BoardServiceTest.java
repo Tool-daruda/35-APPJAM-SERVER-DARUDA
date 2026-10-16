@@ -120,7 +120,7 @@ class BoardServiceTest {
 			given(toolBoard.getTool()).willReturn(tool);
 			given(toolBoard.getUser()).willReturn(user);
 			given(user.getNickname()).willReturn("작성자");
-			given(tool.getToolId()).willReturn(100L);
+			given(tool.getId()).willReturn(100L);
 			given(tool.getToolMainName()).willReturn("Cursor");
 			given(tool.getToolLogo()).willReturn("https://logo.png");
 
@@ -137,8 +137,8 @@ class BoardServiceTest {
 
 			// then
 			assertThat(result.boardList()).hasSize(1);
-			assertThat(result.boardList().get(0).getToolId()).isEqualTo(100L);
-			assertThat(result.boardList().get(0).getScrapCount()).isEqualTo(3L);
+			assertThat(result.boardList().get(0).toolId()).isEqualTo(100L);
+			assertThat(result.boardList().get(0).scrapCount()).isEqualTo(3L);
 		}
 
 		@Test
@@ -168,8 +168,8 @@ class BoardServiceTest {
 
 			// then
 			assertThat(result.boardList()).hasSize(1);
-			assertThat(result.boardList().get(0).getToolId()).isNull();
-			assertThat(result.boardList().get(0).getScrapCount()).isEqualTo(0L);
+			assertThat(result.boardList().get(0).toolId()).isNull();
+			assertThat(result.boardList().get(0).scrapCount()).isEqualTo(0L);
 		}
 	}
 }

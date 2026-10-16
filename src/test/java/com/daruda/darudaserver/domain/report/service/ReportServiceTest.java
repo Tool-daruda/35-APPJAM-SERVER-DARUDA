@@ -136,7 +136,7 @@ class ReportServiceTest {
 			CreateReportResponse response = reportService.createReport(reporter.getId(), request);
 
 			// then
-			assertThat(response.getId()).isEqualTo(1000L);
+			assertThat(response.id()).isEqualTo(1000L);
 			then(reportRepository).should().save(any(Report.class));
 		}
 
@@ -168,7 +168,7 @@ class ReportServiceTest {
 			CreateReportResponse response = reportService.createReport(reporter.getId(), request);
 
 			// then
-			assertThat(response.getId()).isEqualTo(1000L);
+			assertThat(response.id()).isEqualTo(1000L);
 			then(reportRepository).should().save(any(Report.class));
 		}
 
@@ -333,8 +333,8 @@ class ReportServiceTest {
 			ProcessReportResponse response = reportService.processReport(admin.getId(), report.getId(), request);
 
 			// then
-			assertThat(response.getId()).isEqualTo(report.getId());
-			assertThat(response.getStatus()).isEqualTo(ReportStatus.APPROVED);
+			assertThat(response.id()).isEqualTo(report.getId());
+			assertThat(response.status()).isEqualTo(ReportStatus.APPROVED);
 		}
 
 		@Test
@@ -353,8 +353,8 @@ class ReportServiceTest {
 			ProcessReportResponse response = reportService.processReport(admin.getId(), report.getId(), request);
 
 			// then
-			assertThat(response.getId()).isEqualTo(report.getId());
-			assertThat(response.getStatus()).isEqualTo(ReportStatus.REJECTED);
+			assertThat(response.id()).isEqualTo(report.getId());
+			assertThat(response.status()).isEqualTo(ReportStatus.REJECTED);
 		}
 
 		@Test

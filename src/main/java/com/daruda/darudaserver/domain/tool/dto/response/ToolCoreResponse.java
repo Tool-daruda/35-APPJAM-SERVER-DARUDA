@@ -12,7 +12,7 @@ public record ToolCoreResponse(
 ) {
 	public static ToolCoreResponse of(ToolCore toolCore) {
 		return ToolCoreResponse.builder()
-			.coreId(toolCore.getCoreId())
+			.coreId(toolCore.getId())
 			.coreTitle(toolCore.getCoreTitle())
 			.coreContent(toolCore.getCoreContent())
 			.build();

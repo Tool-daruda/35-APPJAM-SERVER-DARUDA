@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReportService {
 
 	private final UserRepository userRepository;
@@ -80,9 +81,9 @@ public class ReportService {
 			reportedUser,
 			board,
 			comment,
-			request.getReportType(),
-			request.getTitle(),
-			request.getDetail()
+			request.reportType(),
+			request.title(),
+			request.detail()
 		);
 
 		report = reportRepository.save(report);
@@ -108,8 +109,8 @@ public class ReportService {
 		}
 
 		// 신고 상태 변경
-		report.updateStatus(request.getStatus());
-		report.updateProcessInfo(admin.getId(), request.getProcessNote(), LocalDateTime.now());
+		report.updateStatus(request.status());
+		report.updateProcessInfo(admin.getId(), request.processNote(), LocalDateTime.now());
 		report.updateSuspensionDays(request.getSuspensionDays());
 
 		// 제재 적용

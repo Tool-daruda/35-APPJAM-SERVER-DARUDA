@@ -26,7 +26,7 @@ public class ToolKeyword {
 	@Id
 	@Column(name = "keyword_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long keywordId;
+	private Long id;
 
 	@Column(name = "keyword_name", nullable = false)
 	private String keywordName;
