@@ -1,16 +1,10 @@
 package com.daruda.darudaserver.domain.tool.entity;
 
-import java.sql.Timestamp;
-
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import com.daruda.darudaserver.domain.admin.dto.request.CreateToolRequest;
+import com.daruda.darudaserver.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -25,12 +19,11 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "tool")
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-public class Tool {
+public class Tool extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,12 +50,6 @@ public class Tool {
 	private String planLink;
 	@Column(name = "tool_logo", nullable = false)
 	private String toolLogo;
-	@CreatedDate
-	@Column(name = "created_at", nullable = false, updatable = false)
-	private Timestamp createdAt;
-	@LastModifiedDate
-	@Column(name = "updated_at")
-	private Timestamp updatedAt;
 	@Column(columnDefinition = "integer default 0", nullable = false)
 	private int viewCount;
 	@Column(name = "popular", columnDefinition = "integer default 0")
