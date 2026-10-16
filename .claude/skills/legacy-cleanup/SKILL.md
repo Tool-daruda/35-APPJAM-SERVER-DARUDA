@@ -11,24 +11,10 @@ This is code written before the guidelines were unified. **New code follows the 
 
 | Item | Current state | Goal |
 |------|---------------|------|
-| Dual response wrappers | `ApiResponse` (7 controllers) / `SuccessResponse` (4) coexist | Unify to `SuccessResponse`, then delete `ApiResponse` |
-| Abbreviated DTO suffixes | `ToolDetailGetRes`, `CategoryRes`, `BoardRes`, etc. (`dto/res`, `dto/req` packages) | `XxxResponse`/`XxxRequest` + `dto/response`, `dto/request` |
-| Entity suffix | `CommentEntity`, `UserEntity`, `NotificationEntity`, `ReportEntity` | `Comment`, `User`, `Notification`, `Report` |
-| Transaction import | **17 files** importing `jakarta.transaction.Transactional` — 12 repositories with `@Modifying` + 5 services (`UserService`, `CommentService`, `AuthService`, `NotificationService`, `TokenService`). All **31 annotation declarations** in these files are bare, attribute-less annotations, so swapping the import alone keeps behavior identical | `org.springframework.transaction.annotation.Transactional` |
-| Transaction scope | Class-level `@Transactional` (write) in 23 places. Of these, `UserService`·`CommentService` also overlap with a jakarta import, so swapping the import alone still leaves reads as write transactions | Class `readOnly = true` + `@Transactional` on write methods only |
-| ErrorCode duplicates | Code values `E400009`·`E400012`·`E400013` are duplicated; the typo constant `REFREH_TOKEN_EMPTY_ERROR` duplicates `REFRESH_TOKEN_EMPTY_ERROR` | Make code values unique + remove the typo constant |
-| HTTP status mismatch | `ResponseEntity.ok()` + `SuccessCode.SUCCESS_CREATE(201)` → body says 201, actual response is 200 | Creation APIs use `status(HttpStatus.CREATED)` |
-| Soft-delete columns | `is_deleted` (comment) / `del_yn` (board) / hard delete (ToolLike) mixed | Unify column name·strategy |
-| Unused code | `S3Service` (actually uses `OciService`), `ApiResponse.ofFailure` | Delete |
-| QueryDSL location | `BoardService` uses `JPAQueryFactory` directly | Split into a custom repository (`BoardRepositoryCustom`) |
-| `BaseTimeEntity` type | `java.sql.Timestamp` | `LocalDateTime` |
-
-## Caution when cleaning up transaction imports
-
-Do not do a mechanical bulk replacement. The order of handling and the exact facts are owned by `architecture` → `references/transaction.md` ("Order of handling when found in existing code") — read them there instead of relying on a copy.
+| Soft-delete columns | `is_deleted` (comment/user) / `del_yn` (board/tool_scrap/tool_like) mixed | Unify column name·strategy (deferred due to no DB migration tooling) |
 
 ## Scope rules for cleanup work
 
 - Handle one item at a time; don't mix several items into one PR.
 - Cleanup must be behavior-preserving. (The `refactor` commit type is owned by `git-convention`, and the full check by `/run-checks` — those are procedure, not rules restated here.)
-- Wide renames (entity suffix, DTO abbreviation) have references spread across the codebase, so rename via the IDE, then run the full check before opening the PR.
+- Wide renames have references spread across the codebase, so rename via the IDE, then run the full check before opening the PR.

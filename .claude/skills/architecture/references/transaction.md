@@ -52,7 +52,7 @@ public class BoardService {
 2. If it uses `TxType`·`rollbackOn`, it needs **manual mapping** to Spring's `propagation`·`rollbackFor`. Do not convert mechanically.
 3. If it is at the class level, swapping the import still leaves every method as a write transaction. You only gain something once you also reposition `readOnly = true`.
 
-When you find a jakarta import in new or changed code, **flag it.** When you find it in existing code, classify it not as Critical but as **cleanup work** (see the `legacy-cleanup` skill for the current state).
+When you find a jakarta import in new or changed code, **flag it.** (All existing codebase files have been unified to Spring's `@Transactional`).
 
 ## Common misconceptions when diagnosing
 

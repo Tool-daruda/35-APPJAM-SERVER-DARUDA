@@ -96,5 +96,3 @@ return ResponseEntity.status(HttpStatus.CREATED)
 ```
 
 **Always keep the `SuccessCode`'s status and the actual HTTP response status in sync.** For the error response format and `ErrorCode`-addition rules, see the `error-handling` skill.
-
-> `ApiResponse` is legacy. Do not use it in new code (see the `legacy-cleanup` skill).

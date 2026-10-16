@@ -72,8 +72,6 @@ BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "E404006", "게시글이 존재하지 않�
 grep -o '"E[0-9]\{6\}"' src/main/java/com/daruda/darudaserver/global/error/code/ErrorCode.java | sort | uniq -d
 ```
 
-> Some code values are currently duplicated and a typo constant remains. Take care that new code does not reference these (see the `legacy-cleanup` skill for the current state).
-
 ## SuccessCode
 
 Defines the HTTP status + message of success responses (`global/error/code/SuccessCode.java`).
